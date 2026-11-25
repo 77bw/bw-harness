@@ -1,0 +1,12 @@
+[project]
+name = "{{ package_name }}"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [{% if api %}"fastapi>=0.115,<1"{% endif %}]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1"{% if api %}, "httpx>=0.28,<1"{% endif %}]
+
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"

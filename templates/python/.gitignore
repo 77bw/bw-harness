@@ -1,0 +1,11 @@
+.local/
+.env
+.env.*
+*.pcap*
+*.log
+.venv/
+node_modules/
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+.DS_Store

@@ -1,0 +1,5 @@
+from importlib import import_module
+
+
+def test_package():
+    assert import_module("{{ package_name }}").__name__ == "{{ package_name }}"

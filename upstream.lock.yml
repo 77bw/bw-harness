@@ -1,0 +1,181 @@
+{
+  "matt": {
+    "url": "https://github.com/mattpocock/skills",
+    "commit": "6f7f7831a625f040a8e06a0e7954826b87ce775a",
+    "license": "MIT",
+    "patches": [],
+    "resources": {
+      "licenses/Matt-Pocock-MIT": {
+        "source": "LICENSE",
+        "sha256": "c35e5776201f2713d50da75b6ec6a34d3e072717c7988b4aeabe67f2c0a35abb"
+      },
+      "skills/codebase-design": {
+        "source": "skills/engineering/codebase-design",
+        "sha256": "0eece2d6148eede9eebea3989944ea6215b809204352ca82a3a83203b79b78b4"
+      },
+      "skills/domain-modeling": {
+        "source": "skills/engineering/domain-modeling",
+        "sha256": "57926b975b3077c5ebe6f449d2476384c1c3fb1d46452a1141625384923c974c"
+      },
+      "skills/grill-with-docs": {
+        "source": "skills/engineering/grill-with-docs",
+        "sha256": "8973c3d9463fc9dd708adc36a0f97b01aab4ae7d6a0217c2aa0f0a7ef206b83c"
+      },
+      "skills/improve-codebase-architecture": {
+        "source": "skills/engineering/improve-codebase-architecture",
+        "sha256": "3c72a8a3852beda9b28b6a14ce665506ea57a59a76568cf826873ec17d798c5a"
+      },
+      "skills/tdd": {
+        "source": "skills/engineering/tdd",
+        "sha256": "cb510a538834fd446bae7cff1e6e46c4b625524d162bfc56c6d64486115a48e3"
+      },
+      "skills/grilling": {
+        "source": "skills/productivity/grilling",
+        "sha256": "e0e4918ef2675bf3bc0e48fa83c40446cd961c107afdf435cbc2daa774cb0efe"
+      }
+    }
+  },
+  "ce": {
+    "url": "https://github.com/EveryInc/compound-engineering-plugin",
+    "commit": "fcb5e3adc1890db34f482f73e2449f3c57a2f423",
+    "license": "MIT",
+    "patches": [],
+    "resources": {
+      "licenses/Every-MIT": {
+        "source": "LICENSE",
+        "sha256": "9512267466b7d2d4bc4f150584011da7110aa95fdbe4b1932e2132d3720a937b"
+      },
+      ".pi/extensions/compound-engineering.ts": {
+        "source": ".pi/extensions/compound-engineering.ts",
+        "sha256": "4c7a35b0527b3b07bf0bc9608c18b9f6a751cf1e931e48850941b0e4b5e5c615"
+      },
+      "skills/ce-brainstorm": {
+        "source": "skills/ce-brainstorm",
+        "sha256": "896adf193e9eeef5d23487abbdd6425aad3a31e242d21ef900602efa8d6fd028"
+      },
+      "skills/ce-code-review": {
+        "source": "skills/ce-code-review",
+        "sha256": "bc1a8e0328c96b425077f3660752b96940ed55746dbd02e263547ad2dd5b9fb1"
+      },
+      "skills/ce-compound": {
+        "source": "skills/ce-compound",
+        "sha256": "6484dbdf977e90ba6805041259348a13ca921971b5a8ba107649b3c90a8a6761"
+      },
+      "skills/ce-compound-refresh": {
+        "source": "skills/ce-compound-refresh",
+        "sha256": "a10d23989ebde80a6a4dc171c9f22e4419767bcf1ce3f08f966db8b904325cac"
+      },
+      "skills/ce-debug": {
+        "source": "skills/ce-debug",
+        "sha256": "6c91c0eb4d67540fb8a19e78cfe7c2da8654cd120a16010153ba593441a95d7c"
+      },
+      "skills/ce-doc-review": {
+        "source": "skills/ce-doc-review",
+        "sha256": "aa753a4b22abf818a2cbbb3ccbe833200cf27893d2d2478f111c133a130ca18c"
+      },
+      "skills/ce-handoff": {
+        "source": "skills/ce-handoff",
+        "sha256": "91767e995c82e2f3cc004956d1b8054c510ace2ca2b7692c84b3ba80595289fe"
+      },
+      "skills/ce-optimize": {
+        "source": "skills/ce-optimize",
+        "sha256": "e2e7dc6b6bd746596f6d10b223738467403ce9606f2f728ad693405006e86955"
+      },
+      "skills/ce-plan": {
+        "source": "skills/ce-plan",
+        "sha256": "e5d53c48207f7c27e579743200b144844cb3b760b26688fd94f4a86686d9572c"
+      },
+      "skills/ce-setup": {
+        "source": "skills/ce-setup",
+        "sha256": "e973b810c46193b28f86dc6af2154c0a79d03eff848b2429ae59587828e7212e"
+      },
+      "skills/ce-simplify-code": {
+        "source": "skills/ce-simplify-code",
+        "sha256": "daf9b38b8dc3824ee15180a64cabd72f0dc688a72eacfce8a8cbbfa6c5a7f358"
+      },
+      "skills/ce-work": {
+        "source": "skills/ce-work",
+        "sha256": "9e134df79c2c90a6b37a2f99d8613059d908f0600b1ccb09f3f6bafdb1c722fe"
+      },
+      "skills/ce-worktree": {
+        "source": "skills/ce-worktree",
+        "sha256": "041c652e2c42f6ae98d0e11038ebb8a852f8f46623adfc103dc36b772e6458c7"
+      },
+      "skills/ce-noslop": {
+        "source": "skills/ce-noslop",
+        "sha256": "e199145cad2da2f5245305984d24b8fbcfb6af003e47efcdf3c6dbd4dbaa9331"
+      },
+      "skills/ce-prototype": {
+        "source": "skills/ce-prototype",
+        "sha256": "4a3072fc2d8099c7327377f3c295356fae2360caef854129f7652d4c414dd5fc"
+      },
+      "skills/ce-bakeoff": {
+        "source": "skills/ce-bakeoff",
+        "sha256": "589b6cd771c0a88d16b5c9a878590058696b6198b60907222a5547fc6c1bb9f2"
+      },
+      "skills/ce-pov": {
+        "source": "skills/ce-pov",
+        "sha256": "c75c6b8fb5d01189ca587bb862abfd2ec685fe18e1876d08a3cd139d9e4d5ee3"
+      },
+      "skills/ce-explain": {
+        "source": "skills/ce-explain",
+        "sha256": "df4ff34491e56d39ff115bc4d036b0f6b654f4b8887fd8ec8fa4fcaee040ed04"
+      },
+      "skills/ce-ideate": {
+        "source": "skills/ce-ideate",
+        "sha256": "054e1287021f93051378dc65407f6e14ecec7a735e057bb813006f1a79ad6894"
+      }
+    },
+    "skill_catalog": [
+      "ce-babysit-pr",
+      "ce-bakeoff",
+      "ce-brainstorm",
+      "ce-code-review",
+      "ce-commit",
+      "ce-commit-push-pr",
+      "ce-compound",
+      "ce-compound-refresh",
+      "ce-debug",
+      "ce-doc-review",
+      "ce-dogfood",
+      "ce-explain",
+      "ce-handoff",
+      "ce-help",
+      "ce-ideate",
+      "ce-noslop",
+      "ce-optimize",
+      "ce-plan",
+      "ce-polish",
+      "ce-pov",
+      "ce-product-pulse",
+      "ce-promote",
+      "ce-proof",
+      "ce-prototype",
+      "ce-resolve-pr-feedback",
+      "ce-retro",
+      "ce-retune",
+      "ce-riffrec-feedback-analysis",
+      "ce-setup",
+      "ce-simplify-code",
+      "ce-strategy",
+      "ce-sweep",
+      "ce-test-browser",
+      "ce-test-xcode",
+      "ce-work",
+      "ce-worktree",
+      "lfg",
+      "wtf"
+    ],
+    "excluded_routes": {
+      "ce-help": "Use bw-help for local navigation.",
+      "ce-strategy": "Product strategy is outside this Python pack.",
+      "ce-proof": "External publishing is not offered.",
+      "ce-promote": "External marketing is not offered.",
+      "ce-commit": "Project Git delivery is not offered.",
+      "ce-commit-push-pr": "Project Git delivery is not offered.",
+      "ce-resolve-pr-feedback": "Remote PR handling is not offered.",
+      "ce-babysit-pr": "Remote PR monitoring is not offered.",
+      "lfg": "Autonomous shipping is not offered."
+    }
+  }
+}
