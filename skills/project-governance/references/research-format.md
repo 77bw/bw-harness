@@ -9,4 +9,6 @@ Locate the existing note for the object or stable topic. Merge a changed claim i
 | REFUTED | Concrete counterexample/negative result, method and the conditions under which it rules the claim out. |
 | STALE | Previous evidence or revision and what changed enough to require a new check. Keep the old claim and limits understandable. |
 
+A historical label is a source claim, not a current result. If an old report says “refuted” but its sample omits the comparator/input needed to demonstrate a counterexample, preserve and attribute that historic assertion; mark the current claim HYPOTHESIS pending the missing discriminating evidence, rather than giving the new record a REFUTED verdict.
+
 Example, using synthetic data: “REFUTED — batches always retain input order in simulator 1.2 with two workers. Vector order-02 produced B,A for A,B. This does not test one worker.” If the new version changes scheduling, mark the extension to the new version STALE pending rerun instead of retroactively deleting the observation. If private raw evidence cannot be published, keep it in the controlled location and identify a sanitized reproduction or describe the access/evidence gap.
