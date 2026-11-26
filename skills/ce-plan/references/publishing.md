@@ -12,7 +12,7 @@ Never publish in a headless run, one with no user present to answer, such as a p
 2. Otherwise, offer the host's own artifact tool when this session has one. That is a tool the host itself provides for publishing pages or documents, not an installed add-on.
 3. Otherwise, keep the local file and open it in the browser where the host can. If it cannot, print the file's absolute path.
 
-Reach the chosen publisher through its own skill, tool, or documented interface, and follow that interface's current contract. Do not guess an API shape. Proof (`ce-proof`) accepts markdown only: never upload HTML to it. For an HTML document, tell the user Proof cannot take it, and offer to publish a markdown rendering of the same content instead.
+Reach the chosen publisher through its own skill, tool, or documented interface, and follow that interface's current contract. Do not guess an API shape. Only offer a named external destination if its documented interface is available here. Verify its accepted format first; if necessary, offer a supported rendering without replacing the local record.
 
 When a menu offers this step, label the option with the destination chosen here, for example **Open in browser** or **Publish a copy to <destination>**.
 

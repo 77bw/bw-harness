@@ -2,6 +2,8 @@
 
 Phase 1 of `ce-plan`. Read this before dispatching any research subagent.
 
+For continuing work, use the project's status to locate an existing plan, not to override a run receipt. Read only linked ADRs, topic research and solutions that can change this decision, resolving CE paths from the configured document root and domain locations from project instructions. Carry evidence and applicability (version, inputs, independent checks) into planning. A HYPOTHESIS is not a settled fact; reuse VERIFIED findings and do not repeat a REFUTED route under the same conditions without a new reason. Recheck STALE or materially changed conditions against current code/tests. This also applies on the lean path.
+
 ### Phase 1: Gather Context
 
 All specialist research and deepening prompts used in this phase are skill-local prompt assets under `references/agents/`. When dispatching one, read the matching file and seed a generic subagent with that prompt content plus the task-specific context below. Do not dispatch standalone agents by type/name.
@@ -32,7 +34,7 @@ For Standard and Deep, prepare a concise planning context summary (a paragraph o
 - If an origin document exists, summarize the problem frame, requirements, and key decisions from that document
 - Otherwise use the feature description directly
 - Read `STRATEGY.md` at the repo root (the shared project doc), and a legacy `PRODUCT.md` or `VISION.md` only when `STRATEGY.md` is absent or does not carry a meaning you need, and include the relevant pieces (purpose, positioning or approach, active tracks, and stated boundaries or non-goals; go by each section's meaning, since heading names vary by writer and version) in the summary so downstream research and planning decisions are anchored to product strategy
-- If `CONCEPTS.md` exists at repo root, read it — its definitions are the canonical names for domain entities, named processes, and status concepts. Plan with those terms rather than synonyms.
+- If the repository has a `GLOSSARY-MAP.md`, resolve its in-scope context first; otherwise use root `GLOSSARY.md`. Read its relevant definitions and use their canonical names.
 - Include session-settled decisions with their rejected alternatives, plus the standing line "If you find evidence a settled decision cannot work, report it — do not suppress it." Do not pass the decision's advocacy or rationale, and do not let any adversarial or validation reviewer see which decisions are marked settled.
 
 Pass the project's active instructions and the planning context summary to `repo-research-analyst`, and send it directly to the requested current scopes. If the feature cannot be scoped from that context, allow one targeted root or workspace probe. Read an exact dependency or runtime version when the plan or an external-doc query materially depends on it.

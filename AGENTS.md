@@ -1,5 +1,9 @@
 # 维护 BW Harness
 
-这是 Skill Pack，不是生成后的 Python 项目。业务模板仅来自 templates/python。先查 upstream.lock.yml；不要就地改 vendor 资源却不记录补丁。修改入口时同步对应 guides/skills 指南。
+这是跨项目的 Skill Pack，不是业务项目脚手架。三个 BW 入口的执行契约在各自的 SKILL.md；项目文档 seed 由 setup 随包分发。Guides 面向用户。更改执行入口或可达分支时同步指南与真实案例。
 
-包内检查：npm ci --legacy-peer-deps --ignore-scripts；python3 scripts/validate-package.py；uvx --from pytest pytest -q tests。发布门禁还需隔离宿主真实安装、调用和跨会话试点；静态检查不能代替。任何业务项目的 Git 交付另需授权。测试使用合成数据，报告、会话、凭据不得纳入版本库。
+先读 upstream.lock.yml。改上游时从固定修订派生、保留版权和可重放差异，分别验证原始与分发资源。不要通过扩大排除列表修复断链。依赖、脚本和宿主调用按实际到达的路径测试；Git 交付沿用 CE 原生分支、审查与发布约定。
+
+同步默认只读：`python3 scripts/sync-upstream.py`。有本地固定源码时加 `--cache <含 matt/ 和 ce/ 的目录>`。只有在已核对具体改动与回归用例后，才在 POSIX 宿主用 `--record skills/<名称>` 重录该资源的补丁及锁；再运行默认重放。不要用重录修饰未知的校验失败。
+
+包内检查：npm ci --legacy-peer-deps --ignore-scripts；python3 scripts/validate-package.py；uvx --from pytest pytest -q tests。发布前还需隔离安装、实际模型调用、跨会话接续、词表往返和合成仓 Git 交付证据。静态检查不代表宿主通过；凭据、会话、原始报告和个人配置不进版本库。

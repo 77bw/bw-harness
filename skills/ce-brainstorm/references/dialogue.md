@@ -18,7 +18,7 @@ Scan the repo before substantive brainstorming. Match depth to scope:
 
 **Standard and Deep** — Two passes:
 
-*Constraint Check (inline)* — Use the project's active instructions and conventions already in your context. Read `STRATEGY.md` at the repo root for product direction and boundaries — a legacy `PRODUCT.md` or `VISION.md` only when `STRATEGY.md` is absent or lacks a meaning you need; go by section meaning, since headings vary by writer — and `CONCEPTS.md` if it exists for canonical vocabulary. Use canonical names in dialogue, approaches, and the Product Contract; if a source adds nothing, move on.
+*Constraint Check (inline)* — Use the project's active instructions and conventions already in your context. Read `STRATEGY.md` at the repo root for product direction and boundaries — a legacy `PRODUCT.md` or `VISION.md` only when `STRATEGY.md` is absent or lacks a meaning you need; go by section meaning, since headings vary by writer — and the applicable glossary for canonical vocabulary. If the repository has a `GLOSSARY-MAP.md`, resolve its in-scope context first; otherwise use root `GLOSSARY.md`. Use canonical names in dialogue, approaches, and the Product Contract; if a source adds nothing, move on.
 
 *Topic Scan (grounding scout)* — Create and retain the absolute scratch directory with this shell block, substituting the absolute path of this skill's directory and a short unique run slug:
 
@@ -68,7 +68,7 @@ A session-settled decision counts as already-probed — it is not a gap. Spend t
 
 Follow the Interaction Rules in `references/interaction-rules.md`. Use the host's blocking question tool already in the current tool list.
 
-**Conflict check — raise it when it would change a product decision.** If the user uses a term that conflicts with existing `CONCEPTS.md`, or claims how the system works in a way that conflicts with verified code or the grounding dossier, put that conflict to them before treating their wording as settled. Do not create `CONCEPTS.md`. Glossary writes still wait until after the plan.
+**Conflict check — raise it when it would change a product decision.** If the user uses a term that conflicts with existing `GLOSSARY.md`, or claims how the system works in a way that conflicts with verified code or the grounding dossier, put that conflict to them before treating their wording as settled. Do not create `GLOSSARY.md`. Glossary writes still wait until after the plan.
 
 **Blindspot offer — check it before probing flagged territory.** If Phase 0.3 flagged territory the user does not know, make the blindspot offer from `references/blindspot-pass.md` before the first substantive question into that territory (questions about the user's own problem, users, and evidence proceed normally — the offer is territory-scoped). The offer also becomes due mid-dialogue without a Phase 0.3 flag: when two consecutive answers show the user *cannot evaluate* the question's substance — not merely hasn't decided — read the reference and offer the pass then. Never silently switch into teaching; the offer is a blocking question.
 

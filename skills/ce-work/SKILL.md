@@ -47,7 +47,7 @@ Before the first implementation write, including on the Trivial route, read `ref
 
 The commit rule from this file stays in force throughout: every implementation commit names only that unit's owned files. A bare `git commit` can absorb the user's pre-existing index, so it is forbidden.
 
-Keep going until every in-scope unit is done. A progress update does not end the run; stop before that only for a named blocker.
+Keep going until every in-scope unit is done. A progress update does not end the run; stop before that only for a named blocker. On an actual pause or blocker in an onboarded project, index the real plan, completed unit/commit and last successful or failed check in the project’s status if the workflow requests close. Never replace or edit the native run ID, recovery path or controller receipt; in caller-owned mode return the native envelope first and let its caller maintain project status.
 
 ### Phase 3-4: Quality Check and Finishing Work
 

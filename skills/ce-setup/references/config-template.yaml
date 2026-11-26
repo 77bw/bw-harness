@@ -26,8 +26,7 @@
 # docs_root: .compound-engineering/artifacts   # repo-relative dir (default: docs)
 
 # --- Product pulse ---
-# Settings written by /ce-product-pulse first-run interview. Re-run the skill with
-# argument `setup` or `reconfigure` to edit interactively.
+# Compatibility keys for existing product-pulse configurations; this bundle does not set them.
 
 # pulse_product_name: "Spiral"                          # used in report titles (no default)
 # pulse_lookback_default: 24h                           # 1h | 24h | 7d | 30d (default: 24h)

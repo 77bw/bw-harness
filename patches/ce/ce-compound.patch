@@ -1,0 +1,396 @@
+diff --git a/skills/ce-compound/SKILL.md b/skills/ce-compound/SKILL.md
+index 45b6023cbe479157700a98eccc876ba6d18b744c..f9e3ab6e861a649cc71b6ff05a662b0bb2287b4b 100644
+--- a/skills/ce-compound/SKILL.md
++++ b/skills/ce-compound/SKILL.md
+@@ -10,7 +10,7 @@ argument-hint: "[optional: brief context, or refresh and a scope] [mode:refresh]
+ 
+ This skill does one of two jobs. **Capture** holds the lesson of one solved problem. **Refresh** audits the existing learnings against the current codebase and can delete docs and open a PR.
+ 
+-Run refresh when the arguments contain `mode:refresh`, or when an interactive run was invoked to do one, as in `/ce-compound refresh payments`, "clean up the learnings", or a standalone request to create `CONCEPTS.md`. An earlier remark in the session does not count. Read `references/refresh/overview.md` and follow it instead of the rest of this file. The refresh references name the parts of this file they reuse.
++Run refresh when the arguments contain `mode:refresh`, or when an interactive run was invoked to do one, as in `/ce-compound refresh payments`, "clean up the learnings", or a standalone request to create `GLOSSARY.md`. An earlier remark in the session does not count. Read `references/refresh/overview.md` and follow it instead of the rest of this file. The refresh references name the parts of this file they reuse.
+ 
+ When an interactive run is asked to create or update the project's coding standards or review docs as a whole, invoke the `ce-setup` skill with `standards` and stop.
+ 
+@@ -61,7 +61,7 @@ Resolve `<root>` when you first compose a `<root>/solutions/` path, and pass a s
+ 
+ **Only the orchestrator writes product files.** Phase 1 subagents write to per-run scratch only, and never touch `<root>/`, project instruction files, or any other tracked path.
+ 
+-The orchestrator writes what `references/form.md` chooses, in every mode and without asking: at most one added test, added or tightened lint rule with any baseline entries it needs, or condition in an existing `CODING_STANDARDS.md`, and at most one learning under `<root>/solutions/`. It never changes product code. It also writes two maintenance side effects that their own step describes: `CONCEPTS.md` during vocabulary capture, and — **only in interactive Full mode after consent** — a small discoverability line in a project instruction file. Two further writes exist **only in interactive Full mode when the user selects them at the assembly destination step**: a rule file inside a writable declared Compound Pack, and the `packs:` entry appended to `.compound-engineering/config.yaml`. An instruction file is only ever edited, never created. Nothing else in the tree is written. Edits to *other* docs belong to a refresh, which a capture recommends or runs with a narrow scope.
++The orchestrator writes what `references/form.md` chooses, in every mode and without asking: at most one added test, added or tightened lint rule with any baseline entries it needs, or condition in an existing `CODING_STANDARDS.md`, and at most one learning under `<root>/solutions/`. It never changes product code. For the vocabulary steps and report labels below, resolve GLOSSARY-MAP.md first in multi-context projects; GLOSSARY.md is the in-scope glossary, never a parallel root copy. It also writes two maintenance side effects that their own step describes: `GLOSSARY.md` during vocabulary capture, and — **only in interactive Full mode after consent** — a small discoverability line in a project instruction file. Two further writes exist **only in interactive Full mode when the user selects them at the assembly destination step**: a rule file inside a writable declared Compound Pack, and the `packs:` entry appended to `.compound-engineering/config.yaml`. An instruction file is only ever edited, never created. Nothing else in the tree is written. Edits to *other* docs belong to a refresh, which a capture recommends or runs with a narrow scope.
+ 
+ ## Full Mode
+ 
+diff --git a/skills/ce-compound/references/assembly.md b/skills/ce-compound/references/assembly.md
+index e91390f282642ddf1d90c32e3fa29f352fec7a14..3ca094c44d9a964f6ac0ea4c80cefa149a1c5f9d 100644
+--- a/skills/ce-compound/references/assembly.md
++++ b/skills/ce-compound/references/assembly.md
+@@ -59,27 +59,25 @@ When creating a new doc, preserve the section order from `assets/resolution-temp
+ 
+ **First, read `references/concepts-vocabulary.md`.** This is unconditional. Do not pre-judge from memory that nothing qualifies. The reference's criteria are non-obvious, and qualifying terms often live in the surrounding conversation rather than the new doc itself. Reading the reference is what makes the rest of the phase possible.
+ 
+-Then, applying those criteria, scan the new doc, if one was written, **and** the surrounding conversation for qualifying domain terms. If `CONCEPTS.md` exists at repo root, this phase may add, refine, fold, and scrub, as those are defined under **The supported mutations** in that reference; retiring and deleting belong to a refresh. If it does not exist and at least one qualifying term came up, create it.
++Then, applying those criteria, scan the new doc, if one was written, **and** the surrounding conversation for qualifying domain terms. If the resolved context glossary exists, this phase may add, refine, fold, and scrub, as those are defined under **The supported mutations** in that reference; retiring and deleting belong to a refresh. If it does not exist and at least one qualifying term came up, create it.
+ 
+ **Verify behavior assertions against source before writing them.** When an entry asserts how code behaves (states, transitions, limits, semantics), Read the defining source at the current tree first. An entry drafted from a session-level summary is exactly how wrong semantics enter the glossary. Phase 2.45 re-checks these entries, but the cheap fix is to not write the error.
+ 
+-**Seed the learning's area at creation; do not write a lone term.** Creating `CONCEPTS.md` when it is absent is expected. When `CONCEPTS.md` does not yet exist, alongside the term that came up also seed the core domain nouns of the area this learning touched, following the **Seed goal** and **Scope of a seed** rules in `references/concepts-vocabulary.md`. The seed is scoped to the learning's area (the modules and domain the fix touched) and defines only terms investigated here. It does not reach for repo-wide nouns. This anchors the new term so it does not dangle against undefined siblings. A repo-wide concept map is a refresh's bootstrap path, not this one.
++**Seed the learning's area at creation; do not write a lone term.** Creating `GLOSSARY.md` when it is absent is expected. When `GLOSSARY.md` does not yet exist, alongside the term that came up also seed the core domain nouns of the area this learning touched, following the **Seed goal** and **Scope of a seed** rules in `references/concepts-vocabulary.md`. The seed is scoped to the learning's area (the modules and domain the fix touched) and defines only terms investigated here. It does not reach for repo-wide nouns. This anchors the new term so it does not dangle against undefined siblings. A repo-wide concept map is a refresh's bootstrap path, not this one.
+ 
+ **At creation, hold the qualifying bar conservatively for borderline terms.** A borderline term, or a class/table/file name dressed up as an entity, waits for a later run. Clear core nouns are seeded; borderline ones wait. The conservatism is about quality, not count; updates to an existing file follow the normal criteria.
+ 
+-**When bootstrapping the file, start with this preamble under the `# Concepts` heading**, then add the qualifying entries below it:
+-
+-> Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound captures and refreshes learnings; direct edits are fine. Glossary only, not a spec or catch-all.
++**When bootstrapping, use the shared context heading and Language entry format** named in `references/concepts-vocabulary.md`; add only terms qualified in the selected context.
+ 
+ **Refresh the coherence neighborhood of the area this learning touched.** Inspect that *coherence neighborhood* (defined, with its bounds, in `references/concepts-vocabulary.md`) whether or not this run added, edited, or folded anything. A run that finds no qualifying term still leaves its neighborhood correct; that is the pass that keeps violations from accumulating between audits. Within that neighborhood, do three things: fix glossary violations (implementation specifics — file paths, class names, function signatures, current-config values), refresh entries the learning's own evidence shows have drifted, and fold an entry whose whole meaning a neighbor already carries into that neighbor, repointing the terms that cross-reference it. Retiring an entry outright belongs to a refresh, which investigates; this run folds or leaves standing. Bounds: neighborhood only, never a full-file audit; act only on evidence already in hand; if judging a neighbor would require investigation this learning did not do, flag it for a refresh rather than editing on a guess. The test: does every entry in the neighborhood still hold a heading a reader needs, and read consistently with this learning's terms? Broader audit is a refresh's job.
+ 
+-Report what this run did to `CONCEPTS.md` in the success output. "Vocabulary capture: scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. Do not silently skip either one. An unreported `CONCEPTS.md` change is exactly what this line exists to prevent, and the visible scan-and-no-result record is the evidence that the reference was consulted.
++Report what this run did to `GLOSSARY.md` in the success output. "Vocabulary capture: scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. Do not silently skip either one. An unreported `GLOSSARY.md` change is exactly what this line exists to prevent, and the visible scan-and-no-result record is the evidence that the reference was consulted.
+ 
+ **Apply edits silently in every mode. Do not prompt the user in interactive, lightweight, or non-interactive.** Vocabulary capture is a side effect of compounding, not a decision the user makes per run. Lightweight mode reaches this through its own single-pass step in `references/lightweight.md`, and runs an **update-only** version, which that reference defines.
+ 
+ ### Phase 2.45: Grounding Validation
+ 
+-The doc (and any `CONCEPTS.md` entries from Phase 2.4) is about to become permanent, trusted knowledge. Validate its claims against the tree before it compounds. **Read `references/grounding-validation.md` now.** It holds the adjudication rules and the validator prompt; the steps below are only the trigger.
++The doc (and any `GLOSSARY.md` entries from Phase 2.4) is about to become permanent, trusted knowledge. Validate its claims against the tree before it compounds. **Read `references/grounding-validation.md` now.** It holds the adjudication rules and the validator prompt; the steps below are only the trigger.
+ 
+ 1. **Mechanical claims check (every mode, including non-interactive).** Optionally run `git fetch --quiet` first (best-effort; skip silently offline, because the network is never a correctness dependency). Then run the bundled validator against the written doc:
+ 
+@@ -95,7 +93,7 @@ The doc (and any `CONCEPTS.md` entries from Phase 2.4) is about to become perman
+ 
+    Exit 0 means nothing flagged. Exit 1 means flags to **adjudicate, not auto-fix**. Each flagged path, SHA, link, or scaffold pattern is fixed, annotated as historical, or confirmed intentional per the reference's adjudication table. A doc may legitimately cite a path deleted by the very fix it documents; a flag is a question, not a failure. If the script cannot be resolved on this platform, apply the reference's manual checklist and say so in the output. Never silently skip.
+ 
+-2. **Semantic grounding validator (Full mode, including non-interactive Full; lightweight skips it).** Dispatch one read-only generic subagent built from the prompt template in the reference, covering the written doc plus any `CONCEPTS.md` entries added or edited this run. It verifies code-behavior claims by quoting the defining source line, merge-state claims against remote truth (`gh` primary, git reachability fallback), and internal completeness of countable assertions. Apply its verdicts per the reference (fix contradicted claims from the quoted evidence; soften or drop unverifiable ones; mark offline merge-state checks as degraded), then re-run the mechanical check if the body changed.
++2. **Semantic grounding validator (Full mode, including non-interactive Full; lightweight skips it).** Dispatch one read-only generic subagent built from the prompt template in the reference, covering the written doc plus any `GLOSSARY.md` entries added or edited this run. It verifies code-behavior claims by quoting the defining source line, merge-state claims against remote truth (`gh` primary, git reachability fallback), and internal completeness of countable assertions. Apply its verdicts per the reference (fix contradicted claims from the quoted evidence; soften or drop unverifiable ones; mark offline merge-state checks as degraded), then re-run the mechanical check if the body changed.
+ 
+ ## What It Creates
+ 
+diff --git a/skills/ce-compound/references/concepts-vocabulary.md b/skills/ce-compound/references/concepts-vocabulary.md
+index d742284f57f7b2e7e8c2d6f62e54f914cc3a263d..bf6ce053882f99f7d5e791690d8e0b65038d01b7 100644
+--- a/skills/ce-compound/references/concepts-vocabulary.md
++++ b/skills/ce-compound/references/concepts-vocabulary.md
+@@ -1,6 +1,8 @@
+-# CONCEPTS.md vocabulary rules
++# GLOSSARY.md vocabulary rules
+ 
+-`CONCEPTS.md` defines the words that mean something specific in this codebase. It is the shared base that `<root>/solutions/` and AGENTS.md can cite without redefining terms. It lives at the repo root. Terms enter in two ways, accretion and seeding (below), and the file is created the first time either path produces a qualifying entry.
++Resolve the target before reading or writing: if the repository has `GLOSSARY-MAP.md`, follow its links to the context this work concerns (or the separately scoped contexts a repo-wide refresh actually investigated). Do not create a combined root glossary. Without a map use the root `GLOSSARY.md`; create a missing glossary only when this mode allows seeding and there is a qualifying term. A broken map or ambiguous owner is a routing problem, not license to guess a new path. Report the unresolved context and leave the vocabulary unchanged there. In this skill, “GLOSSARY.md” means the resolved file; use its concrete path in reports and discoverability links (the map is the durable entry point for multiple contexts). Legacy CONTEXT/CONCEPTS files are migration inputs, not a second target; surface unmerged terms for project-governance migrate, not automatic rename.
++
++For every write, read the installed `domain-modeling` skill’s [GLOSSARY-FORMAT.md](../../domain-modeling/GLOSSARY-FORMAT.md). Its context heading, Language entries and aliases are the shared representation. The evidence and retention rules below select which entries to write, not a second format. Never silently replace a settled meaning: distinguish a compatible refinement from a contradiction. Leave the disputed entry intact and return the term, actual definitions and evidence for domain-modeling; in unattended mode report the unresolved item for status/research and continue independent work.
+ 
+ ## The supported mutations
+ 
+@@ -22,7 +24,7 @@ Define the core domain nouns the area's **declared domain model** exposes that m
+ ### Scope of a seed
+ 
+ - A **scoped run** (a learning capture, or a refresh narrowed to an area) seeds only that area's core nouns, and defines only terms it actually investigated against code. It does not reach for repo-wide nouns it never touched.
+-- A **repo-wide bootstrap** (an explicit "create CONCEPTS.md" request) seeds the whole project's declared domain model. This is the only path that produces a coherent "what is this project" glossary; a scoped run cannot, and should not pretend to.
++- A **repo-wide bootstrap** (an explicit "create GLOSSARY.md" request) seeds the whole project's declared domain model. This is the only path that produces a coherent "what is this project" glossary; a scoped run cannot, and should not pretend to.
+ 
+ ## Be opinionated
+ 
+@@ -38,7 +40,7 @@ Each entry teaches its concept to a reader with no access to anything else: no c
+ - Links to PRs, issues, channels, or roadmap milestones
+ - Version-specific claims ("currently uses X; migrating to Y")
+ 
+-Cross-references between entries within `CONCEPTS.md` are fine — they resolve internally. General programming vocabulary (caches, queues, jobs, sessions) and everyday domain English need no redefinition either. But if an entry leans on another *project-specific* term to make sense, that term must be defined here too — an undefined project-specific sibling is itself a candidate to add.
++Cross-references between entries within `GLOSSARY.md` are fine — they resolve internally. General programming vocabulary (caches, queues, jobs, sessions) and everyday domain English need no redefinition either. But if an entry leans on another *project-specific* term to make sense, that term must be defined here too — an undefined project-specific sibling is itself a candidate to add.
+ 
+ ## What earns a slot — and what keeps one
+ 
+@@ -56,9 +58,9 @@ The neighborhood of an entry is its cluster siblings plus the terms it cross-ref
+ 
+ ## Per entry
+ 
+-The definition is one sentence: what the term means in this domain, and what makes it distinct from neighbors. A term with non-obvious behavioral rules (lifecycle, cancellation semantics, ownership invariants) earns a second paragraph for those rules, never for elaborating the definition itself.
++The definition is one sentence: what the term means in this domain, and what makes it distinct from neighbors. Add an evidenced domain invariant only when needed to distinguish the meaning; keep implementation and research evidence outside the glossary.
+ 
+-When dropped synonyms exist, list them as an aliases line directly under the definition: *Avoid: Booking, appointment*. Entities typically need more depth than value types; status concepts may need transition notes.
++When dropped synonyms exist, list them as an aliases line directly under the definition: `_Avoid_: Booking, appointment`. Entities typically need more depth than value types; status concepts may need transition notes.
+ 
+ ## Relationships (optional)
+ 
+@@ -76,39 +78,14 @@ When two terms were used interchangeably and the team settled on a distinction,
+ 
+ One line per concept the project no longer has and nothing replaced: what the term meant, and what removed it. Write enough that someone meeting it in an old ticket understands what they were reading and why it is not current. Do not carry the original entry over.
+ 
+-## One illustrative entry — the shape, not a template
+-
+-```
+-## Booking
+-
+-### Reservation
+-A future commitment to seat a Party at a specified date and time.
+-*Avoid:* Booking, appointment
+-
+-A Reservation owns its Party but does not own a Table — Tables are acquired only when the Party arrives, through a Seating. Lifecycle: Booked, Seated, Completed, No-Show. Cancellation before a Seating is non-destructive; cancellation after a Seating is recorded as a No-Show.
+-
+-### Party
+-The guests committed to a Reservation. Each Reservation has exactly one Party. Party size is the count promised at booking, not the count who arrive.
+-
+-### Table
+-A physical seating unit with fixed capacity. Tables are shared resources — they do not belong to Reservations and are allocated only on the day-of through Seatings.
+-
+-### Seating
+-The act of placing a Party at a Table once the Party arrives. A Reservation has at most one Seating; a Table accumulates many Seatings across its lifetime.
+-```
+-
+ ## Vocabulary capture during a refresh
+ 
+-After the per-doc actions execute, reconcile the domain terms flagged during investigation with `CONCEPTS.md`.
+-
+-1. **Aggregate** qualifying terms across the learnings in scope; when one term surfaced with different shades of precision, union the shades into one entry.
+-2. **If `CONCEPTS.md` exists:** add missing terms, refine entries where the corpus surfaced new precision, then reconcile every entry this run's scope reaches against **What earns a slot — and what keeps one** above: backfill central-but-missing core nouns, then route each entry that fails the bar to the outcome that condition names — fold into the surviving entry that can carry it, retire to `## Retired` when readers will still meet the term, delete when they will not. An unscoped refresh reads the whole store, so its reconcile covers the whole file — that is the pass an accreted glossary needs; a scoped one stays in its area and leaves the rest untouched. Retention reads the same **declared domain model** the Seed goal seeds from, so presence and absence are judged against one source.
+-3. **If it doesn't exist** and at least one term qualified: bootstrap it — seed the in-scope area's core domain nouns per the Seed goal alongside the surfaced terms, holding the bar conservatively for borderline terms at creation. Start the file with this preamble under a `# Concepts` heading:
+-
+-   > Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound captures and refreshes learnings; direct edits are fine. Glossary only, not a spec or catch-all.
++After the per-doc actions execute, reconcile the domain terms flagged during investigation with `GLOSSARY.md`.
+ 
+-   1-4 terms → flat headings; more → cluster by domain relationship per the reference.
++1. **Aggregate** qualifying terms across the learnings in scope; when one term surfaced with different shades of precision, combine compatible shades into one entry; report a conflict rather than choosing one meaning.
++2. **If `GLOSSARY.md` exists:** add missing terms, refine entries where the corpus surfaced new precision, then reconcile every entry this run's scope reaches against **What earns a slot — and what keeps one** above: backfill central-but-missing core nouns, then route each entry that fails the bar to the outcome that condition names — fold into the surviving entry that can carry it, retire to `## Retired` when readers will still meet the term, delete when they will not. An unscoped refresh reads the whole store; reconcile each evidenced context against its own glossary — that is the pass an accreted glossary needs; a scoped one stays in its area and leaves the rest untouched. Retention reads the same **declared domain model** the Seed goal seeds from, so presence and absence are judged against one source.
++3. **If it doesn't exist** and at least one term qualified: bootstrap it — seed the in-scope area's core domain nouns per the Seed goal alongside the surfaced terms, holding the bar conservatively for borderline terms at creation. Use the shared format: name the context and describe it briefly, then put canonical entries under `## Language`; group under subheadings only when useful.
+ 4. **Scrub violations** per the reference's criteria (implementation specifics, config values that drift, status/owner/date metadata, duplicates, undefined project-specific siblings) in the same entries step 2 reconciled — the whole file on an unscoped run, because refresh is an audit; the area's entries on a scoped one.
+-5. Do not expand beyond what this run's scope reaches, and do not retroactively inject `(see CONCEPTS.md)` pointers into learnings.
++5. Do not expand beyond what this run's scope reaches, and do not retroactively inject `(see GLOSSARY.md)` pointers into learnings.
+ 
+-Report what this run did to `CONCEPTS.md`. "scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. The visible record is the audit signal that the reference was consulted, and it is what keeps a silent glossary mutation from going unreported. Apply vocabulary edits silently in every mode — no user prompt.
++Report what this run did to `GLOSSARY.md`. "scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. The visible record is the audit signal that the reference was consulted, and it is what keeps a silent glossary mutation from going unreported. Apply vocabulary edits silently in every mode — no user prompt.
+diff --git a/skills/ce-compound/references/grounding-validation.md b/skills/ce-compound/references/grounding-validation.md
+index 7ef8dc2c40ad6c2ba16c582b0dd1927655a1ddb3..027b5b57b90956cfdfc72306cd2c8ec5af78e232 100644
+--- a/skills/ce-compound/references/grounding-validation.md
++++ b/skills/ce-compound/references/grounding-validation.md
+@@ -35,7 +35,7 @@ After any body edit from this step or Step 2, re-run the script until it reports
+ 
+ ## Step 2: Semantic validator subagent (Full and non-interactive; skipped in lightweight)
+ 
+-Dispatch **one generic read-only subagent** covering the written solution doc plus any `CONCEPTS.md` entries added or edited this run. Phase 2.4's entries are claims too; a glossary entry written from a session-level summary is exactly how wrong semantics enter the vocabulary. Use the same mid-tier model class as other reviewer subagents when the platform exposes one.
++Dispatch **one generic read-only subagent** covering the written solution doc plus any `GLOSSARY.md` entries added or edited this run. Phase 2.4's entries are claims too; a glossary entry written from a session-level summary is exactly how wrong semantics enter the vocabulary. Use the same mid-tier model class as other reviewer subagents when the platform exposes one.
+ 
+ If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+ 
+@@ -46,7 +46,7 @@ You are a grounding validator for documentation about to enter a permanent
+ knowledge store. You are read-only: never edit files. Inspect with Read,
+ Grep, Glob, git (non-mutating), and gh when available.
+ 
+-Inputs: the doc content below, the CONCEPTS.md entries below (if any), and
++Inputs: the doc content below, the GLOSSARY.md entries below (if any), and
+ this staleness context: <INFO line from the mechanical script, or "none">,
+ and the tree to verify code against: <"working tree", or a git ref to
+ read with git show <ref>:<path>>.
+diff --git a/skills/ce-compound/references/lightweight.md b/skills/ce-compound/references/lightweight.md
+index d79816b400dcdca052fe7075ef20beac801efb41..9625b92683ab32f70dfbd67a7a175c4577ad2d9c 100644
+--- a/skills/ce-compound/references/lightweight.md
++++ b/skills/ce-compound/references/lightweight.md
+@@ -18,7 +18,7 @@ The orchestrator (main conversation) performs ALL of the following in one sequen
+    - YAML frontmatter with track-appropriate fields, applying the YAML-safety quoting rule for array items (see `references/yaml-schema.md` > YAML Safety Rules)
+    - Bug track: Problem, root cause, solution with key code snippets, one prevention tip
+    - Knowledge track: Context, guidance with key examples, one applicability note
+-4. **Vocabulary capture (update-only)**: if `CONCEPTS.md` exists at repo root, read `references/concepts-vocabulary.md`, then scan any new doc and the conversation for qualifying terms and add, refine, fold, or scrub entries silently, within the criteria and coherence-neighborhood bounds that reference states. If `CONCEPTS.md` does not exist, defer creation to a Full run, which is the run that seeds the file. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined, 1 folded" or "scanned, no qualifying terms"). If this run changed `CONCEPTS.md` at all (added, refined, folded, or scrubbed) and the project's active instructions and conventions already in your context do not mention it, add the discoverability tip to the output below. Lightweight only **tips**; it does not edit instruction files. An interactive Full run makes that edit after consent; non-interactive Full also only tips and reports.
++4. **Vocabulary capture (update-only)**: read `references/concepts-vocabulary.md` to resolve the context; if its glossary exists, scan any new doc and the conversation for qualifying terms and add, refine, fold, or scrub entries silently, within the criteria and coherence-neighborhood bounds that reference states. If `GLOSSARY.md` does not exist, defer creation to a Full run, which is the run that seeds the file. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined, 1 folded" or "scanned, no qualifying terms"). If this run changed `GLOSSARY.md` at all (added, refined, folded, or scrubbed) and the project's active instructions and conventions already in your context do not mention it, add the discoverability tip to the output below. Lightweight only **tips**; it does not edit instruction files. An interactive Full run makes that edit after consent; non-interactive Full also only tips and reports.
+ 5. **Read-only discoverability check**: Using the project's active instructions and conventions already in your context, assess whether they point agents to `<root>/solutions/` against the three criteria under **Discoverability Check** in `references/refresh-and-discoverability.md`. Do not open, offer to edit, or edit instruction files; Lightweight only reports the result. Record one of:
+    - `no gap` when active project instructions point agents to the knowledge store
+    - `gap noted — instruction-file tip emitted` when active project instructions exist but do not mention it
+@@ -46,8 +46,8 @@ This could be a coding standard if you adopt them.
+ Tip: Your AGENTS.md/CLAUDE.md doesn't surface <root>/solutions/ to agents —
+ a brief mention helps all agents discover these learnings.
+ 
+-[If CONCEPTS.md changed at all this run and isn't surfaced in the instruction files:]
+-Tip: Your AGENTS.md/CLAUDE.md doesn't surface CONCEPTS.md —
++[If GLOSSARY.md changed at all this run and isn't surfaced in the instruction files:]
++Tip: Your AGENTS.md/CLAUDE.md doesn't surface <actual glossary/map path> —
+ a one-line mention helps agents find the shared vocabulary.
+ 
+ Note: This was created in lightweight mode. For richer documentation
+@@ -55,7 +55,7 @@ Note: This was created in lightweight mode. For richer documentation
+ semantic grounding validation), re-run <rendered invocation> in a fresh session.
+ ```
+ 
+-**No subagents are launched. No parallel tasks. The chosen form, plus at most one learning, is the deliverable** (Phase 2.4's update-only vocabulary capture may also change an existing `CONCEPTS.md`).
++**No subagents are launched. No parallel tasks. The chosen form, plus at most one learning, is the deliverable** (Phase 2.4's update-only vocabulary capture may also change an existing `GLOSSARY.md`).
+ 
+ In lightweight mode, the overlap check is skipped (no Related Docs Finder subagent). This means lightweight mode may create a doc that overlaps with an existing one. That is acceptable; a refresh will catch it later. Only suggest a refresh if there is an obvious narrow refresh target. Do not broaden into a large refresh sweep from a lightweight session.
+ 
+diff --git a/skills/ce-compound/references/refresh-and-discoverability.md b/skills/ce-compound/references/refresh-and-discoverability.md
+index a61dc377bfac9cd14e78d26e091bf51e9b03bc9c..83fe7b0b1fdad07dd2c58a706ee52e9994a0da53 100644
+--- a/skills/ce-compound/references/refresh-and-discoverability.md
++++ b/skills/ce-compound/references/refresh-and-discoverability.md
+@@ -87,10 +87,10 @@ After the lesson's form is written and the refresh decision is made, check wheth
+       ```
+    c. In full interactive mode, explain to the user why this matters. Agents working in this repo (including fresh sessions, other tools, or collaborators without the plugin) will not know to check `<root>/solutions/` unless the instruction file mentions it. Show the proposed change and where it would go, then get consent before making the edit through the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability. Do not search for another host's tool name. Fall back to presenting the proposal in the host's user-visible chat only when no blocking tool exists in the harness or the call errors (e.g., Codex edit modes), not because a schema load is required. Never silently skip the question. In lightweight mode (interactive or non-interactive), output a one-liner note and move on. In full non-interactive mode, **do not edit instruction files**. Report the gap in the terminal report as `Instruction-file edit: gap noted, not applied` (non-interactive scope is capturing the lesson, not project configuration, not project-config edits; a human-invoked interactive run applies the edit with consent)
+ 
+-5. **If `CONCEPTS.md` exists at repo root, run a parallel discoverability check for it.** Assess whether the instruction file would lead an agent to discover the project's shared domain vocabulary. Use the same workflow as the `<root>/solutions/` check above: same target file, same edit-placement judgment, same consent-then-edit interaction shape per mode. A line in an existing section is almost always better than a new headed section. Example calibration when nothing else fits:
++5. **If the resolved glossary exists, run a parallel discoverability check for it.** Assess whether the instruction file would lead an agent to discover the project's shared domain vocabulary. Use the same workflow as the `<root>/solutions/` check above: same target file, same edit-placement judgment, same consent-then-edit interaction shape per mode. A line in an existing section is almost always better than a new headed section. Example calibration when nothing else fits:
+ 
+    ```
+-   CONCEPTS.md  # shared domain vocabulary (entities, named processes, status concepts) — relevant when orienting to the codebase or discussing domain concepts
++   <actual GLOSSARY-MAP.md or glossary path>  # shared domain vocabulary (entities, named processes, status concepts) — relevant when orienting to the codebase or discussing domain concepts
+    ```
+ 
+-   **Skip this step entirely if `CONCEPTS.md` does not exist.** Never nag for an artifact the project has not adopted. When skipped, this step produces no output and no edit.
++   **Skip this step entirely if `GLOSSARY.md` does not exist.** Never nag for an artifact the project has not adopted. When skipped, this step produces no output and no edit.
+diff --git a/skills/ce-compound/references/refresh/discoverability.md b/skills/ce-compound/references/refresh/discoverability.md
+index e6503ab0f7ad3fa8a34d5fcf716b92c17ba1d6c2..54c83be4c863e827b9496cfaac8a9889f3842328 100644
+--- a/skills/ce-compound/references/refresh/discoverability.md
++++ b/skills/ce-compound/references/refresh/discoverability.md
+@@ -1,6 +1,6 @@
+ # Discoverability check
+ 
+-After the report, apply the **Discoverability Check** section of `references/refresh-and-discoverability.md`. It defines what a reader must learn, the smallest addition and its tone, the consent step, and the `CONCEPTS.md` variant. Follow its interactive Full path in an interactive refresh, with these differences:
++After the report, apply the **Discoverability Check** section of `references/refresh-and-discoverability.md`. It defines what a reader must learn, the smallest addition and its tone, the consent step, and the `GLOSSARY.md` variant. Follow its interactive Full path in an interactive refresh, with these differences:
+ 
+ - **Instruction files:** look for the project's root agent-instruction surface, whatever this project uses (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or an equivalent). If there is none, skip the check.
+ - **Questions:** ask as `references/refresh/modes.md` describes under Blocking questions.
+diff --git a/skills/ce-compound/references/refresh/investigate.md b/skills/ce-compound/references/refresh/investigate.md
+index c1b5169b79af899610d6402e73b4ff78513b6ca5..28b7a6fc8cb6762c90b22641196e761c6daa2474 100644
+--- a/skills/ce-compound/references/refresh/investigate.md
++++ b/skills/ce-compound/references/refresh/investigate.md
+@@ -1,6 +1,6 @@
+ # Investigating a learning
+ 
+-For each learning in scope, read it and cross-reference its claims against the current codebase. Dimensions that go stale independently: referenced paths/classes/modules; the recommended solution itself (does it still match how the code works?); code snippets; cross-referenced docs — for a knowledge-track learning (`problem_type` in the knowledge track of `references/schema.yaml`), that includes whether a guidance file it names or links (a skill's `SKILL.md`, a runbook, a root instruction file) states a different order or rule for the same procedure; compare only guidance the learning names, never search the guidance layer for one; overlap with other in-scope docs (note pairs covering the same problem/files/solution and which appears broader or more current); and domain vocabulary (note project-specific terms and whether `CONCEPTS.md` defines them accurately, and whether each in-scope entry still names a concept the project currently has and that is useful on its own — collect the signal, don't edit yet). On Claude Code only, also scan the injected auto-memory block for same-domain notes: memory-sourced signals are supplementary — they corroborate codebase evidence or prompt deeper investigation, never alone justify Replace or Delete, and in non-interactive mode memory-only drift means stale-mark. Match depth to specificity: a doc citing exact paths and snippets needs more verification than a general principle.
++For each learning in scope, read it and cross-reference its claims against the current codebase. Dimensions that go stale independently: referenced paths/classes/modules; the recommended solution itself (does it still match how the code works?); code snippets; cross-referenced docs — for a knowledge-track learning (`problem_type` in the knowledge track of `references/schema.yaml`), that includes whether a guidance file it names or links (a skill's `SKILL.md`, a runbook, a root instruction file) states a different order or rule for the same procedure; compare only guidance the learning names, never search the guidance layer for one; overlap with other in-scope docs (note pairs covering the same problem/files/solution and which appears broader or more current); and domain vocabulary (note project-specific terms and whether `GLOSSARY.md` defines them accurately, and whether each in-scope entry still names a concept the project currently has and that is useful on its own — collect the signal, don't edit yet). On Claude Code only, also scan the injected auto-memory block for same-domain notes: memory-sourced signals are supplementary — they corroborate codebase evidence or prompt deeper investigation, never alone justify Replace or Delete, and in non-interactive mode memory-only drift means stale-mark. Match depth to specificity: a doc citing exact paths and snippets needs more verification than a general principle.
+ 
+ **Declared retirement condition.** When a learning's frontmatter has `retire_when`, check whether that condition is now met, the way the field says, through whatever interface its source exposes (an issue tracker, release notes, a version the repo pins). Record the result and the date checked in the report, not as a checked date or status in the learning; when the source cannot be reached, record that it could not be checked. The orchestrator runs this check itself, because investigation subagents carry only the clauses below. Never infer a condition for a learning that declares none.
+ 
+diff --git a/skills/ce-compound/references/refresh/modes.md b/skills/ce-compound/references/refresh/modes.md
+index a12f3343b63c697ecf5a4ece7e94dc4c2592fbeb..b1f9b33a9903155bd51842b2755d24ae859cb3a3 100644
+--- a/skills/ce-compound/references/refresh/modes.md
++++ b/skills/ce-compound/references/refresh/modes.md
+@@ -17,11 +17,11 @@ Strip `mode:refresh`, `mode:non-interactive`, its deprecated alias `mode:headles
+ 
+ Wherever a refresh asks the user something, use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question. Ask one question at a time, prefer multiple choice, lead with the recommended option and a one-sentence rationale.
+ 
+-## CONCEPTS.md bootstrap requests
++## GLOSSARY.md bootstrap requests
+ 
+-If invoked specifically to create or bootstrap `CONCEPTS.md` ("create a CONCEPTS.md", "build the concept map"), the intent is ambiguous between two jobs — disambiguate with a blocking question:
++If invoked specifically to create or bootstrap `GLOSSARY.md` ("create a GLOSSARY.md", "build the concept map"), the intent is ambiguous between two jobs — disambiguate with a blocking question:
+ 
+-1. **Create CONCEPTS.md (build the concept map)** — skip the `<root>/solutions/` classification work. Read `references/concepts-vocabulary.md` and follow its **Seed goal** and **Scope of a seed** (repo-wide) rules: seed the project's core domain nouns from the declared domain model, write the preamble (see Vocabulary Capture), cluster per the organization rules, run the Discoverability Check per `references/refresh/discoverability.md`, then commit per `references/refresh/commit.md` — do not leave the bootstrap uncommitted.
+-2. **Run a refresh cycle** — proceed normally; `CONCEPTS.md` is seeded (if absent) and reconciled during Vocabulary Capture.
++1. **Create GLOSSARY.md (build the concept map)** — skip the `<root>/solutions/` classification work. Read `references/concepts-vocabulary.md` and follow its **Seed goal** and **Scope of a seed** (repo-wide) rules: resolve the mapped context(s) first; seed their evidenced core domain nouns separately from the declared domain model, use the shared context and Language entry format (see Vocabulary Capture), cluster per the organization rules, run the Discoverability Check per `references/refresh/discoverability.md`, then commit per `references/refresh/commit.md` — do not leave the bootstrap uncommitted.
++2. **Run a refresh cycle** — proceed normally; `GLOSSARY.md` is seeded (if absent) and reconciled during Vocabulary Capture.
+ 
+ In non-interactive mode, default to the refresh cycle and note in the report that a standalone repo-wide bootstrap was not run.
+diff --git a/skills/ce-compound/references/refresh/overview.md b/skills/ce-compound/references/refresh/overview.md
+index e84bc54e4cdca00ec5d2e0150950afa8f03758c8..e514a4f43c8669965c813537c4442e4ea78202fe 100644
+--- a/skills/ce-compound/references/refresh/overview.md
++++ b/skills/ce-compound/references/refresh/overview.md
+@@ -5,7 +5,7 @@ Audit the learnings under `<root>/solutions/` against the current codebase, appl
+ 
+ ## Mode
+ 
+-**Read `references/refresh/modes.md` now.** It reads the mode off the arguments and defines what each mode may apply unattended, the stale-marking fallback, the question tools, and the `CONCEPTS.md` bootstrap.
++**Read `references/refresh/modes.md` now.** It reads the mode off the arguments and defines what each mode may apply unattended, the stale-marking fallback, the question tools, and the `GLOSSARY.md` bootstrap.
+ 
+ Two rules hold in both modes. A failed write is recorded as **recommended**, and the run continues. And a question is asked through the host's blocking tool, or through the numbered-options fallback that reference defines. It is never silently skipped.
+ 
+@@ -49,9 +49,9 @@ Read `references/refresh/per-action-flows.md` and follow the section matching ea
+ 
+ ## Vocabulary Capture
+ 
+-After the per-doc actions, reconcile the domain terms flagged during investigation with `CONCEPTS.md`. **Read `references/concepts-vocabulary.md` unconditionally.** Its qualifying criteria are non-obvious, so a "nothing qualifies" judgment reached without reading it is a shortcut, not a result.
++After the per-doc actions, reconcile the domain terms flagged during investigation with `GLOSSARY.md`. **Read `references/concepts-vocabulary.md` unconditionally.** Its qualifying criteria are non-obvious, so a "nothing qualifies" judgment reached without reading it is a shortcut, not a result.
+ 
+-Edits apply silently in every mode. The report's `CONCEPTS.md` line records what the scan found, including "scanned, no qualifying terms".
++Edits apply silently in every mode. The report's `GLOSSARY.md` line records what the scan found, including "scanned, no qualifying terms".
+ 
+ ## Report
+ 
+@@ -63,4 +63,4 @@ Skip if nothing changed. Otherwise stage **only** the files this refresh modifie
+ 
+ ## Discoverability Check
+ 
+-After the report, check that the project's instructions would lead an agent to `<root>/solutions/` before working in a documented area. Do this every time: the store only compounds value when agents can find it. **Read `references/refresh/discoverability.md`** for what the reader must learn, the smallest-addition rule and its tone, the `CONCEPTS.md` variant, consent versus a report line per mode, and folding a late edit into the commit.
++After the report, check that the project's instructions would lead an agent to `<root>/solutions/` before working in a documented area. Do this every time: the store only compounds value when agents can find it. **Read `references/refresh/discoverability.md`** for what the reader must learn, the smallest-addition rule and its tone, the `GLOSSARY.md` variant, consent versus a report line per mode, and folding a late edit into the commit.
+diff --git a/skills/ce-compound/references/refresh/report.md b/skills/ce-compound/references/refresh/report.md
+index 23776ad3d91b7be9dc4446dd15b5741db9f5bd28..1b4cfdf2d436541f6bfd1b9d3650735f275a6e43 100644
+--- a/skills/ce-compound/references/refresh/report.md
++++ b/skills/ce-compound/references/refresh/report.md
+@@ -1,5 +1,7 @@
+ # The refresh report
+ 
++For every vocabulary result below, use the concrete resolved glossary path(s), and name an unresolved scope or conflicting definition rather than reporting a clean scan.
++
+ **Print the full report as markdown — it is the deliverable, not an internal summary.** After processing the scope:
+ 
+ ```text
+@@ -16,7 +18,7 @@ Skipped: V
+ Marked stale: S
+ Worth: <N shortened, N deleted; standards: N removed, N narrowed, N added | off (drift fixes only)>
+ 
+-CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded) | updated — N added, N refined, N reconciled, N folded, N retired, N deleted, N scrubbed | repo-wide map created with N entries>
++GLOSSARY.md: <scanned, no qualifying terms | created with N entries (M seeded) | updated — N added, N refined, N reconciled, N folded, N retired, N deleted, N scrubbed | repo-wide map created with N entries>
+ ```
+ 
+ When `Marked stale` is above zero, add a line under the summary saying the learnings researchers that other skills dispatch keep surfacing those docs, labeled stale with their reason, until a refresh or a person settles them.
+diff --git a/skills/ce-compound/references/report.md b/skills/ce-compound/references/report.md
+index 60005887efbc9199a9fd480c0fe3040d5ffb955e..3c79bab25c52ba4e4765a47b1ed1103e46b1ac36 100644
+--- a/skills/ce-compound/references/report.md
++++ b/skills/ce-compound/references/report.md
+@@ -2,6 +2,8 @@
+ 
+ ## Success Output
+ 
++For every vocabulary result below, use the concrete resolved glossary path(s), and name an unresolved scope or conflicting definition rather than reporting a clean scan.
++
+ **User-runnable refresh rendering.** The reports below print a refresh invocation for the user to copy. Default to `/ce-compound refresh <scope>`; use `$ce-compound refresh <scope>` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
+ 
+ ### Non-interactive mode
+@@ -20,8 +22,8 @@ Track: <bug | knowledge>
+ Category: <category>
+ Grounding: <mechanical check clean | N flags adjudicated>
+ Discoverability: <no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
+-CONCEPTS.md: <not present | scanned, no qualifying terms | updated — N added, N refined, N folded, N scrubbed>
+-CONCEPTS.md discoverability: <not checked — CONCEPTS.md unchanged | no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
++GLOSSARY.md: <not present | scanned, no qualifying terms | updated — N added, N refined, N folded, N scrubbed>
++GLOSSARY.md discoverability: <not checked — GLOSSARY.md unchanged | no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
+ Refresh recommendation: <none | /ce-compound refresh <scope>>
+ 
+ Documentation complete
+@@ -40,7 +42,7 @@ Category: <category>
+ Overlap: <none | low | moderate — see <path> | high — existing doc updated>
+ Grounding: <clean | N flags adjudicated (X fixed, Y annotated, Z confirmed) | N claims softened or corrected | degraded — merge-state claims unverified offline>
+ Instruction-file edit: <none needed | gap noted, not applied>
+-CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded from the learning's area) | updated — N added, N refined, N folded, N scrubbed>
++GLOSSARY.md: <scanned, no qualifying terms | created with N entries (M seeded from the learning's area) | updated — N added, N refined, N folded, N scrubbed>
+ Refresh recommendation: <none | /ce-compound refresh <scope>>
+ 
+ Documentation complete
+@@ -83,7 +85,7 @@ Specialized Agent Reviews (Auto-Triggered):
+ 
+ Files written:
+ - <root>/solutions/performance-issues/n-plus-one-brief-generation.md (created)
+-- CONCEPTS.md (created with 3 entries: BriefSystem, EmailQueue, Brief Status)
++- GLOSSARY.md (created with 3 entries: BriefSystem, EmailQueue, Brief Status)
+ 
+ This documentation will be searchable for future reference when similar
+ issues occur in the Email Processing or Brief System modules.
+diff --git a/skills/ce-compound/references/research.md b/skills/ce-compound/references/research.md
+index 897e666254ba8197c4d45e25504442211cc079c3..56aa900cce5a17f5d314e7ea14e1a9e74aaa0f0b 100644
+--- a/skills/ce-compound/references/research.md
++++ b/skills/ce-compound/references/research.md
+@@ -42,7 +42,7 @@ RUN_DIR="$SCRATCH_ROOT/ce-compound/$RUN_ID";
+ echo "$RUN_DIR";
+ ```
+ 
+-**Resolve current vocabulary and conventions before dispatching subagents.** Use the project's active instructions and conventions already in your context. If `CONCEPTS.md` exists, read its relevant terms before you classify.
++**Resolve current vocabulary and conventions before dispatching subagents.** Use the project's active instructions and conventions already in your context. Follow root `GLOSSARY-MAP.md` if present, otherwise use root `GLOSSARY.md`. In the task’s context read relevant existing terms before you classify.
+ 
+ **CRITICAL: glob `<root>/solutions/` fresh every run.** The current vocabulary and conventions above do not substitute for the live-tree search in step 3.
+ 
+diff --git a/skills/ce-compound/scripts/validate-doc-claims.py b/skills/ce-compound/scripts/validate-doc-claims.py
+index 4339a3fdc0f899b09fca9a009bec3e2eca41e981..8e87c85606f55c3108367ebada44f21e03ce92b1 100644
+--- a/skills/ce-compound/scripts/validate-doc-claims.py
++++ b/skills/ce-compound/scripts/validate-doc-claims.py
+@@ -52,6 +52,8 @@ The script never touches the network (no fetch); classification uses
+ whatever refs exist locally. Run a best-effort `git fetch --quiet` first
+ when freshness matters. Pure stdlib (no third-party deps).
+ """
++from __future__ import annotations
++
+ import os
+ import re
+ import subprocess

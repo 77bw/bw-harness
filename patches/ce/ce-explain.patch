@@ -1,0 +1,26 @@
+diff --git a/skills/ce-explain/references/orchestration.md b/skills/ce-explain/references/orchestration.md
+index 1043253f019746fa264f5ea513aa05beb5f6054f..fc47e039572e2ff86fb0f1d1ace681a96c781e9c 100644
+--- a/skills/ce-explain/references/orchestration.md
++++ b/skills/ce-explain/references/orchestration.md
+@@ -37,7 +37,7 @@ echo "$RUN_DIR";
+ 
+ ## Grounding by input shape
+ 
+-**Repo-touching inputs** (a concept with footprint in this repo, a diff, a recap): use the project's active instructions already in context and go directly to the diff, call-sites, current source, or commits. Read `CONCEPTS.md` when canonical vocabulary matters. If the topic cannot be scoped from the input and existing context, allow one targeted root or workspace probe.
++**Repo-touching inputs** (a concept with footprint in this repo, a diff, a recap): use the project's active instructions already in context and go directly to the diff, call-sites, current source, or commits. When canonical vocabulary matters, read the applicable glossary. If the repository has a `GLOSSARY-MAP.md`, resolve its in-scope context first; otherwise use root `GLOSSARY.md`. If the topic cannot be scoped from the input and existing context, allow one targeted root or workspace probe.
+ 
+ **Diff mode:** resolve the change (the `diff:` ref, or the most recent substantial change when the request points at one implicitly) and gather its evidence — the diff itself, the files it touches, any plan or solution doc that motivated it. **Empty range** or missing subject: do not silently explain something else. Report that before explaining an adjacent thing. Use a substitute only when the request permits it or the user agrees; name the substitution in the result and artifact `Subject` when present. Otherwise return the unresolved scope to the caller.
+ 
+diff --git a/skills/ce-explain/references/publishing.md b/skills/ce-explain/references/publishing.md
+index 62db286f014da73c1e8aba2f68ab3150a6a0a9e9..db81117aaaa33fbed2174532e7705a5a01bebb6a 100644
+--- a/skills/ce-explain/references/publishing.md
++++ b/skills/ce-explain/references/publishing.md
+@@ -12,7 +12,7 @@ Never publish in a headless run, one with no user present to answer, such as a p
+ 2. Otherwise, offer the host's own artifact tool when this session has one. That is a tool the host itself provides for publishing pages or documents, not an installed add-on.
+ 3. Otherwise, keep the local file and open it in the browser where the host can. If it cannot, print the file's absolute path.
+ 
+-Reach the chosen publisher through its own skill, tool, or documented interface, and follow that interface's current contract. Do not guess an API shape. Proof (`ce-proof`) accepts markdown only: never upload HTML to it. For an HTML document, tell the user Proof cannot take it, and offer to publish a markdown rendering of the same content instead.
++Reach the chosen publisher through its own skill, tool, or documented interface, and follow that interface's current contract. Do not guess an API shape. Only offer a named external destination if its documented interface is available here. Verify its accepted format first; if necessary, offer a supported rendering without replacing the local record.
+ 
+ When a menu offers this step, label the option with the destination chosen here, for example **Open in browser** or **Publish a copy to <destination>**.
+ 
