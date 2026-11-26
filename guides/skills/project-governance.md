@@ -1,11 +1,9 @@
-# project-governance：结构治理
+# project-governance：检查改动能否安全留下
 
-在需要「结构治理」时使用。先读取当前项目约束与相关测试，不代替用户的写入授权。
+代码已经能跑，但根目录多了临时脚本，测试结果只在聊天里。现在需要的是核对现状，不是再规划一次。
 
-Pi 场景示例：`/skill:project-governance check：列出根目录临时脚本及被跟踪的 .local 文件。`
+- **`check`**：只读报告。比如 `/skill:project-governance check 查 src 是否引用 experiments、.local 是否被跟踪；列出违规路径，不修复。` 路径告警不能证明脚本已经无用。
+- **`close`**：阶段收尾。给它本次变更与验证范围，让它跑相关回归、Ruff 和结构检查，核对临时证据，再原地更新 `docs/status.md`。没通过就写明失败，不标完成。
+- **`migrate`**：整理旧工程。先给逐文件清单、基线和回退方法；批准某一批不等于批准改业务逻辑或删旧资料。
 
-**预期结果与边界**：按路径给诊断；close 在回归后更新 status，migrate 需逐批批准。
-
-找不到入口时先查[安装与冲突](../installation.md)，不要安装第二份同名插件。Claude/Codex 调用状态见该页；此示例不是跨宿主验收记录。
-
-来源：BW 自研。[运行说明及依赖资源](../../skills/project-governance/SKILL.md)。
+如果它建议删除唯一的原始样本，先停下来核对备份和授权。好的收尾报告能回答：跑了哪条命令、还有哪个失败、下一会话从哪里继续。[旧工程实例](../workflows/existing-project.md)

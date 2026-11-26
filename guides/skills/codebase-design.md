@@ -1,11 +1,7 @@
-# codebase-design：模块边界
+# codebase-design：从调用者要知道什么来比较接口
 
-在需要「模块边界」时使用。先读取当前项目约束与相关测试，不代替用户的写入授权。
+五个调用者都要先算 UTF-8 长度、写前缀再拼载荷，说明格式细节散到了调用方。这个 Skill 用同一套词汇讨论接口、模块内部复杂度和可替换的边界，不会替你决定业务格式。
 
-Pi 场景示例：`/skill:codebase-design 比较调用者必须自己拼装长度字段与 encode(payload) 两种接口。`
+`/skill:codebase-design 比较 encode(text) -> bytes 与分别暴露 encode_length、encode_payload 的接口。列出调用者要知道的规则，以及测试可以从哪里观察行为；先不改文件。`
 
-**预期结果与边界**：列出复杂度归属、接口及测试边界；不是实施计划。
-
-找不到入口时先查[安装与冲突](../installation.md)，不要安装第二份同名插件。Claude/Codex 调用状态见该页；此示例不是跨宿主验收记录。
-
-来源：Matt Pocock，修订与导入范围见 [上游锁](../../upstream.lock.yml)。[运行说明及依赖资源](../../skills/codebase-design/SKILL.md)。
+看建议是否用真实调用点说明取舍：收窄接口能隐藏哪条规则？将来改变格式要动几处？只增加一层转发却没有减少调用者知识，不一定是改善。已有明确接口要落实行为，改用 [tdd](tdd.md)。

@@ -1,11 +1,11 @@
-# grill-with-docs：需求与领域对齐
+# grill-with-docs：边问边记下影响实现的决定
 
-在需要「需求与领域对齐」时使用。先读取当前项目约束与相关测试，不代替用户的写入授权。
+“长度最大 255”听起来明确，遇到中文才发现两人说的不是同一个长度。还没写代码时就值得把这个分歧问清。
 
-Pi 场景示例：`/skill:grill-with-docs 本地消息的长度指字节还是字符？给出反例，再确认术语。`
+```text
+/skill:grill-with-docs 我要做一字节长度前缀的文本帧。请用空串和「你」帮我确认载荷、长度单位和超长输入的行为，一次问一个会改变实现的问题。
+```
 
-**预期结果与边界**：确认定义写 GLOSSARY，重要取舍写 ADR；把已确认限制原样交给 ce-plan。
+你负责选择业务语义，Agent 用反例追问，并借助 [grilling](grilling.md) 和 [domain-modeling](domain-modeling.md) 更新确认过的术语。难逆转的取舍才写 `docs/adr/`。检查 `GLOSSARY.md` 讲的是这个词在项目里是什么意思，而不是把整场谈话抄进去。
 
-找不到入口时先查[安装与冲突](../installation.md)，不要安装第二份同名插件。Claude/Codex 调用状态见该页；此示例不是跨宿主验收记录。
-
-来源：Matt Pocock，修订与导入范围见 [上游锁](../../upstream.lock.yml)。[运行说明及依赖资源](../../skills/grill-with-docs/SKILL.md)。
+决定充分后，把目标、非目标、边界和验收条件交给 [ce-plan](ce-plan.md)。已有明确决策就直接传过去，不要为了产出文档再访谈一轮。

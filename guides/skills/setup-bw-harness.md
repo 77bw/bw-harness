@@ -1,11 +1,12 @@
-# setup-bw-harness：初始化与诊断
+# setup-bw-harness：让目录具备可验证的开发起点
 
-在需要「初始化与诊断」时使用。先读取当前项目约束与相关测试，不代替用户的写入授权。
+在终端里 `cd` 到目标目录再启动 Pi。安装包装的是工具；这个入口决定工具能对**当前项目**做什么。不要站在 Harness 源码目录里让它“新建项目”。
 
-Pi 场景示例：`/skill:setup-bw-harness 在空目录生成 demo；已有项目只列缺失文档，不覆盖 AGENTS。`
+| 目录状况 | Pi 输入示例 | 会改变什么 |
+|---|---|---|
+| 新建空目录 | `/skill:setup-bw-harness new 创建 frame_demo，不开 API，安装依赖并运行 smoke test。` | 调用 Copier 生成 `src/frame_demo/`、测试、文档和 answers。 |
+| 已有工程，先了解情况 | `/skill:setup-bw-harness check 只读报告缺项和重名来源。` | 不写文件、不安装；缺项是诊断，不是覆盖许可。 |
+| 只想补文档 | `/skill:setup-bw-harness docs 列出缺失文件，先不要写。` | 先预览，批准后只新增缺项；已有规则另行比较。 |
+| 要搬旧文件 | `/skill:setup-bw-harness migrate 列迁移清单和回退方法。` | 先诊断并交给治理；没批准具体批次不移动。 |
 
-**预期结果与边界**：Copier answers、src 包和 smoke test；运行 uv run pytest 后再交给 grill。
-
-找不到入口时先查[安装与冲突](../installation.md)，不要安装第二份同名插件。Claude/Codex 调用状态见该页；此示例不是跨宿主验收记录。
-
-来源：BW 自研。[运行说明及依赖资源](../../skills/setup-bw-harness/SKILL.md)。
+新项目看两项结果：`.copier-answers.yml` 有来源和修订，`uv run pytest -q` 真正运行了至少一个测试。再次运行 `new` 被拒绝是保护；复查用 `check`。下一步看[第一个功能](../workflows/new-project.md)。

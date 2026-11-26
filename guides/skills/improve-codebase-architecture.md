@@ -1,11 +1,7 @@
-# improve-codebase-architecture：架构改善
+# improve-codebase-architecture：先找值得改的边界，再选一处深入
 
-在需要「架构改善」时使用。先读取当前项目约束与相关测试，不代替用户的写入授权。
+项目扩大后，路由、CLI 和编码函数都在检查同一个长度字段。一次把所有目录重排风险很大；先让 Agent 找出重复知识出现在哪些调用点。
 
-Pi 场景示例：`/skill:improve-codebase-architecture 找出编解码层与 API 路由间泄漏的格式知识，先不要改代码。`
+`/skill:improve-codebase-architecture 检查 CLI 和 API 是否各自实现了长度规则。给我候选改进和相应源码位置，先不要重构业务代码。`
 
-**预期结果与边界**：给出候选及报告；选定后再深入，对报告落点先确认。
-
-找不到入口时先查[安装与冲突](../installation.md)，不要安装第二份同名插件。Claude/Codex 调用状态见该页；此示例不是跨宿主验收记录。
-
-来源：Matt Pocock，修订与导入范围见 [上游锁](../../upstream.lock.yml)。[运行说明及依赖资源](../../skills/improve-codebase-architecture/SKILL.md)。
+给它可读取的工程与术语表。上游会把候选整理成可视化 HTML 报告；这是**报告文件**，不是代码变更，先确认允许的落点。你选中一个候选后再讨论接口和取舍，必要时记录决策。若只是某个函数里有重复分支，不必做全项目扫描，用 [ce-simplify-code](ce-simplify-code.md) 更直接。
