@@ -1,0 +1,45 @@
+diff --git a/skills/ce-setup/SKILL.md b/skills/ce-setup/SKILL.md
+index 9d8a222d4f4e8c4b315ba9d073eefdb13522e66c..d042c94041e36ffd2afd3837cf7ee00a634cbc6a 100644
+--- a/skills/ce-setup/SKILL.md
++++ b/skills/ce-setup/SKILL.md
+@@ -85,11 +85,11 @@ Every change to a user-owned file is offered and applied only if the user approv
+ 
+ ## Phase 3: Summary
+ 
+-**User-runnable invocation rendering.** In setup summaries, default to `/ce-setup` and `/ce-help`; use `$ce-setup` and `$ce-help` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. On oh-my-pi (`omp`), keep `/ce-setup` and use `/skill:ce-help`. Render only the invocation as inline code and output one form only.
++**User-runnable invocation rendering.** Render `ce-setup` and the installed `bw-help` using the current host's exposed registrations: on Pi use `/skill:<name>`, on Codex use the catalogued `$<name>`, and on Claude Code use the slash command including any installed plugin namespace. If the host exposes a different spelling use the exact catalog entry, not a guessed alias. Show one form only.
+ 
+ Write the summary that `references/summary.md` describes. End it with these two lines, with the rendered invocations filled in:
+ 
+ ```text
+ Run `<rendered invocation>` anytime to re-check.
+-Run `<rendered ce-help invocation>` to ask which skill fits or what comes next.
++Run `<rendered bw-help invocation>` to ask which skill fits or what comes next.
+ ```
+diff --git a/skills/ce-setup/references/config-template.yaml b/skills/ce-setup/references/config-template.yaml
+index 650092a94f9af56ff802e5791b2e7173735b237e..b4dafac6f599c8d3eb1ec8c231ebda35e49e6cb8 100644
+--- a/skills/ce-setup/references/config-template.yaml
++++ b/skills/ce-setup/references/config-template.yaml
+@@ -26,8 +26,7 @@
+ # docs_root: .compound-engineering/artifacts   # repo-relative dir (default: docs)
+ 
+ # --- Product pulse ---
+-# Settings written by /ce-product-pulse first-run interview. Re-run the skill with
+-# argument `setup` or `reconfigure` to edit interactively.
++# Compatibility keys for existing product-pulse configurations; this bundle does not set them.
+ 
+ # pulse_product_name: "Spiral"                          # used in report titles (no default)
+ # pulse_lookback_default: 24h                           # 1h | 24h | 7d | 30d (default: 24h)
+diff --git a/skills/ce-setup/references/project-docs.md b/skills/ce-setup/references/project-docs.md
+index dfce5c1bc5ad5ae057c43779162b4a19c77c3203..eae8bf921dfaec5b3a068de4ab4df2a0bce342b9 100644
+--- a/skills/ce-setup/references/project-docs.md
++++ b/skills/ce-setup/references/project-docs.md
+@@ -30,7 +30,7 @@ The user should be able to judge, from the offer alone, what they would get and
+ 
+ Skip the offer, and say why in the summary, when the repository has nothing to draft from: no reachable pull request history, fix commits, solution records, or rules already written in its instructions or an AI reviewer's file. Never offer a template in place of evidence.
+ 
+-`STRATEGY.md` is owned by `ce-strategy`, and drafting it takes an interview, not history. When the repository has none, add one line to the summary suggesting it. When this host is Codex, or documents dollar-prefixed skill invocation, render the invocation as `$ce-strategy`; on oh-my-pi (`omp`), render it as `/skill:ce-strategy`; otherwise render it as `/ce-strategy`. Render only the invocation as inline code, in one form.
++A missing `STRATEGY.md` is not a review-doc defect. Drafting product strategy takes a separate interview; do not offer to create it here or direct users to an unbundled command.
+ 
+ ## Drafting
+ 
