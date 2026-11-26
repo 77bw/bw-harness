@@ -5,3 +5,5 @@
 `/skill:ce-code-review 只审查本次帧解码器变更，重点看缺前缀、截断和尾随数据。按文件指出有证据的问题和缺测项，不改代码、不操作远程。`
 
 先核对审查实际看到了哪些文件，尤其是还没被 Git 跟踪的新测试。有效发现应能解释“哪种输入、经过哪条路径、造成什么结果”；一般性的风格偏好不是阻断理由。默认先读报告；批准修复后再重跑相关测试。它审代码，不审计划文字，后者用 [ce-doc-review](ce-doc-review.md)。
+
+执行依据：[ce-code-review 正文](../../skills/ce-code-review/SKILL.md) · CE `fcb5e3a`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。

@@ -1,39 +1,8 @@
-# 快速上手：让 Pi 在空目录里生成一个能测试的包
+# 第一次接入：让下一会话找到真实工作
 
-目标是运行**你的新项目**，不是测试 BW Harness 仓库。以下命令假设你在 macOS 终端，Pi 已登录，且已按[安装指南](installation.md)装好 v1.0.0。若目录里已经有代码，改看[已有项目](workflows/existing-project.md)。
+按[安装指南](installation.md)注册后，在项目根目录启动 Pi。可以是只有一个源码文件的项目，也可以是空目录。下面的输入发给 Pi，不是在终端执行。
 
-### 1. 选对工作目录
-
-在平时放项目的目录执行；若 `frame-demo` 已存在，换一个新名字，不要清空旧目录。
-
-```bash
-mkdir frame-demo
-cd frame-demo
-pi
-```
-
-### 2. 让 Pi 初始化，不自己复制模板
-
-在 **Pi 对话**输入：
-
-```text
-/skill:setup-bw-harness new 在这里创建 frame_demo。用轻量模板，不加研究目录和 FastAPI；可以安装依赖、运行测试，不做 Git 提交。
-```
-
-`frame-demo` 是磁盘目录，`frame_demo` 是 Python 导入名。首次运行会下载 Copier 和项目依赖。完成后看 `src/frame_demo/__init__.py`、`tests/test_import.py` 和 `.copier-answers.yml`；三个文件分别告诉你“代码放哪”“怎样证明能导入”“用的哪一版模板”。
-
-### 3. 验证的不只是“文件建好了”
-
-另开终端，进入刚才的 `frame-demo` 目录，执行：
-
-```bash
-uv run python -c "import frame_demo; print(frame_demo.__name__)"
-uv run pytest -q
-uv run python scripts/check_structure.py
-```
-
-应看到包名 `frame_demo` 和通过的导入测试；结构检查正常时可以没有输出，退出码应为 0。这只证明项目能运行，还没有实现任何编码算法。失败时保留第一条出错命令和报错，去[排错](troubleshooting.md)，不要再跑一遍 `new`。
-
-### 4. 把第一个任务说具体
-
-回到 Pi：`/skill:bw-help 我想支持空串和中文消息。还没决定长度字段按什么单位算，请只推荐下一步。` 正常结果是一个建议，不是自动改代码。想继续开发时，沿[新项目工作流](workflows/new-project.md)把决定交给计划和测试。
+1. **先了解会变什么。** 输入 `/skill:setup-bw-harness check 检查生效指令、Git 根、文档位置和已有验证入口`。结果应该指出实际位置与冲突，不新增文件。空项目还没有词表或测试是正常的。
+2. **接入。** 输入 `/skill:setup-bw-harness 接入当前目录，使用 CE 本地计划；保留已有配置、入口及工作中修改`。它先展示发现，再读取自身模板，合并到生效指令。查看返回的 Created / Updated / Preserved / Blockers / Checks / Next，打开其中给出的实际状态路径。配置文件不应声称跑过尚未执行的测试。
+3. **检查。** 在项目根运行 `git status --short --branch`、`git check-ignore .local/probe`；看变更是否只涵盖约定的文件。再次调用 setup，不应追加第二个同义指令块。已有项目继续使用原有测试命令。
+4. **继续真实任务。** `/skill:bw-help 我有一个未完成的工作，请从当前状态判断下一步`。它应指出计划或缺的输入；需要它交接时明确说“执行这一步”。[从计划走到交付](workflows/git-delivery.md)。
