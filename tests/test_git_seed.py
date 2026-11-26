@@ -43,3 +43,24 @@ def test_ignore_protections_do_not_remove_existing_evidence(tmp_path):
         assert git("check-ignore", "-q", "--no-index", "--", path).returncode == 1, path
     assert git("ls-files", "--stage", "-z").stdout == original_index
     assert evidence.read_text(encoding="utf-8") == "synthetic"
+
+
+def test_compound_validates_real_solution_path(tmp_path):
+    """Host regression: this command previously crashed before reading the solution on Python 3.9."""
+    import sys
+
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / "library").mkdir()
+    (tmp_path / "library/count.py").write_text("answer = 3\n", encoding="utf-8")
+    doc = tmp_path / "solution.md"
+    doc.write_text(
+        "The verified result is in `library/count.py:1`.\n", encoding="utf-8"
+    )
+    script = ROOT / "skills/ce-compound/scripts/validate-doc-claims.py"
+    cmd = [sys.executable, script, doc]
+    subprocess.run(cmd, cwd=tmp_path, check=True)
+    doc.write_text("The result is in `library/count.py:82`.\n", encoding="utf-8")
+    bad = subprocess.run(
+        cmd, cwd=tmp_path, capture_output=True, encoding="utf-8", check=False
+    )
+    assert bad.returncode == 1 and "library/count.py" in bad.stdout

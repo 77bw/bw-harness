@@ -108,6 +108,14 @@ def routes(skill, patterns, lock):
     return sorted(edges), errors
 
 
+# Also catch prose/code literals such as ce-work/references/input-triage.md;
+# these are qualified by the other installed skill, not by the caller.
+CROSS_RESOURCE = re.compile(
+    r"(?<![\w-])([a-z][a-z\d-]*)/((?:references|scripts|assets|agents)/[\w./-]+"
+    r"|[A-Za-z][\w.-]*\.(?:md|py|js|sh))(?![\w-])"
+)
+
+
 def links(doc, root, skill=None):
     errors, fenced = [], False
     for number, line in enumerate(doc.read_text(encoding="utf-8").splitlines(), 1):
@@ -121,6 +129,14 @@ def links(doc, root, skill=None):
                 errors.append(f"{doc.relative_to(root)}:{number}: broken link {href}")
         if not skill:
             continue
+        for name, href in CROSS_RESOURCE.findall(line):
+            other = root / "skills" / name
+            if other.is_dir():
+                resource = inside(other, href.rstrip("."))
+                if not resource.exists():
+                    errors.append(
+                        f"{doc.relative_to(root)}:{number}: missing skill resource {name}/{href}"
+                    )
         for href in RESOURCE.findall(line):
             if not (skill / href).exists() and not (doc.parent / href).exists():
                 errors.append(

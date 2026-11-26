@@ -83,3 +83,12 @@ def test_broken_guide_link_and_encoding(pack):
     assert "broken link absent.md" in validate(pack).stdout
     doc.write_bytes(b"\xff")
     assert validate(pack).returncode != 0
+
+
+def test_missing_cross_skill_plain_text_reference(pack):
+    doc = pack / "skills/bw-help/SKILL.md"
+    with doc.open("a", encoding="utf-8") as f:
+        f.write("\nRead `ce-work/references/absent.md` before routing.\n")
+    assert (
+        "missing skill resource ce-work/references/absent.md" in validate(pack).stdout
+    )

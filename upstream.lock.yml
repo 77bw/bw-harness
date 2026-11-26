@@ -254,7 +254,7 @@
       },
       "skills/ce-compound": {
         "source": "skills/ce-compound",
-        "sha256": "0c4f0e1b3afa8364ba4a5081127aafefe66329b8fe8ff83ef1a03ff4580d04c4",
+        "sha256": "d652a54d04ca65cfa644c75a7ca327d079e729639e8cf736372e1c0a4f46d496",
         "upstream_sha256": "6484dbdf977e90ba6805041259348a13ca921971b5a8ba107649b3c90a8a6761",
         "executables": [
           "scripts/packs-resolve.py",

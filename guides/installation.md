@@ -27,6 +27,10 @@ pi list
 - Codex：从包目录运行 `codex plugin marketplace add "$PWD"`、`codex plugin add bw-harness@bw-harness` 后，新会话使用 `$bw-help`。用 `codex plugin list` 核对来源及启用状态。
 - 本手册中的 `/skill:…` 是 **Pi 对话输入**，不是 shell 命令或通用宿主语法。发现、模型实际调用、子任务派发、跨会话恢复是不同能力；兼容性以对应修订的实际验收为准。操作系统上的包检查不证明该系统已跑模型。
 
+### 本次候选版的实测边界
+
+macOS 上 Pi 1.1.0 已从公开仓的候选修订隔离安装，并能调用 BW；Codex 0.153.4 已从单独插件缓存加载 BW，在两个独立会话中续接同一个计划。Claude Code 2.1.322 的插件校验通过（有警告），启动目录中能看到 BW 命令，但配置的模型网关重试后仍返回 `ECONNRESET`，因此不宣称 Claude 模型调用或会话接续通过。Linux、Windows 的包测试与宿主实测分别报告；不从 CI 推断桌面宿主支持。
+
 ## 升级
 
 先升级注册源，再到业务项目运行 `/skill:setup-bw-harness update`。新版不生成 Python 工程；只更新可识别的 BW 规则，保留项目原有约定，实质冲突先核对。旧资料归位用治理的 migrate，不对业务代码做模板升级。Pi 解除注册使用 `pi remove` 加上 `pi list` 中的实际源，不删除业务仓文件。

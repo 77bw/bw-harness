@@ -381,3 +381,16 @@ index 897e666254ba8197c4d45e25504442211cc079c3..56aa900cce5a17f5d314e7ea14e1a9e7
  
  **CRITICAL: glob `<root>/solutions/` fresh every run.** The current vocabulary and conventions above do not substitute for the live-tree search in step 3.
  
+diff --git a/skills/ce-compound/scripts/validate-doc-claims.py b/skills/ce-compound/scripts/validate-doc-claims.py
+index 4339a3fdc0f899b09fca9a009bec3e2eca41e981..8e87c85606f55c3108367ebada44f21e03ce92b1 100644
+--- a/skills/ce-compound/scripts/validate-doc-claims.py
++++ b/skills/ce-compound/scripts/validate-doc-claims.py
+@@ -52,6 +52,8 @@ The script never touches the network (no fetch); classification uses
+ whatever refs exist locally. Run a best-effort `git fetch --quiet` first
+ when freshness matters. Pure stdlib (no third-party deps).
+ """
++from __future__ import annotations
++
+ import os
+ import re
+ import subprocess
