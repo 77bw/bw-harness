@@ -17,7 +17,7 @@ Read this when it is unclear whether the input fits `ce-pov`, or to route a Hold
 | To scope an idea already chosen | `ce-brainstorm` | `ce-pov` decides *whether*; brainstorm scopes *what* once it's a yes |
 | To know how to build something decided | `ce-plan` | Perform a requested handoff only when the Phase 4 (Deliver and return) authority check passes; `ce-pov` does no task breakdown |
 | To fix observed broken behavior | `ce-debug` | `ce-pov` assesses *exposure and priority* of a CVE; debug investigates an *actual failure* |
-| Product thesis / company direction | `ce-strategy` | `ce-pov` is bounded to a specific external input |
+| Product thesis / company direction | Out of scope; return the request to the caller | `ce-pov` is bounded to a specific external input |
 
 ## The selection escape hatch
 

@@ -2,6 +2,8 @@
 
 ## Success Output
 
+For every vocabulary result below, use the concrete resolved glossary path(s), and name an unresolved scope or conflicting definition rather than reporting a clean scan.
+
 **User-runnable refresh rendering.** The reports below print a refresh invocation for the user to copy. Default to `/ce-compound refresh <scope>`; use `$ce-compound refresh <scope>` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
 
 ### Non-interactive mode
@@ -20,8 +22,8 @@ Track: <bug | knowledge>
 Category: <category>
 Grounding: <mechanical check clean | N flags adjudicated>
 Discoverability: <no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
-CONCEPTS.md: <not present | scanned, no qualifying terms | updated — N added, N refined, N folded, N scrubbed>
-CONCEPTS.md discoverability: <not checked — CONCEPTS.md unchanged | no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
+GLOSSARY.md: <not present | scanned, no qualifying terms | updated — N added, N refined, N folded, N scrubbed>
+GLOSSARY.md discoverability: <not checked — GLOSSARY.md unchanged | no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
 Refresh recommendation: <none | /ce-compound refresh <scope>>
 
 Documentation complete
@@ -40,7 +42,7 @@ Category: <category>
 Overlap: <none | low | moderate — see <path> | high — existing doc updated>
 Grounding: <clean | N flags adjudicated (X fixed, Y annotated, Z confirmed) | N claims softened or corrected | degraded — merge-state claims unverified offline>
 Instruction-file edit: <none needed | gap noted, not applied>
-CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded from the learning's area) | updated — N added, N refined, N folded, N scrubbed>
+GLOSSARY.md: <scanned, no qualifying terms | created with N entries (M seeded from the learning's area) | updated — N added, N refined, N folded, N scrubbed>
 Refresh recommendation: <none | /ce-compound refresh <scope>>
 
 Documentation complete
@@ -83,7 +85,7 @@ Specialized Agent Reviews (Auto-Triggered):
 
 Files written:
 - <root>/solutions/performance-issues/n-plus-one-brief-generation.md (created)
-- CONCEPTS.md (created with 3 entries: BriefSystem, EmailQueue, Brief Status)
+- GLOSSARY.md (created with 3 entries: BriefSystem, EmailQueue, Brief Status)
 
 This documentation will be searchable for future reference when similar
 issues occur in the Email Processing or Brief System modules.

@@ -1,5 +1,7 @@
 # The refresh report
 
+For every vocabulary result below, use the concrete resolved glossary path(s), and name an unresolved scope or conflicting definition rather than reporting a clean scan.
+
 **Print the full report as markdown — it is the deliverable, not an internal summary.** After processing the scope:
 
 ```text
@@ -16,7 +18,7 @@ Skipped: V
 Marked stale: S
 Worth: <N shortened, N deleted; standards: N removed, N narrowed, N added | off (drift fixes only)>
 
-CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded) | updated — N added, N refined, N reconciled, N folded, N retired, N deleted, N scrubbed | repo-wide map created with N entries>
+GLOSSARY.md: <scanned, no qualifying terms | created with N entries (M seeded) | updated — N added, N refined, N reconciled, N folded, N retired, N deleted, N scrubbed | repo-wide map created with N entries>
 ```
 
 When `Marked stale` is above zero, add a line under the summary saying the learnings researchers that other skills dispatch keep surfacing those docs, labeled stale with their reason, until a refresh or a person settles them.

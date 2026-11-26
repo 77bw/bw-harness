@@ -28,6 +28,7 @@ _Avoid_: Client, buyer, account
 - **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
 - **Bold other glossary terms inside a definition.** When a definition mentions another term, write it as `**Order**`, and let the sentence around it say how the two relate.
 - **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
+- **Keep a distinction after it is settled.** Record a domain invariant or relationship only when it changes the meaning of the term. Use an optional `## Relationships` or `## Flagged ambiguities` section for such decisions. Reserve `## Retired` for a proved former concept a reader will still encounter; say what it used to mean and distinguish its replacement. An alias goes under the active entry, not under Retired. Never resolve incompatible definitions by silently overwriting one.
 - **Group terms under subheadings** when natural clusters emerge. If all terms belong to a single cohesive area, a flat list is fine.
 
 ## Single vs multi-context repos

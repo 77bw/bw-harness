@@ -15,11 +15,11 @@ Treat all of these as candidates. Do not privilege bug-shaped learnings over the
 
 For optimization invocations, search the full learning corpus described below, then convert relevant findings into optimization inputs: prior benchmark data, measurement methods, known bottlenecks, previous optimization attempts, performance regressions, experiment-design traps, and verification approaches. Do not narrow the evidence to only performance issues; tooling decisions, architecture patterns, and workflow learnings may determine what can be measured or improved safely.
 
-## Step 0: Ground in CONCEPTS.md (if present)
+## Step 0: Ground in GLOSSARY.md (if present)
 
-Before searching `<root>/solutions/`, check whether `CONCEPTS.md` exists at the repo root. If it does, read it as grounding. It defines the project's shared vocabulary (domain entities, named processes, status concepts) and the canonical names for things the caller may be asking about. Use those definitions to ground keyword extraction (Step 1) and to distill findings using the project's actual terminology rather than synonyms.
+Before searching `<root>/solutions/`, follow the root `GLOSSARY-MAP.md` to the in-scope context glossary, or check root `GLOSSARY.md` when no map exists. If it does, read it as grounding. It defines the project's shared vocabulary (domain entities, named processes, status concepts) and the canonical names for things the caller may be asking about. Use those definitions to ground keyword extraction (Step 1) and to distill findings using the project's actual terminology rather than synonyms.
 
-If `CONCEPTS.md` does not exist, skip this step entirely and proceed to Step 1.
+If no glossary resolves for this context, skip this step entirely and proceed to Step 1.
 
 ## Search Strategy (Grep-First Filtering)
 

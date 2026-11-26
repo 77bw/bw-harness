@@ -1,6 +1,6 @@
 # Discoverability check
 
-After the report, apply the **Discoverability Check** section of `references/refresh-and-discoverability.md`. It defines what a reader must learn, the smallest addition and its tone, the consent step, and the `CONCEPTS.md` variant. Follow its interactive Full path in an interactive refresh, with these differences:
+After the report, apply the **Discoverability Check** section of `references/refresh-and-discoverability.md`. It defines what a reader must learn, the smallest addition and its tone, the consent step, and the `GLOSSARY.md` variant. Follow its interactive Full path in an interactive refresh, with these differences:
 
 - **Instruction files:** look for the project's root agent-instruction surface, whatever this project uses (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or an equivalent). If there is none, skip the check.
 - **Questions:** ask as `references/refresh/modes.md` describes under Blocking questions.

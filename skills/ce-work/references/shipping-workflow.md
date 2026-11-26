@@ -4,6 +4,8 @@ This file contains the shipping workflow (Phase 3-4). It is loaded when all Phas
 
 ## Phase 3: Quality Check
 
+For an onboarded BW project this transition is the completion checkpoint named in the active project instructions, not a new capture trigger. Apply its configured compounding directive once to a solved, verified correction; carry the actual result (including a skip or no qualifying correction), not a prediction of whether a wiki entry is worthwhile. If capture for that event already ran, reuse its result. When the project calls for `project-governance close`, load the installed skill here and pass it the plan, checks already run, capture result and worktree scope; it closes knowledge/status, not shipping. Record actual progress, not a claim that the upcoming PR or final checks already succeeded. Changes these steps make belong to the diff checked below.
+
 1. **Run Core Quality Checks**
 
    Run the project's full test suite and its configured lint command on the finished change before simplification and review.
@@ -43,6 +45,8 @@ This file contains the shipping workflow (Phase 3-4). It is loaded when all Phas
    Skip the gate when there are no justified remaining concerns or dedicated review was skipped. A reported count alone does not decide whether to stop.
 
 5. **Final Validation**
+
+   A later review fix can expose a *new* verified correction. Apply the same active checkpoint to that event only; do not re-capture an event that already has a result. Compare changes since the last checks/review, including tests, lint configuration and review standards added by capture or close. Run the affected checks for the final tree; if the prior review does not cover a new behavior-bearing delta or revised review rules, obtain the applicable review for that delta under step 3 before shipping. Keep valid receipts for unchanged scope, and state the final evidence. Pure documentation follows the normal checks appropriate to the change.
 
    Before shipping, re-open the plan and re-check its active units, requirements, Verification Contract, and Definition of Done against the diff (for one PR group of a multi-PR plan, check only that group's units, the requirements they trace to, and the parts of the Verification Contract and Definition of Done those units cover), because context may have been compacted to a summary that dropped detail. The change is ready when:
    - every task is complete, and every `Deferred to Implementation` question was resolved;

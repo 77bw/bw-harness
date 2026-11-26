@@ -85,11 +85,11 @@ Every change to a user-owned file is offered and applied only if the user approv
 
 ## Phase 3: Summary
 
-**User-runnable invocation rendering.** In setup summaries, default to `/ce-setup` and `/ce-help`; use `$ce-setup` and `$ce-help` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. On oh-my-pi (`omp`), keep `/ce-setup` and use `/skill:ce-help`. Render only the invocation as inline code and output one form only.
+**User-runnable invocation rendering.** Render `ce-setup` and the installed `bw-help` using the current host's exposed registrations: on Pi use `/skill:<name>`, on Codex use the catalogued `$<name>`, and on Claude Code use the slash command including any installed plugin namespace. If the host exposes a different spelling use the exact catalog entry, not a guessed alias. Show one form only.
 
 Write the summary that `references/summary.md` describes. End it with these two lines, with the rendered invocations filled in:
 
 ```text
 Run `<rendered invocation>` anytime to re-check.
-Run `<rendered ce-help invocation>` to ask which skill fits or what comes next.
+Run `<rendered bw-help invocation>` to ask which skill fits or what comes next.
 ```
