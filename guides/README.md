@@ -31,7 +31,7 @@
 
 | 主入口和常用流程 | 什么时候选 |
 |---|---|
-| [setup-bw-harness](skills/setup-bw-harness.md) / [bw-help](skills/bw-help.md) | 初始化或检查项目 / 只问下一步怎么走 |
+| [setup-bw-harness](skills/setup-bw-harness.md) / [bw-help](skills/bw-help.md) | 接入或检查项目 / 推荐下一步，明确要求时移交执行 |
 | [grill-with-docs](skills/grill-with-docs.md) / [ce-brainstorm](skills/ce-brainstorm.md) | 术语、业务边界不清 / 产品需求和范围未定 |
 | [ce-plan](skills/ce-plan.md) / [ce-work](skills/ce-work.md) | 已定目标要变成计划 / 已有计划要实施 |
 | [project-governance](skills/project-governance.md) / [ce-compound](skills/ce-compound.md) | 检查、迁移、收尾 / 留下已证实的经验 |
