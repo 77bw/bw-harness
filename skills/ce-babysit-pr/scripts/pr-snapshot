@@ -1581,8 +1581,8 @@ def _apply_dispositions(items, id_key, prior, identity_fn=None,
 
     When identity_fn is given, an item whose disposition is in `reactivate_dispositions` is
     *reactivated* — set back to open and re-actionized — once its last-comment / edit identity moves
-    past the one we acted on. That acted-on identity is captured lazily on the first tick after our
-    own reply, so the reply becomes the baseline and later reviewer activity reopens the item. This
+    past the one we acted on. The dispatched mark captures that identity after our reply. A legacy mark with no
+    baseline reopens on the next tick; unrelated newer activity is never adopted as handled. This
     stops a dispatched-but-unresolved thread with fresh activity from being silenced.
 
     The feedback stream excludes DISPATCHED from `reactivate_dispositions` deliberately: status
@@ -1600,9 +1600,7 @@ def _apply_dispositions(items, id_key, prior, identity_fn=None,
         acted_identity = pri.get("acted_identity")
         if disposition in reactivate_dispositions and identity_fn is not None:
             current_identity = identity_fn(it)
-            if acted_identity is None:
-                acted_identity = current_identity   # first post-action observation: adopt as baseline
-            elif current_identity != acted_identity:
+            if acted_identity is None or current_identity != acted_identity:
                 disposition = DISPOSITION_OPEN       # a later human/reviewer reply past our baseline -> reactivate
                 acted_identity = None
         if disposition == DISPOSITION_OPEN:
@@ -3513,14 +3511,16 @@ def cmd_mark(args):
                 if _needs_human_source_is_covered(state, item_id, kind):
                     raise SystemExit(
                         "cannot dispatch a source covered by a current human decision")
-                entry["disposition"] = DISPOSITION_DISPATCHED
                 if args.thread:
                     # our reply moved the thread's last comment, so re-read it now as the baseline.
                     ident = _mark_thread_baseline(item_id, args, state)
-                    if ident is not None:
-                        entry["acted_identity"] = ident
+                    if not ident or not all(ident):
+                        raise SystemExit("thread baseline unavailable; refresh the snapshot "
+                                         "and reconcile the reply before retrying this mark")
+                    entry["acted_identity"] = ident
                 elif args.comment and args.acted_edit_id:
                     entry["acted_identity"] = [args.acted_edit_id]
+                entry["disposition"] = DISPOSITION_DISPATCHED
             state["last_action"] = f"{args.disposition} {label} {item_id}"
             marked = marked or item_id
         if getattr(args, "invariant_key", None) and args.disposition == DISPOSITION_DISPATCHED:

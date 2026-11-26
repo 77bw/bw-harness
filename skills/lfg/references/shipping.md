@@ -4,7 +4,7 @@ The shipping steps are the last stretch of the run: commit, push, PR, CI, and cl
 
 ## Step 9 — a project-defined process may replace the default handoff
 
-The goal is the remaining work committed, pushed, and in an open PR whose URL you hold.
+The goal is the remaining work committed and, when the shipping precondition permits it, pushed and in an open PR whose URL you hold. Check the local-only branch below first, even when step 5 made no push. For remote handoff pass untouched pre-work paths as `exclude:<paths>`; if a project-defined process cannot honor them, use the default native handoff instead.
 
 The project's active instructions may name a process for that handoff: a named skill or command, a stacking tool, or documented steps. Commit or PR-title conventions do not count, because the default already honors them, and a skill directory alone is not a directive. When such a process is named, run it non-interactively with the same plan path and context below instead of the default. It is done only when the work is pushed and you hold the URL of an open PR containing it, either one the process opened or a PR that already exists for the branch. If it cannot run headlessly, is unavailable, or ends short of that state, stop as **blocked** naming the process. Do not fall through to the default or to step 10.
 
@@ -14,9 +14,11 @@ Pass the recorded plan path from step 1 into the `ce-commit-push-pr` invocation,
 
 This commits any remaining changes, pushes the branch, and opens a pull request, non-interactively because of the `mode:pipeline` token. If it prints a `New concepts:` trailer after the PR URL, record the concept name(s) for step 11. If a PR already exists for the branch (check with `gh pr view --json number,url,state 2>/dev/null`), skip PR creation but still commit and push any uncommitted changes. Pipeline mode leaves an existing PR body alone by default, so the description context above would be lost there; after the push, invoke `ce-commit-push-pr mode:pipeline` again in its description-update mode on that PR with the same context, so the record reaches the reviewer without a confirmation prompt.
 
-**Per the shipping precondition, when no remote is configured, do NOT invoke `ce-commit-push-pr` or a project-defined shipping process.** The default's commit step pushes unconditionally (`git push -u origin HEAD`), so a literal invocation would still hit the impossible push. Instead commit the files this run changed, by name (the work source's files, the review fixes, and any captured learning), and skip the push and PR creation entirely. Never `git add -A`: a file that was already dirty before the run, or one the defect route's `pre_fix_scope` lists, stays uncommitted and is named in the report.
+**Per the shipping precondition, when no remote is configured or outgoing work is unoffered or unknown, do NOT invoke `ce-commit-push-pr` or a project-defined shipping process.** The default's commit step pushes unconditionally (`git push -u origin HEAD`), so a literal invocation would still hit the impossible push. Instead commit the files this run changed, by name (the work source's files, the review fixes, and any captured learning), and skip the push and PR creation entirely. Never `git add -A`: a file that was already dirty before the run, or one the defect route's `pre_fix_scope` lists, stays uncommitted and is named in the report.
 
 ## Step 10 — stack handoff from step 9
+
+If step 9 held publication, skip step 10 entirely, including on a branch with a previous PR. State what stayed local and why.
 
 If step 9's `ce-commit-push-pr` completed a stack-mode submit and handed off `ce-babysit-pr` on the **bottom open non-draft** PR with `posture:stack-ready` or `posture:stack-land`:
 

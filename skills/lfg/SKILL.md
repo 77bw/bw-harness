@@ -32,6 +32,8 @@ Resolve every skill named here against the host's available-skills list and invo
 
 ## The run (routes that change the code)
 
+Record the native pre-work scope **before the first mutating child**, including planning: the invoked branch and HEAD, untouched dirty/staged/untracked paths (`git status --short --untracked-files=all`), upstream default/base and commits already ahead of it, or unknown. Keep this alongside the work source for the run; distinguish changes this run makes from what was there at entry. The defect route also returns its native `pre_fix_scope`. Do not stash, rebase, reset or claim existing work.
+
 1. **Produce the work source** per `references/intake.md`. On the plan route, read `references/plan-brief.md` first; it alone defines the settled-decisions brief and the artifact-root rule. Any explicit `status: blocked` return, including `settled-decision-invalidated`, stops the run. Blocked status outranks an existing artifact and is never retried. Only absence of both a blocker and a plan file `ce-plan` reported writing this run invokes `ce-plan` a second time with the same arguments, reusing the composed brief verbatim; the plan must then pass the readiness check in `references/plan-brief.md`. Record the work source for every later step. LFG never launches `/goal` directly; `ce-work` implements and returns control.
 
 2. **Read `references/work-return.md` first**, then invoke the `ce-work` skill with `mode:return-to-caller <plan-path-from-step-1>`; a one-pass statement takes the path's place. On the defect route this step does not run: `ce-debug` already implemented and committed, and `references/debug-return.md` was its gate. Only a valid `status: complete` from `ce-work` may advance; every other status or malformed return stops the pipeline.
@@ -40,7 +42,7 @@ Resolve every skill named here against the host's available-skills list and invo
 
 4. Invoke the `ce-code-review` skill with `mode:agent plan:<plan-path-from-step-1>`; with no plan, omit `plan:`. A `settled_conflict` finding whose evidence shows the settled decision cannot work (infeasible, wrong-thing, or destructive) stops the pipeline as blocked, with the finding reported, before the shipping precondition.
 
-**Shipping precondition (every push from step 5 on).** Run `git remote` once. No remote means local-only: make every commit the steps call for, but skip every push, PR create/edit, and CI-watch action, including step 10 in full. That is terminal, not an error.
+**Shipping precondition (every push from step 5 on).** Use the existing offered-work publication rule on **every route** (plan, one-pass direct prompt or defect), before step 5's first review-fix push and again before step 9. Compare the pre-work scope with the actual remote branch/base and full outgoing commit range; an open PR counts only for the commits already in its remote head. A configured remote alone is not evidence of ownership. If pre-existing commits would be published that were not offered, or the scope cannot be established, use the same local-only path as for no remote. Exclude untouched pre-work paths from every commit and handoff. No remote or a publication hold means local-only: make every commit the steps call for, but skip every push, PR create/edit, and CI-watch action, including step 10 in full. That is terminal, not an error.
 
 5. **Apply and persist review fixes** as that file defines. Do not proceed to the residual handoff, run browser tests, or output DONE while eligible review fixes remain only in the working tree uncommitted.
 
@@ -50,7 +52,7 @@ Resolve every skill named here against the host's available-skills list and invo
 
 8. Invoke the `ce-test-browser` skill with `mode:pipeline`.
 
-9. **Read `references/shipping.md` first**; it governs steps 9 through 11. Then invoke the `ce-commit-push-pr` skill with `mode:pipeline branding:on`.
+9. **Read `references/shipping.md` first**; it governs steps 9 through 11. Only when the shipping precondition allows publication, invoke the `ce-commit-push-pr` skill with `mode:pipeline branding:on`; otherwise use the local step in that reference.
 
 10. Watch the PR to CI-decided with `ce-babysit-pr mode:pipeline <pr-url>` when an open PR exists, as `references/shipping.md` decides. Do not reimplement CI-watching here.
 

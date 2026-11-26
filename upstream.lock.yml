@@ -571,7 +571,7 @@
       "skills/ce-babysit-pr": {
         "source": "skills/ce-babysit-pr",
         "upstream_sha256": "392539120768acb44e559a6dbe7d1c820b10d1f5d81462d6d5a17670305b65f5",
-        "sha256": "392539120768acb44e559a6dbe7d1c820b10d1f5d81462d6d5a17670305b65f5",
+        "sha256": "2071bd0db43cc8059b0c22cd27a02465be9ef5c6a6ae53c4b875bcf76e8b7cf3",
         "executables": [
           "scripts/intake-overlap",
           "scripts/pr-snapshot"
@@ -583,12 +583,13 @@
           "ce-resolve-pr-feedback",
           "ce-work",
           "lfg"
-        ]
+        ],
+        "patch": "patches/ce/ce-babysit-pr.patch"
       },
       "skills/lfg": {
         "source": "skills/lfg",
         "upstream_sha256": "cdf05b3b4ed08ac08ea9e5d77c62e0c28ee4e478925c576632cd0e94a0598a88",
-        "sha256": "5716c7c36bc487c30d08034189c856332ff1afb964e23c0a952ff16c441b1a6f",
+        "sha256": "431e38e6094449dee8fa275140753b16556cf0aa3ade6c0a9f59f95d0f5258ae",
         "executables": [],
         "requires": [
           "ce-babysit-pr",
