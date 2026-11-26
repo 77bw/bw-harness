@@ -101,12 +101,29 @@ def test_replay_from_immutable_objects_and_drift(trees):
 
 
 def test_failed_patch_does_not_touch_destination_or_lock(trees):
-    root, _ = trees
+    root, cache = trees
+    # This missing first resource is valid and queued for restoration. A bad
+    # patch on the second resource must not leave a partially restored pack.
+    lock_path = root / "upstream.lock.yml"
+    metadata = json.loads(lock_path.read_bytes())
+    checksum = digest(cache / "matt/source/SKILL.md")
+    queued = "licenses/fixture-note"
+    metadata["matt"]["resources"] = {
+        queued: {
+            "source": "source/SKILL.md",
+            "upstream_sha256": checksum,
+            "sha256": checksum,
+            "executables": [],
+        },
+        **metadata["matt"]["resources"],
+    }
+    lock_path.write_bytes(json.dumps(metadata).encode())
     path = root / "patches/matt/fixture.patch"
     path.write_bytes(path.read_bytes().replace(b"-original", b"-WRONG"))
     lock = (root / "upstream.lock.yml").read_bytes()
     result = sync(trees, "--apply")
     assert result.returncode != 0 and "patch" in result.stderr
+    assert queued in result.stdout and not (root / queued).exists()
     assert (root / "skills/fixture/SKILL.md").read_bytes() == b"adapted\n"
     assert (root / "upstream.lock.yml").read_bytes() == lock
 
