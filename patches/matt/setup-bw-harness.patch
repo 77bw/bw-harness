@@ -1,8 +1,8 @@
 diff --git a/skills/setup-bw-harness/SKILL.md b/skills/setup-bw-harness/SKILL.md
-index 2df0b07981718fa5d9a51526dfbcaee87e3a543d..6dd3f948eaffcd62e6cec5ccb70b5562c56e3579 100644
+index 2df0b07981718fa5d9a51526dfbcaee87e3a543d..6414e4e7a38c45965456ad3ffe43eb78158743b4 100644
 --- a/skills/setup-bw-harness/SKILL.md
 +++ b/skills/setup-bw-harness/SKILL.md
-@@ -1,120 +1,67 @@
+@@ -1,120 +1,69 @@
  ---
 -name: setup-matt-pocock-skills
 -description: "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills."
@@ -26,13 +26,13 @@ index 2df0b07981718fa5d9a51526dfbcaee87e3a543d..6dd3f948eaffcd62e6cec5ccb70b5562
 +Resolve the target directory named by the user, else the working directory. Locate seeds beside **this loaded SKILL.md**, not relative to the target. Identify the installed BW copy of CE, not an unrelated global copy. Missing resources or ambiguous duplicate providers are blockers for the affected action.
  
 -## Process
-+- Explicit setup (including old `new`): onboard empty **or existing** projects by editing workflow documents, not by generating application code.
-+- `docs`: preview proposed document merges; apply only the requested document scope. `update`: reconcile existing BW settings and user edits in place.
++- Explicit onboarding: use the default invocation for empty **or existing** projects. Edit project workflow documents, not application code. A request to preview proposals (in any mode) ends before the first write.
++- `update`: reconcile existing BW settings and user edits in place.
 +- `check`: perform only steps 1 and 2 and read-only verification. No writes, Git init, installs, repairs, tests that produce artifacts, or status updates.
 +- `migrate`: inspect enough to identify the sources, then hand off to the installed `project-governance migrate`. Setup does not move historical knowledge.
  
 -### 1. Explore
-+Confirm the project is not the installed pack or the wrong enclosing checkout. If inside a larger Git root, identify the intended boundary before writing there or initializing a nested repo. Ordinary work does not implicitly run setup.
++If the input is only an obsolete generator command or flags (for example `new --api`), explain that the generator was removed. Stop without onboarding, writing or installing; a generator invocation does not authorize a different operation.
  
 -Look at the current repo to understand its starting state. Read whatever exists; don't assume:
 -
@@ -67,10 +67,11 @@ index 2df0b07981718fa5d9a51526dfbcaee87e3a543d..6dd3f948eaffcd62e6cec5ccb70b5562
 -A GitHub or GitLab tracker needs a reachable repo. When the user picks one and no `git remote` points at that host, get the repo URL from them and wire it up (`git init` if needed, `git remote add origin <url>`) before going further. Done when `gh repo view` / `glab repo view` prints the project from inside this directory; if it can't, stop and tell the user what's missing.
 -
 -**Section B: Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
-+## 1. Explore
++Confirm the project is not the installed pack or the wrong enclosing checkout. If inside a larger Git root, identify the intended boundary before writing there or initializing a nested repo. Ordinary work does not implicitly run setup.
  
 -If it is installed, ask exactly one question:
--
++## 1. Explore
+ 
 -> Do you want to keep the default triage labels? (recommended: **yes**)
 -
 -The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no, usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`), collect the overrides so `triage` applies existing labels instead of creating duplicates.

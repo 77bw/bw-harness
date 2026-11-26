@@ -12,10 +12,12 @@ Derived from Matt Pocock’s setup-matt-pocock-skills (MIT; revision and differe
 
 Resolve the target directory named by the user, else the working directory. Locate seeds beside **this loaded SKILL.md**, not relative to the target. Identify the installed BW copy of CE, not an unrelated global copy. Missing resources or ambiguous duplicate providers are blockers for the affected action.
 
-- Explicit setup (including old `new`): onboard empty **or existing** projects by editing workflow documents, not by generating application code.
-- `docs`: preview proposed document merges; apply only the requested document scope. `update`: reconcile existing BW settings and user edits in place.
+- Explicit onboarding: use the default invocation for empty **or existing** projects. Edit project workflow documents, not application code. A request to preview proposals (in any mode) ends before the first write.
+- `update`: reconcile existing BW settings and user edits in place.
 - `check`: perform only steps 1 and 2 and read-only verification. No writes, Git init, installs, repairs, tests that produce artifacts, or status updates.
 - `migrate`: inspect enough to identify the sources, then hand off to the installed `project-governance migrate`. Setup does not move historical knowledge.
+
+If the input is only an obsolete generator command or flags (for example `new --api`), explain that the generator was removed. Stop without onboarding, writing or installing; a generator invocation does not authorize a different operation.
 
 Confirm the project is not the installed pack or the wrong enclosing checkout. If inside a larger Git root, identify the intended boundary before writing there or initializing a nested repo. Ordinary work does not implicitly run setup.
 

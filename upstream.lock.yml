@@ -69,7 +69,7 @@
         "source": "skills/engineering/ask-matt",
         "derived_from": "ask-matt",
         "upstream_sha256": "3e106f7d925f59b112975fb4fb96bf790d68a358b1d5a0bf6cb5f4d35035f14a",
-        "sha256": "3153683b28943aedf24b5c9ea68de61ddddbb7e3bb52c3d1aca87477e8ee8de0",
+        "sha256": "8514aa32cac6e89d7cca499cc40125e9ff6f1612e78d03aa1f182fae46f5f33f",
         "executables": [],
         "requires": [
           "ce-babysit-pr",
@@ -96,7 +96,7 @@
         "source": "skills/engineering/setup-matt-pocock-skills",
         "derived_from": "setup-matt-pocock-skills",
         "upstream_sha256": "fb96a61c2698a9f4299778861547b92f11719d033d1cd5dea7e95a98fe8e438a",
-        "sha256": "c28c6b9f92e83994f5f2e283e9e38473a68b5425e1a392b4371f2d47ca658b36",
+        "sha256": "53c76ae143b6d78f5b57a41330e233840153ecbe9d230d6fde6fb797d0e2967e",
         "executables": [],
         "requires": [
           "ce-setup",

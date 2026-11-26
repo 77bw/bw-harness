@@ -14,6 +14,14 @@ Derived from Matt Pocock’s ask-matt (MIT). Before stating what a skill does or
 2. In a project, inspect the effective instructions, actual document root and current status; open the named active plan, not every old plan. Check only task-related code, Git state, ADRs, research, solutions and evidence of an in-progress CE run. A status label alone is not an executable plan or a receipt. For unrelated questions this project scan is unnecessary.
 3. Identify the next unresolved decision or unit, then inspect the registered target(s). Read the actual candidate package paths supplied by the host. When the request is about a specific skill, read its body and corresponding user Guide if available. A duplicate provider or missing dependency is a named blocker, not permission to install anything.
 
+**Explicit commands vs discovery.** A model's automatic-skill list can omit manual entries (including setup and help) by design. Its silence says nothing about whether the user can invoke them. In Pi, if a candidate is missing from that list, check **explicit command registration before giving an availability verdict**. With shell access, this no-model, read-only catalog probe works in the same project and package profile:
+
+```sh
+printf '%s\n' '{"id":"bw","type":"get_commands"}' | pi --mode rpc --no-session
+```
+
+Read the matching response's `data.commands`: match the exact `skill:<name>` and `sourceInfo.path` to this package (a CE extension can register skills from the same pack). Preserve the launching profile, cwd, enabled resource/skill filters and extension settings when probing; don't replace them with discovery overrides. When the registered path matches, give the exact user-callable command even if automatic invocation is disabled. If an equivalent live catalog is unavailable or the current filters can't be reproduced, distinguish “package contains this explicit command” from “registration not verified”; name the one selector/catalog check, without claiming the skill is absent or advising reinstallation on that basis. Adjacent files alone do not prove registration. Other hosts: use their actual command/skill selector. Consultation stays read-only: verifying a command does not run setup.
+
 ## The main flow: idea → ship
 
 - **First connection.** For onboarding, recommend explicit `setup-bw-harness`. For changes to an established project's conventions, use its update branch. Do not interrupt a straightforward self-contained question for setup.
