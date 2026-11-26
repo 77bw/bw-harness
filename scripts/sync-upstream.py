@@ -1,7 +1,8 @@
 """Replay the *pinned* upstream sources and reviewed patches in isolation.
 
 Default: verify and report drift, no writes to the pack. --apply restores only
-missing, pristine upstream, or last committed lock-matching resources after all checks succeed. To author a
+missing, pristine upstream, or last committed lock-matching resources after all checks succeed.
+Existing resources are retained at printed recovery paths, including concurrent open-file edits. To author a
 patch, edit one distributed resource, then explicitly --record its package path,
 inspect the patch/lock diff, and rerun the default verification.
 """
@@ -70,6 +71,85 @@ def executable_files(target):
         for f in files(target)
         if f.stat().st_mode & 0o111
     )
+
+
+def snapshot(path):
+    if path.is_symlink():
+        raise ValueError(f"symlink in resource: {path}")
+    if not path.exists():
+        return None
+    return digest(path), None if os.name == "nt" else executable_files(path)
+
+
+def checked_target(root, name, observed):
+    target = inside(root, name)
+    if snapshot(target) != observed:
+        raise ValueError(f"{name}: destination changed during replay; not overwriting")
+    return target
+
+
+def rename_new(src, dst):
+    """Atomically publish a whole resource without replacing even an empty racing target."""
+    if os.name == "nt":
+        os.rename(src, dst)  # Windows refuses an existing destination.
+        return
+    # POSIX rename/replace can silently destroy a newly created file or empty
+    # directory. Use the native exclusive form or fail closed on unsupported FS.
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    a, b = os.fsencode(src), os.fsencode(dst)
+    if sys.platform == "darwin" and hasattr(libc, "renamex_np"):
+        result = libc.renamex_np(a, b, 4)  # RENAME_EXCL
+    elif sys.platform.startswith("linux") and hasattr(libc, "renameat2"):
+        result = libc.renameat2(-100, a, -100, b, 1)  # AT_FDCWD, RENAME_NOREPLACE
+    else:
+        raise OSError("atomic non-replacing rename is unavailable")
+    if result:
+        err = ctypes.get_errno()
+        raise OSError(err, os.strerror(err), str(dst))
+
+
+def install(root, source, name, observed):
+    target = checked_target(root, name, observed)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    # Stage and recover outside discoverable skills and tracked pack resources.
+    local = inside(root, ".local")
+    local.mkdir(mode=0o700, exist_ok=True)
+    if local.stat().st_dev != target.parent.stat().st_dev:
+        raise ValueError(f"{name}: staging and destination must be on the same volume")
+    with tempfile.TemporaryDirectory(prefix="upstream-stage-", dir=local) as tmp:
+        incoming, staged = Path(tmp) / "incoming", Path(tmp) / "candidate"
+        copy(source, incoming)
+        # Probe exclusive rename support on this volume *before* displacing data.
+        rename_new(incoming, staged)
+        backup = None
+        if observed is not None:
+            recoveries = inside(root, ".local/upstream-backups")
+            recoveries.mkdir(mode=0o700, exist_ok=True)
+            directory = Path(tempfile.mkdtemp(dir=recoveries))
+            backup = directory / target.name
+        checked_target(root, name, observed)
+        if backup is not None:
+            target.rename(inside(root, backup.relative_to(root).as_posix()))
+            print("BACKUP", name, backup, flush=True)
+        try:
+            if backup is not None and snapshot(backup) != observed:
+                raise ValueError(f"{name}: destination changed during replacement")
+            rename_new(staged, inside(root, name))
+        except (OSError, ValueError) as error:
+            if backup is not None:
+                try:
+                    rename_new(backup, inside(root, name))
+                except (OSError, ValueError) as recovery_error:
+                    raise ValueError(
+                        f"{name}: {error}; current destination untouched; "
+                        f"recover the displaced resource at {backup}: {recovery_error}"
+                    ) from error
+                backup.parent.rmdir()
+            raise
+        # Do not delete the backup: a writer holding an open descriptor can
+        # still change the displaced tree after the validation above.
 
 
 def committed_resources(root):
@@ -233,18 +313,14 @@ def main(argv=None, root=ROOT):
                         raise ValueError(
                             f"{dst}: dependency mismatch: {errors or deps}"
                         )
-                if (
-                    target.exists()
-                    and digest(target) == entry["sha256"]
-                    and (os.name == "nt" or executable_files(target) == modes)
-                ):
+                observed = snapshot(target)
+                if observed == (entry["sha256"], None if os.name == "nt" else modes):
                     continue
                 print("DIFF", dst)
                 drifts.append(dst)
                 if args.apply:
-                    if target.exists():
-                        found = digest(target)
-                        mode = executable_files(target)
+                    if observed is not None:
+                        found, mode = observed
                         old = previous.get(dst, {})
                         pristine = found == original and (
                             os.name == "nt" or mode == original_modes
@@ -256,10 +332,14 @@ def main(argv=None, root=ROOT):
                             raise ValueError(
                                 f"{dst}: local modifications; refusing to overwrite"
                             )
-                    staged.append((source, target))
+                    staged.append((source, dst, observed))
             print(key, commit, "checked")
-        for src, dst in staged:
-            copy(src, dst)
+        # Check the whole queue before applying any of it, and then each
+        # destination at its own installation boundary.
+        for _, name, observed in staged:
+            checked_target(root, name, observed)
+        for src, name, observed in staged:
+            install(root, src, name, observed)
         if selected:
             for path, content in patches.items():
                 if content is None:
