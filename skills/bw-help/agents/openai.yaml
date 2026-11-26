@@ -1,0 +1,5 @@
+interface:
+  display_name: "BW Help"
+  short_description: "Find or hand off to the next installed BW workflow"
+policy:
+  allow_implicit_invocation: false

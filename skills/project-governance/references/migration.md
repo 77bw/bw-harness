@@ -1,0 +1,9 @@
+# Batch migration procedure
+
+Take a read-only inventory first. For each paragraph, table, code snippet or evidence reference record its source path/anchor, incoming links, known revision or protected copy, candidate owner and scope. Find existing successful checks if available. For untracked raw material Git is not a recovery source. Do not copy private artifacts into tracked docs or assume an ignored directory is backed up.
+
+Propose operations in reviewable units: **retain as historical / cross-link / merge / split by responsibility / defer conflict**. For a mixed CONTEXT/CONCEPTS page, a stable term may go to the domain glossary, a decision to an ADR, a measured counterexample to research and the open unit to the current status. Do not just rename the file into GLOSSARY. For a solved lesson inspect native CE's current form and duplicates before recommending a durable holder; an old session summary is not proof the issue was fixed. Leave business code and its directory layout in place.
+
+Before writing an approved batch, locate the relevant passages and current diffs again. If the sources changed since approval, reconcile or pause affected items. Create/merge destinations before changing old entry points; preserve quoted evidence conditions and source pointers. Update incoming links (including anchors and maps); where historic references cannot move, retain a small historical redirect with its scope. Never delete the only copy or silently resolve semantic contradictions. Unapproved items remain untouched.
+
+For verification, trace every starting section to a retained source, merged authority or explicit open question; open links from both old and new consumers. Compare before/after filenames, approved scope and Git diff including untracked assets. Record per-item recovery (original revision/retained path or verified protected backup), not a destructive blanket reset of someone else's tree.
