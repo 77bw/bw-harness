@@ -1,7 +1,7 @@
-# Committing the refresh
+# 提交刷新
 
-Skip if no files changed. Check the current branch, whether the tree has unrelated uncommitted changes, and recent commit style. Stage **only** the files this refresh modified. Write a descriptive message summarizing the refresh (e.g., "update 3 stale learnings, consolidate 2 overlapping docs, delete 1 obsolete doc") in the repo's convention. Its body, and the pull request body when there is one, lists each worth-based cut or Delete and each standards change with its quoted evidence, because reviewers and later readers rely on that trail. Stage a `CODING_STANDARDS.md` this refresh changed.
+如果没有文件更改则跳过。检查当前分支，树是否有不相关的未提交更改，以及最近的提交风格。 **仅**此刷新修改的文件。在存储库约定中编写一条描述性消息，总结刷新内容（例如，“更新 3 个过时的学习内容，合并 2 个重叠的文档，删除 1 个过时的文档”）。它的主体以及拉取请求主体（如果有）列出了每个基于价值的剪切或删除以及每个标准的更改及其引用的证据，因为审查者和后来的读者依赖于该线索。暂存 `CODING_STANDARDS.md` 此刷新已更改。
 
-Non-interactive defaults: on the repo's default branch (main, master, or whatever the remote designates) → create a branch named for what was refreshed (e.g., `docs/refresh-auth-learnings`), commit, attempt a PR (if PR creation fails, report the branch name); on a feature branch → separate commit on that branch; git failures → put the recommended commands in the report and continue.
+非交互式默认值：在存储库的默认分支（主分支、主分支或远程指定的任何分支）上→创建一个以刷新内容命名的分支（例如，`docs/refresh-auth-learnings`），提交，尝试PR（如果PR创建失败，报告分支名称）；在功能分支上 → 在该分支上单独提交； git 失败 → 将推荐的命令放入报告中并继续。
 
-Interactive: ask (per Blocking questions), with the recommended option first. On the default branch: branch+commit+PR (recommended; specific branch name) / commit directly to the current branch / don't commit. On a clean feature branch: commit to it (recommended) / separate branch / don't commit. On a dirty feature branch: selective-stage and commit only refresh changes / don't commit.
+互动：询问（根据阻止问题），首先提出推荐的选项。在默认分支上：branch+commit+PR（推荐；具体分支名称）/直接提交到当前分支/不提交。在干净的功能分支上：提交（推荐）/单独的分支/不提交。在脏功能分支上：选择性阶段并提交仅刷新更改/不提交。

@@ -1,18 +1,18 @@
-# Check-in
+# 报到
 
-The check-in is the active-recall section of the explainer: a `Check yourself` section at the end of the artifact where the reader answers first and reads the answers after. It is static text in the document. The run asks the reader nothing about it — no offer, no prediction turn, no exercise posed in chat — so a user who switches away never comes back to a waiting question.
+签入是解释器的主动回忆部分：产物末尾的 `Check yourself` 部分，读者首先回答，然后阅读答案。它是文档中的静态文本。运行过程不会向读者询问任何信息——没有报价、没有预测回合、没有在聊天中提出练习——因此，离开的用户永远不会再回到等待的问题。
 
-## Include or omit
+## 包含或省略
 
-The request wins in both directions: an explicit ask for a check-in, quiz, or exercises includes the section whatever the material; an explicit "no quiz" or equivalent omits it. When the request is silent, include the section when retention is the point — a hard or unfamiliar concept, a gnarly or consequential diff, a dense recap window with decisions worth recalling later — and omit it when comprehension is the point and retention is incidental: a routine recap before a meeting, a small mechanical diff, a topic the user signals they only need to skim. When the material and the request disagree, the request wins. Do not announce a justification either way.
+这个请求是双向的：明确要求签到、测验或练习，包括该部分，无论材料是什么；明确的“无测验”或同等内容将其省略。当请求保持沉默时，请包含以记忆为重点的部分——一个困难或不熟悉的概念、粗糙或后果性的差异、一个包含值得稍后回忆的决定的密集回顾窗口——而当以理解为重点而记忆只是偶然时则省略它：会议前的例行回顾、小的机械差异、用户表示他们只需略读的主题。当材料和请求不一致时，请求获胜。无论哪种方式都不要宣布理由。
 
-The reader does not change the decision. An artifact rendered for another reader gets the same test, because the section exercises whoever reads the document.
+读者不会改变决定。为其他读者呈现的产物会得到相同的测试，因为该部分练习了阅读该文档的任何人。
 
-## Shape
+## 形状
 
-- One section headed `Check yourself`, placed last: after the explanation and before the HTML footer.
-- Questions first, then their answers under an `Answers` label, so a reader can attempt every question before any answer is in view. Choose the number according to what is worth practicing.
-- Each answer states what a correct response contains and names the gap a plausible wrong answer exposes. One correction per question — do not lecture past the gap.
-- Static only: no forms, scripts, click handlers, or collapsing widgets. The label and spacing set the answers apart; nothing hides them.
+- 标题为 `Check yourself` 的部分位于最后：解释之后、HTML 页脚之前。
+- 首先是问题，然后是 `Answers` 标签下的答案，因此读者可以在看到任何答案之前尝试每个问题。根据值得练习的内容选择数字。
+- 每个答案都说明了正确答案包含的内容，并指出了可能的错误答案所暴露的差距。每个问题一次更正——不要讲过间隙。
+- 仅静态：无表单、脚本、点击处理程序或折叠小部件。标签和间距将答案分开；没有什么可以隐藏他们。
 
-Questions should test applying the mechanism or recognizing its limits rather than recalling the explanation's wording.
+问题应该测试该机制的应用或认识其局限性，而不是回忆解释的措辞。

@@ -1,0 +1,5 @@
+interface:
+  display_name: "带宽帮助"
+  short_description: "查找或移交给下一个安装的 BW 工作流程"
+policy:
+  allow_implicit_invocation: false

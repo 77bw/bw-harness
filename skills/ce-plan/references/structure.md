@@ -1,224 +1,224 @@
-# Structure and Write the Plan
+# 构建并编写计划
 
-Phase 2 through 4 of `ce-plan`. Read this before building the planning-question list.
+`ce-plan` 的第 2 至第 4 阶段。在构建规划问题列表之前请阅读本文。
 
-### Phase 2: Resolve Planning Questions
+### 第 2 阶段：解决规划问题
 
-Build a planning question list from:
-- Deferred questions in the origin document
-- Gaps discovered in repo or external research
-- Technical decisions required to produce a useful plan
+根据以下内容构建规划问题列表：
+- 原始文档中推迟的问题
+- 回购或外部研究中发现的差距
+- 制定有用计划所需的技术决策
 
-For each question, decide whether it should be:
-- **Resolved during planning** - the answer is knowable from repo context, documentation, or user choice
-- **Deferred to implementation** - the answer depends on code changes, runtime behavior, or execution-time discovery
+对于每个问题，决定是否应该：
+- **在规划期间解决** - 答案可以从存储库上下文、文档或用户选择中得知
+- **推迟到实现** - 答案取决于代码更改、运行时行为或执行时发现
 
-Ask the user only when the answer materially affects architecture, scope, sequencing, or risk and cannot be responsibly inferred. Use the platform's blocking question tool when available (see Interaction Method).
+仅当答案对架构、范围、排序或风险产生重大影响并且无法负责任地推断时才询问用户。如果可用，请使用平台的屏蔽问题工具（请参阅交互方法）。
 
-**Never re-ask a session-settled decision.** A decision carrying the `session-settled:` label, or classified settled per `references/settled-decisions.md`, is answered input, not a planning question. An unexamined directive receives exactly one challenge here, backed by research evidence, and the outcome lands in the plan as a labeled or unlabeled Key Technical Decision — the plan is the record of that challenge; later pipeline stages do not re-challenge. A challenge raised in pipeline mode that the user never answered comes back only through the calling pipeline's residual channel.
+**永远不要重新询问会话解决的决策。**带有 `session-settled:` 标签或根据 `references/settled-decisions.md` 分类解决的决策是回答输入，而不是规划问题。未经审查的指令在这里收到了一个由研究证据支持的挑战，并且结果作为标记或未标记的关键技术决策出现在计划中——该计划是该挑战的记录；后面的管道阶段不会重新挑战。在管道模式下提出的用户从未回答的挑战只能通过调用管道的剩余通道返回。
 
-**Scaffold questions on unfamiliar territory.** When the user has signaled they lack working knowledge of the area a question lives in — an explicit "I don't know X", or earlier answers showing they *cannot evaluate* options rather than merely haven't decided — do not ask the question naked. Present it as a taught decision: the realistic options, one clause each on the trade-off that matters for this plan, and a recommended default. If the user still cannot evaluate, record the default as an explicit assumption in the plan instead of extracting a guess. In pipeline mode (LFG, any `disable-model-invocation` context) this scaffolding never presents anything — resolve to the recommended default and record it as an explicit assumption in the plan.
+**在不熟悉的领域提出问题。**当用户表示他们缺乏问题所在领域的工作知识时——明确的“我不知道X”，或者早期的答案表明他们“无法评估”选项而不是仅仅还没有决定——不要赤裸裸地提出问题。将其呈现为一项教学决策：现实的选项、每个关于对该计划重要的权衡的条款，以及建议的默认值。如果用户仍然无法评估，请将默认值记录为计划中的明确假设，而不是提取猜测。在管道模式（LFG，任何`disable-model-invocation`上下文）中，这个脚手架永远不会呈现任何内容——解析为推荐的默认值并将其记录为计划中的明确假设。
 
-**Do not** run tests, build the app, or probe runtime behavior in this phase. The goal is a strong plan, not partial execution.
+**不要**在此阶段运行测试、构建应用程序或探测运行时行为。目标是一个强有力的计划，而不是部分执行。
 
-### Phase 3: Structure the Plan
+### 第三阶段：构建计划
 
-#### 3.1 Title and File Naming
+#### 3.1 标题和文件命名
 
-- Draft a clear, searchable title using conventional format such as `feat: Add user authentication` or `fix: Prevent checkout double-submit`
-- Determine the plan type: `feat`, `fix`, or `refactor`
-- Build the filename following the repository convention: `<root>/plans/YYYY-MM-DD-HHMM-<type>-<descriptive-name>-plan.md`
-  - Create `<root>/plans/` if it does not exist
-  - Take `YYYY-MM-DD-HHMM` from the local wall-clock time at write, so the prefix matches the `date:` frontmatter and the day the user experienced; do not scan for or allocate a daily sequence number
-  - Reserve the candidate path atomically with exclusive creation; if it already exists, append the smallest available numeric collision suffix (`-2`, `-3`, …) before the extension rather than overwriting it
-  - Keep the descriptive name concise (3-5 words) and kebab-cased
-  - Examples: `2026-01-15-0915-feat-user-authentication-flow-plan.md`, `2026-02-03-1642-fix-checkout-race-condition-plan.md`
-  - Avoid: daily sequence numbers, vague names like "new-feature", and invalid characters (colons, spaces)
+- 使用传统格式（例如`feat: Add user authentication`或`fix: Prevent checkout double-submit`）起草清晰、可搜索的标题
+- 确定计划类型：`feat`、`fix` 或 `refactor`
+- 按照存储库约定构建文件名：`<root>/plans/YYYY-MM-DD-HHMM-<type>-<descriptive-name>-plan.md`
+  - 如果`<root>/plans/`不存在则创建
+  - 从写入时的本地挂钟时间获取 `YYYY-MM-DD-HHMM`，因此前缀与 `date:` frontmatter 和用户经历的日期相匹配；不扫描或分配每日序列号
+  - 通过独占创建以原子方式保留候选路径；如果它已经存在，则在扩展名之前附加最小的可用数字冲突后缀（`-2`，`-3`，...），而不是覆盖它
+  - 保持描述性名称简洁（3-5 个单词）并采用短横线格式
+  - 示例：`2026-01-15-0915-feat-user-authentication-flow-plan.md`、`2026-02-03-1642-fix-checkout-race-condition-plan.md`
+  - 避免：每日序列号、“新功能”等模糊名称以及无效字符（冒号、空格）
 
-#### 3.2 Stakeholder and Impact Awareness
+#### 3.2 利益相关者和影响意识
 
-For **Standard** or **Deep** plans, briefly consider who is affected by this change — end users, developers, operations, other teams — and how that should shape the plan. For cross-cutting work, note affected parties in the System-Wide Impact section.
+对于**标准**或**深度**计划，请简要考虑谁会受到此更改的影响 - 最终用户、开发人员、运营、其他团队 - 以及应如何制定计划。对于跨领域工作，请在“全系统影响”部分注明受影响的各方。
 
-#### 3.3 Break Work into Implementation Units
+#### 3.3 将工作分解为实施单元
 
-Start from how the result will be used or run: who calls it, runs it, or depends on it, what they see when it works, and who finds out when it fails. When nobody would, making the failure visible is part of that usage, not an extra. Units exist to deliver that usage and to keep existing contracts working. A mechanism the request did not ask for enters a unit only by passing 3.8.
+从如何使用或运行结果开始：谁调用它、运行它或依赖它，当它工作时他们看到什么，以及当它失败时谁发现。当没有人愿意时，使故障可见是该用法的一部分，而不是额外的。单位的存在是为了提供这种使用并保持现有合同的运行。请求未要求的机制仅通过传递 3.8 进入一个单元。
 
-Break the work into logical implementation units. Each unit should represent one meaningful change that an implementer could typically land as an atomic commit.
+将工作分解为逻辑实施单元。每个单元应该代表一个有意义的更改，实施者通常可以将其作为原子提交来实现。
 
-Good units are:
-- Focused on one component, behavior, or integration boundary
-- Usually touching a small cluster of related files
-- Ordered by dependency
-- Concrete enough for execution without pre-writing code
+好的单位有：
+- 专注于一个组件、行为或集成边界
+- 通常接触一小群相关文件
+- 按依赖关系排序
+- 足够具体，无需预先编写代码即可执行
 
-Avoid:
-- 2-5 minute micro-steps
-- Units that span multiple unrelated concerns
-- Units that are so vague an implementer still has to invent the plan
+避免：
+- 2-5 分钟微步
+- 跨越多个不相关问题的单元
+- 单位如此模糊，实施者仍然需要发明计划
 
-Each unit carries a stable plan-local **U-ID** assigned in Phase 3.5 (`U1`, `U2`, …). U-IDs survive reordering, splitting, and deletion: new units take the next unused number, gaps are fine, and existing IDs are never renumbered. This lets `ce-work` reference units unambiguously across plan edits.
+每个单元都带有在第 3.5 阶段分配的稳定计划本地 **U-ID**（`U1`、`U2`、...）。 U-ID 在重新排序、拆分和删除后仍然存在：新单元采用下一个未使用的编号，间隙很好，并且现有 ID 永远不会重新编号。这使得 `ce-work` 可以在计划编辑中明确参考单位。
 
-**Delivery shape.** Decide whether the work ships as one pull request or several, and state it in the Goal Capsule's execution profile. One PR is the default. Each extra PR costs another round of CI and review, another rebase, and often a wait while the earlier PR merges. Split only where the boundary buys something worth that cost:
+**交付形式。** 决定工作是作为一个拉取请求还是多个拉取请求来交付，并在 Goal Capsule 的执行配置文件中注明。默认值是 1 PR。每个额外的 PR 都会花费另一轮 CI 和审查、另一次变基，并且通常需要等待较早的 PR 合并。仅在边界购买值得该成本的东西时进行分割：
 
-- the project's instructions or configuration require a part to ship as its own PR or to be approved by an approver the rest does not need, such as a code-owner approver for one directory or a rule that migrations land alone. A practice the project does not state does not count;
-- the project's instructions or configuration require a person to review each PR, and one PR would be too large for that person to review well. The requirement must be stated, but a size limit need not be: judge the size by what one careful reviewer can read well in one sitting. Agent review reads the same total diff however it is split, so when no person must review, size does not justify a boundary;
-- a part must reach production before the rest is ready, such as an urgent fix inside larger work;
-- a later part cannot merge until an earlier part is deployed, has migrated production data, or has run in production for a set time.
+- 项目的指令或配置要求一部分作为自己的 PR 发布，或者由其余部分不需要的批准者批准，例如一个目录的代码所有者批准者或迁移单独登陆的规则。项目未说明的实践不算数；
+- 项目的说明或配置要求一个人检查每个 PR，而一个 PR 对于该人来说太大而无法很好地检查。必须说明要求，但不必限制大小：根据一位细心的审查者可以一次性阅读的内容来判断大小。代理审查会读取相同的总差异，但它是分开的，因此当没有人必须审查时，大小并不能证明边界的合理性；
+- 一部分必须在其余部分准备好之前投入生产，例如大型工作中的紧急修复；
+- 在部署较早的部分、迁移生产数据或在生产中运行一段时间之前，后面的部分无法合并。
 
-Parts that carry different risk, that are separate units, or that must merge in a certain order are not reasons to split on their own. Neither is being able to roll a part back separately: an agent can fix forward or revert and re-land a combined PR at little cost, and splitting for rollback alone multiplies PRs. A part that waits on a person's decision, sign-off, or authorization is not a reason either: record that wait in Open Questions as a gate on merging, and keep the work in one PR. A part blocked by something that will not clear during this work, such as a vendor or a credential nobody has yet, is not ready to build; list it under `### Deferred to Follow-Up Work` instead of giving it its own PR. Work that only checks or measures the change, such as a test harness or a benchmark, ships in the PR whose change it checks, unless it is a deliverable in its own right. A check that can run only after that change is in production cannot finish inside that PR; it ships with the work that waits on its result. If later units depend on a result from earlier units, such as a measurement, put the earlier units first in the same PR. Do not give them their own PR for that reason.
+具有不同风险的部分、独立的单元或必须按一定顺序合并的部分并不是单独拆分的理由。两者都无法单独回滚部分：代理可以以很小的成本修复前向或恢复并重新着陆组合的PR，而单独回滚的分割会成倍增加PRs。等待一个人的决定、签字或授权的部分也不是原因：在开放问题中记录等待作为合并的大门，并将工作保留在一个PR中。被在此工作期间无法清除的事物（例如供应商或无人知晓的凭证）阻塞的部分尚未准备好构建；将其列在 `### Deferred to Follow-Up Work` 下，而不是给它自己的 PR。仅检查或测量变更的工作（例如测试工具或基准）在 PR 中发布，它会检查其变更，除非它本身就是可交付成果。仅在更改投入生产后才能运行的检查无法在 PR 内完成；它附带了等待其结果的工作。如果后面的单位依赖于早期单位的结果（例如测量），请将早期单位放在同一 PR 中。因此，不要给他们自己的 PR。
 
-When it ships as several, each PR is a group of whole units: group the units in Implementation Units under one heading per PR, and follow each heading with a `Waits on:` line. Under each heading except the first, add one sentence naming which reason above keeps that group a separate PR. If no reason applies, merge the group into a group it waits on, or into the first group if it waits on nothing. Do not make work wait on a gate it does not need: a group held for an approver or a production step that the other groups do not need goes after them, unless another group needs what it produces. A wait that is merge order only is allowed in a valid split; it just cannot be the split's reason. The `Waits on:` line names each PR the group waits on and the kind of wait: merge order only, or needed before this group can start because its build or verification uses what that PR's merge or deployment produces. Executors build groups ahead of merges, so a wait marked merge order lets the waiting group be built before the earlier PR merges. Units keep their `U<N>.` headings inside the group. Do not add a second grouping, such as a PR table, that divides the units differently. The grouping must meet three conditions:
+当以多个形式交付时，每个 PR 是一组完整的单元：将实施单元中的单元分组到每个 PR 的一个标题下，并在每个标题后面添加 `Waits on:` 线。在除第一个标题之外的每个标题下，添加一个句子命名，上述原因使该组保持单独的PR。如果没有原因，则将该组合并到它等待的组中，或者如果它不等待任何内容，则合并到第一个组中。不要让工作在它不需要的门上等待：等待批准者的小组或其他小组不需要的生产步骤会在他们之后进行，除非另一个小组需要它生产的东西。在有效的分割中只允许等待合并顺序；这不可能是分裂的原因。 `Waits on:` 行命名了组等待的每个 PR 以及等待类型：仅合并顺序，或者在该组开始之前需要，因为其构建或验证使用 PR 的合并或部署生成的内容。执行器在合并之前构建组，因此等待标记的合并顺序可以让等待组在较早的 PR 合并之前构建。单元将其 `U<N>.` 标题保留在组内。不要添加以不同方式划分单位的第二个分组，例如 PR 表。分组必须满足三个条件：
 
-- **One creator per shared artifact.** A type, table, migration, route, or config key that several units use is created by exactly one unit. Every unit that uses it is in the creator's PR or in a PR that waits on the creator's PR.
-- **Safe after every merge.** Merging the PRs in dependency order leaves the default branch shippable and safe after each merge. No capability is reachable on the default branch, by users or agents, before the guard that limits it, such as a permission check, a spending limit, or an audit record. This holds when the guard ships in a later PR and when it is deferred out of scope: until the guard exists, restrict the capability to the callers that guard would not limit. Infrastructure that only deferred work uses waits for that work instead of shipping inside the Definition of Done. The same holds after each deploy: when a PR is unsafe to merge until an earlier PR is deployed, such as a separately deployed service that calls a change the earlier PR makes live, its `Waits on:` line names that deployment. A deploy dependency gates the merge, not the start, unless the group's build or verification needs the deployed state.
-- **Parallel PRs do not conflict.** PRs that do not wait on each other can merge in either order without a merge conflict.
+- **每个共享产物有一个创建者。** 多个单元使用的类型、表、迁移、路由或配置密钥均由一个单元创建。使用它的每个单元都在创建者的 PR 中或在等待创建者的 PR 的 PR 中。
+- **每次合并后都是安全的。** 按依赖顺序合并 PRs 会使默认分支在每次合并后可交付且安全。在限制它的防护之前，用户或代理无法在默认分支上访问任何功能，例如权限检查、支出限制或审计记录。当守卫在稍后的 PR 中发布以及它被推迟到范围之外时，这一点成立：直到守卫存在，将能力限制在守卫不会限制的调用者上。仅延迟工作使用的基础设施会等待该工作，而不是在“完成的定义”内传送。每次部署后也是如此：当部署较早的PR之前PR无法安全合并时，例如调用较早的PR启用的更改的单独部署的服务，其`Waits on:`行会命名该部署。部署依赖关系控制合并，而不是开始，除非组的构建或验证需要部署状态。
+- **并行 PRs 不冲突。** 不互相等待的 PRs 可以按任一顺序合并，而不会发生合并冲突。
 
-How the project branches, stacks PRs, numbers migrations, or gates merges comes from its own instructions. Cite those instead of restating them in the plan.
+项目如何分支、堆栈PRs、数字迁移或门合并都来自其自己的指令。引用这些内容而不是在计划中重述它们。
 
-#### 3.4 High-Level Technical Design
+#### 3.4 高层技术设计
 
-When the plan's technical approach has shape that prose alone doesn't carry well — architecture across components, sequencing across processes, state machines, branching gates, lifecycles, quantitative comparisons — include a High-Level Technical Design section that conveys the shape. The exact form (component diagram, sequence, swim lane, flowchart, state machine, decision matrix, pseudo-code grammar, bar chart for sizing concerns) is the agent's call per artifact — pick what makes the content land fastest for the reader.
+当计划的技术方法已经成型时，仅靠散文无法很好地表达——跨组件的架构、跨流程的排序、状态机、分支门、生命周期、定量比较——包括传达形状的高级技术设计部分。确切的形式（组件图、序列、泳道、流程图、状态机、决策矩阵、伪代码语法、用于大小问题的条形图）是代理对每个产物的调用 - 选择使内容最快地到达读者手中的内容。
 
-See `references/plan-sections.md` for the section catalog including HTD's "include when material" criterion. See the format-rendering reference loaded at Phase 0.0 (Resolve Output Mode) for how visualizations render in the target format (mermaid in markdown, inline SVG in HTML — with the layout-legibility principles around halo, contrast, and label placement when in HTML).
+请参阅`references/plan-sections.md`了解包含 HTD 的“材料时包含”标准的剖面目录。请参阅在阶段 0.0（解析输出模式）加载的格式渲染参考，了解可视化如何以目标格式渲染（markdown 中的美人鱼、HTML 中的内联 SVG — 以及 HTML 中围绕光晕、对比度和标签放置的布局易读性原则）。
 
-When the plan's approach is a one-paragraph pattern application that prose conveys directly, skip the section. Include HTD only when its content genuinely benefits from visualization.
+当计划的方法是散文直接传达的单段落模式应用时，请跳过该部分。仅当其内容真正受益于可视化时才包含 HTD。
 
-Plan diagrams render authoritative content alongside the prose — they are not "directional sketches." Do not add hedging captions like *"directional guidance for review, not implementation specification"* to plan diagrams; the prose-is-authoritative rule already governs disagreement, and the hedging weakens the diagram unnecessarily.
+平面图与散文一起呈现权威内容——它们不是“方向草图”。不要在计划图表中添加诸如*“审查的方向性指导，而不是实施规范”*之类的对冲标题；散文即权威的规则已经控制了分歧，而对冲则不必要地削弱了图表。
 
-#### 3.4b Output Structure (Optional)
+#### 3.4b 输出结构（可选）
 
-For greenfield plans that create a new directory structure (new plugin, service, package, or module), include an `## Output Structure` section with a file tree showing the expected layout. This gives reviewers the overall shape before diving into per-unit details.
+对于创建新目录结构（新插件、服务、包或模块）的绿地计划，请包含一个 `## Output Structure` 部分，其中包含显示预期布局的文件树。这可以让审查者在深入研究每个单元的细节之前了解整体形状。
 
-**When to include it:**
-- The plan creates 3+ new files in a new directory hierarchy
-- The directory layout itself is a meaningful design decision
+**何时包含它：**
+- 该计划在新的目录层次结构中创建 3 个以上的新文件
+- 目录布局本身是一个有意义的设计决策
 
-**When to skip it:**
-- The plan only modifies existing files
-- The plan creates 1-2 files in an existing directory — the per-unit file lists are sufficient
+**何时跳过它：**
+- 该计划仅修改现有文件
+- 该计划在现有目录中创建 1-2 个文件 — 每个单元的文件列表就足够了
 
-The tree is a scope declaration showing the expected output shape. It is not a constraint — the implementer may adjust the structure if implementation reveals a better layout. The per-unit `**Files:**` sections remain authoritative for what each unit creates or modifies.
+该树是显示预期输出形状的范围声明。这不是一个限制——如果实现显示出更好的布局，实现者可以调整结构。每个单元的 `**Files:**` 部分对于每个单元创建或修改的内容仍然具有权威性。
 
-#### 3.5 Define Each Implementation Unit
+#### 3.5 定义各个实施单元
 
-Each unit is a level-3 heading carrying a stable U-ID prefix matching the format used for R/A/F/AE in requirements docs: `### U1. [Name]`. Number sequentially within the plan starting at U1. Do not render units as bulleted list items or prefix them with `- [ ]` / `- [x]` checkbox markers. List-based unit titles fragment in every standard renderer because the per-unit fields (`**Goal:**`, `**Files:**`, `**Approach:**`, etc.) are written flush-left, which terminates CommonMark list continuation and detaches the fields from the unit they describe. Headings render correctly everywhere, are the right semantic match for sections containing multi-block content, and give each unit an anchor link. The plan is a decision artifact; execution progress is derived from git by `ce-work` rather than stored in the plan body.
+每个单元都是一个 3 级标题，带有稳定的 U-ID 前缀，与需求文档中用于 R/A/F/AE 的格式相匹配：`### U1. [Name]`。计划内从U1 开始按顺序编号。不要将单位渲染为项目符号列表项或使用 `- [ ]` / `- [x]` 复选框标记作为前缀。每个标准渲染器中都会出现基于列表的单元标题片段，因为每个单元字段（`**Goal:**`、`**Files:**`、`**Approach:**` 等）都是左对齐写入的，这会终止 CommonMark 列表延续并将字段与它们所描述的单元分离。标题在任何地方都能正确呈现，是包含多块内容的部分的正确语义匹配，并为每个单元提供一个锚链接。该计划是一个决策产物；执行进度是通过 `ce-work` 从 git 导出的，而不是存储在计划主体中。
 
-**Stability rule.** Once assigned, a U-ID is never renumbered. Reordering units leaves their IDs in place (e.g., U1, U3, U5 in their new order is correct; renumbering to U1, U2, U3 is not). Splitting a unit keeps the original U-ID on the original concept and assigns the next unused number to the new unit. Deletion leaves a gap; gaps are fine. This rule matters most during deepening (Phase 5.3), where accidental renumbering is most likely.
+**稳定性规则。** 一旦分配，U-ID 就不会重新编号。重新排序单元会保留其 ID（例如，新顺序中的 U1、U3、U5 是正确的；重新编号为 U1、U2、U3 则不正确）。拆分单元会保留原始概念上的原始 U-ID，并将下一个未使用的编号分配给新单元。删除留下空白；间隙很好。该规则在深化过程中最为重要（阶段 5.3），此时最有可能发生意外重新编号。
 
-For each unit, include:
-- **Goal** - what this unit accomplishes
-- **Requirements** - which requirements or success criteria it advances (cite R-IDs, and A/F/AE IDs when origin supplies them)
-- **Dependencies** - what must exist first (cite by U-ID, e.g., "U1, U3")
-- **Files** - repo-relative file paths to create, modify, or test (never absolute paths)
-- **Approach** - key decisions, data flow, component boundaries, or integration notes. **Unit-local content only:** cite the governing R-IDs / KTD-IDs for any product or protocol rule rather than restating it. When the content enumerates sequenced steps or per-file changes, write it as a short ordered list under the field label, one step per item — a sentence chaining more than two semicolons is a list wearing a paragraph
-- **Execution note** - optional natural-language direction, only when the unit benefits from non-default sequencing or proof. Do not treat this as an enum; phrase the evidence the implementer should seek.
-- **Technical design** - optional pseudo-code or diagram when the unit's approach is non-obvious and prose alone would leave it ambiguous. Frame explicitly as directional guidance, not implementation specification
-- **Patterns to follow** - existing code or conventions to mirror
-- **Test scenarios** - enumerate the specific test cases the implementer should write, one scenario per list item (never a semicolon-chained paragraph), right-sized to the unit's complexity and risk. Scenarios test the behavior the unit builds; a category is not a list of failures to add handling for. Include scenarios from each category below that applies to what this unit builds. A simple config change may need one scenario; a payment flow may need a dozen. The quality signal is specificity — each scenario should name the input, action, and expected outcome so the implementer doesn't have to invent coverage. For units with no behavioral change (pure config, scaffolding, styling), use `Test expectation: none -- [reason]` instead of leaving the field blank. **AE-link convention:** when a test scenario directly enforces an origin Acceptance Example, prefix it with `Covers AE<N>.` (or `Covers F<N> / AE<N>.`). This is sparse-by-design — most test scenarios are finer-grained than AEs and do not link. Do not force AE links onto tests that only cover lower-level implementation details.
-  - **Happy path behaviors** - core functionality with expected inputs and outputs
-  - **Edge cases** (inputs the unit really receives) - boundary values, empty inputs, nil/null states
-  - **Error and failure paths** (failure handling the unit builds) - how the unit behaves when that handling triggers
-  - **Integration scenarios** (when the unit crosses layers) - behaviors that mocks alone will not prove, e.g., "creating X triggers callback Y which persists Z". Include these for any unit touching callbacks, middleware, or multi-layer interactions
-- **Verification** - how an implementer should know the unit is complete, expressed as outcomes rather than shell command scripts
+对于每个单元，包括：
+- **目标** - 该单位完成的任务
+- **要求** - 它提出了哪些要求或成功标准（引用 R-ID 和 A/F/AE ID（当来源提供时））
+- **依赖项** - 首先必须存在的项（通过 U-ID 引用，例如“U1、U3”）
+- **文件** - 要创建、修改或测试的存储库相对文件路径（绝不是绝对路径）
+- **方法** - 关键决策、数据流、组件边界或集成说明。 **仅限单位本地内容：** 引用任何产品或协议规则的管理 R-ID / KTD-ID，而不是重述。当内容枚举顺序步骤或每个文件的更改时，将其写为字段标签下的简短有序列表，每个项目一个步骤 - 链接两个以上分号的句子是带有段落的列表
+- **执行注释** - 可选的自然语言指导，仅当单元受益于非默认排序或证明时。不要将其视为枚举；表述实施者应寻求的证据。
+- **技术设计** - 当单元的方法不明显并且单独的散文会使它变得模糊时，可选的伪代码或图表。明确框架作为方向性指导，而不是实施规范
+- **要遵循的模式** - 要镜像的现有代码或约定
+- **测试场景** - 枚举实施者应编写的特定测试用例，每个列表项一个场景（绝不是分号链接的段落），大小适合单元的复杂性和风险。场景测试单元构建的行为；类别不是要添加处理的故障列表。包括以下每个类别中适用于本单元构建内容的场景。一个简单的配置更改可能需要一种场景；一个支付流程可能需要十几个。质量信号是特异性的——每个场景都应该指定输入、操作和预期结果，这样实施者就不必发明覆盖范围。对于没有行为更改的单元（纯配置、脚手架、样式），请使用 `Test expectation: none -- [reason]` 而不是将该字段留空。 **AE-link 约定：** 当测试场景直接强制执行原始验收示例时，请在其前面添加 `Covers AE<N>.` （或 `Covers F<N> / AE<N>.`）。这是稀疏设计——大多数测试场景比 AE 更细粒度并且不链接。不要强制将 AE 链接到仅涵盖较低级别实现细节的测试上。
+  - **快乐路径行为** - 具有预期输入和输出的核心功能
+  - **边缘情况**（单元实际接收的输入）-边界值、空输入、nil/null状态
+  - **错误和失败路径**（处理单元构建失败）-处理触发时单元的行为方式
+  - **集成场景**（当单元跨层时） - 单独模拟的行为无法证明，例如“创建 X 触发回调 Y 并持久保留 Z”。包括任何单元接触回调、中间件或多层交互
+- **验证** - 实施者应该如何知道单元是完整的，表示为结果而不是 shell 命令脚本
 
-Every feature-bearing unit should include the test file path in `**Files:**`. When the plan names where a test should live, say in one line what that seam catches and what it misses.
+每个功能承载单元都应在`**Files:**`中包含测试文件路径。当计划指定测试应该在哪里进行时，请用一行说出该接缝捕捉到了什么以及错过了什么。
 
-Use `Execution note` sparingly. Good uses include:
+谨慎使用`Execution note`。好的用途包括：
 - `Execution note: Start with a failing integration test for the request/response contract.`
 - `Execution note: Add characterization coverage before modifying this legacy parser.`
 - `Execution note: Implement new domain behavior test-first.`
 - `Execution note: This is mostly packaging/config; prefer install/runtime smoke verification over unit coverage.`
 
-Do not expand units into literal `RED/GREEN/REFACTOR` substeps.
+不要将单位扩展为字面的 `RED/GREEN/REFACTOR` 子步骤。
 
-#### 3.6 Keep Planning-Time and Implementation-Time Unknowns Separate
+#### 3.6 将计划时间和实施时间的未知因素分开
 
-If something is important but not knowable yet, record it explicitly under deferred implementation notes rather than pretending to resolve it in the plan.
+如果某件事很重要但尚不可知，请将其明确记录在推迟的实施说明中，而不是假装在计划中解决它。
 
-Examples:
-- Exact method or helper names
-- Final SQL or query details after touching real code
-- Runtime behavior that depends on seeing actual test failures
-- Refactors that may become unnecessary once implementation starts
+示例：
+- 确切的方法或助手名称
+- 接触真实代码后的最终 SQL 或查询详细信息
+- 取决于看到实际测试失败的运行时行为
+- 一旦实施开始，重构可能变得不必要
 
-#### 3.7 Anti-Expansion: Tangential Cleanup and Scope Creep Go to Deferred
+#### 3.7 反扩展：切向清理和范围蠕变转到延迟
 
-Distinct from 3.6 (which is about *unknowns* at plan time): 3.7 is about *known but tangential* work that the agent notices while planning but that falls outside the user's confirmed scope. When research surfaces an adjacent refactor, a "while we're here" cleanup, or a scope-adjacent feature nobody asked for ("we could also add a CSV export"), put it in the existing `### Deferred to Follow-Up Work` subsection in Scope Boundaries (Phase 4.2 Core Plan Template), not into active Implementation Units. An unrequested mechanism around the requested work, such as a guard, retry, limit, or recovery path, is not tangential work: 3.8 decides whether it is built or recorded as a non-goal.
+与 3.6（关于计划时的“未知”）不同：3.7 是关于代理在计划时注意到但不属于用户确认范围的“已知但无关”的工作。当研究发现相邻的重构、“当我们在这里时”清理或无人要求的范围相邻功能（“我们还可以添加 CSV 导出”）时，请将其放入范围边界（阶段 4.2 核心计划模板）中现有的 `### Deferred to Follow-Up Work` 小节中，而不是放入活动的实施单元中。围绕所请求工作的未请求机制，例如保护、重试、限制或恢复路径，不是无关紧要的工作：3.8 决定是否将其构建或记录为非目标。
 
-This reinforces the synthesis discipline established at Phase 0.7 / Phase 5.1.5 — the user's confirmed scope is what the active plan executes; everything else is deferred. Does NOT impose architectural bias on extend-vs-invent decisions within confirmed scope — that judgment stays with the agent (and is shown to the user in the Phase 5.1.5 synthesis when material). The user's explicit ask overrides this default — if the user explicitly requested a refactor, it's in-scope, not deferred.
+这强化了在阶段 0.7/阶段 5.1.5 建立的综合规则——用户确认的范围是活动计划执行的范围；其他一切都被推迟。不会对已确认范围内的扩展与发明决策强加架构偏见——该判断由代理保留（并在材料时在阶段 5.1.5 综合中向用户显示）。用户的显式询问会覆盖此默认值 - 如果用户显式请求重构，则它在范围内，而不是推迟。
 
-#### 3.8 Judge Each Concern; Record What You Chose Not to Build
+#### 3.8 判断每个问题；记录您选择不构建的内容
 
-Risk has no natural limit: any design has one more way to fail. A concern raised by you, by research, by a specialist agent, or by a reviewer is a claim to judge, not an item to build. Build a mechanism the request did not ask for, such as a guard, retry, recovery path, mode, option, abstraction, or extra operational procedure, only when an existing contract requires it or one of these holds:
+风险没有自然限制：任何设计都有一种失败的可能。您、通过研究、专家代理或审查者提出的问题是一种判断主张，而不是一个需要构建的项目。仅当现有合同需要它或其中之一时，才构建请求未要求的机制，例如保护、重试、恢复路径、模式、选项、抽象或额外的操作程序：
 
-- **Leaving it out causes harm nobody would catch in time.** The failure can actually happen here (trace it, do not assume it), and the way the result is used would not surface it quickly to someone who can fix it cheaply. Something that notices the failure counts; an instruction asking a person to avoid it, or to clean up by hand afterward, does not.
-- **Adding it later would be expensive,** because it concerns stored data or its format, a public or shared interface, money, or security.
+- **将其排除在外会造成没人能及时发现的伤害。**故障实际上可能发生在这里（追踪它，不要假设它），并且使用结果的方式不会很快向可以廉价修复它的人显现出来。注意到失败的事情很重要；要求人们避免这样做或事后用手清理的指示则不然。
+- **稍后添加它会很昂贵，**因为它涉及存储的数据或其格式、公共或共享接口、金钱或安全性。
 
-A mechanism that passes gets the smallest form that closes its gap. Anything built around it, such as a second guard, a recovery mode, or a finer classification of outcomes, is its own addition and faces the same test.
+通过的机制会得到缩小其差距的最小形式。围绕它构建的任何东西，例如第二个后卫、恢复模式或更精细的结果分类，都是其自身的补充，并面临相同的考验。
 
-This test sizes what the request did not ask for; it never trims what it did. A safeguard may not narrow a requested behavior by delaying, gating, capping, or skipping any part of it, and where the request's words cover a case, the plan covers it. When a needed safeguard and a requested behavior truly conflict, plan the behavior as requested and record the conflict under Open Questions for the requester.
+该测试确定了请求未要求的内容；它从不削减它所做的事情。保障措施不得通过延迟、限制、限制或跳过请求的行为的任何部分来缩小请求的行为范围，并且如果请求的措辞涵盖了某个案例，则计划将涵盖该行为。当所需的保障措施和请求的行为确实发生冲突时，请根据请求计划行为，并将冲突记录在请求者的开放问题下。
 
-A concern that fails the test is not dropped silently. List it among the non-goals in Scope Boundaries as considered and not built, with one line on why and on what evidence would change the call. It is not planned work, so it never goes under `Deferred to Follow-Up Work`. When you cannot tell whether leaving a mechanism out lets harm land before anyone catches it, or whether it keeps an existing contract or stored data working, build it.
+未能通过测试的担忧不会被默默地丢弃。将其列为范围边界中已考虑但未构建的非目标，并用一行文字说明为什么以及哪些证据会改变这一呼吁。这不是计划好的工作，所以它永远不会低于 `Deferred to Follow-Up Work`。当你无法判断留下一个机制是否会在任何人发现它之前损害土地，或者它是否使现有合同或存储的数据保持有效，那就建造它。
 
-### Phase 4: Write the Plan
+### 第四阶段：编写计划
 
-**NEVER CODE during this skill.** Research, decide, and write the plan — do not start implementation.
+**在此技能期间切勿编码。**研究、决定并编写计划 - 不要开始实施。
 
-Use one planning philosophy across all depths. Change the amount of detail, not the boundary between planning and execution.
+在所有深度上使用一种规划理念。改变细节的数量，而不是计划和执行之间的界限。
 
-#### 4.1 Plan Depth Guidance
+#### 4.1 规划深度指导
 
-**Lightweight**
-- Keep the plan compact
-- Usually 2-4 implementation units
-- Omit optional sections that add little value
+**轻的**
+- 保持计划紧凑
+- 通常有2-4个实施单位
+- 省略没有什么价值的可选部分
 
-**Standard**
-- Use the full core template, omitting optional sections (including High-Level Technical Design) that add no value for this particular work
-- Usually 3-6 implementation units
-- Include risks, deferred questions, and system-wide impact when relevant
+**标准**
+- 使用完整的核心模板，省略对此特定工作没有任何价值的可选部分（包括高级技术设计）
+- 通常有3-6个实施单位
+- 包括风险、延迟问题和相关的系统范围影响
 
-**Deep**
-- Use the full core template plus optional analysis sections where warranted
-- Usually 4-8 implementation units
-- Group units into phases when that improves clarity. When the work ships as several PRs, the groups are the PRs (3.3)
-- Include alternatives considered, documentation impacts, and deeper risk treatment when warranted
+**深的**
+- 使用完整的核心模板以及必要的可选分析部分
+- 通常有4-8个实施单位
+- 当可以提高清晰度时，将单元分为几个阶段。当作品以多个 PRs 交付时，组为 PRs (3.3)
+- 包括考虑的替代方案、记录影响以及必要时更深入的风险处理
 
-#### 4.1b Optional Deep Plan Extensions
+#### 4.1b 可选的深度计划扩展
 
-For sufficiently large, risky, or cross-cutting work, add the sections that genuinely help:
-- **Alternative Approaches Considered**
-- **Success Metrics** — operational instrumentation for the deep-plan tier: dashboards, error budgets, alert thresholds, and rollout telemetry. A threshold that *is* the product outcome (p95 latency, delivery rate, adoption) belongs to the Product Contract's `### Success Criteria` and never appears here as well; Success Metrics covers only what Success Criteria does not already state. When only one applies, it is almost always Success Criteria.
-- **Dependencies / Prerequisites**
-- **Risk Analysis & Mitigation**
-- **Phased Delivery** — rollout after merge, such as feature flags or staged enablement. The PR split lives in Implementation Units (3.3)
-- **Documentation Plan**
-- **Operational / Rollout Notes**
-- **Future Considerations** only when they materially affect current design
+对于足够大、有风险或交叉的工作，请添加真正有帮助的部分：
+- **考虑的替代方法**
+- **成功指标** — 深度计划层的操作仪表：仪表板、错误预算、警报阈值和推出遥测。 *是*产品结果（p95 延迟、交付率、采用率）的阈值属于产品合约的`### Success Criteria`，并且也永远不会出现在这里；成功指标仅涵盖成功标准尚未说明的内容。当只有一个标准适用时，它几乎总是成功标准。
+- **依赖项/先决条件**
+- **风险分析与缓解**
+- **分阶段交付** — 合并后推出，例如功能标志或分阶段启用。 PR 分裂生活在实施单元中 (3.3)
+- **文档计划**
+- **操作/推出说明**
+- **未来考虑因素** 仅当它们对当前设计产生重大影响时
 
-Do not add these as boilerplate. Include them only when they improve execution quality or stakeholder alignment.
+不要将它们添加为样板。仅当它们提高执行质量或利益相关者一致性时才包含它们。
 
-**Alternatives Considered — what to vary.** When this section is included, alternatives must differ on *how* the work is built: architecture, sequencing, boundaries, integration pattern, rollout strategy. Tiny implementation variants (which hash function, which serialization format) belong in Key Technical Decisions, not Alternatives. Product-shape alternatives (different actors, different core outcome, different positioning) belong in `ce-brainstorm`, not here — raise them upstream rather than re-litigating product questions during planning.
+**考虑的替代方案 - 需要改变的内容。** 当包含此部分时，替代方案必须在“如何”构建工作方面有所不同：架构、排序、边界、集成模式、推出策略。微小的实现变体（哪种散列函数，哪种序列化格式）属于关键技术决策，而不是替代方案。产品形状的替代方案（不同的参与者、不同的核心结果、不同的定位）属于`ce-brainstorm`，而不是这里——将它们向上游提出，而不是在规划期间重新提出产品问题。
 
-#### 4.2 Section Contract and Rendering
+#### 4.2 剖面合同和渲染
 
-Compose the plan using two paired references:
+使用两个配对参考来制定计划：
 
-- `references/plan-sections.md` — the section contract. Describes what the plan contains: the outcome the plan must enable for downstream consumers, the hard floor (Summary, Problem Frame, Requirements, KTDs, Implementation Units), the include-when-material catalog (covering the Product Contract's product-framing sections and the implementation-facing ones; the reference enumerates them), the freedom to introduce new sections when content warrants, and the ID/content rules.
-- The format-rendering reference loaded at Phase 0.0 (Resolve Output Mode) — `markdown-rendering.md` OR `html-rendering.md` — — how to present the sections in the resolved output format.
+- `references/plan-sections.md` — 截面合同。描述计划包含的内容：计划必须为下游消费者实现的结果、硬底（摘要、问题框架、要求、KTD、实施单元）、包含材料目录（涵盖产品合同的产品框架部分和面向实施的部分；引用文档列举了它们）、在内容允许时引入新部分的自由度以及ID/content规则。
+- 在阶段 0.0（解析输出模式）加载的格式渲染参考 — `markdown-rendering.md` 或 `html-rendering.md` — — 如何以解析的输出格式呈现各个部分。
 
-The section catalog is the same regardless of format. Format-specific principles (table-vs-prose by content shape, ID prefix format, diagram rendering, etc.) live in the rendering reference.
+无论格式如何，节目录都是相同的。特定于格式的原则（表格与散文的内容形状、ID 前缀格式、图表渲染等）存在于渲染参考中。
 
-Omit "include when material" sections that don't carry information for this specific plan. Filling a section with placeholder prose is worse than omitting it.
+省略不包含此特定计划信息的“重要时包含”部分。用占位符散文填充一个部分比省略它更糟糕。
 
-#### 4.3 Planning Rules
+#### 4.3 规划规则
 
-- **Horizontal rules (`---`) between top-level sections** in Standard and Deep plans, mirroring the `ce-brainstorm` requirements doc convention. Improves scannability of dense plans where many H2 sections sit close together. Omit for Lightweight plans where the whole doc fits on a single screen.
-- **File paths follow `references/output-mode.md`.** When a plan targets a different repo than the document's home, state the target repo once at the top (e.g., `**Target repo:** my-other-project`) and make repository file references relative to that target.
-- Prefer path plus class/component/pattern references over brittle line numbers
-- Do not include implementation code — no imports, exact method signatures, or framework-specific syntax
-- Pseudo-code sketches and DSL grammars are allowed in the High-Level Technical Design section and per-unit technical design fields when they communicate design direction. Frame them explicitly as directional guidance, not implementation specification
-- Mermaid diagrams are encouraged when they clarify relationships or flows that prose alone would make hard to follow — ERDs for data model changes, sequence diagrams for multi-service interactions, state diagrams for lifecycle transitions, flowcharts for complex branching logic
-- Do not include git commands, commit messages, or exact test command recipes
-- Do not expand implementation units into micro-step `RED/GREEN/REFACTOR` instructions
-- Do not pretend an execution-time question is settled just to make the plan look complete
+- **标准计划和深度计划中顶级部分**之间的水平规则 (`---`)，反映了 `ce-brainstorm` 需求文档约定。提高了许多 H2 部分紧密相连的密集平面图的可扫描性。对于整个文档适合在一个屏幕上的轻量级计划，请省略。
+- **文件路径遵循 `references/output-mode.md`。** 当计划针对与文档主目录不同的存储库时，请在顶部声明目标存储库（例如，`**Target repo:** my-other-project`）并相对于该目标进行存储库文件引用。
+- 优先选择路径加上 class/component/pattern 引用而不是脆弱的行号
+- 不包含实现代码——没有导入、精确的方法签名或特定于框架的语法
+- 在传达设计方向时，高级技术设计部分和每单元技术设计字段允许使用伪代码草图和 DSL 语法。将它们明确地构建为方向性指导，而不是实施规范
+- 当美人鱼图阐明单独的散文很难理解的关系或流程时，我们鼓励使用美人鱼图——用于数据模型更改的 ERD、用于多服务交互的序列图、用于生命周期转换的状态图、用于复杂分支逻辑的流程图
+- 不包含 git 命令、提交消息或精确的测试命令配方
+- 不要将执行单元扩展为微步`RED/GREEN/REFACTOR`指令
+- 不要假装执行时问题已经解决，只是为了让计划看起来很完整

@@ -1,124 +1,124 @@
-# Determining the reviewed diff and scope
+# 确定审查的差异和范围
 
-Read this at Stage 1. It defines how to resolve scope on every invocation path and how to compute the deterministic scope signals that Stage 3 (Select reviewers) uses.
+请在第 1 阶段阅读此内容。它定义了如何解析每个调用路径上的范围以及如何计算第 3 阶段（选择审查者）使用的确定性范围信号。
 
-### Stage 1: Determine scope
+### 第一阶段：确定范围
 
-Compute the diff range, file list, and diff. Minimize permission prompts by combining into as few commands as possible.
+计算差异范围、文件列表和差异。通过组合成尽可能少的命令来最小化权限提示。
 
-**If `base:` argument is provided (fast path):**
+**如果提供了 `base:` 参数（快速路径）：**
 
-The caller already knows the diff base. Skip all base-branch detection, remote resolution, and merge-base computation. Use the provided value directly:
+调用者已经知道 diff 基数。跳过所有基分支检测、远程解析和合并基计算。直接使用提供的值：
 
 ```
 BASE_ARG="{base_arg}"
 BASE=$(git merge-base HEAD "$BASE_ARG" 2>/dev/null) || BASE="$BASE_ARG"
 ```
 
-Then produce the same output as the other paths:
+然后产生与其他路径相同的输出：
 
 ```
 echo "BASE:$BASE" && echo "FILES:" && git diff --name-only $BASE && echo "DIFF:" && git diff -U10 --irreversible-delete $BASE && echo "UNTRACKED:" && git ls-files --others --exclude-standard
 ```
 
-This path works with any ref — a SHA, `origin/main`, a branch name. Callers reviewing the current checkout should pass explicit `base:` when auto-detection is unnecessary. **Do not combine `base:` with a PR number or branch target.** If both are present, stop with an error: "Cannot use `base:` with a PR number or branch target — `base:` implies the current checkout is already the correct branch. Pass `base:` alone, or pass the target alone and let scope detection resolve the base."
+该路径适用于任何引用 - SHA、`origin/main`、分支名称。当不需要自动检测时，查看当前结帐的调用者应通过显式 `base:`。 **不要将 `base:` 与 PR 数字或分支目标组合。** 如果两者都存在，则停止并显示错误：“不能将 `base:` 与 PR 数字或分支目标一起使用 - `base:` 意味着当前签出已经是正确的分支。单独传递 `base:`，或单独传递目标并让范围检测解析基数。”
 
-**If a PR number or GitHub URL is provided as an argument:**
+**如果提供 PR 数字或 GitHub URL 作为参数：**
 
-Do **not** check out the PR branch. Scope comes from GitHub read APIs plus optional local alignment when HEAD already matches the PR head branch.
+不要**检查 PR 分支。当 HEAD 已经与 PR 头分支匹配时，范围来自 GitHub 读取 API 以及可选的本地对齐。
 
-**Skip-condition pre-check.** Before scope detection, run a PR-state probe:
+**跳过条件预检查。** 在范围检测之前，运行 PR 状态探测：
 
 ```
 gh pr view <number-or-url> --json state,title,body,files
 ```
 
-Apply skip rules in order:
+按顺序应用跳过规则：
 
-- `state` is `CLOSED` or `MERGED` -> stop with reason `PR is closed/merged; not reviewing.`
-- **Trivial-PR judgment**: spawn a lightweight sub-agent on the platform's cheapest capable model when a known override exists; otherwise omit the model override and inherit. Read `references/subagent-model.md` before this spawn; in Codex it replaces this tier. Give it the PR title, body, and changed file paths. The agent's task: "Is this an automated or trivial PR that does not warrant a code review? Consider: dependency lock-file or manifest-only bumps, automated release commits, chore version increments with no substantive code changes. When in doubt, answer no — false negatives (skipped reviews that should have run) are more costly than false positives (unnecessary reviews)." If the judgment returns yes: stop with reason `PR appears to be a trivial automated PR; not reviewing. Run without a PR argument to review the current branch, or pass base:<ref> if review is intended.`
+- `state` 是 `CLOSED` 或 `MERGED` -> 有理由停止 `PR is closed/merged; not reviewing.`
+- **琐碎-PR判断**：当存在已知覆盖时，在平台最便宜的模型上生成轻量级子代理；否则忽略模型覆盖并继承。在此生成之前阅读`references/subagent-model.md`；在 Codex 中它取代了这一层。为其指定 PR 标题、正文和更改的文件路径。代理的任务：“这是一个自动化的或微不足道的PR，不需要进行代码审查吗？考虑：依赖项锁定文件或仅限清单的碰撞、自动发布提交、杂务版本增量，而没有实质性的代码更改。如有疑问，请回答“否” - 误报（跳过本应运行的审查）比误报（不必要的审查）成本更高。”如果判断返回yes：有理由停止`PR appears to be a trivial automated PR; not reviewing. Run without a PR argument to review the current branch, or pass base:<ref> if review is intended.`
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-When any skip rule applies, stop without dispatching reviewers. **Default mode:** emit the reason as plain text. **`mode:agent`:** emit JSON only — `{"status":"skipped","reason":"<same message>"}` — so programmatic callers can parse the outcome. **Standalone**, **`base:`**, and **branch-remote** paths are unaffected. **Draft PRs are reviewed normally.**
+当任何跳过规则适用时，停止而不派遣审查者。 **默认模式：** 以纯文本形式发出原因。 **`mode:agent`：** 仅发出 JSON — `{"status":"skipped","reason":"<same message>"}` — 因此编程调用者可以解析结果。 **独立**、**`base:`** 和 **分支远程** 路径不受影响。 **草稿PRs正常审核。**
 
-If no skip rule applies, fetch PR metadata **without checkout**:
+如果没有适用跳过规则，则获取 PR 元数据**不签出**：
 
 ```
 gh pr view <number-or-url> --json title,body,baseRefName,headRefName,headRefOid,isCrossRepository,url,files,reviews,comments --jq '{title, body, baseRefName, headRefName, headRefOid, isCrossRepository, url, files: [.files[].path], hasPriorComments: ((.reviews | map(select(.state != "APPROVED" or .body != "")) | length) > 0 or (.comments | length) > 0)}'
 ```
 
-Set `BASE:` to `pr:<number-or-url>` (logical marker — not a git SHA). Set `UNTRACKED:` from `git ls-files --others --exclude-standard` on the **current** checkout (usually empty during PR-remote review).
+将 `BASE:` 设置为 `pr:<number-or-url>`（逻辑标记 — 不是 git SHA）。在**当前**结帐时从 `git ls-files --others --exclude-standard` 设置`UNTRACKED:`（在PR-远程审核期间通常为空）。
 
-**PR scope mode.** Classify as **`local-aligned`** only when **all** of these hold; otherwise use **`pr-remote`**. A matching branch name alone is not enough — a fork PR or a stale local branch can share a name with the PR head while pointing at unrelated code, and trusting the name would diff and inspect the wrong tree.
+**PR范围模式。**仅当**全部**成立时才分类为**`local-aligned`**；否则使用 **`pr-remote`**。仅匹配分支名称是不够的 - 分叉 PR 或过时的本地分支可以与 PR 头共享名称，同时指向不相关的代码，并且信任该名称会比较并检查错误的树。
 
-1. `git rev-parse --abbrev-ref HEAD` equals `headRefName`.
-2. The PR is **not** cross-repository (`isCrossRepository` is false).
-3. The PR head commit is contained in the local checkout: `git merge-base --is-ancestor <headRefOid> HEAD` exits 0. This confirms the working tree actually carries the PR head (allowing unpushed local fixes layered on top) rather than an unrelated same-named branch.
+1. `git rev-parse --abbrev-ref HEAD`等于`headRefName`。
+2. PR **不是** 跨存储库（`isCrossRepository` 为 false）。
+3. PR头提交包含在本地签出中：`git merge-base --is-ancestor <headRefOid> HEAD`退出0。这确认工作树实际上携带PR头（允许未推送的本地修复分层在顶部）而不是不相关的同名分支。
 
-- **`local-aligned`** — all three checks pass. Local Read/Grep/git blame against workspace files are valid for PR changed paths.
-- **`pr-remote`** — any check fails. The working tree is **not** the PR head; workspace file contents for changed paths may be stale or unrelated.
+- **`local-aligned`** — 所有三项检查均通过。针对工作区文件的本地 Read/Grep/git 责备对于 PR 已更改的路径有效。
+- **`pr-remote`** — 任何检查都失败。工作树**不是** PR 头；已更改路径的工作区文件内容可能已过时或不相关。
 
-**Diff by scope mode** (do not mix remote and local diffs — contradictory hunks cause false positives):
+**按范围模式进行差异**（不要混合远程和本地差异 - 矛盾的块会导致误报）：
 
-- **`local-aligned`:** Resolve `<resolved-base-ref>` from `baseRefName` (fetch if needed). Compute `BASE=$(git merge-base HEAD <resolved-base-ref>)`, then set `FILES:` from `git diff --name-only $BASE` and `DIFF:` from `git diff -U10 --irreversible-delete $BASE` (includes committed, staged, and unstaged changes on the PR branch). Do **not** call `gh pr diff` or append remote hunks — when unpushed fixes exist, the local tree is canonical. Note in Coverage: `scope: local-aligned (PR; local tree diff)`.
-- **`pr-remote`:** Set `FILES:` from the PR `files` array. Set `DIFF:` from `gh pr diff <number-or-url> --color=never`. If `gh pr diff` fails, stop with an actionable error — do not fall back to checkout. Then drop deleted-file bodies from that saved output the way `--irreversible-delete` does on the local paths, with `awk '/^diff --git /{del=0} del && !/^index /{next} /^deleted file mode /{del=1} {print}'`; never pipe `gh pr diff` straight into the filter, because the pipe hides its failure.
+- **`local-aligned`：** 从`baseRefName`解析`<resolved-base-ref>`（如果需要则获取）。计算`BASE=$(git merge-base HEAD <resolved-base-ref>)`，然后从`git diff --name-only $BASE`设置`FILES:`，从`git diff -U10 --irreversible-delete $BASE`设置`DIFF:`（包括PR分支上已提交、暂存和未暂存的更改）。 **不要**调用`gh pr diff`或附加远程块——当存在未推送的修复时，本地树是规范的。覆盖范围中的注释：`scope: local-aligned (PR; local tree diff)`。
+- **`pr-remote`:** 从 PR `files` 数组中设置 `FILES:`。从`gh pr diff <number-or-url> --color=never`设置`DIFF:`。如果 `gh pr diff` 失败，请停止并显示可操作的错误 - 不要退回到结帐。然后从保存的输出中删除已删除的文件主体，就像 `--irreversible-delete` 在本地路径上所做的那样，使用`awk '/^diff --git /{del=0} del && !/^index /{next} /^deleted file mode /{del=1} {print}'`；切勿将`gh pr diff`直接插入过滤器，因为管道隐藏了其故障。
 
-When **`pr-remote`**, before Stage 4:
+当 **`pr-remote`** 时，第 4 阶段之前：
 
-1. Best-effort fetch PR head without checkout: `git fetch --no-tags origin <headRefName>:refs/review/pr-<number>-head` (substitute PR number from metadata).
-2. Set `PR_HEAD_REF=refs/review/pr-<number>-head` for reviewers and validators only when `git rev-parse refs/review/pr-<number>-head` equals the metadata `headRefOid`. A successful fetch does not prove the ref is the PR head: on a cross-repository PR, `origin` can carry an unrelated branch with the same name, and the PR can move between the metadata call and the fetch. When the fetch fails or the OID differs, omit `PR_HEAD_REF` and note which in Coverage — reviewers must rely on diff hunks only.
-3. Best-effort fetch the PR base without checkout: `git fetch --no-tags origin <baseRefName>`. When it succeeds, resolve a concrete ref with `git rev-parse FETCH_HEAD` and set `PR_BASE_REF` to that SHA — a **real git base ref** reviewers and validators use for file-level git diffs (e.g. `data-migration-reviewer` runs `git diff <PR_BASE_REF> -- db/schema.rb`/`structure.sql`). The `pr:<number-or-url>` logical marker in `BASE:` stays the scope marker; `PR_BASE_REF` is the diffable base. When the fetch fails, omit `PR_BASE_REF` and note in Coverage — schema-drift and other git-diff checks fall back to diff hunks only and must **not** assume `main`.
-4. Include `<pr-scope-mode>pr-remote</pr-scope-mode>` and, when set, `<pr-head-ref>...</pr-head-ref>` and `<pr-base-ref>...</pr-base-ref>` in the Stage 4 review context bundle.
+1. 尽力获取 PR 头而不检出：`git fetch --no-tags origin <headRefName>:refs/review/pr-<number>-head`（替换元数据中的 PR 数字）。
+2. 仅当 `git rev-parse refs/review/pr-<number>-head` 等于元数据 `headRefOid` 时，才为审查者和验证者设置 `PR_HEAD_REF=refs/review/pr-<number>-head`。成功的获取并不能证明 ref 是PR头：在跨存储库PR上，`origin`可以携带具有相同名称的不相关分支，并且PR可以在元数据调用和获取之间移动。当获取失败或 OID 不同时，省略 `PR_HEAD_REF` 并在覆盖范围中注明 — 审查者必须仅依赖 diff 块。
+3. 尽最大努力获取 PR 基数而不检出：`git fetch --no-tags origin <baseRefName>`。成功后，使用 `git rev-parse FETCH_HEAD` 解析具体引用，并将 `PR_BASE_REF` 设置为该 SHA — 审查者和验证者用于文件级 git diff 的**真正的 git 基本引用**（例如 `data-migration-reviewer` 运行 `git diff <PR_BASE_REF> -- db/schema.rb`/`structure.sql`）。 `BASE:`中的`pr:<number-or-url>`逻辑标记仍然是范围标记； `PR_BASE_REF` 是可区分的基数。当获取失败时，省略 `PR_BASE_REF` 并在覆盖范围中注明 - schema-drift 和其他 git-diff 检查仅回退到 diff 块，并且不得**假设 `main`。
+4. 将 `<pr-scope-mode>pr-remote</pr-scope-mode>` 以及设置后的 `<pr-head-ref>...</pr-head-ref>` 和 `<pr-base-ref>...</pr-base-ref>` 包含在第 4 阶段审核上下文包中。
 
-Reviewers and Stage 5b validators in **`pr-remote`** mode must **not** Read/Grep workspace paths for files in `FILES:`. Inspect via `git show <PR_HEAD_REF>:<path>` when `PR_HEAD_REF` is set, otherwise use only the provided diff hunks. **`local-aligned`** uses normal workspace inspection.
+**`pr-remote`** 模式下的审查者和阶段 5b 验证者不得** `FILES:` 中文件的Read/Grep 工作空间路径。设置 `PR_HEAD_REF` 时通过 `git show <PR_HEAD_REF>:<path>` 检查，否则仅使用提供的 diff 块。 **`local-aligned`** 使用正常的工作空间检查。
 
-**If a branch name is provided as an argument:**
+**如果提供分支名称作为参数：**
 
-Substitute the provided branch name as `<branch>`. Do **not** check out `<branch>`.
+将提供的分支名称替换为 `<branch>`。 **不要**查看`<branch>`。
 
-If `git rev-parse --abbrev-ref HEAD` equals `<branch>`, use the **standalone (current branch)** path below — same tree, explicit branch name; do not use remote-only diff.
+如果`git rev-parse --abbrev-ref HEAD`等于`<branch>`，则使用下面的**独立（当前分支）**路径——同一棵树，明确的分支名称；不要使用仅远程差异。
 
-Otherwise diff the remote/local ref **without checkout**:
+否则，比较 remote/local 参考 **无需结帐**：
 
-1. Try `gh pr view <branch> --json baseRefName,url,headRefName` — if a PR exists, prefer the **PR number/URL path** above (same remote diff rules).
-2. Else resolve `<branch>` as `origin/<branch>` or `<branch>` after `git fetch --no-tags origin <branch>` when needed.
-3. Resolve default base branch (same logic as standalone). Compute `BASE=$(git merge-base <base-ref> <branch-ref>)` and `git diff -U10 --irreversible-delete $BASE <branch-ref>`.
-4. If `<branch-ref>` cannot be resolved locally, stop: "Cannot diff branch `<branch>` without checkout. Check out that branch, pass its open PR URL/number, or review the current branch with `base:`."
+1. 尝试 `gh pr view <branch> --json baseRefName,url,headRefName` — 如果 PR 存在，则更喜欢上面的 **PR number/URL 路径**（相同的远程 diff 规则）。
+2. 否则，需要时在 `git fetch --no-tags origin <branch>` 之后将 `<branch>` 解析为 `origin/<branch>` 或 `<branch>`。
+3. 解析默认基础分支（与独立逻辑相同）。计算 `BASE=$(git merge-base <base-ref> <branch-ref>)` 和 `git diff -U10 --irreversible-delete $BASE <branch-ref>`。
+4. 如果`<branch-ref>`无法在本地解析，请停止：“无法在没有签出的情况下比较分支`<branch>`。签出该分支，传递其打开的PRURL/number，或使用`base:`查看当前分支。”
 
-On success for remote branch diff, set **branch-remote scope**. The working tree is **not** `<branch>`. Include `<pr-scope-mode>branch-remote</pr-scope-mode>` and `<branch-head-ref><branch-ref></branch-head-ref>` in the Stage 4 review context bundle. Reviewers and Stage 5b validators must **not** Read/Grep workspace paths for files in `FILES:`. Inspect via `git show <branch-ref>:<path>` or diff hunks only.
+远程分支差异成功后，设置**分支远程范围**。工作树**不是** `<branch>`。将 `<pr-scope-mode>branch-remote</pr-scope-mode>` 和 `<branch-head-ref><branch-ref></branch-head-ref>` 包含在第 4 阶段审核上下文包中。审核者和阶段 5b 验证者不得** `FILES:` 中文件的Read/Grep 工作空间路径。仅通过 `git show <branch-ref>:<path>` 或 diff hunk 进行检查。
 
-Produce:
+生产：
 
 ```
 echo "BASE:$BASE" && echo "FILES:" && git diff --name-only $BASE <branch-ref> && echo "DIFF:" && git diff -U10 --irreversible-delete $BASE <branch-ref> && echo "UNTRACKED:" && git ls-files --others --exclude-standard
 ```
 
-**If no argument (standalone on current branch):**
+**如果没有参数（在当前分支上独立）：**
 
-Apply the same base-detection logic as branch mode above, using the current branch (i.e., `gh pr view --json baseRefName,url` with no argument defaults to the current branch).
+使用当前分支，应用与上述分支模式相同的基址检测逻辑（即，不带参数的 `gh pr view --json baseRefName,url` 默认为当前分支）。
 
-If no base can be resolved, **stop**. Do not fall back to `git diff HEAD` — a standalone review without the base would only show uncommitted changes and silently miss all committed work on the branch.
+如果无法解析任何碱基，**停止**。不要退回到`git diff HEAD`——没有基础的独立审查只会显示未提交的更改，并默默地错过分支上所有已提交的工作。
 
-On success, produce the diff:
+成功后，生成差异：
 
 ```
 echo "BASE:$BASE" && echo "FILES:" && git diff --name-only $BASE && echo "DIFF:" && git diff -U10 --irreversible-delete $BASE && echo "UNTRACKED:" && git ls-files --others --exclude-standard
 ```
 
-Using `git diff $BASE` (without `..HEAD`) diffs the merge-base against the working tree, which includes committed, staged, and unstaged changes together.
+使用`git diff $BASE`（不使用`..HEAD`）将合并基础与工作树进行比较，其中包括已提交、暂存和未暂存的更改。
 
-**Whole-file deletions carry no body.** `--irreversible-delete` keeps each deleted file's `deleted file mode` header and path and leaves out its old content, so reviewers do not read code the change removes. A reviewer that needs a deleted body reads it from the review base, as `references/diff-scope.md` states.
+**整个文件删除不包含正文。** `--irreversible-delete` 保留每个已删除文件的 `deleted file mode` 标头和路径，并省略其旧内容，因此审查者不会读取更改删除的代码。需要删除主体的审查者从审阅库中读取它，如`references/diff-scope.md`所述。
 
-**Untracked file handling:** Always inspect `UNTRACKED:`. Untracked paths are out of scope unless staged. When non-empty, list excluded files in Coverage and continue on tracked changes only — never stop or prompt.
+**未跟踪的文件处理：** 始终检查 `UNTRACKED:`。除非上演，否则未跟踪的路径超出范围。当非空时，列出覆盖范围中排除的文件，并仅继续跟踪更改 - 从不停止或提示。
 
-### Stage 1b: Compute scope signals (cheap, deterministic)
+### 第 1b 阶段：计算示波器信号（廉价、确定性）
 
-Derive deterministic facts once with `scripts/review-scope.py` from this skill's directory. The helper validates the endpoints, counts changed lines, derives path classes, and reports floors. It never awards lite. Do not reproduce those mechanics in prose or estimate them from diff hunks. The invocation below is the helper's contract: run it directly rather than inspecting the script or probing its `--help`, unless it actually fails with an incompatibility.
+使用 `scripts/review-scope.py` 从该技能的目录中导出一次确定性事实。帮助程序验证端点、计算更改的线路、派生路径类并报告楼层。它从不奖励精简版。不要在散文中重现这些机制或从差异块中估计它们。下面的调用是助手的契约：直接运行它，而不是检查脚本或探测其 `--help`，除非它实际上因不兼容而失败。
 
-Set `SCOPE_MODE` to the Stage 1 scope mode and set `DIFF_A`/`DIFF_B` to its two endpoints:
-- **`local-aligned` / standalone / `base:`** — `DIFF_A="$BASE"` (a real SHA/ref), `DIFF_B` empty (diffs base vs working tree).
-- **`pr-remote` / `branch-remote`** — `DIFF_A=<PR_BASE_REF>`, `DIFF_B=<PR_HEAD_REF>` (or `<branch-head-ref>`) — the fetched refs from Stage 1.
+将 `SCOPE_MODE` 设置为 Stage 1 作用域模式，并将 `DIFF_A`/`DIFF_B` 设置为其两个端点：
+- **`local-aligned`/独立/`base:`** - `DIFF_A="$BASE"`（真正的SHA/ref），`DIFF_B`空（比较基础树与工作树）。
+- **`pr-remote` / `branch-remote`** — `DIFF_A=<PR_BASE_REF>`、`DIFF_B=<PR_HEAD_REF>`（或`<branch-head-ref>`）— 从第 1 阶段获取的引用。
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -130,21 +130,21 @@ else
 fi
 ```
 
-Remote scope always passes both endpoint flags, even when a best-effort fetch left one value empty; the helper then refuses to compute rather than comparing the fetched base to the unrelated local worktree. Load the JSON result. `hard_block_full` is a floor for the Review depth gate in `references/modes-and-output.md`; it covers the named hard-block classes, uncounted files, and a `size_band` of `large` (executable non-test changed lines at the full floor). `silent_pass_classes` names guards for consequence assessment under that gate, not a depth floor. Neither awards lite, and a count below the floor decides nothing on its own. Whole-file deletions are not in any of the line counts above: the helper lists them in `deleted_files`, counts their executable non-test lines in `deleted_exec_nontest_lines`, and bands that count in `deleted_band` (`none`, `small`, or `large`), which the gate reads. `signals` are path heuristics, not selection decisions and not a lite block. After this stage, apply that gate before reading any later reference. On the full spine, Stage 3 still judges content-based risk such as auth, payments, mutation, external I/O, concurrency, and process execution. Use `test_files_changed`, `agent_surface`, `has_learnings_corpus`, and `declared_packs` as inputs to the conditions that select generic reviewers, not as automatic spawn decisions. `declared_packs` reports whether the local CE config names any Compound Pack, read from the config alone (nothing is resolved, so `pack_roots` is always 0); the learnings selection rule in `references/persona-catalog.md` decides what that fact selects on the full spine, and `references/depth-paths.md` decides how the lite and focused paths use it. It describes the local checkout, so the helper evaluates it only in local scope: in remote scope it is `null` and no resolver runs. In local scope, `null` means the helper could not tell; read the config's `packs:` key yourself.
+远程作用域始终传递两个端点标志，即使尽力获取将一个值留空时也是如此；然后，助手拒绝计算，而不是将获取的基数与不相关的本地工作树进行比较。 加载 JSON 结果。 `hard_block_full`是`references/modes-and-output.md`复习深度门的楼层；它涵盖了指定的硬块类、未计数的文件以及`size_band`或`large`（整个楼层的可执行非测试更改行）。 `silent_pass_classes` 指定守卫在该门下进行后果评估，而不是在深度楼层。 两者都没有简单的奖励，并且低于地板的计数本身并不能决定任何事情。 整个文件删除不在上面的任何行计数中：帮助程序将它们列在 `deleted_files` 中，在 `deleted_exec_nontest_lines` 中对它们的可执行非测试行进行计数，以及在门读取的 `deleted_band`（`none`、`small` 或 `large`）中计数的带区。 `signals` 是路径启发法，不是选择决策，也不是精简版块。 在此阶段之后，在阅读任何后续引用文档之前应用该门。 总体而言，第 3 阶段仍然判断基于内容的风险，例如身份验证、支付、突变、外部I/O、并发性和流程执行。 使用 `test_files_changed`、`agent_surface`、`has_learnings_corpus` 和 `declared_packs` 作为选择通用审查者的条件的输入，而不是作为自动生成决策。 `declared_packs`报告本地CE配置是否命名任何Compound Pack，仅从配置中读取（没有解析任何内容，因此`pack_roots`始终为0）； `references/persona-catalog.md` 中的学习选择规则决定该事实在整个脊柱上选择什么，`references/depth-paths.md` 决定精简路径和集中路径如何使用它。 它描述了本地签出，因此帮助程序仅在本地范围内对其进行评估：在远程范围中，它是 `null` 并且没有解析器运行。 在局部范围内，`null`表示助手无法分辨；自己阅读配置的 `packs:` 键。
 
-### Stage 1c: Map criteria files to changed paths
+### 阶段 1c：将条件文件映射到更改的路径
 
-**Goal:** the mapping that pairs each criteria file governing this change with the changed files it governs. Paths, not contents. Both depth paths consume it: the lite path checks the diff against it in context, and Stage 3b decides the `project-standards` dispatch from it.
+**目标：** 将管理此更改的每个标准文件与其管理的已更改文件配对的映射。路径，而不是内容。两个深度路径都会消耗它：精简路径在上下文中检查它的差异，并且阶段 3b 决定从中调度 `project-standards`。
 
-Enumerate the candidates from **the tree under review**, never from whichever tree happens to be checked out: the workspace only in `local-aligned` scope, and the reviewed head ref in `pr-remote` and `branch-remote` (Stage 1 resolved which). A criteria file that exists only in the reviewed tree must appear, and one deleted there must not, or the review enforces criteria the change never had.
+从**正在审查的树**中枚举候选者，而不是从碰巧检出的任何一棵树中枚举候选者：仅在`local-aligned`范围内的工作区，以及在`pr-remote`和`branch-remote`中审查的头引用（第1阶段解决了哪个）。必须出现仅存在于所审阅的树中的标准文件，并且不能出现在那里删除的标准文件，否则审阅会强制执行更改从未有过的标准。
 
-Candidates are `CODING_STANDARDS.md`, `CLAUDE.md`, and `AGENTS.md` at any depth. Keep those whose directory is an ancestor of a changed file — a root-level file governs the whole checkout, `skills/AGENTS.md` only what is under `skills/`.
+候选者是任意深度的 `CODING_STANDARDS.md`、`CLAUDE.md` 和 `AGENTS.md`。保留那些目录是已更改文件的祖先的目录 - 根级文件控制整个签出，`skills/AGENTS.md`仅控制`skills/`下的内容。
 
-`CODING_STANDARDS.md` is the designated criteria source, so an instruction file supplies criteria only for changed files that no `CODING_STANDARDS.md` governs, and no file is graded against both kinds. Every governing `CODING_STANDARDS.md` applies cumulatively. When two of them state rules that cannot both hold for the same changed file, the one whose directory is nearer that file decides it, so a nested file's rule wins only for changed files under its directory. Declared Compound Packs are not a criteria kind here. On the full spine they select `learnings-researcher`, which grades them; on the lite and focused paths they are graded in context. Either way they are graded separately from criteria files, so a line that violates a standards rule and a pack rule yields one finding per source.
+`CODING_STANDARDS.md` 是指定的标准源，因此指令文件仅为不受`CODING_STANDARDS.md` 管辖的已更改文件提供标准，并且不会针对这两种类型对文件进行评分。每个管理`CODING_STANDARDS.md`累积适用。当其中两个规定的规则不能同时适用于同一已更改的文件时，由较接近该文件的目录的规则决定，因此嵌套文件的规则仅适用于其目录下已更改的文件。声明的Compound Pack不是这里的标准类型。在整个书脊上，他们选择`learnings-researcher`，这对他们进行评分；在精简和集中的路径上，它们根据上下文进行分级。无论哪种方式，它们都是与标准文件分开分级的，因此违反标准规则和包规则的行会为每个源产生一个结果。
 
-**Done** when no changed file could be graded against two kinds of criteria. A changed file that no criteria file governs is a complete result, not a gap. A search failure or uncertain scope is recorded as exactly that, never as an empty result; the Review depth gate and Stage 3b each state what it means for them.
+**完成** 当没有可以根据两种标准对更改的文件进行评分时。没有标准文件控制的更改文件是完整的结果，而不是间隙。搜索失败或不确定范围会被准确记录，而不是空结果；审查深度门和阶段 3b 各自说明了其对他们的意义。
 
-Create the review run directory now. Every path, lite or full, writes its artifacts there:
+立即创建审核运行目录。每条路径，无论是精简路径还是完整路径，都会在那里写入其产物：
 
 ```bash
 SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
@@ -159,9 +159,9 @@ RUN_DIR="$SCRATCH_ROOT/ce-code-review/$RUN_ID";
 echo "$RUN_DIR";
 ```
 
-### Stage log
+### 阶段日志
 
-Every run records what each stage cost, so the thresholds this skill uses can be set from measured runs. The record is `<run-dir>/stages.jsonl`, written only by the bundled script below; the receipt writer folds it into `metadata.json` at the end (`summarize`, named where each path writes its receipt). Open the scope stage now, in the same shell call that printed the run directory when you can:
+每次运行都会记录每个阶段的成本，因此可以根据测量的运行来设置该技能使用的阈值。记录为`<run-dir>/stages.jsonl`，仅由下面的捆绑脚本编写；收据编写器将其折叠到末尾的`metadata.json`（`summarize`，在每个路径写入其收据的位置命名）。现在，在打印运行目录的同一个 shell 调用中打开范围阶段，您可以：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -169,20 +169,20 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 "$PY" "$SKILL_DIR/scripts/run-log.py" event --run-dir "$RUN_DIR" --start scope
 ```
 
-Every later boundary is the same call with `--end <stage> --start <stage>` in one invocation, and `--reviewers`, `--candidates`, `--tokens` (only when the host handed you a count), or `--fact key=value` for what that stage learned. The stage names are fixed: `scope`, then `review` and `receipt` on lite and focused (with `peer` overlapping `review` on focused), or `select`, `dispatch`, `validate`, `merge`, and `report` on the full spine (with `peer` overlapping `dispatch`). Fold the call into a shell call the step already makes wherever one exists; a boundary is never its own turn.
+之后的每个边界都是一次调用中的 `--end <stage> --start <stage>` 相同的调用，以及 `--reviewers`、`--candidates`、`--tokens`（仅当主机向您提供计数时）或 `--fact key=value` 来了解该阶段学到的内容。舞台名称是固定的：`scope`，然后是 lite 和 focus 上的 `review` 和 `receipt`（焦点上 `peer` 与 `review` 重叠），或者整个书脊上的 `select`、`dispatch`、`validate`、`merge` 和 `report` （`peer` 与 `dispatch` 重叠）。将调用折叠到该步骤已在任何地方存在的 shell 调用中；边界永远不会轮到自己。
 
-### Stage 1d: Stage the review policy
+### 第 1d 阶段：制定审查政策
 
-**Goal:** the repository's review policy, read from a copy the change under review cannot have edited, staged where every later reader finds it.
+**目标：** 存储库的审核策略，从副本中读取正在审核的更改无法编辑的内容，并暂存到每个后来的读者都可以找到它的地方。
 
-A review policy is a `REVIEW.md` file: instructions for how review behaves in this repository, such as what each severity means here, paths or classes of finding to skip, a cap on minor findings, the evidence a class of finding needs, or checks to run on every change. Claude Code Review reads the same file. It is not a criteria file: it neither supplies criteria nor displaces them, so Stage 1c's precedence ignores it.
+审核策略是一个 `REVIEW.md` 文件：说明审核在此存储库中的行为方式，例如这里每个严重性的含义、要跳过的查找路径或类别、次要发现的上限、查找需求类别的证据，或对每次更改运行的检查。 Claude Code 审阅读取同一文件。它不是标准文件：它既不提供标准也不取代它们，因此 Stage 1c 的优先级会忽略它。
 
-- **Which files.** The root `REVIEW.md` governs the whole change. A `REVIEW.md` in a directory that is an ancestor of a changed file adds to the root file for the paths under it.
-- **Which copy.** Read each file from the Stage 1 base (`BASE:`, or `PR_BASE_REF` in `pr-remote`), never from the reviewed tree, because a change must not be reviewed under policy it wrote itself. When the diff adds, edits, or deletes a policy file, the base copy applies (none for a new file), and Coverage says the change's version was not applied.
-- **Includes.** In the root file, a line holding only `@<path>` stands for that file, read from the same ref, one level deep. Skip an include of a file this review already reads as criteria, such as `@CODING_STANDARDS.md`.
+- **哪些文件。** 根`REVIEW.md` 控制整个更改。作为已更改文件的祖先的目录中的 `REVIEW.md` 将添加到其下路径的根文件中。
+- **哪个副本。** 从第 1 阶段基础（`BASE:` 或 `pr-remote` 中的 `PR_BASE_REF`）读取每个文件，而不是从已审核的树中读取，因为不得根据其自己编写的策略来审核更改。当 diff 添加、编辑或删除策略文件时，将应用基本副本（对于新文件则不适用），并且 Coverage 表示未应用更改的版本。
+- **包括。** 在根文件中，仅包含 `@<path>` 的行代表该文件，从同一引用读取，深一层。跳过此审核已读取为标准的文件的包含，例如 `@CODING_STANDARDS.md`。
 
-Write what you read to `<run-dir>/review-policy.md`, each file under a heading that names its path and the paths it governs. No policy file at the base is a complete result: write nothing. A policy file you found but could not read is recorded for Coverage as unread, never treated as absent.
+将您读到的内容写入`<run-dir>/review-policy.md`，每个文件都有一个标题，该标题指定了其路径及其管理的路径。基础上没有策略文件是完整的结果：什么也不写。您找到但无法读取的策略文件会在 Coverage 中记录为未读，而不会被视为不存在。
 
-## Task Visibility
+## 任务可见性
 
-For the multi-agent path, once the review scope is resolved, use the platform's task-tracking capability when available to show a short user-facing view derived from the execution spine. Track review outcomes, not individual personas, setup mechanics, or tool calls; add conditional work only when its condition is met, and update the view at meaningful transitions. If no task-tracking capability is available, continue with the normal progress and final report without simulating a task list in chat.
+对于多代理路径，一旦解决了审查范围，就可以使用平台的任务跟踪功能（如果可用）来显示从执行脊柱派生的面向用户的简短视图。跟踪审核结果，而不是个人角色、设置机制或工具调用；仅在满足条件时添加条件工作，并在有意义的转换时更新视图。如果没有可用的任务跟踪功能，请继续正常进度和最终报告，而无需在聊天中模拟任务列表。

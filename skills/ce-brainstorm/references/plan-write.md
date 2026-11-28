@@ -1,32 +1,32 @@
-# Phase 3: capture the requirements-only unified plan
+# 第 3 阶段：捕获仅需求的统一计划
 
-### Phase 3: Capture the Requirements-Only Unified Plan
+### 第 3 阶段：制定仅满足需求的统一计划
 
-Write or update a requirements-only unified plan only when a file is warranted — see `references/brainstorm-sections.md` "Decide whether a doc is warranted at all" for the condition and the bug-fix stress test. Otherwise the chat paragraph from Phase 2.5 is the result and the decisions flow downstream (ce-plan's prompt, commit message, <root>/solutions/) without a brainstorm artifact in the middle.
+仅当文件得到保证时才编写或更新仅满足需求的统一计划 - 请参阅`references/brainstorm-sections.md`“确定文档是否完全得到保证”以了解条件和错误修复压力测试。否则，阶段 2.5 的聊天段落就是结果，决策流向下游（ce-plan 的提示、提交消息、<root>/解决方案/），中间没有头脑风暴产物。
 
-When a doc is warranted, compose it using:
+当文档有保证时，请使用以下内容撰写它：
 
-- `references/brainstorm-sections.md` — section contract (unified plan skeleton contract, Product Contract hard floor, include-when-material catalog, agency rules, ID conventions).
-- The format-specific rendering reference for the `OUTPUT_FORMAT` resolved at Phase 0.0 — read `references/markdown-rendering.md` (md) or `references/html-rendering.md` (html) **now**, before composing. It defines how the format presents the sections and was deliberately deferred from Phase 0.0; composing without it produces format drift the section contract alone cannot prevent.
+- `references/brainstorm-sections.md`——分段合同（统一计划骨架合同、产品合同硬底、包含材料目录、代理规则、ID约定）。
+- 在阶段 0.0 解析的 `OUTPUT_FORMAT` 的特定于格式的渲染参考 — 在撰写之前阅读 `references/markdown-rendering.md` (md) 或 `references/html-rendering.md` (html) **现在**。它定义了格式如何呈现各部分，并被故意从阶段 0.0 推迟；没有它的写作会产生格式漂移，而单靠章节合同是无法防止的。
 
-Session-settled decisions land in the Product Contract's Key Decisions section carrying their `session-settled:` annotation (shape in `references/settled-decisions.md`), so `ce-plan` enrichment inherits the label into plan KTDs.
+会话解决的决策位于产品合同的关键决策部分，带有其 `session-settled:` 注释（`references/settled-decisions.md` 中的形状），因此 `ce-plan` 丰富将标签继承到计划 KTD 中。
 
-If the grounding scout's gist listed any `pack:<id>` matches, read those entries in the dossier and cite each requirement or decision they shaped with `(pack: <id>, <path within the pack>)` (shape in `references/brainstorm-sections.md` Sources / Research). A pack quote that shaped nothing is not cited, and a Product Contract that used none never mentions packs.
+如果接地侦察员的要点列出了任何 `pack:<id>` 匹配项，请阅读档案中的这些条目，并引用他们使用 `(pack: <id>, <包内的路径>)` 制定的每个要求或决定（形状在 `references/brainstorm-sections.md` 来源/研究中）。没有任何内容的包装报价不会被引用，而没有使用任何内容的产品合同也不会提及包装。
 
-**Write tight.** A section being material is not license to pad it. Hold every kept section to the prose-economy discipline in `references/brainstorm-sections.md`: lead with the decision or outcome, one idea per sentence, a requirement is intent plus at most one qualifier, defer forks to Outstanding Questions rather than specifying both arms, resolve superseded text in place rather than stacking strata.
+**写紧。** 重要的部分不允许填充它。将每一个保留的部分保留在`references/brainstorm-sections.md`中的散文经济纪律：以决定或结果为主导，每句话一个想法，要求是意图加上最多一个限定符，将分支推迟到未决问题而不是指定双臂，就地解决被取代的文本而不是堆叠分层。
 
-`SKILL.md` states the artifact contract — path shape, frontmatter fields, title, and the Goal-Capsule-plus-Product-Contract body — and it is not restated here. What this step adds: do not allocate a daily sequence number; reserve the candidate path atomically with exclusive creation, retrying the smallest available numeric collision suffix (`-2`, `-3`, …) before the extension rather than overwriting; the extension follows `OUTPUT_FORMAT`; the Goal Capsule holds objective, product authority, and open blockers; there is no conventional-commit prefix on the title. `references/brainstorm-sections.md` defines the artifact content rules, including repo-relative file paths inside the doc.
+`SKILL.md` 规定了产物契约——路径形状、frontmatter 字段、标题和 Goal-Capsule-plus-Product-Contract 主体——这里不再重述。此步骤增加的内容：不分配每日序列号；通过独占创建以原子方式保留候选路径，在扩展之前重试最小的可用数字冲突后缀（`-2`，`-3`，...）而不是覆盖；扩展遵循`OUTPUT_FORMAT`； Goal Capsule 拥有目标、产品权威和开放拦截器；标题上没有约定提交前缀。 `references/brainstorm-sections.md` 定义产物内容规则，包括文档内的存储库相对文件路径。
 
-**Ready for Planning Check.** After writing the actual file, run the four checks in `references/brainstorm-sections.md`: Complete, Consistent, Focused, and Usable by planning. Fix failures in place when the correction preserves settled intent, then rerun the failed checks. If a correction would choose or change product behavior or scope, ask one targeted question, update the artifact after the answer, and rerun the checks. When confirming in chat after the pass, report the artifact with its absolute path so the reference is clickable.
+**准备好计划检查。** 编写实际文件后，运行`references/brainstorm-sections.md`中的四项检查：完整、一致、重点和按计划可用。当更正保留既定意图时修复故障，然后重新运行失败的检查。如果修正会选择或更改产品行为或范围，请提出一个有针对性的问题，在回答后更新产物，然后重新运行检查。通过后在聊天中确认时，报告产物及其绝对路径，以便参考可单击。
 
-#### Vocabulary Capture — after the requirements-only unified plan (only if CONCEPTS.md already exists)
+#### 词汇捕获——仅在需求统一计划之后（仅当GLOSSARY.md已经存在时）
 
-**Skip this step entirely if `CONCEPTS.md` does not exist at repo root** — only ce-compound creates it.
+如果存储库有`GLOSSARY-MAP.md`，则首先解析其范围内上下文；否则使用 root `GLOSSARY.md`。 **如果解析的术语表不存在或其范围不清楚，请跳过此步骤。** 该分支仅用于更新。
 
-Run this **after** the approaches, the scope synthesis, and the requirements-only unified plan — that is where the canonical term often gets chosen or corrected, so capturing during early dialogue (before this point) would miss the final resolved name. If it exists, scan the full dialogue and the Product Contract for **resolved** domain terms — terms where the conversation actively pinned down a precise local meaning, not terms merely mentioned in passing. **Resolved means the definition is settled, not still under discussion.** Provisional terms that may still revise stay in the conversation only.
+在方法、范围综合和仅需求统一计划之后运行此命令 - 这就是规范术语经常被选择或纠正的地方，因此在早期对话期间（此时之前）捕获将错过最终解析的名称。如果存在，请扫描完整的对话和产品合同以查找**已解决的**领域术语 - 对话主动确定精确的本地含义的术语，而不是仅仅顺便提及的术语。 **已解决意味着定义已经解决，而不是仍在讨论中。**仍可能修改的临时条款仅保留在对话中。
 
-For each resolved term: if missing, add it; if present but new precision surfaced, refine it; if already consistent, no action. A term whose whole meaning an existing entry already carries is a refinement of that entry, not a new heading. Only ce-compound folds an existing entry, and only its refresh job retires or deletes one.
+对于每个已解决的术语：如果缺少，请添加；如果存在但出现了新的精度，则对其进行改进；如果已经一致，则不采取任何行动。现有条目已包含其全部含义的术语是对该条目的改进，而不是新标题。只有 ce-compound 会折叠现有条目，并且只有其刷新作业会退出或删除一个条目。
 
-**Domain entities, named processes, and status concepts with project-specific meaning only.** Not file paths, class names, function signatures, or implementation decisions — `CONCEPTS.md` is a glossary, not a spec or catch-all.
+**仅具有项目特定含义的域实体、命名进程和状态概念。**不是文件路径、类名、函数签名或实现决策 - `GLOSSARY.md` 是一个术语表，而不是规范或包罗万象的内容。
 
-Follow the format set by existing entries. Apply edits silently. (If Phase 3 skipped the doc, still run this against the resolved dialogue.)
+使用[共享词汇表格式](../../domain-modeling/GLOSSARY-FORMAT.md)。如果新定义与现有定义相矛盾，则保持其不变并返回 `domain-modeling` 的冲突和证据。仅应用兼容的已解决编辑。 （如果第 3 阶段跳过了文档，仍然针对已解决的对话运行此文档。）

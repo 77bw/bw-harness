@@ -1,16 +1,16 @@
-# Preview helper
+# 预览助手
 
-Load this when serving a local web prototype. Isolated web runs start the helper with annotation on; `references/annotation-loop.md` owns the wait loop and when chat is the fallback.
+在提供本地 Web 原型时加载此内容。隔离的网络运行启动带有注释的助手； `references/annotation-loop.md` 拥有等待循环，当聊天时是后备。
 
-This skill ships its own `scripts/light-webserver.js`. Do not import a sibling skill's copy — isolation forbids that. The file is a byte-identical copy of brainstorm's helper.
+该技能自带`scripts/light-webserver.js`。不要导入同级技能的副本——隔离禁止这样做。该文件是 Brainstorm 助手的字节相同的副本。
 
-Use the bundled helper when the current platform can run a bundled skill script. Invoke it via the `SKILL_DIR` anchor: set `SKILL_DIR` to the absolute path of the directory containing the `ce-prototype` `SKILL.md` you loaded (the Bash tool's cwd is the user's project, not the skill dir), and re-set it in the same command on each call since shell vars do not persist between Bash invocations. Do not resolve the helper from the user's project CWD.
+当当前平台可以运行捆绑的技能脚本时，请使用捆绑的帮助程序。通过 `SKILL_DIR` 锚点调用它：将 `SKILL_DIR` 设置为包含您加载的 `ce-prototype` `SKILL.md` 的目录的绝对路径（Bash 工具的 cwd 是用户的项目，而不是技能目录），并在每次调用时在同一命令中重新设置它，因为 shell 变量在 Bash 调用之间不会保留。不要从用户的项目 CWD 解析帮助程序。
 
-Resolve the question directory once, at the start of the run, and reuse the absolute path it prints for every later call. Do not re-derive it per command — the server keys its pidfile and its process match off `--root`, so a start and a stop that resolve differently leave an orphaned server.
+在运行开始时解析一次问题目录，并为以后的每次调用重复使用它打印的绝对路径。不要根据命令重新派生它 - 服务器将其 pidfile 及其进程匹配为`--root`，因此以不同方式解析的启动和停止会留下孤立服务器。
 
-`RUN_SLUG` is `<date>-<short-question-slug>` for the run; `QUESTION_SLUG` is `NN-<question-slug>` for the question being built. A run that covers a second related question resolves a second question directory under the same run directory.
+运行时`RUN_SLUG`为`<date>-<short-question-slug>`；对于正在构建的问题，`QUESTION_SLUG` 是 `NN-<question-slug>`。涵盖第二个相关问题的运行解决了同一运行目录下的第二个问题目录。
 
-Settle durability before you run this block; it reads both decisions once and there is no second pass. Set `RUN_KEEP="no"` when the user asked that this run not be left in the repo, and run the block as it stands — it sends the run to OS temp and nothing else changes. Otherwise, when the run is inside a git repository, probe the repo root for `.context/compound-engineering/`; if it is not covered, offer to append that one line to the repo-root `.gitignore`, appending only if the user agrees and leaving the rest of the file alone. A run that is headed for OS temp either way gets no offer.
+在运行此块之前解决耐久性；它会读取两个决定一次，并且不会进行第二次读取。当用户要求不要将此运行留在存储库中时，设置`RUN_KEEP="no"`，并按原样运行该块 - 它将运行发送到 OS temp，并且没有其他任何更改。否则，当运行在 git 存储库内时，探测存储库根目录中的 `.context/compound-engineering/`；如果未覆盖，请提议将这一行附加到 repo-root `.gitignore`，仅在用户同意的情况下附加，并保留文件的其余部分。无论哪种方式，以操作系统温度为目标的运行都不会得到任何报价。
 
 ```bash
 RUN_SLUG="<YYYY-MM-DD>-<run-slug>";
@@ -47,11 +47,11 @@ chmod 700 "$RUN_DIR" || exit 1;
 echo "$RUN_DIR"
 ```
 
-Three things this block is careful about. The symlink and ownership checks run against both the **root** — the directory sitting in a shared or world-writable location — and the `ce-prototype` directory beneath it, because that one survives between runs: `mkdir -p` follows a symlink that is already there, and `chmod` would then change the link's target rather than anything inside the validated root. Every check is inside the retry loop, so an unsafe in-repo path at either level falls back to OS temp rather than aborting — a hostile or misconfigured `.context` costs the run its durability, not the run itself, and only a temp root that also fails is fatal.
+这个区块需要注意三件事。符号链接和所有权检查针对 **root**（位于共享或全局可写位置的目录）及其下的 `ce-prototype` 目录运行，因为该目录在运行之间仍然存在：`mkdir -p` 遵循已存在的符号链接，然后 `chmod` 将更改链接的目标，而不是已验证根中的任何内容。每次检查都在重试循环内，因此任一级别的不安全存储库路径都会回退到操作系统临时而不是中止 - 敌对或错误配置的 `.context` 会损害运行的持久性，而不是运行本身，并且只有也失败的临时根才是致命的。
 
-Creating the directory is how it is claimed — never test whether the name is free and then write, which two runs starting together both pass. There is no rejoin: this block runs once per invocation, so a second question never re-derives the run directory and can neither split into a suffixed sibling nor adopt a finished run's directory.
+创建目录就是它的声明方式——永远不要测试名称是否空闲然后写入，这两个一起启动的运行都会通过。没有重新加入：该块每次调用运行一次，因此第二个问题永远不会重新派生运行目录，并且既不能拆分为带后缀的同级目录，也不能采用完成的运行目录。
 
-Then, once per question, create that question's directory under the run directory the block above printed:
+然后，针对每个问题，在上面打印的运行目录下创建该问题的目录：
 
 ```bash
 RUN_DIR="<absolute run directory the resolution block printed>";
@@ -61,7 +61,7 @@ PROTO_DIR="$RUN_DIR/$QUESTION_SLUG"; (umask 077; mkdir -p "$PROTO_DIR") || exit 
 echo "$PROTO_DIR"
 ```
 
-Start (detached), with `PROTO_DIR` set to the absolute path the resolution printed:
+开始（分离），将 `PROTO_DIR` 设置为分辨率打印的绝对路径：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -70,9 +70,9 @@ if [ -L "$PROTO_DIR" ] || [ ! -O "$PROTO_DIR" ]; then echo "unsafe run directory
 node "$SKILL_DIR/scripts/light-webserver.js" start --root "$PROTO_DIR" --annotate
 ```
 
-The server takes `--root` on trust — it resolves the path and creates it, and checks nothing — so each call re-checks the directory it is about to hand over. The path arrives here by transcription across separate shell invocations, and a mistyped or stale one would otherwise be written to unverified.
+服务器信任`--root`——它解析路径并创建它，并且不检查任何内容——因此每次调用都会重新检查它要移交的目录。该路径通过跨单独的 shell 调用的转录到达这里，否则输入错误或过时的路径将被写入未经验证的路径。
 
-Append `--foreground` to that `start` command for foreground mode. Status and stop take the same anchor and the same `PROTO_DIR` — and because neither persists between Bash invocations, each must re-set both in its own call rather than reuse the `start` block's values:
+将 `--foreground` 附加到 `start` 命令以实现前台模式。 Status 和 stop 采用相同的锚点和相同的 `PROTO_DIR` — 并且由于 Bash 调用之间两者都不会持续存在，因此每个调用都必须在自己的调用中重新设置这两个值，而不是重用 `start` 块的值：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -82,37 +82,37 @@ node "$SKILL_DIR/scripts/light-webserver.js" status --root "$PROTO_DIR"
 # stop: the same command with `stop` in place of `status` (re-set both again)
 ```
 
-If `SKILL_DIR` cannot be resolved to a concrete skill directory, do not guess from the project CWD. Stop and report that the preview cannot start; do not settle the question in chat instead.
+如果`SKILL_DIR`无法解析为具体的技能目录，请勿从项目CWD中猜测。停止并报预览无法启动；不要在聊天中解决问题。
 
-The helper creates `screens/` and `state/`, serves the newest `.html` file in `screens/` at `/`, writes `state/display-info.json`, and exposes `/version` so a default (annotate-off) browser can poll for screen changes. Isolated web starts pass `--annotate`: the printed URL is the origin (no token in it), the overlay is added at serve time to every HTML document the browser navigates to under `screens/` (a script fetching an HTML partial gets it raw), and disk screens stay agent-clean. Visiting that origin sets a session cookie so the overlay can reach wait, annotation, and events; those routes stay token-gated. Do not print the token to the explorer. A prototype may use `?token=` or other query state of its own. Every other path is read from `screens/` at that same path — `/img/blot.webp` serves `screens/img/blot.webp` — so a screen keeps whatever asset layout it was copied from, nesting included. Put the assets the screen references under `screens/` at the paths it asks for, or inline them as data URIs. Anything resolving outside `screens/` is refused.
+帮助器创建`screens/`和`state/`，在`screens/`中的`/`处提供最新的`.html`文件，写入`state/display-info.json`，并公开`/version`，以便默认（注释关闭）浏览器可以轮询屏幕更改。隔离网络开始通过`--annotate`：打印的 URL 是源（其中没有令牌），在服务时将覆盖层添加到浏览器在`screens/`下导航到的每个 HTML 文档（获取 HTML 部分的脚本获取原始数据），并且磁盘屏幕保持代理干净。访问该源会设置一个会话 cookie，以便覆盖可以到达等待、注释和事件；这些路由保持令牌门控。不要将令牌打印到资源管理器。原型可以使用 `?token=` 或它自己的其他查询状态。所有其他路径都是从同一路径上的 `screens/` 读取的 - `/img/blot.webp` 服务于 `screens/img/blot.webp` - 因此屏幕会保留从中复制的任何资源布局，包括嵌套。将屏幕引用的资产放在 `screens/` 下所需的路径处，或将它们内联为数据 URI。任何在 `screens/` 之外解决的问题都会被拒绝。
 
-Before handing over the URL, look at the rendered screen — a screenshot where the platform has one, otherwise measure the laid-out result in the DOM. A 200 on every asset is not that check: an image that loads correctly at the wrong size passes it, as does a script that leaves the page inert. Check each variant at rest, not just the page — one bug in shared scaffolding reads as several bad designs. Drive an interaction only when its behavior is invisible at rest, which is also the case where telling them to try something you have not tried is a claim you made up. Measurement lies by default — computed styles read mid-transition, scroll events coalesce — so read after things settle, and suspect the instrument before you conclude the page is broken. You are done when they could judge the idea, not when the code is correct. If you have no way to see the rendered result, say so when you hand over the URL rather than implying it was checked.
+在移交 URL 之前，请查看渲染的屏幕 - 平台有屏幕截图，否则测量 DOM 中的布局结果。每个资产上的 200 并不是这样的检查：以错误尺寸正确加载的图像会通过它，使页面保持惰性的脚本也会通过它。检查静态的每个变体，而不仅仅是页面——共享脚手架中的一个错误看起来像是几个糟糕的设计。仅当其行为在静止时不可见时才驱动交互，在这种情况下，告诉他们尝试一些你没有尝试过的东西是你编造的主张。默认情况下，测量是存在的——计算样式在转换过程中读取，滚动事件合并——所以在事情解决之后再阅读，并在断定页面损坏之前怀疑工具。当他们能够判断这个想法时，而不是当代码正确时，你就完成了。如果您无法看到渲染结果，请在提交 URL 时说明，而不是暗示它已被检查。
 
-A default start reloads only when the newest screen changes; it must not continually reload on a timer. Annotate-on pushes each change under `screens/` — the screen or an asset it links — over a stream, and the page reloads. Pins for notes the agent has not applied yet survive the reload; a pin leaves the page once its note is applied, and every pin clears when the session ends. `/version` polling and an open tab do not count as activity, so an abandoned tab cannot keep the server alive; an annotation POST and a running `wait` do, so a session with an agent waiting on it does not idle out. Detached servers monitor the owning harness process when it can be resolved, and all servers exit after an idle timeout. Interactive HTML is allowed.
+仅当最新屏幕更改时才会重新加载默认启动；它不能不断地重新加载计时器。 启用「标注」后 通过流将每个更改推送到 `screens/`（屏幕或其链接的资产）下，然后页面重新加载。代理尚未应用但在重新加载后仍然有效的注释的引脚；一旦应用其注释，图钉就会离开页面，并且当会话结束时，每个图钉都会被清除。 `/version` 轮询和打开的选项卡不计为活动，因此废弃的选项卡无法使服务器保持活动状态；注释 POST 和正在运行的 `wait` 会执行此操作，因此带有等待其的代理的会话不会空闲。分离的服务器会在可以解决问题时监视所属的宿主进程，并且所有服务器会在空闲超时后退出。允许交互式 HTML。
 
-Write screens under:
+在以下位置写入屏幕：
 
 ```text
 <repo>/.context/compound-engineering/ce-prototype/<YYYY-MM-DD>-<run-slug>/
-  decisions.md               # run capsule for the next skill; not a plan
+  decisions.md # 运行胶囊以获得下一个技能；不是计划
   01-<question-slug>/
     screens/
       001-<variant>.html
-      img/blot.webp          # any assets the screen references, at the paths it uses
+      img/blot.webp # 屏幕在其使用的路径引用的任何资源
       world/cast/pip.webp
     state/
       display-info.json
-  02-<question-slug>/         # only when the run covers a second related question
+  02-<question-slug>/ # 仅当运行涵盖第二个相关问题时
     screens/
     state/
 ```
 
-The fallback root takes the same shape under `/tmp/compound-engineering-<uid>/ce-prototype/`. The capsule sits at the run directory and names each question directory; `--root` is always a question directory, never the run directory.
+后备根在 `/tmp/compound-engineering-<uid>/ce-prototype/` 下采用相同的形状。胶囊位于运行目录并命名每个问题目录； `--root` 始终是问题目录，而不是运行目录。
 
-## Handoff
+## 不可触摸
 
-Pick the browser that will load the prototype — one surface. Hand it the origin it will actually request. The helper prints `http://localhost:<port>`. Use that when that browser is on this machine. When it is not, start with `--host 0.0.0.0` and hand the explorer the helper's returned URL with only the host rewritten to one they can reach. Rewrite only the host. Do not also hand localhost. Visiting that origin sets the session cookie. Wait talks the bind address with the file token. Do not print the token. Binding every interface serves the run directory to anything that can reach the port; annotation and wait routes stay token-gated — do it only on a network the user trusts, and say so when you hand over the URL.
+选择将加载原型的浏览器 - 一个表面。将其实际请求的来源交给它。助手打印`http://localhost:<port>`。当该浏览器位于本机上时使用它。如果不是，则从 `--host 0.0.0.0` 开始，将助手返回的 URL 交给浏览器，仅将主机重写为他们可以到达的主机。仅重写主机。不要也手本地主机。访问该源会设置会话 cookie。等待将绑定地址与文件令牌进行对话。不要打印令牌。将每个接口服务的运行目录绑定到任何可以到达该端口的东西；注释和等待路由保持令牌门控——仅在用户信任的网络上执行，并在您移交 URL 时说明。
 
-Keep the server alive the way this host actually does. Detached `start` is the default. If this host reaps detached processes or the URL dies after the tool call, append `--foreground` through its long-running terminal.
+按照该主机实际的方式保持服务器处于活动状态。默认为分离 `start`。如果该主机在工具调用后捕获分离的进程或 URL 终止，请通过其长时间运行的终端附加 `--foreground`。
 
-If the helper path is unavailable or the platform cannot display a local URL cleanly, stop and report that. Do not settle the question in chat instead — a question that needs a real artifact to be decided is not answered by talking about it.
+如果辅助路径不可用或者平台无法干净地显示本地 URL，请停止并报告。不要在聊天中解决问题——一个需要真正的产物才能决定的问题不能通过谈论来回答。

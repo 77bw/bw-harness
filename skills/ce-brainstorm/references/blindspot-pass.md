@@ -1,70 +1,70 @@
-# Blindspot Pass
+# 盲点通行证
 
-The interview machinery in this skill assumes the user can evaluate what it asks. On territory the user doesn't know, that assumption fails: questions extract guesses, not requirements. The blindspot pass converts the user's unknown unknowns into known unknowns — it lays out the decisions the user will face in the flagged territory and the realistic options for each, so the user chooses among options they can now evaluate, instead of generating answers from nothing.
+该技能中的面试机制假设用户可以评估其询问的内容。在用户不知道的领域，该假设失败：问题提取猜测，而不是要求。盲点传递将用户的未知未知数转换为已知的未知数——它列出了用户将在标记的区域中面临的决策以及每个决策的现实选项，因此用户可以在他们现在可以评估的选项中进行选择，而不是从无到有生成答案。
 
-A blindspot pass is a decision map, not a tutorial. Test for every item: it must end in something the user will decide, delegate, or explicitly defer during this brainstorm. An item that feeds no decision is domain trivia — cut it.
+盲点传递是一个决策图，而不是教程。测试每个项目：它必须以用户在头脑风暴期间决定、委托或明确推迟的内容结束。领域琐事是无法做出任何决定的项目——删掉它。
 
-## Trigger
+## 扳机
 
-Two signals make the pass available:
+有两个信号使通行证可用：
 
-- **Opening signal** — the user explicitly flags missing working knowledge of the domain or the territory the topic touches: "I know nothing about X", "never touched the auth modules", "I don't know what's possible here", "I don't know what I should be asking".
-- **Mid-dialogue signal** — two consecutive answers show the user *cannot evaluate* the question's substance: "I don't know", "whatever you think", "you decide" in response to questions that need domain judgment.
+- **开放信号** - 用户明确标记缺少该主题涉及的领域或领域的工作知识：“我对 X 一无所知”，“从未接触过身份验证模块”，“我不知道这里可能发生什么”，“我不知道我应该问什么”。
+- **对话中信号** - 两个连续的答案显示用户*无法评估*问题的实质内容：“我不知道”、“无论你怎么想”、“你决定”来回答需要领域判断的问题。
 
-**Can't-evaluate vs. hasn't-decided — the guard against over-firing.** A user who understands the options but hasn't picked one needs the normal interview, not a teaching pass. Offer only when the signal shows the user cannot weigh the options at all. Offering a blindspot pass to a domain expert who is merely undecided is the failure mode; when the signal is ambiguous, keep interviewing.
+**无法评估与尚未决定 — 防止过度执行。** 了解选项但尚未选择的用户需要正常的面试，而不是教学通行证。仅当信号显示用户根本无法权衡选项时才提供。向尚未做出决定的领域专家提供盲点通行证是失败模式；当信号不明确时，继续采访。
 
-## The gate
+## 大门
 
-The offer is **territory-scoped, not conversation-wide**. Questions about the user's own problem, users, evidence, and priorities proceed normally — the user is the authority on those. The offer is made only before the first substantive question *into the flagged territory* (the domain or system area the user cannot evaluate).
+该优惠是**区域范围内的，而不是对话范围内的**。关于用户自己的问题、用户、证据和优先级的问题正常进行——用户是这些问题的权威。仅在第一个实质性问题*进入标记区域*（用户无法评估的域或系统区域）之前才提供报价。
 
-Never silently switch into teaching. The offer is a blocking question (Interaction Rule 4), asked once per flagged territory. If the user declines, do not re-offer for that territory — fill gaps with recommended defaults recorded as explicit assumptions, per the normal rigor-probe discipline.
+永远不要默默地转入教学。该提议是一个阻塞问题（交互规则 4），每个标记的区域询问一次。如果用户拒绝，则不要重新提供该地区的服务——按照正常的严格调查纪律，用记录为明确假设的推荐默认值来填补空白。
 
-**Non-interactive degradation:** in a pipeline or headless run where no user can answer, never make the offer — treat flagged territory exactly like a declined offer (recommended defaults recorded as explicit assumptions) and continue.
+**非交互式降级：**在没有用户可以回答的管道或无头运行中，永远不要提出要约 - 将标记的区域完全像拒绝的要约一样对待（建议的默认值记录为明确的假设）并继续。
 
-## Offer
+## 提供
 
-Use this wording, substituting the territory:
+使用以下措辞，替换领土：
 
-> Part of this sits in territory you've flagged as unfamiliar (<territory>). I can map out the decisions first — the ones you'll face there, the realistic options for each, and what I'd default to — so you're choosing rather than guessing. Or we keep going with questions and I fill gaps with defaults recorded as assumptions. Which do you prefer?
+> 其中一部分位于您标记为不熟悉的领域（<territory>）。我可以首先制定出决策——你将在那里面临的决策、每个决策的现实选择以及我默认的决策——所以你是在选择而不是猜测。或者我们继续提出问题，然后我用记录为假设的默认值来填补空白。你更喜欢哪一个？
 
-Two options: **Map the territory first** / **Proceed with questions** (defaults become assumptions).
+两个选项：**首先绘制领土地图**/**继续提出问题**（默认值变为假设）。
 
-## Building the map
+## 构建地图
 
-Ground it before writing it:
+写之前先接地：
 
-- **In-repo territory** (a module, subsystem, or pattern in this codebase): use the Phase 1.1 grounding — the scout's dossier and targeted reads. If the scout has not returned yet, wait for it or read the relevant area directly; do not map in-repo territory from model knowledge alone.
-- **External domain** (a technology, practice, or field outside the repo): research with whatever web tools are reachable. When none are, model knowledge is allowed, but label each such item **Unverified — from model knowledge, not checked against current sources**.
+- **仓库内区域**（此代码库中的模块、子系统或模式）：使用阶段 1.1 基础 — 侦察员的档案和目标读取。如果侦察兵还没有回来，等待它或者直接读取相关区域；不要仅根据模型知识来映射回购区域。
+- **外部域**（存储库之外的技术、实践或领域）：使用任何可访问的网络工具进行研究。如果没有，则允许模型知识，但标记每个此类项目**未经验证 - 来自模型知识，未根据当前来源进行检查**。
 
-**The territory closes questions the user should never be asked.** Before an item goes on the map, check whether the codebase or sources already answer it — if so, it is not a decision: show the question and the found answer with its citation as settled ground, not as an option menu. The map holds only what genuinely needs the user's judgment. But a question closed off-screen isn't closed — territory-answered items are shown, never silently resolved.
+**领域关闭了用户不应该被问到的问题。** 在某个项目出现在地图上之前，检查代码库或来源是否已经回答了它 - 如果是，则不是一个决定：将问题和找到的答案及其引用显示为解决的基础，而不是作为选项菜单。地图只包含真正需要用户判断的内容。但在屏幕外关闭的问题并没有被关闭——领域回答的项目会被显示出来，而永远不会默默地得到解决。
 
-While grounding, hunt hazards specifically: things that bite silently (wrong-by-default data, filters that pass bad rows, escaping that corrupts output), unwritten conventions the code enforces that no doc states, and half-built or reverted prior attempts at the same job — the reason a prior attempt died is usually the landmine.
+在接地时，特别要寻找危险：悄无声息地咬人的东西（默认错误的数据、通过坏行的过滤器、损坏输出的转义）、代码强制执行的不成文约定，没有文档说明，以及半构建或恢复先前对同一工作的尝试 - 先前尝试失败的原因通常是地雷。
 
-The map is **3-7 items**, delivered in chat. Each item is a **decision** the user will face or a **hazard** that constrains one, in at most 4 lines — an item that runs longer has started teaching instead of framing the decision; cut it back:
+该地图是 **3-7 项**，在聊天中交付。每个项目都是用户将面临的一个**决定**或一个限制一个的**危险**，最多 4 行 - 运行时间较长的项目已经开始教导而不是制定决策；削减它：
 
-- what the decision or hazard is, in the user's vocabulary — when a term of art is unavoidable, define it and name what knowing it unlocks the user to decide
-- why it matters *for this topic* — tie it to something the user said, not to the domain in general; a hazard states what it changes about the task
-- decisions only: the realistic options (2-4), one clause each on the trade-off that matters here — list only options you would defend if the user picked them; a menu padded with options the map itself rules out is a strawman, not a choice. An option you ruled out belongs in why-it-matters as one clause ("subdomain isolation is closed — single-domain config"), never in the menu
-- decisions only: the recommended default, stated plainly
+- 在用户的词汇中，决定或危险是什么——当一个艺术术语不可避免时，定义它并命名什么，知道它可以让用户做出决定
+- 为什么它对这个主题很重要——将其与用户所说的内容联系起来，而不是与一般的领域联系起来；危险说明了任务会发生什么变化
+- 仅决策：现实选项（2-4），每个条款都涉及此处重要的权衡 - 仅列出如果用户选择它们，您会捍卫的选项；菜单上填满了地图本身排除的选项，这是一个稻草人，而不是一个选择。您排除的一个选项属于“为什么重要”作为一个子句（“子域隔离已关闭 - 单域配置”），而不是在菜单中
+- 仅决策：建议的默认值，明确说明
 
-A hazard is not a vote — it gets no option menu and no default. When a hazard forces a choice among genuinely viable mitigations, that choice is its own decision item and the hazard is its why-it-matters.
+危险不是投票——它没有选项菜单，也没有默认值。当危险迫使人们在真正可行的缓解措施中做出选择时，该选择就是它自己的决策项，而危险就是它的重要性。
 
-The highest-stakes item goes first, not longer — depth belongs in the walk-through after the user selects it, not in the map.
+风险最高的项目首先出现，而不是更长的——深度属于用户选择它后的演练，而不是地图。
 
-Order items by how much the user's answer would change the product shape — architecture-changing decisions first, hazards and reversible choices last. Do not pad to 7; a territory with three real decisions gets three items.
+根据用户的答案会改变产品形状的程度来排序项目——首先是改变架构的决策，最后是危险和可逆的选择。不要填充到7；具有三个实际决策的领土将获得三个项目。
 
-## Re-entering the dialogue
+## 重新进入对话
 
-After the map, ask **one** multi-select blocking question (a legitimate Rule 3 compatible set): *"Which of these do you want to walk through now? Anything unselected takes the recommended default, recorded as an explicit assumption."*
+在地图之后，询问 **一个** 多选阻塞问题（合法的规则 3 兼容集）：*“您现在想要遍历其中哪一个？任何未选择的内容均采用建议的默认值，记录为明确的假设。”*
 
-Then:
+然后：
 
-- **Selected decisions** — walk through one per turn as informed single-select menus. Post-pass, menus over mapped options are the right form even where Rule 5 would normally prefer open-ended: the options no longer steer, they recall what was just taught.
-- **Unselected decisions and hazards** — record the recommended default (or the hazard's constraint) as an explicit assumption, the same way rigor-probe uncertainty is recorded: in the Product Contract on the software route, in the synthesis on the universal route.
-- **"I want to actually learn this one"** — offer a handoff to the `ce-explain` skill for that item (offer it; do not invoke it automatically); the brainstorm resumes when they return or continues with the default meanwhile.
+- **选定的决策** — 每轮浏览一个决策作为知情的单选菜单。即使规则 5 通常更喜欢开放式，通过后，映射选项上的菜单也是正确的形式：选项不再引导，他们会回忆起刚刚教过的内容。
+- **未选择的决策和危险** - 将建议的默认值（或危险的约束）记录为明确的假设，与记录严格探测不确定性的方式相同：在软件路线的产品合同中，在通用路线的综合中。
+- **“我想真正学习这个”** — 提供该项目的 `ce-explain` 技能的切换（提供它；不要自动调用它）；当他们返回时，头脑风暴会继续进行，或者同时继续默认。
 
-The pass never resolves decisions by itself and never replaces the dialogue. It runs once, converts blindspots into questions the user can answer, and the normal flow — rigor probes, approaches, synthesis — continues on informed ground.
+通行证本身永远不会解决决策，也永远不会取代对话。它运行一次，将盲点转化为用户可以回答的问题，并且正常的流程——严格的探索、方法、综合——在知情的基础上继续进行。
 
-## Universal route
+## 通用路线
 
-The pass applies unchanged on the non-software route (an unfamiliar craft, market, or process — "I need to grade this video but don't know what color grading is"). Grounding is web research or labeled model knowledge; delegated defaults land as named assumptions in the wrap-up synthesis instead of a Product Contract.
+该通行证在非软件路线上保持不变（不熟悉的工艺、市场或流程——“我需要对这个视频进行分级，但不知道什么是颜色分级”）。基础是网络研究或标记的模型知识；委托违约作为总结综合中的指定假设而不是产品合同。

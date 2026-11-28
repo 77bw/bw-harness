@@ -1,60 +1,60 @@
-# ce-debug — post-fix handoff (interactive)
+# ce-debug — 修复后切换（交互式）
 
-Loaded at Phase 4 when Phase 3 actually applied a fix in interactive mode. Not used in `mode:pipeline` (see `pipeline-mode.md`) and not used when the user chose "Diagnosis only". In both of those cases Phase 4 ends at the Debug Summary.
+在第 4 阶段加载，当时第 3 阶段实际在交互模式下应用了修复程序。在`mode:pipeline`中不使用（参见`pipeline-mode.md`），并且当用户选择“仅诊断”时不使用。在这两种情况下，第 4 阶段均在调试摘要处结束。
 
-The goal of these post-fix steps is a **PR-ready** fix, not merely a locally green one, while never letting polish or review reach outside the bug's scope.
+这些修复后步骤的目标是**PR-ready**修复，而不仅仅是本地绿色修复，同时绝不让完善或审查超出错误范围。
 
-## Post-fix polish and review steps (before commit or PR)
+## 修复后完善和审查步骤（提交之前或PR）
 
-**Contextual overrides first.** Check the user's original prompt, loaded memories, and the project's active instructions already in your context for explicit, clearly applicable preferences that conflict with automatic polish or review, such as "minimal hotfix only", "do not run review", "always ask before cleanup", or "ship the smallest possible diff". Honor them and state what was skipped.
+**首先进行上下文覆盖。** 检查用户的原始提示、加载的内存以及上下文中已有的项目活动指令，以获取与自动完善或审核相冲突的明确、明确适用的首选项，例如“仅最小修补程序”、“不运行审核”、“清理前始终询问”或“提供尽可能小的差异”。尊重他们并说明跳过的内容。
 
-**Skip review only when the change cannot affect behavior:** nothing it touches is run or loaded by anything, whether code, configuration, a dependency, or instruction text. Change size is not the test; a few lines of shared configuration can change every run. Simplify has its own threshold below. Keep the Phase 3 tests and self-review regardless, and carry any skip reason into the summary.
+**仅当更改不会影响行为时才跳过审查：**所涉及的任何内容都不会由任何内容运行或加载，无论是代码、配置、依赖项还是指令文本。改变尺寸不是测试；几行共享配置可以更改每次运行。简化有其自己的阈值如下。无论如何，保留第 3 阶段的测试和自我审查，并将任何跳过原因纳入摘要中。
 
-**Scope rule for both passes below: never let either pass reach work the user did not offer up.** Phase 3 recorded the fix-owned files (the files this fix changed) and which files were already dirty; that is the scope. Never widen it to the branch because the branch looks safe. A branch diff equals the fix scope only when the tree was clean anyway, so widening buys nothing there, and it silently swallows the user's WIP when the tree was not clean. Branch creation is not evidence of a clean tree: `git checkout -b` carries uncommitted work forward.
+**以下两个通道的范围规则：永远不要让任何一个通道达到用户未提供的工作。**第 3 阶段记录了修复拥有的文件（此修复更改的文件）以及哪些文件已经脏了；这就是范围。切勿将其扩大到分支，因为分支看起来很安全。无论如何，只有当树是干净的时候，分支差异才等于修复范围，所以扩大在那里什么也买不到，并且当树不干净时，它会默默地吞噬用户的WIP。分支创建并不是一棵干净的树的证据：`git checkout -b`将未承诺的工作向前推进。
 
-**Simplify before review when useful.** Invoke `ce-simplify-code` with `mode:pipeline` when the fix diff is non-mechanical and large enough to benefit (default: >=30 changed lines), touches multiple implementation files, introduces a new helper or abstraction, or affects shared or risky areas (auth/authz, public contracts, persistence, concurrency, background jobs, external services). Always pass the fix-owned files that were clean before Phase 3 as an explicit scope, never the branch diff, and the bug's regression test as `proof-test:<path>`. `ce-simplify-code` treats a named scope as authoritative and will not widen it, and it *modifies* what it is given, so a named scope is the guardrail. If a fix-owned file already had pre-existing user edits, skip it and record `Simplify: skipped for overlapping pre-existing edits`. File-level simplification could rewrite unrelated hunks the user did not authorize.
+**有用时在审查前进行简化。** 当修复差异是非机械的且足够大以受益时（默认值：> = 30 个更改行），使用 `mode:pipeline` 调用 `ce-simplify-code`，触及多个实现文件，引入新的帮助程序或抽象，或影响共享或有风险的区域（auth/authz，公共合同，持久性，并发，后台作业，外部服务）。始终将在第 3 阶段之前干净的修复拥有的文件作为显式范围传递，而不是分支差异，并将 bug 的回归测试作为 `proof-test:<path>`。 `ce-simplify-code` 将命名范围视为权威的，不会扩大它，并且它“修改”给定的内容，因此命名范围是护栏。如果修复拥有的文件已经有预先存在的用户编辑，则跳过它并记录 `Simplify: skipped for overlapping pre-existing edits`。文件级简化可能会重写用户未授权的不相关的块。
 
-**Review the final fix scope.** Review every fix the skip rule above does not exempt, unless review tooling is unavailable. Review covers the fix as it ships: when the fix changes after review ran, for any reason, review the changed part again before anything commits. Run default `ce-code-review` **only when its diff scope is known to be this fix**: the pre-fix tree was clean and you can pass `base:<pre-fix-HEAD>`. Review reads rather than writes, so a base-scoped diff is worth preferring where it is provably the fix. It is the one place the scope may come from a revision rather than the file list. On a pre-existing dirty branch or one with unrelated committed work, standalone review would reach outside the bug scope. In that case use the harness's lightweight review tool if it accepts an explicit file scope; otherwise review the fix-owned files manually and record `Code review: targeted manual due to unrelated branch work`. If `ce-code-review` is unavailable on an otherwise fix-only scope, fall back to the harness's lightweight review tool, else one explicit manual diff scan, and state that dedicated review was unavailable.
+**审查最终修复范围。** 审查上述跳过规则不排除的每个修复，除非审查工具不可用。审核涵盖了发布时的修复：当审核运行后修复发生更改时，出于任何原因，请在提交任何内容之前再次审核更改的部分。运行默认的`ce-code-review`**仅当已知其差异范围是此修复时**：前缀树是干净的，您可以传递`base:<pre-fix-HEAD>`。检查读取而不是写入，因此在可证明修复的情况下，值得优先选择基本范围的差异。这是范围可能来自修订版本而不是文件列表的地方。在预先存在的脏分支或具有不相关的已提交工作的分支上，独立审查将超出错误范围。在这种情况下，如果该工具接受明确的文件范围，请使用该工具的轻量级审查工具；否则手动检查修复拥有的文件并记录`Code review: targeted manual due to unrelated branch work`。如果 `ce-code-review` 在其他仅修复范围上不可用，请回退到宿主的轻量级审查工具，否则进行显式手动差异扫描，并声明专用审查不可用。
 
-**Handle residual findings before shipping.** Do not auto-open a PR with unresolved P0/P1 findings, or with findings whose fix needs a product/design decision. Ask whether to fix now, accept/defer durably, or stop. Accepted residuals must not live only in the session. If a PR will be opened, pass them to `ce-commit-push-pr` as a `## Unapplied review findings` checklist section (`- [ ] <severity> — <file:line> — <title>` per finding). On commit-only or stop, file a ticket per finding in the tracker detected in Phase 1.4, with enough background to action it standalone (the finding, why it matters, file:line, severity, a pointer to the review run, and the branch/head SHA so it points at the code even without a PR). Pick the destination and file it; do not ask which destination to use. When no tracker is reachable, name the accepted findings in the final summary and say plainly that nothing else recorded them.
+**在交付前处理残留的结果。** 不要自动打开未解决的 P0/P1 结果或需要 product/design 决定修复的结果的 PR。询问是否立即修复，accept/defer 持久修复，还是停止。接受的残差不能仅存在于会话中。如果将打开 PR，请将它们作为 `## Unapplied review findings` 检查表部分传递到 `ce-commit-push-pr`（每个发现`- [ ] <severity> — <file:line> — <title>`）。在仅提交或停止时，为阶段 1.4 中检测到的跟踪器中的每个发现提交一张票证，并有足够的背景来独立操作（发现、为什么重要、file:line、严重性、指向审核运行的指针以及branch/head SHA，因此即使没有PR，它也指向代码）。选择目的地并归档；不要询问要使用哪个目的地。当无法访问跟踪器时，请在最终摘要中列出已接受的发现，并明确表示没有其他任何记录。
 
-**Re-verify after these edits.** If simplification or review changed code, rerun the bug's regression test and any targeted checks those steps identified. Never proceed to commit or PR with a red tree.
+**在这些编辑后重新验证。**如果简化或审查更改的代码，请重新运行错误的回归测试并进行任何有针对性的检查所识别的步骤。切勿继续使用红树进行提交或PR。
 
-Then append this block below the Debug Summary, before the commit/PR handoff:
+然后将此块附加到调试摘要下方、commit/PR 切换之前：
 
 ```
 ## Post-Fix Quality
-**Scope**: [fix-only branch / base:<pre-fix-HEAD> / fix-owned files only / targeted manual due to unrelated branch work]
-**Simplify**: [ran/skipped + reason]
-**Review**: [ran/skipped/manual + outcome]
-**Residuals**: [none / unapplied review findings section for PR / filed as tracker tickets / stated in this summary only, no tracker reachable / blocked pending user decision]
-**Re-verification**: [checks rerun after tail edits]
+**范围**：[仅修复分支/基础：<pre-fix-HEAD>/仅修复拥有的文件/由于不相关的分支工作而导致的目标手册]
+**简化**：[ran/skipped+原因]
+**回顾**：[ran/skipped/manual + 结果]
+**残差**：[无/未应用PR的审查结果部分/作为跟踪票提交/仅在本摘要中说明，无法访问跟踪器/阻止待决的用户决定]
+**重新验证**：[检查尾部编辑后重新运行]
 ```
 
-## Commit / PR handoff detail
+## 提交/PR交接细节
 
-SKILL.md's Phase 4 **Routing** block defines the bare per-case actions: which skill runs, and what to do when no PR is possible. It stays there because it must apply even if this file is never read. This section carries only the detail that shapes those actions.
+SKILL.md 的第 4 阶段 **路由** 块定义了每种情况的基本操作：运行哪个技能，以及当没有 PR 可能时要做什么。它保留在那里，因为即使从未读取该文件，它也必须应用。本节仅包含塑造这些操作的细节。
 
-**Opening a PR is the default; do not ask for permission.** What varies the route is what else sits on the branch, never whether the user would approve. A branch carrying only this fix ships as a PR whether or not this skill created it.
+**默认打开一个PR；不请求许可。** 改变路线的是分支上的其他内容，而不是用户是否会批准。仅携带此修复的分支作为 PR 交付，无论此技能是否创建它。
 
-**Why a branch carrying unrelated work stops short of a push.** `ce-commit-push-pr` commits the changed files it finds, pushes the whole branch, and opens a PR spanning every commit on it. On a branch holding someone's in-progress work, that publishes what they never offered up, and hands that PR to `ce-babysit-pr`. The preview cannot catch this, because it does not wait for an answer. This is the same scope rule the polish steps above already apply to simplify and review; shipping gets no exemption from it.
+**为什么承载不相关工作的分支在推送之前停止。** `ce-commit-push-pr` 提交它找到的更改文件，推送整个分支，并打开一个跨越其上每次提交的 PR。在保存某人正在进行的工作的分支上，发布他们从未提供的内容，并将 PR 交给 `ce-babysit-pr`。预览无法捕捉到这一点，因为它不等待答案。这与上面的润色步骤已经适用于简化和审查的范围规则相同；航运不享有任何豁免。
 
-**Why the separable case acts and the entangled case asks.** Committing only the fix-owned files is safe and trivially reversible. The user who wanted exactly that pays no round trip, and the user who wanted the PR says one word. The routing offers the PR rather than asking permission for it. Entanglement is different in kind: when a fix-owned file already held the user's edits, every available move loses something real, and no default is defensible. Restricting the question to that state is what keeps it from becoming the reflexive prompt this routing exists to remove. Most runs reach neither state. A fresh branch or clean tree routes straight to the PR.
+**为什么能隔离就直接做，混杂才询问。** 只提交本次修复所属文件，既安全又容易撤销；需要 PR 时提供该选择，不先为整套发布重复确认。若修复文件已包含用户编辑，没有可不改变用户成果的默认做法，此时才询问。新分支或原来干净的工作树进入原生 PR 路线。
 
-**Contextual overrides come first.** An explicit, clearly applicable instruction such as "always review before pushing", "open PRs as drafts", "don't open PRs from skills", or "commit only" outranks the default routing: skip the PR step, adjust it, or stop, whichever matches what the user said. A vague tonal cue is not an override.
+**上下文覆盖优先。** 明确、明确适用的指令，例如“在推送之前始终进行审查”、“将 PRs 作为草稿打开”、“不要从技能中打开 PRs”或“仅提交”优先于默认路由：跳过 PR 步骤，调整它或停止，以与用户所说的匹配为准。模糊的音调提示不是覆盖。
 
-**The preview is not a question.** State what gets committed, on what branch, and that a PR will be opened, then proceed without waiting. It exists so the user can interrupt.
+**预览不是问题。** 说明在哪个分支上提交了什么，以及将打开 PR，然后无需等待即可继续。它的存在是为了让用户可以中断。
 
-**`branding:on` is required.** The explicit branding signal records that `ce-debug` produced the fix. A handoff without it loses that provenance.
+**`branding:on` 是必需的。** 显式品牌信号记录了`ce-debug` 产生了修复。没有它的切换就会失去该来源。
 
-**Link what already exists; never open a new record.** Reference the issue of record from Phase 0, plus any existing ticket Phase 1.4 found for this same bug. Linking something that already exists is always fine, and on an auto-closing tracker it is how the fix closes it. What is forbidden is *creating* a record for this bug. Do not open a ticket in a different system because the repo happens to use it, and do not ask the user whether you should. A Sentry issue, an alert, or a GitHub issue is as much the record as a Linear or Jira ticket, and a duplicate is noise the user then has to close. When Phase 0 found no issue of record (a pasted stack trace, a failing test), this run has none. Ship the fix without one rather than opening a ticket to fill the slot. A new ticket is warranted only for a *different* problem you found along the way, per the residual rule above.
+**链接已经存在的内容；永远不要打开新记录。** 参考阶段 0 中的记录问题，以及针对同一错误发现的任何现有票证阶段 1.4。链接已经存在的东西总是好的，在自动关闭跟踪器上，这就是修复关闭它的方式。禁止的是为此错误“创建”记录。不要在不同的系统中打开票证，因为存储库碰巧使用它，并且不要询问用户是否应该。 Sentry 问题、警报或 GitHub 问题与 Linear 或 Jira 票证一样都是记录，而重复的问题则是用户必须关闭的噪音。当阶段 0 没有发现记录问题（粘贴的堆栈跟踪、失败的测试）时，此运行没有记录问题。在没有修复程序的情况下发送修复程序，而不是开一张票来填补空缺。根据上述剩余规则，仅针对您在此过程中发现的“不同”问题才需要一张新票。
 
-**Issue auto-close syntax.** When the issue you are linking lives in a tracker with auto-close support, include that tracker's syntax in the location it requires, so the fix flows back to the issue and closes it on merge. Most trackers parse PR descriptions (`Fixes #N` for GitHub, `Closes ABC-123` for Linear), but some parse only commit messages (Jira Smart Commits). When the record has no such syntax (an error monitor like Sentry, or a pasted alert), just link it in the PR description and say what the fix addresses.
+**问题自动关闭语法。** 当您链接的问题存在于支持自动关闭的跟踪器中时，请将该跟踪器的语法包含在它需要的位置，以便修复流回问题并在合并时将其关闭。大多数跟踪器解析 PR 描述（`Fixes #N` 代表 GitHub，`Closes ABC-123` 代表线性），但有些跟踪器仅解析提交消息（Jira 智能提交）。当记录没有这样的语法（像 Sentry 这样的错误监视器，或粘贴的警报）时，只需将其链接到 PR 描述中并说明修复地址。
 
-## Learning-capture criteria (before anything commits)
+## 学习捕获标准（在提交任何内容之前）
 
-Offer once when the diagnosis or fix corrected a wrong belief about how something behaves: a first hypothesis the evidence disproved, a cause other than the one the symptom pointed to, a review finding that exposed a real defect, or an assumption or document that turned out wrong. Skip silently when the cause was evident from the symptom and the first fix held.
+当诊断或修复纠正了对某事物行为方式的错误信念时，提供一次：证据反驳的第一个假设、症状所指出的原因之外的原因、暴露真正缺陷的审查结果，或者结果是错误的假设或文件。当从症状中明显看出原因并且第一个修复成功时，请默默地跳过。
 
-Do not judge whether the lesson deserves a document: `ce-compound` decides whether it qualifies and what holds it (a test, a lint rule, a coding standard, or a learning), and writes nothing when nothing qualifies.
+不要判断该课程是否值得记录：`ce-compound` 决定它是否合格以及它的内容（测试、lint 规则、编码标准或学习），并且当没有任何合格时不写任何内容。
 
-These are the criteria only; SKILL.md's Routing block defines what runs when the user accepts.
+这些只是标准； SKILL.md 的路由块定义了用户接受时运行的内容。

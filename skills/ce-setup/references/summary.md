@@ -1,13 +1,13 @@
-# Setup summary (Phase 3)
+# 设置摘要（第 3 阶段）
 
-The summary lets a user who skimmed the run see what they gained and what to do next.
+摘要让浏览过运行的用户了解他们获得了什么以及下一步该做什么。
 
-- Open with what changed for them, in one plain sentence.
-- For each change, say what it does for the user, not only which file moved. Where a change carries content, such as new rules in a standards file, quote a few of them with their source.
-- Keep what the user declined apart from what needed no change.
-- For each config file Step 5a looked at, say which happened: rebuilt or cut down, declined, refused with the reason, already current, or left alone because a newer plugin wrote it. Name each setting it removed, migrated, or renamed, with its reason, including the setting that replaced it. Without that line the user cannot learn what to use instead. If the refresh could not run, say why and what would let it run. Name any unrecognized setting it kept.
-- Name missing optional tools as optional, not as failures, and say to install them only for the workflows the user runs. Do not offer a bulk install: the diagnostic already printed each install command or project URL.
-- Name the files left uncommitted. The closing question offers to commit them, so leave committing out of the to-do list.
-- List what the user still has to do, most important first. Put first any step without which a new file has no effect, such as a reviewer that does not read it yet.
+- 用一个简单的句子来讲述他们发生的变化。
+- 对于每个更改，请说明它为用户做了什么，而不仅仅是移动了哪个文件。如果更改包含内容，例如标准文件中的新规则，请引用其中的一些内容及其来源。
+- 将用户拒绝的内容与不需要更改的内容分开。
+- 对于第 5a 步查看的每个配置文件，说出发生的情况：重建或削减、拒绝、拒绝并给出原因、已经是当前的、或者因为更新的插件编写了它而被保留。命名它删除、迁移或重命名的每个设置及其原因，包括替换它的设置。如果没有该行，用户将无法了解要使用什么。如果刷新无法运行，请说明原因以及什么可以让它运行。说出它保留的任何无法识别的设置。
+- 将缺少的可选工具命名为可选工具，而不是失败工具，并表示仅为用户运行的工作流程安装它们。不提供批量安装：诊断已打印每个安装命令或项目 URL。
+- 命名未提交的文件。最后一个问题提出要提交这些内容，因此请将提交排除在待办事项列表之外。
+- 列出用户还需要做的事情，首先是最重要的。首先放置新文件没有效果的任何步骤，例如尚未阅读该文件的审查者。
 
-When setup left changes uncommitted, close with a question after the two closing lines in SKILL.md: commit them and open a pull request, commit only, or leave them for the user to review first. Run `ce-commit-push-pr` or `ce-commit` for the user's choice.
+当安装程序未提交更改时，请在 SKILL.md 中的两行结束行后以问题结束：提交它们并打开拉取请求、仅提交或留给用户首先查看。运行`ce-commit-push-pr`或`ce-commit`供用户选择。

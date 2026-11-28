@@ -1,54 +1,56 @@
 ---
 name: ce-worktree
-description: Set up isolated git worktrees — create a new branch for fresh work, or attach a worktree to an existing branch, PR, or commit. Use when starting isolated work or isolating an existing ref.
+description: "设置独立的 git 工作树 — 为新工作创建一个新分支，或将工作树附加到现有分支、PR 或提交。在开始隔离工作或隔离现有参考时使用。"
 ---
 
-# Worktree Isolation
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Ensure the current work happens in an isolated workspace, without disturbing the user's main checkout. Most coding harnesses now create a worktree by default at session start, so the common case is that **isolation already exists**.
+# 工作树隔离
 
-**Done when:** the caller is working in an isolated tree — existing or newly created — and its path and branch have been reported, or a blocker has been reported instead.
+确保当前工作在隔离的工作空间中进行，而不会干扰用户的主要结帐。现在，大多数编码工具在会话启动时默认创建一个工作树，因此常见的情况是**隔离已经存在**。
 
-**Order of operations: detect existing isolation -> prefer a native worktree tool -> fall back to plain git.** Never create a worktree the harness cannot see.
+**完成时间：**调用者正在一棵孤立的树中工作（现有的或新创建的），并且其路径和分支已被报告，或者已报告阻塞程序。
 
-**Two modes, set by the caller's need:**
+**操作顺序：检测现有隔离 -> 更喜欢本机工作树工具 -> 回退到普通 git。** 切勿创建宿主无法看到的工作树。
 
-- **New work (default).** No ref named — create a fresh branch from a base (trunk). This is what `ce-work` and `ce-code-review` use when the user picks the worktree option.
-- **Isolate an existing ref.** The caller names a PR head, branch, or commit — attach the worktree to that ref instead of creating a new branch. **A branch can be checked out in only one worktree at a time.** If the named ref is already checked out anywhere (most commonly as the primary checkout's current branch), do **not** create a second worktree — report that it is already checked out at `<path>` and let the caller act (work there in place; or, only if a clean separate tree is essential, create a *detached* worktree at the same commit).
+**两种模式，根据调用者的需要设置：**
 
-## Step 0: Detect existing isolation
+- **新工作（默认）。** 没有命名的引用 - 从基础（主干）创建一个新分支。这是当用户选择工作树选项时 `ce-work` 和 `ce-code-review` 使用的内容。
+- **隔离现有引用。** 调用者命名 PR 头、分支或提交 - 将工作树附加到该引用，而不是创建新分支。 **一个分支一次只能在一个工作树中检出。**如果指定的引用已经在任何地方检出（最常见的是主检出的当前分支），则不要**创建第二个工作树 - 报告它已经在 `<path>` 处检出并让调用者执行操作（就地工作；或者，仅当必须有一个干净的单独树时，才在同一提交中创建一个*分离的*工作树）。
 
-Compare the **resolved absolute** git dir against the **resolved absolute** common git dir. Git mixes absolute and relative forms depending on the current directory (from a subdirectory of a normal checkout, `--git-dir` comes back absolute while `--git-common-dir` may be relative), so a raw string compare yields a false "already isolated":
+## 第 0 步：检测现有隔离
+
+将 **已解析的绝对** git 目录与 **已解析的绝对** 常见 git 目录进行比较。 Git 根据当前目录混合绝对和相对形式（从正常检出的子目录，`--git-dir` 返回绝对形式，而 `--git-common-dir` 可能是相对形式），因此原始字符串比较会产生错误的“已隔离”：
 
 ```bash
 git rev-parse --absolute-git-dir                     # absolute git dir for this worktree
 (cd "$(git rev-parse --git-common-dir)" && pwd -P)   # absolute shared (common) git dir
 ```
 
-**Equal** -> normal checkout; continue to Step 1.
+**等于** -> 正常结账；继续执行步骤 1。
 
-**Different** -> a linked worktree *or* a submodule. Distinguish with `git rev-parse --show-superproject-working-tree`:
+**不同** -> 链接的工作树*或*子模块。与`git rev-parse --show-superproject-working-tree`区分：
 
-- **Non-empty** -> submodule; treat it as a normal checkout and continue to Step 1.
-- **Empty** -> **already isolated**. Report the worktree path (`git rev-parse --show-toplevel`) and current branch, then **work in place** — a worktree-from-worktree lands in the wrong tree and is invisible to the harness that made the current one. In isolate-an-existing-ref mode, check that ref out here (unless it is already current) rather than nesting a worktree.
+- **非空** -> 子模块；将其视为正常结帐并继续执行步骤 1。
+- **空** -> **已隔离**。报告工作树路径 (`git rev-parse --show-toplevel`) 和当前分支，然后**就地工作** — 工作树到工作树落在错误的树中，并且对于生成当前树的宿主来说是不可见的。在隔离现有引用模式下，检查此处的引用（除非它已经是当前的）而不是嵌套工作树。
 
-## Step 1: Prefer the harness's native worktree tool
+## 第 1 步：首选宿主的本机工作树工具
 
-If the harness provides a native worktree primitive — for example an `EnterWorktree` / `WorktreeCreate` tool, a `/worktree` command, or a `--worktree` flag — use it and stop. Native tools place, track, and clean up the worktree so the harness can manage it. A behind-the-back `git worktree add` creates phantom state the harness cannot see, navigate to, or clean up.
+如果宿主提供了本机工作树基元 - 例如 `EnterWorktree` / `WorktreeCreate` 工具、`/worktree` 命令或 `--worktree` 标志 - 使用它并停止。本机工具放置、跟踪和清理工作树，以便宿主可以对其进行管理。背后的`git worktree add`会创建宿主无法看到、导航或清理的幻象状态。
 
-## Step 2: Git fallback
+## 步骤 2：Git 后备
 
-Only when there is no native tool **and** Step 0 found no existing isolation.
+仅当没有本机工具**且**步骤 0 发现不存在现有隔离时。
 
-1. **Run from the repo root:** `cd "$(git rev-parse --show-toplevel)"`. The paths below are repo-root-relative, but the skill runs from the user's current directory — without this, `.worktrees/<branch>` and the `.gitignore` edit land in a subdirectory (e.g. `src/.worktrees/...`).
-2. Choose a meaningful branch name from the work description (e.g. `feat/login`, `fix/email-validation`) — never an opaque auto-generated one. Base: origin's default branch, else `main`.
-3. **Ensure `.worktrees/` is gitignored before creating anything:** `git check-ignore -q .worktrees/` — **with the trailing slash**, so an existing directory-only `.worktrees/` rule is honored even before the directory exists (without the slash the probe misses it and dirties a correctly-configured repo). Not ignored -> add a `.worktrees/` line to `.gitignore`.
-4. Refresh the base with `git fetch origin <from-branch>`. This is **non-fatal** — no `origin` remote, a differently-named remote, or a local-only branch is not an abort; continue with the local ref.
-5. Create the worktree, per mode:
-   - **New work:** `git worktree add -b <branch-name> .worktrees/<branch-name> origin/<from-branch>` (use the local `<from-branch>` ref if `origin/<from-branch>` does not exist).
-   - **Existing branch or tag:** `git worktree add .worktrees/<slug> <target-ref>`.
-   - **PR:** check it out on a **local branch** — `git fetch origin pull/<n>/head:pr-<n>` then `git worktree add .worktrees/pr-<n> pr-<n>`. Never a detached `FETCH_HEAD`: that orphans the fix loop's commits instead of updating the PR. (For push-tracking back to the PR, create it detached — `git worktree add --detach .worktrees/pr-<n>` — then `cd` in and run `gh pr checkout <n>`, which is fork-safe.)
-   - If git reports the ref is already checked out elsewhere, apply the one-branch-one-worktree rule above — do not force a second worktree.
-6. `cd` into it, then report the path and branch.
+1. **从存储库根运行：** `cd "$(git rev-parse --show-toplevel)"`。下面的路径是相对于 repo-root 的，但技能从用户的当前目录运行 - 如果没有这个，`.worktrees/<branch>` 和 `.gitignore` 编辑将位于子目录中（例如 `src/.worktrees/...`）。
+2. 从工作描述中选择一个有意义的分支名称（例如 `feat/login`、`fix/email-validation`）——切勿使用不透明的自动生成名称。 Base：origin 的默认分支，否则`main`。
+3. **确保在创建任何内容之前 gitignored `.worktrees/`：** `git check-ignore -q .worktrees/` — **带有尾部斜杠**，因此即使在目录存在之前，也会遵守现有的仅目录 `.worktrees/` 规则（没有斜杠，探测器会错过它并弄脏正确配置的存储库）。不忽略 -> 将 `.worktrees/` 行添加到 `.gitignore`。
+4. 用 `git fetch origin <from-branch>` 刷新底座。这是**非致命** - 没有 `origin` 远程、不同名称的远程或仅限本地的分支都不是中止；继续使用本地参考。
+5. 按模式创建工作树：
+   - **新工作：** `git worktree add -b <branch-name> .worktrees/<branch-name> origin/<from-branch>`（如果`origin/<from-branch>`不存在，则使用本地`<from-branch>`引用）。
+   - **现有分支或标签：** `git worktree add .worktrees/<slug> <target-ref>`。
+   - **PR：**在**本地分支**上查看 - `git fetch origin pull/<n>/head:pr-<n>` 然后`git worktree add .worktrees/pr-<n> pr-<n>`。永远不要分离的`FETCH_HEAD`：孤立修复循环的提交而不是更新PR。 （为了推回PR，创建分离的`git worktree add --detach .worktrees/pr-<n>`—然后创建`cd`并运行`gh pr checkout <n>`，这是分叉安全的。）
+   - 如果 git 报告该引用已在其他地方签出，请应用上面的一分支一工作树规则 - 不要强制使用第二个工作树。
+6. `cd`进入其中，然后报告路径和分支。
 
-If `git worktree add` fails with a sandbox or permission error, the requested isolation does not exist. Do **not** proceed in the current checkout — the user chose isolation specifically to avoid it. Report the failure and ask, offering options such as "work in the current checkout" vs "stop and resolve the permission issue", using the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Only when no such tool is in the list or a real question call errors, present the numbered options in chat and wait for the reply. Never skip the confirmation, and do not retry alternative paths automatically.
+如果 `git worktree add` 因沙箱或权限错误而失败，则请求的隔离不存在。不要**继续当前结账——用户专门选择了隔离来避免这种情况。报告失败并询问，提供“在当前结账中工作”与“停止并解决权限问题”等选项，使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才在聊天中显示编号的选项并等待回复。切勿跳过确认，也不要自动重试替代路径。

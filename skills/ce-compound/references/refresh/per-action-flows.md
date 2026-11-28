@@ -1,97 +1,97 @@
-# Per-Action Flows
+# 每个动作的流程
 
-Read this reference when executing Phase 4. Find the section matching the action classified in Phase 2 and confirmed in Phase 3 (Keep, Update, Consolidate, Replace, or Delete) and follow that flow.
+执行阶段 4 时请阅读此参考。找到与阶段 2 中分类并在阶段 3 中确认的操作相匹配的部分（保留、更新、合并、替换或删除），然后遵循该流程。
 
-## Keep Flow
+## 保持流畅
 
-No file edit by default; the one exception is clearing an earlier stale mark (`references/refresh/investigate.md`). Summarize why the learning remains trustworthy.
+默认不编辑文件；唯一的例外是清除较早的陈旧标记 (`references/refresh/investigate.md`)。总结为什么学习仍然值得信赖。
 
-## Update Flow
+## 更新流程
 
-Apply in-place edits only when the solution is still substantively correct.
+仅当解决方案仍然基本正确时才应用就地编辑。
 
-Examples of valid in-place updates:
+有效就地更新的示例：
 
-- Rename `app/models/auth_token.rb` reference to `app/models/session_token.rb`
-- Update `module: AuthToken` to `module: SessionToken`
-- Fix outdated links to related docs
-- Refresh implementation notes after a directory move
-- Relocate a doc whose directory and frontmatter category unambiguously disagree (see Relocation below)
-- Cut claims a named artifact states, keeping one line that points to it (`references/refresh/worth-audit.md`)
+- 将 `app/models/auth_token.rb` 引用重命名为 `app/models/session_token.rb`
+- 将`module: AuthToken`更新为`module: SessionToken`
+- 修复相关文档的过时链接
+- 目录移动后刷新实施说明
+- 重新定位目录和 frontmatter 类别明确不一致的文档（请参阅下面的重新定位）
+- Cut 声明一个已命名的产物状态，保留一条指向它的线 (`references/refresh/worth-audit.md`)
 
-Examples that should **not** be in-place updates:
+**不**应该是就地更新的示例：
 
-- Fixing a typo with no effect on understanding
-- Rewording prose for style alone
-- Small cleanup that does not materially improve accuracy or usability
-- The old fix is now an anti-pattern
-- The system architecture changed enough that the old guidance is misleading
-- The troubleshooting path is materially different
+- 修正错字但不影响理解
+- 仅仅为了风格而改写散文
+- 小的清理不会实质性地提高准确性或可用性
+- 旧的修复现在是一种反模式
+- 系统架构发生了足够大的变化，旧的指导具有误导性
+- 故障排除路径有很大不同
 
-Those cases require **Replace**, not Update.
+这些情况需要**替换**，而不是更新。
 
-### Relocation (Update variant)
+### 搬迁（更新变体）
 
-Relocate only when the misfiling is unambiguous: the doc's directory and its frontmatter category disagree, or the content plainly belongs in a different **existing** category. A mismatch proves something is wrong but not which side — read the content and decide whether the directory is wrong (relocate) or the frontmatter is wrong (fix the frontmatter in place; that is an ordinary Update, not a move). Never create a new category directory for a relocation, and never relocate on a judgment call — placement has no ground truth, and a move a later run could argue back is churn.
+仅当错误归档明确时才重新定位：文档的目录与其 frontmatter 类别不一致，或者内容明显属于不同的 **现有** 类别。不匹配证明有问题，但不是哪一边——阅读内容并确定是目录错误（重新定位）还是 frontmatter 错误（修复 frontmatter 到位；这是普通更新，而不是移动）。永远不要为重新定位创建新的类别目录，也永远不要根据判断进行重新定位——放置没有基本事实，并且稍后运行可能会反驳的移动是流失。
 
-In non-interactive mode, apply the relocation only when all four conditions hold, mirroring the auto-delete pattern: (1) frontmatter and directory disagree per the category mapping, (2) content evidence clearly resolves the direction as directory-wrong, (3) the target category directory already exists, (4) every inbound citation is in-repo and mechanically rewritable. If any condition fails — including content that plausibly fits either category — record the relocation (doc, proposed target, which condition failed) under Recommended instead of moving.
+在非交互模式下，仅当所有四个条件都成立时才应用重定位，反映自动删除模式：(1) frontmatter 和目录在类别映射方面不一致，(2) 内容证据明确将方向解析为目录错误，(3) 目标类别目录已存在，(4) 每个入站引用都是存储库内的且可机械重写。如果任何条件失败（包括似乎适合任一类别的内容），请在“推荐”下记录重新定位（文档、建议的目标、哪个条件失败），而不是移动。
 
-1. Confirm the target category directory exists.
-2. Move the file with `git mv` so history follows the rename.
-3. Reconcile frontmatter category metadata with the new location.
-4. Rewrite inbound links across the repo's markdown, including catalog rows in README files.
-5. Re-check the moved doc's **outgoing** relative links — the move changed their resolution base, so a `../category/doc.md` that resolved before now dangles. Run the bundled claims validator (`scripts/validate-doc-claims.py`, invoked as in the Replace flow) on the moved doc, or inspect its relative links manually, and rewrite any that no longer resolve before completing the relocation.
+1. 确认目标类别目录存在。
+2. 使用 `git mv` 移动文件，以便历史记录跟随重命名。
+3. 使 frontmatter 类别元数据与新位置保持一致。
+4. 重写存储库Markdown中的入站链接，包括 README 文件中的目录行。
+5. 重新检查移动文档的 **传出** 相对链接 - 移动改变了它们的解析基础，因此之前解析的 `../category/doc.md` 现在悬空。在移动的文档上运行捆绑的声明验证器（`scripts/validate-doc-claims.py`，在替换流程中调用），或手动检查其相关链接，并在完成重定位之前重写任何不再解析的链接。
 
-## Consolidate Flow
+## 整合流量
 
-The orchestrator handles consolidation directly (no subagent needed — the docs are already read and the merge is a focused edit). Process Consolidate candidates by topic cluster. For each cluster identified in Phase 1.75:
+编排器直接处理合并（不需要子代理 - 文档已被读取并且合并是集中编辑）。流程按主题集群合并候选者。对于阶段 1.75 中确定的每个集群：
 
-1. **Confirm the canonical doc** — the broader, more current, more accurate doc in the cluster.
-2. **Extract unique content** from the subsumed doc(s) — anything the canonical doc does not already cover. This might be specific edge cases, additional prevention rules, or alternative debugging approaches.
-3. **Merge unique content** into the canonical doc in a natural location. Do not just append — integrate it where it logically belongs. If the unique content is small (a bullet point, a sentence), inline it. If it is a substantial sub-topic, add it as a clearly labeled section.
-4. **Update cross-references** — if any other docs reference the subsumed doc, update those references to point to the canonical doc. Catalog rows in README files are inventory, not citations: the invariant is that after consolidation the canonical doc has exactly one row and the subsumed doc has none. When both docs had rows, remove the subsumed row (folding any unique description into the canonical row); when only the subsumed doc had a row, repoint that row to the canonical doc (path and description) instead of deleting the catalog's only entry for the surviving content. READMEs are excluded as review candidates, but their rows are maintained mechanically whenever an action removes, renames, or moves a doc they list.
-5. **Delete the subsumed doc.** Do not archive it, do not add redirect metadata — just delete the file. Git history preserves it.
+1. **确认规范文档** — 集群中更广泛、更最新、更准确的文档。
+2. **从包含的文档中提取独特的内容** - 规范文档尚未涵盖的任何内容。这可能是特定的边缘情况、附加的预防规则或替代的调试方法。
+3. **将独特内容**合并到自然位置的规范文档中。不要只是追加——将其集成到其逻辑所属的位置。如果独特的内容很小（一个要点、一个句子），请将其内联。如果它是一个重要的子主题，请将其添加为明确标记的部分。
+4. **更新交叉引用** - 如果任何其他文档引用了包含的文档，请更新这些引用以指向规范文档。 README 文件中的目录行是清单，而不是引文：不变的是，合并后规范文档只有一行，而包含的文档则没有。当两个文档都有行时，删除包含的行（将任何唯一的描述折叠到规范行中）；当只有包含的文档有一行时，将该行重新指向规范文档（路径和描述），而不是删除目录中剩余内容的唯一条目。自述文件被排除在审查候选项之外，但每当操作删除、重命名或移动它们列出的文档时，它们的行都会被机械维护。
+5. **删除包含的文档。** 不要存档它，不要添加重定向元数据 - 只需删除该文件。 Git历史保留了它。
 
-If a doc cluster has 3+ overlapping docs, process pairwise: consolidate the two most overlapping docs first, then evaluate whether the merged result should be consolidated with the next doc.
+如果文档集群有 3 个以上重叠文档，则成对处理：首先合并两个最重叠的文档，然后评估合并结果是否应与下一个文档合并。
 
-After the merge, run the mechanical claims check on the canonical doc (step 4 of the Replace flow below) — merged content brings its citations with it, and consolidation is where cross-references most often dangle.
+合并后，对规范文档运行机械声明检查（下面的替换流程的步骤 4）——合并的内容会带来其引用，而合并是交叉引用最常出现的地方。
 
-**Structural edits beyond merge:** Consolidate also covers the reverse case — one doc holding multiple genuinely independent problems. That case runs the Split Flow below.
+**合并之外的结构编辑：** Consolidate 还涵盖相反的情况 - 一个文档包含多个真正独立的问题。该案例运行下面的拆分流程。
 
-## Split Flow
+## 分流
 
-Split is the inverse of Consolidate: one multi-problem doc becomes N focused successors. The bar is high — splitting doubles drift surface, the exact risk consolidation exists to remove. Split only when the Retrieval-Value Test inverts: a maintainer searching for one sub-topic would be materially harmed by wading through the other content, and each fragment has independent retrieval value. Length alone is never a reason.
+拆分是合并的逆过程：一个多问题文档成为 N 个集中的后继文档。门槛很高——分裂使漂移面加倍，存在需要消除的确切风险整合。仅当检索价值测试反转时才进行拆分：搜索一个子主题的维护者会因翻阅其他内容而受到重大损害，并且每个片段都有独立的检索价值。长度从来都不是理由。
 
-In non-interactive mode, do not split; record the recommendation (doc, proposed fragment boundaries, evidence) under Recommended.
+非交互模式下，不拆分；在“推荐”下记录推荐（文档、建议的片段边界、证据）。
 
-Process splits **one at a time, sequentially**, reusing the Replace machinery:
+进程分裂**一次一个，按顺序**，重用替换机制：
 
-1. Spawn a single subagent to write the successor docs. Pass it the original's full content, the sub-topic boundaries identified during investigation, the target paths and categories, and the same three contract files the Replace flow passes (`references/schema.yaml`, `references/yaml-schema.md`, `assets/resolution-template.md`). Shared context that every fragment needs (root cause, environment, background) is duplicated into each successor, not cross-referenced — each fragment must stand alone.
-2. Validate every successor exactly as in Replace flow steps 3-4: parser-safe frontmatter via `scripts/validate-frontmatter.py`, then the mechanical claims check via `scripts/validate-doc-claims.py`, with the same fallback behavior when a script is not resolvable.
-3. Rewrite inbound links so each citation points at the fragment that carries the cited content; a citation that spans fragments points at the most relevant one. Update catalog rows in README files.
-4. The orchestrator deletes the original. Git history preserves it.
+1. 生成一个子代理来编写后续文档。向其传递原始的完整内容、调查过程中确定的子主题边界、目标路径和类别以及替换流程传递的相同三个合同文件（`references/schema.yaml`、`references/yaml-schema.md`、`assets/resolution-template.md`）。每个片段需要的共享上下文（根本原因、环境、背景）被复制到每个后继片段中，而不是交叉引用——每个片段必须独立。
+2. 完全按照替换流程步骤 3-4 中的方式验证每个后继者：通过 `scripts/validate-frontmatter.py` 进行解析器安全的 frontmatter，然后通过 `scripts/validate-doc-claims.py` 进行机械声明检查，当脚本不可解析时，具有相同的后备行为。
+3. 重写入站链接，使每个引用都指向携带引用内容的片段；跨片段的引用指向最相关的一个。更新 README 文件中的目录行。
+4. 协调器删除原始内容。 Git历史保留了它。
 
-## Replace Flow
+## 更换流程
 
-Process Replace candidates **one at a time, sequentially**. Each replacement is written by a subagent to protect the main context window.
+流程 替换候选人**一次一个，按顺序**。每个替换都是由子代理编写的，以保护主上下文窗口。
 
-When a replacement is needed, read the documentation contract files and pass their contents into the replacement subagent's task prompt:
+当需要替换时，阅读文档合同文件并将其内容传递到替换子代理的任务提示中：
 
-- `references/schema.yaml` — frontmatter fields and enum values
-- `references/yaml-schema.md` — category mapping
-- `assets/resolution-template.md` — section structure
+- `references/schema.yaml` — frontmatter 字段和枚举值
+- `references/yaml-schema.md` — 类别映射
+- `assets/resolution-template.md` — 截面结构
 
-Do not let replacement subagents invent frontmatter fields, enum values, or section order from memory.
+不要让替换子代理从内存中发明 frontmatter 字段、枚举值或节顺序。
 
-**When evidence is sufficient:**
+**当证据充足时：**
 
-1. Spawn a single subagent to write the replacement learning. Pass it:
-   - The old learning's full content
-   - A summary of the investigation evidence (what changed, what the current code does, why the old guidance is misleading)
-   - The target path and category (same category as the old learning unless the category itself changed). The replacement chooses `component`/`root_cause` under the corpus-first rule in `references/yaml-schema.md`, counting the old learning as one of the corpus's docs (so its `component` counts for the area, and its `root_cause` counts only for the cause it describes)
-   - The relevant contents of the three support files listed above
-2. The subagent writes the new learning using the support files as the source of truth: `references/schema.yaml` for frontmatter fields and enum values, `references/yaml-schema.md` for category mapping and YAML-safety rules for array items, and `assets/resolution-template.md` for section order. It should use dedicated file search and read tools if it needs additional context beyond what was passed. Pass it this citation rule in its prompt: cite code by the file and the function, class, or config key that defines the behavior, read on the default branch, and add a line number only when no name identifies the spot, because line numbers go stale whenever code above them moves.
-3. **Validate parser-safety of the new learning's frontmatter** to catch silent-corruption issues the prose rules miss: malformed `---` delimiter lines, unquoted ` #` in scalar values (silent comment truncation), and unquoted `: ` in scalar values (silent mapping confusion). The bundled validator ships **inside the skill bundle**; set `SKILL_DIR` to the absolute path of the directory containing this skill's SKILL.md and run it through an existence guard so platforms that cannot locate the script fall back to a manual check instead of silently skipping the protection:
+1. 生成一个子代理来编写替换学习。通过它：
+   - 旧学的全部内容
+   - 调查证据摘要（发生了什么变化，当前代码的作用，为什么旧的指导具有误导性）
+   - 目标路径和类别（与旧学习的类别相同，除非类别本身发生变化）。替换在`references/yaml-schema.md`中根据语料库优先规则选择`component`/`root_cause`，将旧学习算作语料库的文档之一（因此它的`component`计入该区域，而它的`root_cause`仅计入它所描述的原因）
+   - 上面列出的三个支持文件的相关内容
+2. 子代理使用支持文件作为事实来源来编写新的学习内容：`references/schema.yaml`用于 frontmatter 字段和枚举值，`references/yaml-schema.md`用于类别映射，YAML用于数组项的安全规则，`assets/resolution-template.md`用于部分顺序。如果它需要超出传递内容的附加上下文，则应使用专用的文件搜索和读取工具。在提示中传递此引用规则：通过文件和定义行为的函数、类或配置键引用代码，在默认分支上读取，并仅在没有名称标识该位置时添加行号，因为只要行号上方的代码移动，行号就会过时。
+3. **验证新学习的 frontmatter 的解析器安全性**，以捕获散文规则遗漏的静默损坏问题：格式错误的 `---` 分隔符行、标量值中未加引号的 ` #`（静默注释截断）以及标量值中未加引号的 `: `（静默映射混乱）。捆绑的验证器在技能包内交付**；将 `SKILL_DIR` 设置为包含该技能的 SKILL.md 的目录的绝对路径，并通过存在防护运行它，以便无法找到脚本的平台回退到手动检查，而不是默默地跳过保护：
 
    ```bash
    SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -103,14 +103,14 @@ Do not let replacement subagents invent frontmatter fields, enum values, or sect
    fi
    ```
 
-   - **If the script ran:** exit 0 means parser-safe; exit 1 means stderr names the offending field(s) — quote the value(s), re-write the doc, and re-run until exit 0. Do not declare success while validation fails.
-   - **If the script did not run** (else branch): apply the validator's checks by hand, matching its exact scope — checking more broadly risks edits the validator would not require. Fix any violation by quoting the whole value before continuing:
-     1. The opening and closing frontmatter delimiters are each a line whose content is `---` (trailing whitespace is fine; `----` or `---extra` is not a valid delimiter).
-     2. For each **top-level** mapping entry (`key: value`, no leading indentation) whose value is **not already quoted or structured** (does not start with `"`, `'`, `[`, `{`, `|`, or `>`): the value must contain no unquoted ` #` (space-then-hash — YAML treats it as a comment and silently truncates) and no unquoted `: ` (colon-then-space — strict YAML may read it as a nested mapping). Quote the whole value if either appears.
-     Nested values, array items, and already-quoted values are out of scope here (array-item quoting is handled by the schema/YAML-safety step above). Then note in the completion output that the bundled script validator was unavailable on this platform and the checks were applied manually.
+   - **如果脚本运行：** exit 0 表示解析器安全； exit 1 意味着 stderr 命名有问题的字段 - 引用值，重写文档，然后重新运行，直到 exit 0。验证失败时不要声明成功。
+   - **如果脚本没有运行**（else 分支）：手动应用验证器的检查，匹配其确切范围 - 更广泛的检查风险会导致验证器不需要的编辑。在继续之前通过引用整个值来修复任何违规：
+     1. 开头和结尾的 frontmatter 分隔符各为一行，其内容为 `---`（尾随空格即可；`----` 或 `---extra` 不是有效的分隔符）。
+     2. 对于每个**顶级**映射条目（`key: value`，无前导缩进），其值**尚未引用或结构化**（不以 `"`、`'`、`[`、`{`、`|` 或 `>` 开头）：该值不得包含未引用的 ` #` （space-then-hash — YAML 将其视为注释并默默截断）并且没有未加引号的 `: `（冒号—then-space — strict YAML 可能会将其读取为嵌套映射）。如果其中任何一个出现，请引用整个值。
+     嵌套值、数组项和已引用的值超出了此处的范围（数组项引用由上面的 schema/YAML-safety 步骤处理）。然后在完成输出中注意，捆绑脚本验证器在此平台上不可用，并且检查是手动应用的。
 
-   The validator does not enforce schema rules and does not flag YAML reserved-indicator characters (those produce loud parser errors downstream rather than silent corruption — out of scope). Uses Python 3 stdlib only (no PyYAML or other deps).
-4. **Run the mechanical claims check on the successor doc.** The bundled `scripts/validate-doc-claims.py` flags cited repo paths missing from the tree, cited line numbers past the end of their file, commit SHAs that do not resolve or are unreachable, relative doc links that do not resolve, and dangling drafting scaffold ("Learning 3", unresolved `{{...}}` tokens). It also emits lower-tier `NOTE` lines for unresolved hex identifiers it cannot classify; those do not affect its exit code and are read, not fixed:
+   验证器不强制执行模式规则，也不标记 YAML 保留指示符字符（这些字符会在下游产生响亮的解析器错误，而不是无声损坏 - 超出范围）。仅使用 Python 3 stdlib（无 PyYAML 或其他依赖项）。
+4. **对后继文档运行机械声明检查。** 捆绑的 `scripts/validate-doc-claims.py` 标记引用的存储库路径从树中丢失、引用的行号超过文件末尾、提交无法解析或无法访问的 SHA、无法解析的相对文档链接以及悬空的起草脚手架（“学习 3”、未解析的 `{{...}}` 标记）。它还为无法分类的未解析的十六进制标识符发出较低层的 `NOTE` 行；这些不会影响其退出代码并被读取，而不是修复：
 
    ```bash
    SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -122,22 +122,22 @@ Do not let replacement subagents invent frontmatter fields, enum values, or sect
    fi
    ```
 
-   Exit 1 flags are **adjudication input, not failures** — a successor doc describing removed code legitimately cites paths that no longer exist. Resolve each flag by fixing the citation, annotating it as historical, or confirming it intentional; always fix scaffold flags. If the script is not resolvable on this platform, scan the body for those same patterns manually and say so in the report.
-5. After the subagent completes, the orchestrator deletes the old learning file and updates any catalog README row that lists the old filename to point at the successor. The new learning's frontmatter may include `supersedes: [old learning filename]` for traceability, but this is optional — the git history and commit message provide the same information.
+   Exit 1 标志是**裁决输入，而不是失败** - 描述已删除代码的后续文档合法地引用了不再存在的路径。通过修复引用、将其注释为历史或确认其有意为之来解决每个标记；始终修复脚手架标志。如果该脚本在此平台上无法解析，请手动扫描正文以查找相同的模式，并在报告中说明。
+5. 子代理完成后，编排器将删除旧的学习文件并更新列出旧文件名的任何目录 README 行以指向后继文件。新学习的 frontmatter 可能包括用于可追溯性的 `supersedes: [old learning filename]`，但这是可选的 — git 历史记录和提交消息提供相同的信息。
 
-**When evidence is insufficient:**
+**当证据不足时：**
 
-1. Mark the learning as stale in place:
-   - Add to frontmatter: `status: stale`, `stale_reason: [what you found]`, `stale_date: YYYY-MM-DD`
-2. Report what evidence was found and what is missing
-3. Recommend the user run `ce-compound` after their next encounter with that area
+1. 将学习标记为陈旧：
+   - 添加到 frontmatter: `status: stale`, `stale_reason: [what you found]`, `stale_date: YYYY-MM-DD`
+2. 报告发现了什么证据以及缺少什么证据
+3. 建议用户在下次遇到该区域后运行`ce-compound`
 
-## Delete Flow
+## 删除流程
 
-Delete only when a learning is clearly obsolete, redundant (with no unique content to merge), or its problem domain is gone. Do not delete a document just because it is old — age alone is not a signal.
+仅当学习内容明显过时、多余（没有可合并的独特内容）或其问题域消失时才删除。不要仅仅因为文档太旧就将其删除——年龄本身并不是一个信号。
 
-Before unlinking the file, run a final inbound-link check across the repo's markdown content to catch any references missed during Phase 1 investigation. Prefer the platform's native content-search tool (e.g., Grep in Claude Code) for efficiency; use ranged or context-line reads around matches rather than loading whole files.
+在取消链接文件之前，请对存储库的 Markdown 内容运行最终的入站链接检查，以捕获第一阶段调查期间遗漏的任何引用。为了提高效率，更喜欢平台的原生内容搜索工具（例如Claude Code中的Grep）；使用围绕匹配的范围或上下文行读取而不是加载整个文件。
 
-Each match is a citation that will dangle after delete. Cleanup is mechanical — Phase 2 already classified the citations and confirmed Delete was right. Don't re-litigate. Catalog rows in README files count as citations for cleanup purposes: remove the deleted doc's row.
+每场比赛都是一个引用，删除后会悬空。清理是机械的——第二阶段已经对引文进行了分类并确认删除是正确的。请勿再提起诉讼。出于清理目的，README 文件中的目录行计为引用：删除已删除的文档行。
 
-If any citation surfaces here that wasn't seen in Phase 1 and is anything other than unambiguously decorative (substantive or mixed/unclear), stop and reclassify: autofix mode stale-marks; interactive mode asks the user whether Replace fits. Only proceed with cleanup when all late-discovered citations are unambiguously decorative.
+如果这里有任何在第一阶段中没有出现的引文，并且不是明确的装饰性（实质性或mixed/unclear），请停止并重新分类：自动修复模式陈旧标记；交互模式询问用户替换是否合适。仅当所有后来发现的引用都明确具有装饰性时才进行清理。

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Cross-model point of view",
+  "title": "跨模型观点",
   "type": "object",
   "additionalProperties": false,
   "required": ["voice", "position", "reasoning", "evidence", "external_check", "mode", "movement", "final"],
@@ -8,24 +8,24 @@
     "voice": {
       "type": "string",
       "minLength": 1,
-      "description": "Short identity for the peer voice; the worker namespaces it to the provider."
+      "description": "对等语音的简短标识；工作人员将其命名空间提供给提供者。"
     },
     "position": {
       "type": "string",
       "minLength": 1,
-      "description": "The adoption grade, document or approach bottom line, skeptic verdict, or blocked state."
+      "description": "采用等级、记录或方法底线、怀疑论结论或阻止状态。"
     },
     "reasoning": {
       "type": "string",
       "minLength": 1,
-      "description": "Concise reasoning for the position, including the reason when blocked."
+      "description": "该职位的简明推理，包括被阻止的原因。"
     },
     "evidence": {
       "type": "array",
       "items": {
         "type": "string",
         "minLength": 1,
-        "description": "A succinct claim with a URL, file:line, or named document section attribution."
+        "description": "带有 URL、file:line 或命名文档部分归属的简洁声明。"
       }
     },
     "external_check": {
@@ -39,11 +39,11 @@
     "movement": {
       "type": "string",
       "enum": ["initial", "moved", "held"],
-      "description": "Initial position, or whether the voice moved or held during reconciliation."
+      "description": "初始位置，或者在协调过程中声音是移动还是保持。"
     },
     "final": {
       "type": "boolean",
-      "description": "true when position is your settled answer (a settled Blocked verdict counts); false when you have not finished inspecting and position is a placeholder."
+      "description": "当位置是您的已解决答案时为 true（已解决的阻止判决有效）；当您尚未完成检查并且位置是占位符时为 false。"
     },
     "cross_model_route": { "type": "string" },
     "cross_model_target": { "type": "string" },

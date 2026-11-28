@@ -1,35 +1,35 @@
-# Non-interactive runs
+# 非交互式运行
 
-A non-interactive run has no one to answer a question, so it asks none, in any phase. With no user present, whoever reviews the pull request it opens does the approving. So the run applies only what a reviewer can judge from that pull request, and lists everything else for a person to decide.
+非交互式运行没有人回答问题，因此在任何阶段都不会提出问题。在没有用户在场的情况下，无论谁查看它打开的拉取请求，都会进行批准。因此，运行仅应用审查者可以从拉取请求中判断的内容，并列出其他所有内容供人们决定。
 
-**Outcome:** the checkout's generated files, and the review docs the run was asked for, are current and published as one pull request. Every change only a person can decide is listed in that pull request instead of made. A `standards` run covers only the review docs, as it does interactively. A run that finds nothing to change writes nothing and opens no pull request.
+**结果：** 结帐生成的文件以及运行所需的审阅文档都是最新的并作为一个拉取请求发布。只有一个人可以决定的每个更改都列在该拉取请求中，而不是进行更改。 `standards` 运行仅涵盖审阅文档，就像它以交互方式运行一样。如果运行没有发现任何需要更改的内容，则不会写入任何内容，也不会打开拉取请求。
 
-## What a run applies and what it only reports
+## 运行适用的内容以及仅报告的内容
 
-Apply a write when a reviewer can judge it from the pull request alone. That covers generated output (Step 5's example refresh), the `.gitignore` entries of Steps 7 and 8, and, when the invocation asked for review docs, the drafts and pointer lines `references/project-docs.md` produces. It also covers Step 5a's refresh of `config.yaml`: the pull request body lists every change with its reason, and the script's verification shows nothing else moved. On a reused refresh branch, first restore `config.yaml` from the default branch and refresh that copy, so edits the team made there since the branch opened are kept.
+当审查者可以仅根据拉取请求来判断写入时，应用写入。这涵盖了生成的输出（步骤 5 的示例刷新）、步骤 7 和 8 的 `.gitignore` 条目，以及当调用请求审阅文档时，生成的草稿和指针行 `references/project-docs.md`。它还涵盖了步骤 5a 的 `config.yaml` 刷新：拉取请求正文列出了每个更改及其原因，并且脚本的验证显示没有其他任何移动。在重用的刷新分支上，首先从默认分支恢复 `config.yaml` 并刷新该副本，以便保留自分支打开以来在此处所做的编辑。
 
-Report a write instead of making it when it needs a choice only a person can make, removes content a person wrote, changes a file the pull request cannot show, or changes this machine rather than the checkout. That covers creating `config.yaml`, every change to the gitignored `config.local.yaml`, deleting `compound-engineering.local.md`, repairing `docs_root` or the `ce-work` engine settings, every Step 9 addition, moving rules out of an agent-instructions file or an AI reviewer's file, removing the legacy Codex tool map, and warming the npm cache.
+当需要只有一个人可以做出的选择、删除一个人编写的内容、更改拉取请求无法显示的文件或更改本机而不是结账时，报告写入而不是进行写入。这包括创建 `config.yaml`、对 gitignored `config.local.yaml` 的每次更改、删除 `compound-engineering.local.md`、修复 `docs_root` 或 `ce-work` 引擎设置、每个步骤 9 添加、将规则移出代理指令文件或 AI 审查者文件、删除旧的 Codex 工具图以及预热 npm 缓存。
 
-A run that did not ask for review docs leaves them alone. It reports whether they exist, because a repository without them has made a valid choice.
+不要求审查文档的运行让他们独自一人。它报告它们是否存在，因为没有它们的存储库已经做出了有效的选择。
 
-A Compound Pack scaffold needs the user's approval. `references/pack-scaffold.md` already says what a non-interactive request for one does: it prints the preview and writes nothing.
+Compound Pack支架需要用户的批准。 `references/pack-scaffold.md` 已经说明了非交互式请求的作用：它打印预览并且不写入任何内容。
 
-## Review docs
+## 审查文档
 
-Follow `references/project-docs.md`, with these differences:
+遵循`references/project-docs.md`，但有以下差异：
 
-- There is no offer and no in-session preview. The pull request body carries the preview: each rule added, changed, or retired as one plain line with the pull requests, commits, or records behind it, then a **Recommended** section listing everything this run only reported.
-- A new rule also needs its defect class to appear more than once in the evidence. A scheduled run sees a short window, and a single finding in it is more often a one-off than a convention. Changing or retiring an existing rule needs only the ordinary evidence.
-- Earlier refresh pull requests are evidence too. If one dropped a rule during review, or was closed without merging while it proposed the rule, leave the rule out unless evidence newer than that decision supports it.
+- 没有优惠，也没有会话中预览。拉取请求正文包含预览：添加、更改或停用的每条规则都作为一个简单的行，其后面带有拉取请求、提交或记录，然后是 **推荐** 部分，列出了此运行仅报告的所有内容。
+- 新规则还需要其缺陷类别在证据中多次出现。计划运行的窗口期很短，其中的单个发现通常是一次性的，而不是惯例。改变或废除现有规则只需要普通证据。
+- 早期的刷新拉取请求也是证据。如果在审查期间放弃了某条规则，或者在提出该规则时未合并而关闭，则将该规则排除在外，除非比该决定更新的证据支持该规则。
 
-## Publishing
+## 出版
 
-Name the branch `ce-setup/refresh-<YYYY-MM-DD>` so later runs can find this run's pull request. When an open pull request from a branch starting with `ce-setup/refresh` exists, do this run on the newest such branch, so the existing pull request is updated rather than joined by a second one. Otherwise start a new branch from the default branch. Never commit to the default branch.
+将分支命名为 `ce-setup/refresh-<YYYY-MM-DD>`，以便以后的运行可以找到此运行的拉取请求。当存在来自以 `ce-setup/refresh` 开头的分支的开放拉取请求时，请在最新的此类分支上运行此操作，以便更新现有拉取请求，而不是加入第二个拉取请求。否则从默认分支开始一个新分支。切勿提交到默认分支。
 
-If the working tree has uncommitted changes before the run writes anything, write nothing and report that, because those changes would land in the pull request with this run's.
+如果工作树在运行写入任何内容之前有未提交的更改，则不写入任何内容并报告该情况，因为这些更改将在本次运行的拉取请求中出现。
 
-After writing, invoke the `ce-commit-push-pr` skill with `mode:pipeline` to commit, push, and open or update the pull request. Pipeline mode leaves an existing pull request's description alone, so when this run updated one, invoke `ce-commit-push-pr` again with `mode:pipeline` to update that pull request's description from this run's changes.
+写入后，使用`mode:pipeline`调用`ce-commit-push-pr`技能来提交、推送、打开或更新拉取请求。管道模式单独保留现有拉取请求的描述，因此当此运行更新一个时，使用 `mode:pipeline` 再次调用 `ce-commit-push-pr` 以根据此运行的更改更新该拉取请求的描述。
 
-## Ending
+## 结束
 
-Write the Phase 3 summary without its closing question. End with one line a caller can parse: `Setup complete: <pull request URL>` when the run published, or `Setup skipped: <reason>` when it wrote nothing or could not publish, naming any branch it left behind.
+写第三阶段的总结，但不要提出结束语。以调用者可以解析的一行结束：当运行发布时为`Setup complete: <pull request URL>`，或者当它什么也没写或无法发布时为`Setup skipped: <reason>`，命名它留下的任何分支。

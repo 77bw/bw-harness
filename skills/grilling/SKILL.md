@@ -1,30 +1,32 @@
 ---
 name: grilling
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: "不断地向用户询问计划、决定或想法。当用户想要对他们的思维进行压力测试或使用任何“逐问访谈”触发短语时使用。"
 ---
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+坚持不懈地采访用户，直到达成共识。将其映射为**设计树**：每个决策都会分支成与其相关的决策。
 
-Format a round like so:
+**轮次**地处理树。 **前沿**是先决条件已经解决的每一个决定：您现在可以提出的问题，而无需猜测您尚未听到的答案。一轮询问整个前沿：对每个问题进行编号并给出建议的答案。然后等待用户的回答后再进行下一轮。
+
+像这样格式化一个回合：
 
 ```
-❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q1** - **<问题标题>**：<问题正文，可能是多个段落，包括多个选择>
 
-➡️ <your recommended answer>
+➡️<您的推荐答案>
 
 ---
 
-❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q2** - **<问题标题>**：<问题正文，可能是多个段落，包括多个选择>
 
-➡️ <your recommended answer>
+➡️<您的推荐答案>
 ```
 
-Word each question so "yes" accepts your recommended answer.
+说出每个问题，以便“是”接受您推荐的答案。
 
-Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
+用户的每一轮答案都会重塑树的形状：既定的决策将边界向外推，并解锁依赖于它们的问题。重新计算边界并询问下一轮。如果一个问题的答案取决于本轮中仍悬而未决的另一个问题，则该问题属于_稍后_一轮，而不是本轮。
 
-Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent with a fresh context window to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
+查找_事实_是您的工作，而不是用户的工作。当前沿问题需要来自环境（文件系统、工具等）的事实时，调度具有新上下文窗口的子代理来查找它；不要向用户询问任何您可以自行查找的内容。不要阻止它：正在运行的探索是一个未解决的先决条件，因此只有其下游的问题等待子代理报告；现在就去问问边境的其他人吧。 _决定_是用户的：将每个决定交给他们并等待。
 
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
+当边界为空时，会议就完成了：访问了设计树的每个分支，没有留下任何默默假设的东西。在用户确认你们已达成共识之前，不要采取行动。

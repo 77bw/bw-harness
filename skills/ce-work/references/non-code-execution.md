@@ -1,23 +1,23 @@
-# Non-Code Execution (Knowledge-Work Carve-Out)
+# 非代码执行（知识工作剥离）
 
-Loaded from Phase 0 Input Triage when the plan carries `execution: knowledge-work`. The plan is a **production plan** for a non-code deliverable (a synthesized document, a study artifact, a research write-up) — typically produced by `ce-plan`'s approach-level flow. Execute it to produce the deliverable. This is an uncommon case: the normal code lifecycle does not apply and is not started here.
+当计划携带 `execution: knowledge-work` 时，从阶段 0 输入分类加载。该计划是非代码可交付成果（综合文档、研究产物、研究报告）的**生产计划** — 通常由 `ce-plan` 的方法级流程生成。执行它以产生可交付成果。这是一种不常见的情况：正常的代码生命周期不适用并且不会在此处启动。
 
-## What this skips
+## 这会跳过什么
 
-Do **not** run any of the code-shipping steps; they do not fit knowledge work:
+**不要**运行任何代码传送步骤；他们不适合知识工作：
 
-- No branch/worktree setup (Phase 1 Step 2).
-- No task-list-from-implementation-units, no execution-strategy/subagent dispatch keyed on `Files:`.
-- No Test Discovery, no test-scenario completeness, no system-wide test check.
-- No incremental code commits, and none of `references/shipping-workflow.md` (no PR, no CI).
+- 无 branch/worktree 设置（第 1 阶段第 2 步）。
+- 没有来自实施单元的任务列表，没有在 `Files:` 上键入的 execution-strategy/subagent 调度。
+- 没有测试发现，没有测试场景完整性，没有系统范围的测试检查。
+- 没有增量代码提交，也没有`references/shipping-workflow.md`（没有PR，没有CI）。
 
-## Execute the production plan
+## 执行生产计划
 
-1. **Read the plan fully.** It is a decision artifact describing *how* the deliverable gets made: which sources to read, how to mine each, how they combine, the shape of the deliverable, and any forks the user already confirmed. Honor those decisions.
-2. **Read the sources the plan names** — the actual inputs (PDFs, transcripts, docs, links). Treat user-named resources as authoritative; read them rather than working from memory. If a named source is missing, say so plainly rather than substituting.
-3. **Synthesize and produce the deliverable** following the plan's intended shape and the confirmed forks. This is the work the approach-plan deliberately deferred.
-4. **Save and report.** Write the deliverable to a durable, repo-tracked location — default to a sensible `docs/` subpath (or a path the user named at the checkpoint) — and report its absolute path so the user can find it. Whether to git-commit vs. leave it written is the user's call; offer, don't force.
+1. **完整阅读计划。**这是一个决策产物，描述了交付物的“如何”制作：要阅读哪些来源、如何挖掘每个来源、它们如何组合、交付物的形状以及用户已经确认的任何分叉。尊重这些决定。
+2. **阅读计划名称的来源** — 实际输入（PDF、成绩单、文档、链接）。将用户命名的资源视为权威；阅读它们而不是凭记忆工作。如果缺少指定来源，请明确说明而不是替换。
+3. **按照计划的预期形状和确认的分叉合成并生成可交付成果**。这是该方法计划故意推迟的工作。
+4. **保存并报告。** 将可交付成果写入持久的、存储库跟踪的位置 - 默认为合理的 `docs/` 子路径（或用户在检查点指定的路径） - 并报告其绝对路径，以便用户可以找到它。是否进行 git-commit 或保留写入是由用户决定的；主动提出，不要强迫。
 
-## Stay scoped to non-code deliverables
+## 保持非代码可交付成果的范围
 
-The carve-out is for knowledge-work output. If producing the deliverable legitimately requires emitting code (a script, a config file, a data-transform), send that specific sub-step back through the normal code path so its safeguards (Test Discovery, review, commit hygiene) still apply. Do not silently produce code under the carve-out. The deliverable itself stays non-code.
+剥离是为了知识工作的输出。如果合法生成可交付成果需要发出代码（脚本、配置文件、数据转换），请通过正常代码路径发送该特定子步骤，以便其安全措施（测试发现、审查、提交卫生）仍然适用。不要在剥离的情况下默默地生成代码。可交付成果本身仍然是非代码。

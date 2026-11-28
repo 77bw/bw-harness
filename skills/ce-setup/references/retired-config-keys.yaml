@@ -1,56 +1,56 @@
-# Settings that left config-template.yaml, and what /ce-setup does with each.
-# Every top-level key here is retired; none may also appear in the template.
+# 留下 config-template.yaml 的设置，以及 /ce-setup 对每个设置的作用。
+# 这里的每个顶级密钥都已退役；模板中也可能不会出现任何内容。
 #
 # kind: remove   -- drop the setting; reason names what replaced it, if anything.
 # kind: migrate  -- a true one-to-one rename: write the value to `target`,
-#                   mapped through `values` when the meaning of a value changed.
-#                   A migration never overrides a target that is already set.
-# reason         -- one line shown to the user and recorded with the change.
+# 当值的含义发生变化时，通过 `values` 进行映射。
+# 迁移永远不会覆盖已设置的目标。
+# 原因——向用户显示一行并记录更改。
 
 brainstorm_use_fable:
   kind: remove
-  reason: "No longer does anything and only ever applied on Claude Code; to send approach generation to another model, set brainstorm_model, which applies on every harness."
+  reason: "不再做任何事，只在 Claude Code 上应用过；要将方法生成发送到另一个模型，请设置 brainstorm_model，这适用于每个线束。"
 
 fable_nudge:
   kind: remove
-  reason: "No longer does anything; the one-time model-elevation tip it silenced was removed."
+  reason: "不再做任何事；其静音的一次性模型高程提示被移除。"
 
 plan_use_fable:
   kind: remove
-  reason: "No longer does anything and only ever applied on Claude Code; to send plan authoring to another model, set plan_model, which applies on every harness."
+  reason: "不再做任何事，只在 Claude Code 上应用过；要将计划创作发送到另一个模型，请设置 plan_model，这适用于每个线束。"
 
 pr_branding:
   kind: remove
-  reason: "No longer does anything; PR branding is off by default and is requested per run with the branding:on token."
+  reason: "不再做任何事； PR 品牌默认情况下处于关闭状态，每次运行时都需要使用 branding:on 令牌进行请求。"
 
 work_delegate:
   kind: remove
-  reason: "No longer does anything; the skill that read it was removed. To route implementation to another harness, set work_engine_mode and work_engine_preferences."
+  reason: "不再做任何事；阅读它的技能被删除。要将实现路由到另一个线束，请设置 work_engine_mode 和 work_engine_preferences。"
 
 work_delegate_consent:
   kind: remove
-  reason: "No longer does anything; the skill that read it was removed. Implementation routing is set with work_engine_mode and work_engine_preferences."
+  reason: "不再做任何事；阅读它的技能被删除。实现路由由work_engine_mode和work_engine_preferences设置。"
 
 work_delegate_decision:
   kind: remove
-  reason: "No longer does anything; the skill that read it was removed. Implementation routing is set with work_engine_mode and work_engine_preferences."
+  reason: "不再做任何事；阅读它的技能被删除。实现路由由work_engine_mode和work_engine_preferences设置。"
 
 work_delegate_effort:
   kind: remove
-  reason: "No longer does anything; the skill that read it was removed. Set an external worker's reasoning effort with work_engine_effort."
+  reason: "不再做任何事；阅读它的技能被删除。将外部工作者的推理努力设置为work_engine_effort。"
 
 work_delegate_model:
   kind: remove
-  reason: "No longer does anything; the skill that read it was removed. Name a worker's model in a work_engine_preferences entry."
+  reason: "不再做任何事；阅读它的技能被删除。在 work_engine_preferences 条目中命名工人的模型。"
 
 work_delegate_sandbox:
   kind: remove
-  reason: "No longer does anything; the skill that read it was removed and nothing replaced it."
+  reason: "不再做任何事；阅读它的技能被删除了，没有任何东西可以替代它。"
 
 work_engine_model:
   kind: remove
-  reason: "Never a supported setting; name the model in a work_engine_preferences entry (harness plus optional model)."
+  reason: "从来没有受支持的设置；在 work_engine_preferences 条目中命名模型（线束加可选模型）。"
 
 work_engine_target:
   kind: remove
-  reason: "Never a supported setting; list the harness in a work_engine_preferences entry (harness plus optional model)."
+  reason: "从来没有受支持的设置；在 work_engine_preferences 条目中列出线束（线束加可选型号）。"

@@ -1,54 +1,51 @@
-# Phase 4: wrap-up
+# 第四阶段：总结
 
-Read this at wrap-up. The SKILL.md body states the post-completion options the user chooses from. This file carries what each one needs: the deferred-hypothesis presentation, the results summary, what is preserved and what is not, the mechanical-apply bar for review findings, and the cleanup rules.
+在总结中阅读本文。 SKILL.md 主体说明用户选择的完成后选项。该文件包含每个人需要的内容：延迟假设演示、结果摘要、保留的内容和不保留的内容、审查结果的机械应用栏以及清理规则。
 
-## Phase 4: Wrap-Up
+## 第四阶段：总结
 
-### 4.1 Present Deferred Hypotheses
+### 4.1 现在的递延假设
 
-If any hypotheses were deferred due to unapproved dependencies:
-1. List them with their dependency requirements
-2. Ask the user whether to approve, skip, or save for a future run
-3. If approved: add to backlog and offer to re-enter Phase 3 for one more round
+如果任何假设由于未经批准的依赖关系而被推迟：
+1. 列出它们及其依赖性要求
+2. 询问用户是否批准、跳过或保存以供将来运行
+3. 如果获得批准：添加到待办事项中并提议重新进入第 3 阶段再进行一轮
 
-### 4.2 Summarize Results
+### 4.2 总结结果
 
-Report from the persisted forecasts and measurements, with the final state confirmed using the configured measurement protocol. The confirmation measures the original baseline revision (the commit the optimization branch started from) and the final state as one pairing, and repeats that pairing on the holdout when one is configured; the per-keep holdout pairs compare successive states and do not stand in for it. Persist both pairings in `comparisons` (the held-out one as `kind: holdout`). If confirmation is unavailable, label the final values unconfirmed and state why. A legacy log remains reportable: missing forecasts, comparison baselines, or uncertainty stay unrecorded rather than being reconstructed from the final result.
+来自持续预测和测量的报告，并使用配置的测量协议确认最终状态。确认将原始基线修订（优化分支开始的提交）和最终状态作为一对进行测量，并在配置时在保留上重复该配对；每个保持的保留对比较连续的状态并且不代替它。将两个配对保留在 `comparisons` 中（保留的配对为 `kind: holdout`）。如果无法确认，请将最终值标记为未确认并说明原因。遗留日志仍然是可报告的：丢失的预测、比较基线或不确定性都没有记录，而不是根据最终结果重建。
 
-The summary must contain:
+摘要必须包含：
 
-- **Overall result:** original baseline -> final for every required objective (the primary when no objectives are declared), with units, absolute change, target status, and percentage change where meaningful. A zero baseline has no defined percentage change; an ordinal judge score is reported in score points, not as a percentage improvement.
-- **Opportunity -> result:** each retained change's original expected benefit beside its measured before/after result, the comparison identity and workload, and whether the evidence supports the estimate. Identify standalone versus integrated results. If the forecast and result use different baselines or workloads, label them non-comparable instead of declaring that the forecast was met or missed.
-- **Evidence quality:** measurement uncertainty and confirmation status, correctness checks and their results, and any unverified constraints, including each one a revert found the harness does not check (the change the harness needs before the next run). Each reported gain names what bounds it, such as the threshold it cleared and its sample count. Report a gain with no recorded bound as inconclusive, not as a result. Report measured incremental contributions only when the corresponding reference measurements exist. Do not add percentages from successive changes or count a standalone runner-up gain as its integrated contribution; the overall gain comes from original-to-final measurement.
-- **Held-out result and regressions:** the final state's holdout comparison against the original baseline (or that no holdout was configured, so the reported gain was selected and reported on the same sample), and when `measurement.per_case` is set the list of cases the baseline passed and the final state fails. An empty regression list is reported as empty; an absent one as unrecorded.
-- **Remaining opportunity:** what still costs time or resources, with current evidence and whether further work appears worthwhile. Without fresh evidence, label remaining estimates stale or unknown; do not claim a new bottleneck from the old profile alone.
-- **Run accounting:** stopping reason, duration, outcome counts, judge cost when applicable, estimated whole-run cost with which parts are estimates, and the log path. Preserve the existing outcome distinctions, including `Not selected: <count>`, inconclusive, censored, deferred, errors, and timeouts. Short reports may omit individual rejected experiments, but retain required-objective results and evidence limitations.
+- **总体结果：** 原始基线 -> 每个所需目标的最终目标（未声明目标时的主要目标），其中包含有意义的单位、绝对变化、目标状态和百分比变化。零基线没有定义的百分比变化；顺序裁判分数以分数报告，而不是百分比改进。
+- **机会 -> 结果：**除了测量的before/after结果、比较身份和工作量以及证据是否支持估计之外，每个变更还保留了原始预期收益。确定独立结果与综合结果。如果预测和结果使用不同的基线或工作负载，请将它们标记为不可比较，而不是声明达到或未达到预测。
+- **证据质量：**测量不确定性和确认状态、正确性检查及其结果，以及任何未经验证的约束，包括恢复发现宿主未检查的每个约束（下一次运行之前宿主需要的更改）。每个报告的增益都会指定其范围，例如它清除的阈值及其样本计数。将没有记录界限的增益报告为不确定的，而不是结果。仅当存在相应的参考测量值时才报告测量的增量贡献。不要将连续变化的百分比相加，也不要将单独的亚军收益算作其综合贡献；总体增益来自原始测量到最终测量。
+- **保留结果和回归：** 最终状态与原始基线的保留比较（或者没有配置保留，因此选择报告的增益并在同一样本上报告），并且当设置 `measurement.per_case` 时，基线通过而最终状态失败的情况列表。空的回归列表报告为空；缺席者视为未记录。
+- **剩余的机会：**根据当前的证据以及进一步的工作是否值得，哪些仍然需要花费时间或资源。如果没有新的证据，则将剩余的估计标记为陈旧或未知；不要仅仅从旧的配置文件中声明新的瓶颈。
+- **运行统计：**停止原因、持续时间、结果计数、适用时的判断成本、估计部分的估计整体运行成本以及日志路径。保留现有的结果区别，包括`Not selected: <count>`、不确定、审查、推迟、错误和超时。简短的报告可能会省略个别被拒绝的实验，但保留所需的客观结果和证据限制。
 
-### 4.3 Preserve and Offer Next Steps
+### 4.3 保留并提供后续步骤
 
-The optimization branch (`optimize/<spec-name>`) is preserved with all commits from kept experiments.
-The experiment log and strategy digest remain under `<state-root>` for resume and audit; they do not travel with the branch from either root (`.context/` is gitignored, and a durable store is outside the checkout).
+优化分支 (`optimize/<spec-name>`) 与保留实验中的所有提交一起保留。实验日志和策略摘要保留在`<state-root>`以下，以供恢复和审核；它们不会随来自任一根的分支一起移动（`.context/` 被 gitignored，并且持久存储位于结帐之外）。
 
-**Export the report.** Write the 4.2 summary to `<root>/optimize/<spec-name>-report.md` (`<root>` from the body's Artifact Root rule) and commit it on the optimization branch, so a PR from the branch carries its evidence and the summary outlives the ledger. Report the path to the user together with the summary; the user may name a different tracked path instead.
+**导出报告。** 将 4.2 摘要写入 `<root>/optimize/<spec-name>-report.md`（`<root>` 来自主体的 Artifact Root 规则）并将其提交到优化分支上，因此来自分支的 PR 携带其证据，并且摘要比分类账寿命更长。将路径连同摘要报告给用户；用户可以命名不同的跟踪路径。
 
-Present these options after the summary. When the stop was reached on an unattended wake, presenting them is the point where this turn ends: `run_state.status` stays `waiting` on the user's choice, and CP-5 is written only after that choice, as the body states.
+在摘要之后呈现这些选项。当在无人值守的唤醒中到达停止点时，呈现它们是本轮结束的点：根据用户的选择，`run_state.status`保持`waiting`，并且CP-5仅在该选择之后写入，如正文所述。
 
-1. **Run `ce-code-review`** on the cumulative diff (baseline to final), on the optimization branch. Do not commit or push from this step.
-2. **Run `ce-compound`** to document the winning strategy as an institutional learning.
-3. **Create PR** from the optimization branch to the default branch.
-4. **Continue**: re-enter Phase 3, state re-read first.
-5. **Done**: leave the branch for manual review.
+1. **在优化分支上对累积差异（基线到最终）运行 `ce-code-review`**。不要从此步骤提交或推送。
+2. **运行`ce-compound`**将获胜策略记录为机构学习。
+3. **从优化分支到默认分支创建PR**。
+4. **继续**：重新进入阶段3，先状态重读。
+5. **完成**：离开分支进行手动审核。
 
-For option 1, load `ce-code-review` on the optimization branch, interactive or `mode:agent`, and land eligible fixes under the bar below before moving to the next option.
+对于选项 1，在优化分支、交互式或 `mode:agent` 上加载 `ce-code-review`，并将符合条件的修复程序放在下面的栏下，然后再转到下一个选项。
 
-**Mechanical-apply bar:** apply any finding with a concrete `suggested_fix` that is a clear, reversible improvement. Push back (keep, don't apply) when the reviewer is wrong, noting why. Defer anything whose right fix needs a design or product decision (architecture direction, contract shape, behavior change needing sign-off) and any finding with no concrete fix to act on. Tell the user what was deferred. Confirm evidence still matches at `file:line` before editing. After applying, run tests (at least targeted tests for what changed; broader suite for multi-file edits). Do not commit or push from this step. Leave the diff on the optimization branch for the Create PR option.
-Option 4 (continue) re-enters Phase 3 with the current state, state re-read from disk first.
+**机械应用棒：** 使用具体的`suggested_fix`应用任何发现，这是一个明显的、可逆的改进。当审稿人错误时，予以拒绝（保留，不要应用），并注明原因。推迟任何需要设计或产品决策（架构方向、合同形式、需要签字的行为变更）进行正确修复的事情，以及任何没有具体修复措施的发现。告诉用户什么被推迟了。在编辑之前确认`file:line`处的证据仍然匹配。应用后，运行测试（至少针对更改的内容进行有针对性的测试；更广泛的多文件编辑套件）。不要从此步骤提交或推送。将差异保留在 Create PR 选项的优化分支上。选项 4（继续）以当前状态重新进入阶段 3，首先从磁盘重新读取状态。
 
-### 4.4 Cleanup
+### 4.4 清理
 
-Once CP-5 is written the run is over, so leave behind only what someone will still read. Remove the working files this run created under `<state-root>`: the strategy digest, the judge cache, result markers, and any scratch payloads or decision files you wrote there. Keep `experiment-log.yaml` and `spec.yaml`, tell the user where they are, and remove them too only if the user asks. A run that is not final (`waiting` or `blocked`) keeps everything, because a resume reads it.
+一旦 CP-5 被写入，运行就结束了，所以只留下人们仍然会阅读的内容。删除此运行在 `<state-root>` 下创建的工作文件：策略摘要、判断缓存、结果标记以及您在那里编写的任何临时有效负载或决策文件。保留 `experiment-log.yaml` 和 `spec.yaml`，告诉用户它们在哪里，只有在用户要求时才删除它们。非最终运行（`waiting`或`blocked`）会保留所有内容，因为简历会读取它。
 
-Remove files the way this host and the user's own rules prefer, such as moving them to the trash rather than deleting them permanently when that is available. Remove only files you can name that this run created inside `<state-root>`; never compose a path to delete from a pattern or an unresolved placeholder, and leave anything you are unsure about in place and name it in the final message. Remove experiment worktrees only through `scripts/experiment-worktree.sh cleanup`, which checks what it removes.
+按照该主机和用户自己的规则喜欢的方式删除文件，例如将它们移至垃圾桶，而不是在可用时永久删除它们。仅删除此运行在 `<state-root>` 内创建的您可以命名的文件；永远不要编写要从模式或未解析的占位符中删除的路径，并将任何您不确定的内容留在原地并在最终消息中命名。仅通过 `scripts/experiment-worktree.sh cleanup` 删除实验工作树，它会检查删除的内容。
 
-Do NOT delete the experiment log if the user may resume or wants an audit trail. The exported report in 4.3 is the durable shared artifact; the ledger is not. Unregister any wake still registered for this run.
-Do NOT delete experiment worktrees that are still being referenced.
+如果用户可以恢复或想要审核跟踪，请勿删除实验日志。 4.3中导出的报告是持久共享产物；账本不是。取消注册本次运行中仍注册的任何唤醒。不要删除仍在引用的实验工作树。

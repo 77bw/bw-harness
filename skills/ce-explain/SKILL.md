@@ -1,68 +1,70 @@
 ---
 name: ce-explain
-description: "Explain how and why something has its current shape, or what happened over a window of work, grounded in evidence. Use when the user asks for an explanation. Use ce-pov for a judgment or recommendation."
-argument-hint: "[question, concept, change, or work window] [intended use or reader]"
+description: "以证据为基础，解释某事物如何以及为何具有当前的形状，或者在工作期间发生的事情。当用户要求解释时使用。使用ce-pov进行判断或建议。"
+argument-hint: "[问题、概念、变更或工作窗口] [预期用途或读者]"
 ---
 
-# Explain How and Why
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Produce an explanation that answers the scoped question and gives its consumer enough understanding for the intended use. The subject and purpose come from the request and available context, whether a person or another workflow supplied them. Ground project behavior in source evidence; distinguish documented rationale, inference, and unknowns.
+# 解释如何以及为什么
 
-**Done:** deliver the explanation with supporting evidence and material unanswered questions, or return the specific blocker. When an artifact is requested, deliver the artifact and its location. Publication is a separate action, not a condition of having explained the subject.
+做出解释来回答范围内的问题，并让消费者对预期用途有足够的了解。主题和目的来自请求和可用上下文，无论是人还是另一个工作流提供它们。源证据中的地面项目行为；区分记录的基本原理、推论和未知数。
 
-## Consumer and interaction
+**完成：**提供带有支持证据和材料的解释以及未回答的问题，或返回特定的阻止者。当请求产物时，交付产物及其位置。出版是一项单独的行动，而不是解释该主题的条件。
 
-Adapt depth and presentation to the intended readers and use. A person may need a working answer; a calling agent may need a teaching artifact for someone else. Do not infer the output from the caller's identity alone. When contributing to an ongoing workflow, deliver the requested result and leave continuation to its owner, the calling workflow. Do not add destination menus or follow-up offers to that return.
+## 消费者与互动
 
-Resolve discoverable facts before asking. Ask only when missing information materially changes the answer and cannot be resolved from the request or evidence. If interaction is unavailable, return the unresolved question and its consequence rather than waiting or inventing an answer. A result may explain verified behavior while reporting that its historical rationale is unknown.
+根据目标读者和用途调整深度和呈现方式。一个人可能需要一个可行的答案；呼叫代理可能需要为其他人提供教学产物。不要仅根据调用者的身份推断输出。当为正在进行的工作流程做出贡献时，交付请求的结果并将继续留给其所有者（调用工作流程）。请勿在该退货中添加目的地菜单或后续优惠。
 
-**When a request takes the full path below, read `references/orchestration.md` before grounding, the first blocking question, or subagent dispatch.** It defines evidence gathering, tool use, model tiers, and their fallbacks.
+在询问之前解决可发现的事实。仅当缺失的信息严重改变答案并且无法通过请求或证据解决时才询问。如果无法进行交互，请返回未解决的问题及其后果，而不是等待或发明答案。结果可以解释经过验证的行为，同时报告其历史原理未知。
 
-## Plain why and how questions
+**当请求采用下面的完整路径时，请在接地、第一个阻塞问题或子代理调度之前阅读`references/orchestration.md`。**它定义了证据收集、工具使用、模型层及其后备。
 
-Most requests ask why something in the project has its current shape, or how it works, and want an answer back. Take this short path when an answer satisfies the request, with no document to keep, teach from, or share, and the subject is not a named change, a window of work, the user's own idea, or an external concept. It needs no intake, orchestration, or scouts. If you must ask the user something, follow the interaction method in `references/orchestration.md`.
+## 简单的“为什么”和“如何”问题
 
-For a why question, answer from the record: the commits and pull requests that introduced the target and later changed it, their review discussion and linked issues, code comments, and any plan or learning they cite. Cite what the authors wrote, with the commit, pull request, or file it came from. Stay within the request's source restrictions. Access to team chat is not permission to search it when the calling workflow makes that opt-in.
+大多数请求都会询问为什么项目中的某些内容具有当前的形状，或者它是如何工作的，并希望得到答复。当答案满足要求时，无需保留、教授或共享文档，并且主题不是命名的更改、工作窗口、用户自己的想法或外部概念，请采取这条简短的路径。它不需要吸收、编排或侦察。如果一定要询问用户一些事情，请按照`references/orchestration.md`中的交互方法进行。
 
-For a how question, read the source and the tests that cover it. A file name or a conversation claim does not establish behavior. Follow the trigger through its state changes and the components it passes between to its effect, citing file and line. Keep the conditions and failure paths that matter to the requested use.
+对于为什么问题，请从记录中回答：引入目标并随后更改目标的提交和拉取请求、他们的审查讨论和链接的问题、代码注释以及他们引用的任何计划或学习。引用作者所写的内容，以及其来自的提交、拉取请求或文件。保持在请求的来源限制范围内。当呼叫工作流程选择加入时，对团队聊天的访问权限并不意味着对其进行搜索。
 
-Mark your own inferences as inferences, separate from documented reasons. Say what the record does not answer; a missing search result does not prove there was no reason. Check that a historical constraint still applies before presenting it as a current requirement.
+对于如何解决问题，请阅读源代码和涵盖它的测试。文件名或对话声明并不建立行为。跟踪触发器的状态变化以及它在其之间传递的组件以达到其效果，引用文件和行。保留对所请求的用途重要的条件和故障路径。
 
-Then compose and deliver under Phases 3 and 4. Switch to the full path below, keeping the evidence already gathered, when the reader wants an artifact, or when one pass cannot name the components a how answer passes between without hand-waving.
+将您自己的推论标记为推论，与记录的原因分开。说什么记录没有回答；搜索结果缺失并不能证明没有原因。在将历史约束呈现为当前需求之前，检查历史约束是否仍然适用。
 
-## Artifact Root
+然后在第 3 阶段和第 4 阶段进行撰写和交付。当读者想要一件产物时，或者当一次传递无法命名组件时，切换到下面的完整路径，保留已收集的证据，而无需挥手即可回答答案如何在之间传递。
 
-Before composing any `<root>/` path, including reading learnings under `<root>/solutions/`, read `references/artifact-root.md`. It resolves `<root>`.
+## 神器根
 
-## Full path
+在编写任何`<root>/`路径之前，包括阅读`<root>/solutions/`下的学习内容，请阅读`references/artifact-root.md`。它解决了`<root>`。
 
-### Phase 1: Establish the question and use
+## 完整路径
 
-Read `references/intake.md` now. It defines how the subject and time window are resolved, the input tokens, and how the delivery form is chosen. Explain only the requested subject. A bare invocation with no recoverable subject needs clarification under the interaction rule above, not an invented topic or default artifact.
+### 第一阶段：提出问题并使用
 
-### Phase 2: Ground
+立即阅读`references/intake.md`。它定义了如何解决主题和时间窗口、输入令牌以及如何选择交付形式。仅解释所要求的主题。没有可恢复主题的裸调用需要根据上面的交互规则进行澄清，而不是发明的主题或默认产物。
 
-Follow `references/orchestration.md` for the scoped evidence pass. Use existing evidence when it is adequate and current; check claims whose support is missing, disputed, or affected by source changes.
+### 第 2 阶段：接地
 
-Create a run directory only when an artifact or an evidence dossier needs one, with the block in `references/orchestration.md`. A behavior trace that splits across ownership boundaries writes scout dossiers, so create it before dispatching those scouts.
+按照`references/orchestration.md`获取范围证据通道。使用充分且最新的现有证据；检查其支持缺失、有争议或受源更改影响的声明。
 
-### Phase 3: Compose the explanation
+仅当产物或证据档案需要时才创建运行目录，块位于 `references/orchestration.md` 中。跨越所有权边界的行为跟踪会写入侦察员档案，因此在派遣这些侦察员之前创建它。
 
-Answer the question using the evidence, preserving material constraints and uncertainty. Before delivery, check every factual claim against its source. A function call does not establish guarantees about its uninspected implementation. Remove unsupported claims or state their uncertainty where they appear, including in diagrams and exercise answers. Choose prose, code, tables, or visuals when they improve understanding; no particular arrangement is required. Keep attribution accurate when explaining work by multiple people. When selecting from more evidence than the requested scope or depth can hold, disclose the selection; never silently present a partial account as exhaustive.
+### 第三阶段：撰写解释
 
-For an answer or material another workflow will incorporate, return that content directly. Each passage must carry the qualifications needed to use it accurately without separate notes. When another workflow will use the answer, that return includes the evidence, the constraints that still apply, and the unanswered questions. Do not create a standalone artifact unless the intended use needs one.
+使用证据回答问题，保留材料限制和不确定性。在交付之前，请检查每项事实声明的来源。函数调用不保证其未经检查的实现。删除不受支持的主张或在出现的地方说明其不确定性，包括在图表和练习答案中。选择可以增进理解的散文、代码、表格或视觉效果；无需特别安排。在解释多人的工作时，保持归因准确。当选择的证据超出了所要求的范围或深度所能容纳的范围时，请披露选择；永远不要默默地将部分叙述视为详尽无遗。
 
-For a standalone artifact, read `references/explainer-html.md` or `references/explainer-markdown.md` at compose time for the selected format's compatibility and metadata requirements. For teaching artifacts, also read `references/check-in.md`. The run never blocks on the check-in; any exercises are static content in the artifact. Write `$RUN_DIR/explainer.html` or `explainer.md`, then deliver an inline summary plus the file path.
+对于另一个工作流程将合并的答案或材料，直接返回该内容。每个段落都必须具备准确使用它所需的资格，无需单独的注释。当另一个工作流程将使用答案时，该返回包括证据、仍然适用的约束以及未回答的问题。除非预期用途需要，否则不要创建独立的产物。
 
-### Phase 4: Deliver
+对于独立产物，请在撰写时读取 `references/explainer-html.md` 或 `references/explainer-markdown.md` 以了解所选格式的兼容性和元数据要求。对于教学产物，另请阅读`references/check-in.md`。办理登机手续时，跑步永远不会阻塞；所有练习都是产物中的静态内容。写入 `$RUN_DIR/explainer.html` 或 `explainer.md`，然后提供内联摘要以及文件路径。
 
-A delivered answer or local artifact completes the explanation. Do not require a destination choice or manufacture follow-on work. If a destination was requested, read `references/destinations.md` before acting; it defines each destination and the consent publishing needs. When a calling workflow owns the surrounding document, return the content to it rather than placing or publishing it yourself.
+### 第四阶段：交付
 
-Public publishing is never headless and never inferred. Naming a public host picks the destination; it is not confirmation after the public-publishing warning. If confirmation cannot be obtained, do not publish; preserve the canonical file and report its local `$RUN_DIR` path.
+提供的答案或本地产物完成了解释。不需要目的地选择或制造后续工作。如果请求目的地，请在行动前阅读`references/destinations.md`；它定义了每个目的地和同意发布需求。当调用工作流拥有周围文档时，将内容返回给它，而不是自己放置或发布它。
 
-## Boundaries
+公共出版从来都不是无头的，也永远不会被推断。命名公共主机即可选择目的地；这并不是公开发布警告后的确认。若无法获得确认，请勿发布；保留规范文件并报告其本地 `$RUN_DIR` 路径。
 
-- Use `ce-pov` to judge whether an approach should be adopted or changed. Explaining a historical choice is not endorsing it today.
-- Use `ce-compound` to capture durable project learning. Producing an explanation does not authorize maintaining repo memory.
-- Explain an idea as supplied; generating alternatives and scoping implementation belong to `ce-ideate`, `ce-brainstorm`, and `ce-plan`.
-- A reported failure to diagnose or fix belongs to `ce-debug`; a factual explanation of current behavior remains here.
+## 边界
+
+- 使用`ce-pov`来判断是否应该采用或改变某种方法。解释历史选择并不等于在今天认可它。
+- 使用 `ce-compound` 捕捉持久的项目学习。生成解释并不授权维护存储库内存。
+- 解释所提供的想法；生成替代方案和范围实施属于`ce-ideate`、`ce-brainstorm`和`ce-plan`。
+- 报告的诊断或修复失败属于`ce-debug`；对当前行为的事实解释仍然存在。

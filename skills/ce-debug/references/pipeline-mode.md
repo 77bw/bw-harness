@@ -1,57 +1,57 @@
-# ce-debug — pipeline mode (non-interactive)
+# ce-debug — 管道模式（非交互式）
 
-Loaded when `ce-debug` is invoked with `mode:pipeline` by an orchestrator (`ce-babysit-pr`, `lfg`). The skill runs to completion without ever asking the user and returns a structured result the caller composes. The investigation rigor is unchanged. Only the interaction and the fix-authority boundary change.
+当编排器（`ce-babysit-pr`、`lfg`）使用`mode:pipeline`调用`ce-debug`时加载。该技能无需询问用户即可运行完成，并返回调用者编写的结构化结果。调查的严格程度没有改变。只有交互和固定权限边界发生变化。
 
-## Authority: you act under the orchestrator's inherited scope
+## 权威：你在协调器继承的范围内行事
 
-Being invoked by an orchestrator is **not** itself authorization. You mutate under the **inherited** scope the orchestrator holds from the user: **actions** = fix / commit / push on the current branch; **exclusions** = merge, rebase, force-push, approve a gated CI run. That authorized scope is fixed. You may *narrow* it (defer a fix, return `needs-human`) but never *broaden* it. If the only way to make CI green is an excluded action (a rebase or force-push to untangle history, or approving a gated run), that action is outside the authorized scope: **defer as `needs-human`** with a `decision_context`, do not perform it. This is a boundary on the *mechanism* of a change. It sits alongside the convergent/divergent *content* boundary below. A fix can be convergent in content yet still outside the authorized scope in mechanism.
+由编排器调用本身**不是**授权。您可以在编排器从用户处保留的**继承**范围内进行变异：**actions** = 当前分支上的修复/提交/推送； **排除** = 合并、变基、强制推送、批准门控 CI 运行。该授权范围是固定的。你可以“缩小”它（推迟修复，返回`needs-human`），但永远不要“扩大”它。如果使 CI 变为绿色的唯一方法是排除操作（重新设置基准或强制推送以理清历史记录，或批准门控运行），则该操作超出授权范围：**延迟为 `needs-human`** 和 `decision_context`，请勿执行它。这是变革“机制”的边界。它位于下面的 convergent/divergent *内容* 边界旁边。修复内容可能会趋同，但机制上仍超出授权范围。
 
-## Non-interactive overrides (per phase)
+## 非交互式覆盖（每相）
 
-- **Phase 0 (triage):** If an issue fetch fails, do not ask the user to paste content. Proceed with the input you have and note the gap in the return. Do not ask "what have you tried"; infer prior attempts from the input.
-- **Phase 1 (reproduce):** When reproduction cannot run in this environment (a CI- or production-only failure), do not ask for access, artifacts, or a go-ahead. Continue on the best evidence already in reach: the failing job's logs, captured artifacts, the seeded log tails. If a gap-free root cause is still established, the ordinary statuses apply. If not, return `needs-human` with a `decision_context` naming what reproduction requires and what was tried.
-- **Phase 2 (root cause + fix gate):** There is no "Fix it now / Diagnosis only" question. The caller invoked this skill to fix, so **fix by default, but only convergent fixes** (see the boundary below). A divergent fix is deferred, not applied. When Phase 1's tracker and PR-history search finds an open PR or other fix in flight for this same bug, on a branch other than the one you are fixing, apply nothing and return `diagnosed-no-fix` with its link in `summary`; a second fix would only duplicate it.
-- **Phase 3 (workspace/branch):** Operate on the current branch. The orchestrator decides branch context, so never prompt to create a branch and never prompt about uncommitted work. Commit the fix using the project's commit message conventions already in context; otherwise follow the recent log pattern, then use conventional commits (`fix(ci): <summary>` for a CI failure, `fix: <summary>` otherwise). User override wins. Read the branch's PR state immediately before pushing. If the branch has a PR and it is merged or closed, do not push and return `fixed-not-pushed` with that reason; otherwise push the fix. Never weaken, skip, or mock a failing assertion to make it pass. Repair the real issue or defer.
-- **Phase 4 (handoff):** No prompt. Emit the structured return below as the last thing this skill writes, then skip the compound offer. The return ends this skill, not the turn. The caller runs in this same session, and its next step follows the return.
-- **Post-fix simplify and review steps:** Skip them in pipeline to bound cost and nesting depth; the orchestrator scopes review at its own level. Keep the Phase 3 tests.
+- **阶段 0（分类）：** 如果问题获取失败，请勿要求用户粘贴内容。继续输入您的信息并记下回报中的差距。不要问“你尝试过什么”；从输入推断先前的尝试。
+- **阶段 1（复制）：** 当复制无法在此环境中运行时（CI-或仅生产失败），请勿请求访问、产物或批准。继续使用现有的最佳证据：失败作业的日志、捕获的产物、种子日志尾部。如果仍然存在无间隙根本原因，则适用普通状态。如果没有，则返回 `needs-human` 并带有 `decision_context` ，命名复制所需的内容以及尝试过的内容。
+- **阶段 2（根本原因 + 修复门）：** 不存在“立即修复/仅诊断”问题。调用者调用此技能进行修复，因此**默认修复，但仅收敛修复**（参见下面的边界）。分歧修复被推迟，而不是应用。当第 1 阶段的跟踪器和 PR 历史搜索发现开放的 PR 或针对同一错误的其他修复程序时，在您正在修复的分支以外的分支上，不应用任何内容并返回 `diagnosed-no-fix` 及其在 `summary` 中的链接；第二次修复只会重复它。
+- **阶段3 (workspace/branch):** 在当前分支上操作。编排器决定分支上下文，因此永远不会提示创建分支，也永远不会提示未提交的工作。使用上下文中已有的项目提交消息约定提交修复；否则遵循最近的日志模式，然后使用常规提交（`fix(ci): <summary>`表示CI失败，`fix: <summary>`否则）。用户覆盖获胜。在推送之前立即读取分支的 PR 状态。如果分支有PR并且已合并或关闭，则不要推送并因此返回`fixed-not-pushed`；否则推动修复。永远不要削弱、跳过或嘲笑一个失败的断言以使其通过。修复实际问题或推迟。
+- **阶段 4（切换）：** 无提示。发出下面的结构化回报作为该技能写入的最后内容，然后跳过复合报价。返回结束该技能，而不是回合。调用者在同一个会话中运行，返回后执行下一步。
+- **修复后简化和审查步骤：** 在管道中跳过它们以限制成本和嵌套深度；协调者在自己的级别上进行审查。保留第 3 阶段测试。
 
-## The fix-authority boundary: convergent vs divergent
+## 修复权威边界：趋同与发散
 
-Apply a fix only when it **converges to intended behavior**. That means it repairs the real defect so the code meets its planned/tested intent (a genuine bug: null deref, off-by-one, a broken call, a regression against a test that encodes intended behavior).
+仅当修复**收敛于预期行为**时才应用修复。这意味着它修复了真正的缺陷，使代码满足其 planned/tested 意图（真正的错误：null deref、off-by-one、损坏的调用、对编码预期行为的测试的回归）。
 
-**Defer** (do not apply) any fix that would **diverge from intended behavior**: it would change a deliberate contract, API shape, default, or product/UX decision rather than repair a bug; or the "failure" is a test asserting a deliberate behavior that the fix would reverse; or making CI green would require a product/design call. This mirrors the `ce-resolve-pr-feedback` intent-conflict check. It requires evidence and is rare, and it is never a reason to dodge a real fix. When genuinely unsure whether a failure is a bug or a deliberate-behavior conflict, prefer deferring with a crisp `decision_context` over guessing.
+**推迟**（不应用）任何可能**偏离预期行为**的修复：它将更改故意的合同、API形状、默认或product/UX决策，而不是修复错误；或者“失败”是一个测试，断言修复将逆转故意行为；或者使 CI 变为绿色需要调用 product/design 。这反映了 `ce-resolve-pr-feedback` 意图冲突检查。它需要证据并且很少见，而且决不是逃避真正修复的理由。当真正不确定失败是错误还是故意的行为冲突时，宁愿用干脆的`decision_context`推迟，而不是猜测。
 
-### Emergent trade-offs (when the caller passes a `trajectory`)
+### 紧急权衡（当调用者传递 `trajectory` 时）
 
-Some divergence is not visible in one pass. It emerges across rounds as **ping-pong**: your fix for A causes B to appear, and the fix for B brings A back. When the orchestrator seeds you with a `trajectory` (`recurring_checks`, `check_recur_max`, `heads_since_progress`), reason over it before fixing again, and do not raise a false alarm:
+有些分歧在一次传递中是不可见的。它在各轮中以**乒乓球**的方式出现：你对 A 的修复导致 B 出现，而对 B 的修复则使 A 回来。当编排器向您植入 `trajectory`（`recurring_checks`、`check_recur_max`、`heads_since_progress`）时，请在再次修复之前对其进行推理，并且不要发出错误警报：
 
-- **Progressive failure migration** (A fixed, B appears *once*, you fix B, done) is ordinary multi-step repair. **Keep fixing.** Do not park it.
-- **Oscillation** (the *same* check/invariant returns after a fix aimed at it, defects cycle, or each fix trades one failure for another) means A and B cannot both hold without a larger change. That larger change is a **product/design decision**, so **defer**: apply nothing this round and return `needs-human`, with a `decision_context` that names the two failures in tension, why they cannot be reconciled without a divergent change, the options, and your lean.
-- **Moving-target guard:** if the recurrence traces to an external cause (a base-branch merge, a dep bump, flaky infra) rather than your fixes fighting each other, it is *not* an emergent trade-off. Keep fixing, and note the external cause. Recurrence is only meaningful when your own fixes are what oscillate.
+- **渐进式故障迁移**（A修复，B出现*一次*，修复B，完成）是普通的多步骤修复。 **继续修复。** 不要停车。
+- **振荡**（*相同* check/invariant 在针对它的修复、缺陷周期或每次修复以一个失败换取另一个失败后返回）意味着 A 和 B 不能在没有较大变化的情况下同时成立。更大的改变是 **product/design 决定**，所以 **推迟**：本轮不应用任何内容并返回 `needs-human`，用 `decision_context` 命名两个紧张的失败，为什么如果没有不同的改变、选项和你的精益，它们就无法调和。
+- **移动目标防护：**如果复发追溯到外部原因（基础分支合并、深度碰撞、片状基础设施）而不是您的修复相互冲突，那么它*不是*紧急的权衡。继续修复，并注意外部原因。只有当你自己的修正发生振荡时，重复才有意义。
 
-To defer, name the invariant the fix would need to satisfy and why no bounded convergent change satisfies it. If unsure whether it is genuine oscillation or one more real bug, prefer one more convergent attempt over a premature park.
+为了推迟，请指出修复需要满足的不变量以及为什么没有有界收敛变化可以满足它。如果不确定这是真正的振荡还是另一个真正的错误，那么宁愿再进行一次收敛尝试，而不是过早停顿。
 
-## Reporting a deferred (divergent / needs-human) item
+## 报告延期（不同/需求）项目
 
-Never write a PR-body section. Never block. Report it so the human sees it after the run:
+切勿编写 PR-body 部分。永远不要阻止。报告它，以便人们在运行后看到它：
 
-- If it maps to an **open review thread**, leave that thread open (and attach the `decision_context` as a reply when a thread reply is in scope).
-- Otherwise, **return it in the `residuals` list** for the caller to place in its single run-report comment. For a bare `ce-debug` invocation with no orchestrator and no PR, file it as a ticket in the project's tracker (detected in Phase 1.4) with enough background to action it standalone. When no tracker is reachable, return it in the structured result and say plainly that nothing else recorded it.
+- 如果它映射到 **开放审阅线程**，请将该线程保持打开状态（并在线程回复范围内时附加 `decision_context` 作为回复）。
+- 否则，**将其返回到 `residuals` 列表**中，以便调用者将其放入其单个运行报告注释中。对于没有协调器和 PR 的裸 `ce-debug` 调用，请将其作为票证记录在项目的跟踪器中（在阶段 1.4 中检测到），并有足够的背景来独立操作它。当没有跟踪器可达时，将其返回到结构化结果中，并明确表示没有其他任何记录。
 
-Return each decision in the shared typed residual contract. Its `sources` enumerate every item this one decision covers: each failing check key with `kind: "check"`, plus the stable ID and kind of every open review thread, comment, or review body represented by the same decision. `decision_context` contains the quoted failure, investigation, decision reason, options with tradeoffs, and nullable recommendation. `thread_urls` includes every owned open thread (every open thread this decision covers) and is empty only when no source is a thread. The caller persists and invalidates the complete source set as one unit, so never split, omit, or summarize which items a decision covers.
+返回共享类型剩余合约中的每个决策。它的 `sources` 枚举了该决策涵盖的每一项：每个失败的检查键`kind: "check"`，加上同一决策所代表的每个开放评审线程、评论或评审机构的稳定 ID 和类型。 `decision_context` 包含引用的失败、调查、决策原因、权衡选项以及可为空的建议。 `thread_urls` 包括每个拥有的打开线程（此决策涵盖的每个打开线程），并且仅当没有源是线程时为空。调用者将完整的源集作为一个单元保留并使其失效，因此切勿拆分、省略或总结决策涵盖的项目。
 
-## Structured return
+## 结构性回报
 
-The return in pipeline mode is machine-readable (the caller parses it):
+管道模式下的返回是机器可读的（调用者解析它）：
 
 ```json
 {
   "status": "fixed-and-pushed | fixed-not-pushed | diagnosed-no-fix | flaky-infra | needs-human",
-  "summary": "<one line: what happened>",
+  "summary": "<一行：发生了什么>",
   "root_cause": "<causal chain, brief>",
   "changed_files": ["..."],
-  "head_sha": "<sha of the fix commit, when fixed-and-pushed or fixed-not-pushed>",
-  "prevention_signal": "<the proposed log field, metric, or assertion, or null>",
+  "head_sha": "<当修复并推送或修复未推送时，修复提交的 sha>",
+  "prevention_signal": "<建议的日志字段、指标或断言，或 null>",
   "residuals": [
     {
       "type": "needs-human",
@@ -60,22 +60,22 @@ The return in pipeline mode is machine-readable (the caller parses it):
         { "id": "<owned-open-thread-id, when any>", "kind": "thread" }
       ],
       "decision_context": {
-        "quoted_feedback": "<the failure or constraint in tension>",
-        "investigation": "<what was inspected and found>",
-        "decision_reason": "<why no bounded convergent fix is safe>",
+        "quoted_feedback": "<张力失效或约束>",
+        "investigation": "<检查并发现了什么>",
+        "decision_reason": "<为什么没有有界收敛修复是安全的>",
         "options": [ { "option": "<choice>", "tradeoff": "<gain and loss>" } ],
-        "recommendation": "<lean and why, or null>"
+        "recommendation": "<精益和原因，或 null>"
       },
-      "thread_urls": ["<URL for every owned open thread, or empty when none>"]
+      "thread_urls": ["<URL 对于每个拥有的打开线程，或者当没有时为空>"]
     }
   ]
 }
 ```
 
-- `fixed-and-pushed`: a convergent fix was applied, tests pass, committed, and the push succeeded.
-- `fixed-not-pushed`: the same fix is applied and committed locally, but the push did not happen (no remote, no push access, an authorized scope that excludes pushing, a rejected push). `head_sha` is the local commit; the first residual says why. Never report this as `fixed-and-pushed` (the caller re-snapshots a remote head that has not moved) or as `diagnosed-no-fix` (the fix is applied).
-- `flaky-infra`: a flake or infrastructure failure, not a code defect (the caller may retry).
-- `needs-human`: the failure requires a divergent/product decision; nothing applied; see `residuals`.
-- `diagnosed-no-fix`: root cause found but no fix applied this run, because no safe convergent fix exists or one already exists elsewhere; `residuals` carries the reason when a person must decide something, and otherwise `summary` does.
+- `fixed-and-pushed`：应用了收敛修复，测试通过、提交，推送成功。
+- `fixed-not-pushed`：在本地应用并提交相同的修复，但推送没有发生（无远程、无推送访问、排除推送的授权范围、拒绝推送）。 `head_sha` 是本地提交；第一个残差说明了原因。切勿将此报告为 `fixed-and-pushed`（调用方重新拍摄未移动的远程头的快照）或 `diagnosed-no-fix`（已应用修复）。
+- `flaky-infra`：薄片或基础设施故障，而不是代码缺陷（调用者可以重试）。
+- `needs-human`：失败需要divergent/product决策；没有应用任何内容；参见`residuals`。
+- `diagnosed-no-fix`：找到根本原因，但本次运行未应用任何修复，因为不存在安全的收敛修复或其他地方已存在安全修复；当一个人必须决定某件事时，`residuals`带有原因，否则`summary`则带有原因。
 
-`prevention_signal` is present on every return. It carries the always-on signal proposal that SKILL.md's Phase 2 findings block describes, because this mode skips the handoff that would otherwise show it, and it is `null` when that block's condition does not hold. It is a proposal, not a residual, and it is not added to the fix.
+每次退货时都会出现`prevention_signal`。它携带 SKILL.md 的第 2 阶段发现块所描述的始终开启信号建议，因为此模式会跳过本来会显示它的切换，并且当该块的条件不成立时，它是 `null`。这是一个提案，而不是残余，并且不会添加到修复中。

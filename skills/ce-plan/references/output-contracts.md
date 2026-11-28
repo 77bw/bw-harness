@@ -1,30 +1,30 @@
-# Direct and Chat Brief Output Contracts
+# 直接和聊天简短输出合同
 
-Read this when the Output Contract gate in SKILL.md selects Direct or Chat brief. SKILL.md states the gate itself: its condition, the safe direction, the Durable pins, and the point where it resolves. This file defines what the two chat-tier results contain, how each hands off, and when each is done. A Durable run never reads this file.
+当 SKILL.md 中的输出合约门选择直接或聊天简介时请阅读此内容。 SKILL.md 说明门本身：其状况、安全方向、耐用销钉以及其解析点。该文件定义了两个聊天层结果包含的内容、每个结果如何交接以及何时完成。持久运行永远不会读取此文件。
 
-## What both tiers share
+## 两层共享的内容
 
-- The result is delivered in chat, in plain sentences, and nothing is written under `<root>/plans/` unless the user asks for a file.
-- No subagent runs, no confidence check, no document review, and no Phase 5.4 menu. The result closes the run on its own.
-- `ce-plan` still never implements. A Direct result describes the change; the implementation belongs to `ce-work` or the user.
-- When the result names where a test should live, say in one line what that seam catches and what it misses.
+- 结果以简单的句子在聊天中传递，除非用户请求文件，否则`<root>/plans/`下不会写入任何内容。
+- 没有子代理运行，没有置信度检查，没有文档审查，也没有阶段 5.4 菜单。结果自行结束运行。
+- `ce-plan`仍然没有实现。直接结果描述了变化；该实现属于 `ce-work` 或用户。
+- 当结果指定测试应该存在的位置时，请在一行中说出该接缝捕获了哪些内容以及错过了哪些内容。
 
-## Direct
+## 直接的
 
-Say what changes, where, and how it is verified, in a few sentences. Then offer the handoff in one line: hand it to `ce-work` or the user makes the change. Invoke `ce-work` with that statement as its prompt only when the user accepts, or when the invocation already carried implementation intent from an orchestrator; `ce-plan` never makes the edit itself, and a planning invocation is not execution authority. A Direct result is complete when the statement and the offer are in chat.
+用几句话说明发生了什么变化、在哪里以及如何验证。然后在一行中提供交接：将其交给 `ce-work` 或用户进行更改。仅当用户接受时，或者当调用已经携带来自编排器的实现意图时，才以该语句作为提示调用`ce-work`； `ce-plan` 从不进行编辑本身，并且计划调用不是执行权限。当声明和报价在聊天中时，直接结果就完成了。
 
-## Chat brief
+## 聊天简述
 
-Deliver, in chat:
+在聊天中交付：
 
-- a summary of what changes and why, in a few sentences;
-- the implementation units, each with its files and its test expectations;
-- one decisions line when the request or a brainstorm summary settled a choice the implementer must honor, otherwise none.
+- 用几句话总结变化的内容和原因；
+- 实施单位，每个单位都有其文件和测试期望；
+- 当请求或头脑风暴总结确定了实施者必须遵守的选择时，就会有一条决策线，否则就没有。
 
-Close with one line offering to save the brief to a file or hand it to `ce-work`. A Chat brief is complete when the brief and that offer are in chat. "Proceed" after a Chat brief hands the brief to `ce-work` as its prompt; `ce-work`'s session-carried resolution accepts an in-conversation brief as that prompt.
+最后一行提出将摘要保存到文件或将其交给 `ce-work`。当简报和该优惠处于聊天状态时，聊天简报就完成了。聊天简报将简报交给`ce-work`后作为提示，“继续”； `ce-work` 的会话携带的解决方案接受对话中的摘要作为该提示。
 
-A brainstorm summary that carries a settled decision the implementer must honor selects Chat brief at minimum, so the decision has a line to live on.
+包含实施者必须遵守的既定决定的头脑风暴摘要至少选择聊天摘要，因此该决定有一个延续的路线。
 
-## Saving a Chat brief
+## 保存聊天摘要
 
-A save request for anything the file described here cannot be (another renderer, or the full plan floor) is a Durable request whenever it arrives. Re-invoke `ce-plan` on the brief; the Durable path then chooses the renderer and writes the artifact. Otherwise, naming markdown or not, write the brief as a plain markdown file under `<root>/plans/` with the same filename shape as a plan, with frontmatter `title`, `type`, and `date`, and `execution: code` for a code deliverable. Reserve the path with exclusive creation; on collision retry with the smallest available numeric suffix before the extension, never overwriting an existing file. Do not set `artifact_contract`: a saved brief does not carry the unified-plan floor. `ce-work` treats a saved brief as a legacy plan (no contract field, normal code lifecycle).
+对此处描述的文件不能包含的任何内容（另一个渲染器或完整计划楼层）的保存请求无论何时到达都是持久请求。重新调用简报上的`ce-plan`；然后，持久路径选择渲染器并写入产物。否则，无论是否命名 markdown，请在 `<root>/plans/` 下将摘要编写为普通 Markdown 文件，其文件名形状与计划相同，并使用 frontmatter `title`、`type` 和 `date`，以及用于代码交付的`execution: code`。独家创作预留路径；发生冲突时，使用扩展名之前的最小可用数字后缀重试，永远不会覆盖现有文件。不设置`artifact_contract`：保存的简报不带统一规划楼层。 `ce-work` 将保存的概要视为遗留计划（无合同字段，正常代码生命周期）。

@@ -1,14 +1,14 @@
-# Warm the npm cache for cross-model peers
+# 为跨模型对等点预热 npm 缓存
 
-Cross-model peers resolve acpx within tested version bounds, preserving npm's release-age and date-cutoff policies. Warming downloads an eligible transport and the adapters associated with the newest validated release. An older policy-selected transport may fetch different adapter packages on its first run.
+跨模型对等体在测试的版本范围内解析 acpx，保留 npm 的发布年龄和日期截止策略。预热会下载符合条件的传输以及与最新验证版本关联的适配器。较旧的策略选择传输可能会在首次运行时获取不同的适配器包。
 
-Ask once. Say first what it gets the user: skills that consult another model, such as Codex or Claude, usually start without a download on first use. Then say in plain words what it does: it downloads now, into the user's npm cache, the npm packages those skills use to reach the other model, instead of on first use. Say too that npm runs any install scripts those packages declare, as it would on that first use. Name a package such as acpx only alongside that description. Run it only after the user approves; if they decline, fetch nothing.
+问一次。首先说说它为用户带来了什么：参考其他模型的技能，例如 Codex 或 Claude，通常在首次使用时无需下载即可启动。然后用简单的话说明它的作用：它现在将这些技能用来访问其他模型的 npm 软件包下载到用户的 npm 缓存中，而不是在第一次使用时下载。还要说 npm 运行这些包声明的任何安装脚本，就像第一次使用时一样。仅在描述旁边命名一个包，例如 acpx。待用户同意后才运行；如果他们拒绝，就什么也拿不到。
 
-On approval, run the health script with `--warm-acpx` in place of `--version VERSION`, using the same `SKILL_DIR` as Step 2:
+获得批准后，使用与步骤 2 相同的 `SKILL_DIR` 来运行运行状况脚本，并使用 `--warm-acpx` 代替 `--version VERSION`：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the ce-setup SKILL.md>";
 bash "$SKILL_DIR/scripts/check-health" --warm-acpx
 ```
 
-It installs each package into npx's cache, without starting the package itself, and prints one line per package. Show those lines. A failed warm does not disable peers; their normal launch still attempts resolution under the same npm policy. In the summary, say whether every package was cached, or that the user declined, or which package failed to fetch.
+它将每个包安装到 npx 的缓存中，而不启动包本身，并为每个包打印一行。显示这些线。失败的预热不会禁用对等点；他们的正常启动仍然尝试在相同的 npm 政策下解决。在摘要中，说明是否缓存了每个包，或者用户拒绝了，或者哪个包无法获取。

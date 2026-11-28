@@ -1,15 +1,15 @@
-# Reviewer Dispatch
+# 审稿人派遣
 
-Read this before dispatching the Step 2 reviewers. It covers the reviewers' model, what happens when the harness is full, how review agents are released, and the permission mode.
+在派遣第 2 步审查者之前请阅读本文。它涵盖了审查者的模型、宿主满时会发生什么、审阅代理如何释放以及权限模式。
 
-**Model selection.** Use the platform's balanced mid-tier model for these reviewers when the current harness exposes a known override. In Claude Code this is the Sonnet class. In Codex, apply this tier only when the active dispatch primitive exposes an explicit model or custom-agent selector; task wording alone does not select a different model. Otherwise omit the override and inherit the parent model -- a working pass on the parent model beats a broken dispatch.
+**模型选择。** 当当前宿主暴露已知覆盖时，为这些审查者使用平台的平衡中间层模型。在 Claude Code 中，这是 Sonnet 类。在Codex中，仅当活动调度原语公开显式模型或自定义代理选择器时才应用此层；任务措辞本身并不能选择不同的模型。否则，忽略覆盖并继承父模型 - 父模型上的工作传递会击败损坏的调度。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-**Bounded dispatch.** Each reviewer starts in a fresh subagent whose context holds only its own rubric and inputs. The one exception is the combined reviewer that `references/single-pass.md` chooses below a size cutoff, which is itself one reviewer. Otherwise do not combine reviewers in one prompt, and do not send a reviewer to an agent that already ran another. Queue the reviewers and launch only as many as the harness accepts at once. When the harness is full, wait for a running reviewer to finish, release it, and launch the next. A full harness is not a reason to run a reviewer inline. A concurrency or active-agent-limit error means the harness is full, not that the reviewer failed: leave the reviewer queued and retry after a slot frees. When a dispatch cannot recover through active work, supported release, or a corrected invocation, run that pass inline using the same prompt asset and disclose the substitution.
+**有界调度。** 每个审查者都从一个新的子代理开始，该子代理的上下文仅包含自己的标题和输入。一个例外是 `references/single-pass.md` 选择低于大小限制的联合审查者，该审查者本身就是一名审查者。否则，请勿将审查者合并到一个提示中，也不要将审查者发送给已运行另一提示的代理。对审查者进行排队，并仅启动该宿主一次接受的审查者。当宿主已满时，等待正在运行的审查者完成，释放它，然后启动下一个。完整的工具并不是内联运行审查者的理由。并发或活动代理限制错误意味着宿主已满，而不是审查者失败：让审查者排队并在插槽释放后重试。当调度无法通过活动工作、支持的发布或更正的调用恢复时，请使用相同的提示资产内联运行该传递并公开替换。
 
-**Agent lifecycle.** Collect terminal outcomes, including failures, before cleanup. Close or release review-owned agents when the harness provides caller-owned cleanup, before refilling slots, advancing stages, or returning. Do not message completed agents with no remaining work. Do not infer released capacity from completion or interruption, or invent cleanup operations.
+**代理生命周期。** 在清理之前收集终端结果，包括失败。当宿主提供呼叫者拥有的清理功能时，在重新填充插槽、前进阶段或返回之前，关闭或释放审核拥有的代理。不要向已完成但没有剩余工作的代理发送消息。不要根据完成或中断推断已释放的容量，也不要发明清理操作。
 
-**Permission mode.** Omit the `mode` parameter on the dispatch call so the user's configured permission settings apply.
+**权限模式。** 省略调度调用上的 `mode` 参数，以便应用用户配置的权限设置。

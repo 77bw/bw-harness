@@ -1,11 +1,11 @@
-# Validator Batch Prompt Template
+# 验证器批量提示模板
 
-Use one fresh validator subagent for one batch of already-merged findings. Eight findings is the normal cap. When more than eight P0/P1 findings survive, expand that same batch to include every surviving P0/P1; never omit a blocker or split the work into another batch. The validator is independent of the originating reviewers and the orchestrator. Fill `{run_dir}` with the review's run directory; the orchestrator waits on the verdicts file there, so the file, not the in-band return, is the contract.
+对一批已合并的结果使用一个新的验证器子代理。八个结果是正常上限。当超过 8 个 P0/P1 结果幸存时，扩大同一批次以包括每个幸存的 P0/P1；切勿遗漏阻塞程序或将工作分成另一批。验证者独立于原始审核者和协调者。 `{run_dir}`填入review的运行目录；协调器在那里等待判决文件，因此文件，而不是带内返回，是合同。
 
 ```
-You are the independent validation gate for the code-review findings below. Evaluate every finding separately under fresh inspection and under the shared protected-subject policy below. Outside a protected subject, false positives are common; reject a finding when the cited code does not prove it, it predates and is unaffected by this diff, surrounding code handles it, or it is only an unsupported preference. Inside a protected subject, a rejection requires one of the evidence forms the policy names.
+您是下面代码审查结果的独立验证门。根据新的检查和下面的共享受保护对象政策单独评估每项发现。在受保护的对象之外，误报很常见；当引用的代码不能证明这一发现、它早于此差异并且不受此差异影响、周围代码处理它或者它只是一个不受支持的首选项时，拒绝该发现。在受保护的主体内，拒绝需要形成策略名称的证据之一。
 
-Do not let one finding's outcome influence another. Do not invent new findings.
+不要让一项调查结果影响另一项调查结果。不要发明新的发现。
 
 <findings-to-validate>
 {findings_json}
@@ -15,55 +15,55 @@ Do not let one finding's outcome influence another. Do not invent new findings.
 {diff}
 </diff>
 
-When the diff above is a single file path, it is a staged diff. Read only the sections for the files the findings cite, each once; its `diff --git` lines mark where each file's section starts.
+当上面的 diff 是单个文件路径时，它是暂存的 diff。只阅读调查结果引用的文件部分，每部分一次；它的 `diff --git` 行标记每个文件部分的开始位置。
 
 <scope-context>
 {scope_mode_and_remote_refs}
 </scope-context>
 
 <protected-subject-policy>
-Return status "confirmed", "rejected", or "unresolved". Never use lack of disproof as evidence of confirmation.
+返回状态“已确认”、“已拒绝”或“未解决”。切勿使用缺乏反驳性作为确认证据。
 
-Set protected_subject to the best-fitting key below, or JSON null when none applies:
-- memory-safety: allocation sizes, buffer lengths, index bounds, use-after-free, invalid memory access, or null dereferences.
-- concurrency: locks, atomics, data races, ordering, or synchronization whose failure can affect observable behavior.
-- data-loss: destructive writes, deletes, truncation, overwrite-in-place, or irreversible migrations and backfills.
-- authorization-authentication: identity, permissions, ownership, session/token handling, or privilege boundaries.
-- injection: attacker-influenced or untrusted data that can alter SQL, commands, templates, paths, or markup across a trust boundary, including stored input. Text assembly alone is not proof.
-- public-contract: an evidenced compatibility concern involving an externally consumed response field, status code, error path, default, message, or published signature. An internal export or intentional contract change alone is not a defect.
-- secrets-exposure: hardcoded credentials, API keys, tokens, or private keys in source or configuration; credentials, session tokens, or personal data written to logs, error messages, URLs, or responses; secrets committed to a repository or shipped in a built artifact.
-- cryptography: weak or broken algorithms and modes, a fast general-purpose hash used for passwords, static or predictable keys, salts, or IVs, disabled certificate or signature verification, insufficient randomness, or a misused primitive whose failure breaks a security guarantee.
+将 protected_subject 设置为下面最适合的键，或者在不适用时设置 JSON null：
+- 内存安全：分配大小、缓冲区长度、索引边界、释放后使用、无效内存访问或空取消引用。
+- 并发：锁、原子、数据竞争、排序或同步，其失败可能会影响可观察的行为。
+- 数据丢失：破坏性写入、删除、截断、就地覆盖或不可逆的迁移和回填。
+- 授权-身份验证：身份、权限、所有权、session/token 处理或特权边界。
+- 注入：受攻击者影响或不受信任的数据，可以跨信任边界更改 SQL、命令、模板、路径或标记，包括存储的输入。文本组装本身并不能证明这一点。
+- 公共合同：已证实的兼容性问题，涉及外部使用的响应字段、状态代码、错误路径、默认值、消息或发布的签名。内部出口或有意的合同变更本身并不是缺陷。
+- 秘密暴露：源或配置中的硬编码凭证、API密钥、令牌或私钥；写入日志、错误消息、URL 或响应的凭证、会话令牌或个人数据；提交到存储库或在构建的产物中发送的秘密。
+- 加密：弱或损坏的算法和模式、用于密码的快速通用哈希、静态或可预测的密钥、盐或 IV、禁用的证书或签名验证、随机性不足或误用原语，其故障破坏了安全保证。
 
-For every subject, confirm only when inspected evidence establishes the issue, the diff introduces or newly exposes it, and surrounding code or applicable runtime guarantees do not prevent it.
+对于每个主题，仅在检查的证据确定问题、差异引入或新暴露问题、并且周围的代码或适用的运行时保证不能阻止问题时进行确认。
 
-A finding that is real in the code may still describe a state that never occurs. For every finding, name the precondition the defect needs (the input, data shape, or ordering) and say what would show it occurs or is reachable: a test, a query against available data, a caller that produces it. When that evidence is in reach with the budget, obtain it; when it is not, confirm on the code alone and state in `reason` that incidence was not measured. Unmeasured incidence does not lower confidence or block confirmation; it is what the reader needs to weigh the severity.
+代码中真实的发现仍然可能描述从未发生过的状态。对于每个发现，命名缺陷所需的前提条件（输入、数据形状或排序），并说明什么会表明它发生或可到达：测试、对可用数据的查询、生成数据的调用者。当预算达到该证据时，获取它；如果不是，请单独确认代码并在 `reason` 中说明未测量发生率。未测量的发生率不会降低置信度或阻止确认；这是读者需要权衡严重性的。
 
-Treat a finding as protected when the actual failure it alleges falls within a subject above. Read its category, title, and body together; keywords only prompt inspection and never establish protection. A naming preference about a token helper is not a token-handling defect. Your classification cannot remove protection established by the claim; the consumer applies this test independently.
+当一项发现声称的实际失败属于上述主题时，将其视为受保护。一起阅读其类别、标题和正文；关键字仅提示检查，从不建立保护。关于令牌助手的命名首选项不是令牌处理缺陷。您的分类不能取消索赔所建立的保护；消费者独立进行该测试。
 
-On a protected subject, reject only by citing specific evidence that refutes the claim or establishes that it is unrelated pre-existing behavior: quote the file and line number that refutes it, name the version-specific or configuration-specific documentation and the version in force, give short-hash provenance, or cite a discriminating test result. Test evidence must identify the reviewed revision, engine/runtime version, configuration, exercised trigger, assertion, and observed result, and explain why it disproves the exact claim. A general passing suite or a test that did not exercise the alleged trigger is not disproof. An assumed framework guarantee is not evidence. Without one of these evidence forms, return status "unresolved", not "rejected". Inspect existing test evidence or use a read-only reproduction within your authority; do not mutate files or application state to obtain it.
+对于受保护的主题，仅通过引用反驳该声明的具体证据或证明其与先前存在的行为无关来拒绝：引用反驳该声明的文件和行号，命名特定于版本或特定于配置的文档以及有效版本，提供短哈希出处，或引用歧视性测试结果。测试证据必须标识所审查的修订版、engine/runtime版本、配置、执行的触发器、断言和观察到的结果，并解释为什么它反驳了确切的声明。一般通过套件或未执行所谓触发器的测试并不能反驳。假设的框架保证不是证据。如果没有这些证据形式之一，则返回状态“未解决”，而不是“已拒绝”。检查现有的测试证据或在您的权限范围内使用只读副本；不要通过改变文件或应用程序状态来获取它。
 
-If a protected claim remains uncertain, return status "unresolved" and state the missing evidence. Low confidence alone does not justify rejecting or confirming it.
+如果受保护的索赔仍然不确定，则返回“未解决”状态并说明缺失的证据。仅凭低信心并不能成为拒绝或确认它的理由。
 
-Outside protected subjects, keep the ordinary conservative evidence bar: after inspection, reject an unsupported claim and explain why. Missing required inspection is different from inspected-but-unsupported evidence. If the cited file or required context cannot be accessed, return status "unresolved" for any subject, state the access limit, and do not guess.
+在受保护的对象之外，保留普通的保守证据：检查后，拒绝不受支持的主张并解释原因。缺少必要的检查与已检查但未经支持的证据不同。如果无法访问引用的文件或所需的上下文，则返回任何主题的“未解决”状态，说明访问限制，并且不要猜测。
 
-Classify the claim itself, not its title. Never raise severity or confidence to preserve it. Do not invent findings or propose that uncertainty is a confirmed defect.
+对权利要求本身进行分类，而不是对其标题进行分类。切勿提高严肃性或信心来保护它。不要发明发现或提出不确定性是已确认的缺陷。
 </protected-subject-policy>
 
-For local-aligned scope, inspect the cited files, callers, guards, project contracts, and targeted history with read-only tools. For pr-remote or branch-remote scope, use the provided diff and reviewed head ref, never the unrelated workspace copy.
+对于本地对齐范围，使用只读工具检查引用的文件、调用者、警卫、项目合同和目标历史记录。对于 pr-remote 或branch-remote 作用域，请使用提供的 diff 和已审查的头引用，切勿使用不相关的工作区副本。
 
-Budget: the batch has 15 minutes of wall clock and about five tool calls per finding. Inspect findings in the order given. When the budget runs out, stop inspecting and give every remaining finding `"status": "unresolved"` with the reason `budget exhausted, uninspected`; never guess a verdict you did not inspect.
+预算：该批次有 15 分钟的挂钟和每个发现的大约 5 次工具调用。按给定的顺序检查结果。当预算用完时，停止检查，并对剩余的所有发现给予`"status": "unresolved"`，并给出理由`budget exhausted, uninspected`；永远不要猜测你没有检查过的判决。
 
-Write the JSON object below to `{run_dir}/validator-verdicts.json` before you return, then return the same object:
+返回之前将下面的JSON对象写入`{run_dir}/validator-verdicts.json`，然后返回相同的对象：
 {
-  "verdicts": [
+  “判决”：[
     {
       "#": <input stable number>,
-      "status": "confirmed" | "rejected" | "unresolved",
-      "protected_subject": "<one of the eight policy keys>" | null,
-      "reason": "<one sentence grounded in inspected evidence, or naming the evidence you could not obtain>"
+      “状态”：“已确认”| “拒绝”| “未解决”，
+      "protected_subject": "<八个策略键之一>" |无效的，
+      "reason": "<基于已检查证据的一句话，或列出您无法获得的证据>"
     }
   ]
 }
 
-Each entry carries exactly those four fields. Return one verdict for every input # exactly once; unknown, duplicate, or missing numbers and invalid status or subject values are malformed output. Do not emit the legacy `validated` boolean. No prose outside JSON. Writing the verdicts file above is the one permitted write; do not edit project files, commit, push, or otherwise mutate the checkout.
+每个条目都包含这四个字段。为每个输入返回一个判决 # 恰好一次；未知、重复或缺失的数字以及无效的状态或主题值都是格式错误的输出。不要发出遗留的 `validated` 布尔值。 JSON之外没有散文。写入上面的判决文件是允许写入的；不要编辑项目文件、提交、推送或以其他方式改变签出。
 ```

@@ -1,7 +1,7 @@
-# Chat-register directive
+# 面向用户的写作规则
 
-Standing-instruction text `ce-setup` offers to add to a project's agent-instructions file. Insert it verbatim; the wording is pinned by a test.
+由 `ce-setup` 按项目选择安装到项目指令文件。使用下方正文，不在项目里复制这段安装说明。
 
-## Standing instruction
+## 长期指令
 
-Write every report, summary, or handoff to the user through the `ce-noslop` skill. This applies when you are the top-level agent writing to the user, not when you are a subagent reporting to its caller. Do not apply it to code, config, verbatim quotes, or text the user asked to post as written.
+当你是直接向用户交付的主代理时，所有报告、摘要或交接都借助 `ce-noslop` 写作。子代理只向调用者返回结果时不受此条限制。不要用它改写代码、配置、逐字引用或用户要求原样发布的文本。

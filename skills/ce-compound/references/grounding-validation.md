@@ -1,92 +1,92 @@
-# Grounding Validation (Phase 2.45)
+# 接地验证（第 2.45 阶段）
 
-Read this when Phase 2.45 runs. The doc just written becomes permanent, trusted knowledge. Future agents will act on its claims without re-verifying them. This phase checks the claims against reality before they compound: a deterministic mechanical pass (bundled script) plus a semantic pass (one read-only validator subagent). Neither pass is a hard stop. You judge every flag, because solution docs legitimately cite deleted paths and pre-fix states.
+当第 2.45 阶段运行时请阅读此内容。刚刚编写的文档将成为永久的、值得信赖的知识。未来的特工将根据其声明采取行动，而无需重新验证。此阶段在复合之前根据现实检查声明：确定性机械通道（捆绑脚本）加上语义通道（一个只读验证器子代理）。这两次传球都不是硬停。您判断每个标志，因为解决方案文档合法地引用了已删除的路径和前缀状态。
 
-## Which tree is the ground truth
+## 哪棵树是基本事实
 
-Two claim categories verify against different trees:
+两个声明类别针对不同的树进行验证：
 
-- **Code-behavior claims** (enum values, status semantics, limits, defaults) verify against **the code the learning will merge with**: the branch it ships on, including this session's work. On an ordinary branch that is the local working tree. When the working tree also holds changes that will not merge with the learning, such as other unmerged branches applied in a GitButler workspace, read from that branch's ref instead (`git show <ref>:<path>`), and name the tree used in the run report.
-- **Merge-state claims** ("fixed in #1608", "landed", "shipped") verify against **remote truth**. The checkout may predate a merge, so `gh pr view` (or the tracker equivalent) is primary and local git reachability is only the fallback. The script's `INFO: worktree is N commits behind …` line tells you how much to distrust the local tree for this category.
+- **代码行为声明**（枚举值、状态语义、限制、默认值）根据**学习将与之合并的代码进行验证：它所在的分支，包括本次会议的工作。在一个普通的分支上，它是本地工作树。当工作树还包含不会与学习合并的更改时，例如在 GitButler 工作区中应用的其他未合并分支，请改为从该分支的引用中读取 (`git show <ref>:<path>`)，并命名运行报告中使用的树。
+- **合并状态声明**（“已在 #1608 中修复”、“已着陆”、“已交付”）根据 **远程事实** 进行验证。签出可能早于合并，因此 `gh pr view` （或等效的跟踪器）是主要的，本地 git 可访问性只是后备。脚本的 `INFO: worktree is N commits behind …` 行告诉您对该类别的本地树有多不信任。
 
-Before running the script, optionally run `git fetch --quiet` (best-effort; skip silently on failure or offline, because the network is never a correctness dependency). When remote state cannot be checked at all, keep the claim, add an as-of qualifier ("as of this writing"), and record degraded verification in the run report.
+在运行脚本之前，可以选择运行 `git fetch --quiet` （尽力而为；失败或离线时静默跳过，因为网络永远不是正确性依赖项）。当根本无法检查远程状态时，保留声明，添加当前限定符（“截至撰写本文时”），并在运行报告中记录降级验证。
 
-## Step 1: Adjudicate the mechanical flags
+## 步骤一：判定机械标志
 
-The script reports in two tiers and you decide each item. A **FLAG** is a claim it can defend; a **NOTE** is an item it reported without being able to classify, and notes do not affect its exit code. There are three resolutions, **fix**, **annotate**, or **confirm intentional**, and never an automatic rewrite or an automatic pass:
+该脚本分为两层，由您决定每个项目。 **FLAG** 是它可以捍卫的主张； **NOTE** 是它报告但无法分类的项目，注释不会影响其退出代码。共有三种解决方案，**修复**、**注释**或**确认有意的**，并且绝不自动重写或自动通过：
 
-| Flag | Likely meaning | Resolution |
+| 旗帜 | 可能的含义 | 解决 |
 |------|----------------|------------|
-| line past the end of the cited file | Stale or memory-drafted line number | Cite the function, class, or config key that defines the behavior instead; keep the number only when the prose marks it as a pre-fix state |
-| path not found under the search base | Typo, drafted from memory, or a real file in a repo or store the check did not search | Keep the citation if the file exists in another repo or store you can check; otherwise fix the citation or remove the claim |
-| path missing here, exists at upstream | Stale checkout | Verify the claim against upstream; annotate if the doc implies the file is present locally |
-| path deliberately gone (doc says removed/renamed) | Historical citation | Confirm the surrounding prose marks it as historical ("removed by this fix", "pre-fix state"); add that marker if absent |
-| SHA does not resolve, cited as a commit | Fabricated or from another repo | Replace with the PR number, or drop |
-| NOTE: unresolved hex, no commit context | The script cannot tell a session id or content hash from a commit; it is reporting, not accusing | Read the line: if it was never a commit citation, nothing to do; if it was, verify it |
-| SHA reachable from HEAD only | Local-only commit; SHA will change on rebase/squash merge | Replace with the PR number |
-| SHA reachable from upstream only | Checkout predates the merge | Keep, with a temporal qualifier; verify the landed claim via `gh` |
-| SHA exists but unreachable | Rebased-away commit | Replace with the PR number |
-| scaffold ("Learning 3", `{{…}}`) | Drafting-context leak | Always fix; rewrite as a real path or link |
-| relative link unresolved | Wrong target | Fix the path |
+| 超出引用文件末尾的行 | 过时的或内存起草的行号 | 引用定义行为的函数、类或配置键；仅当散文将其标记为前缀状态时才保留该数字 |
+| 在搜索库下找不到路径 | 拼写错误、凭记忆起草、或存储库或存储中的真实文件未搜索到 | 如果该文件存在于您可以检查的另一个存储库或商店中，请保留引用；以其他方式修复引文或删除声明 |
+| 此处缺少路径，存在于上游 | 过时的结帐 | 验证针对上游的索赔；注释文档是否暗示该文件存在于本地 |
+| 路径故意消失（医生说removed/renamed） | 历史引用 | 确认周围的散文将其标记为历史（“通过此修复删除”，“修复前状态”）；如果不存在则添加该标记 |
+| SHA 未解析，引用为提交 | 伪造的或来自另一个仓库 | 替换为PR数字，或者删除 |
+| 注意：未解析的十六进制，没有提交上下文 | 该脚本无法区分提交中的会话 ID 或内容哈希；这是报告，而不是指责 | 阅读这行：如果它从来不是提交引用，则无需执行任何操作；如果是，请验证 |
+| SHA 只能从 HEAD 到达 | 仅本地提交； SHA 将在 rebase/squash 合并时更改 | 替换为PR数字 |
+| SHA 只能从上游访问 | 结帐早于合并 | 保留，带有时间限定符；通过`gh`验证已登陆的索赔 |
+| SHA 存在但无法访问 | 重新调整基数提交 | 替换为PR数字 |
+| 脚手架（“学习3”，`{{…}}`） | 绘图上下文泄漏 | 始终修复；重写为真实路径或链接 |
+| 相对链接未解析 | 目标错误 | 修复路径 |
 
-If the script cannot be resolved on this platform, apply its checks manually at the same scope: scan the body for cited paths that do not exist, cited line numbers past the end of their file, hex words presented as commits anywhere in the body (in commands and code blocks as much as in prose), `Learning(s) N` / `{{…}}` scaffold, and broken relative links. Note in the run output that the check was manual. Do not silently skip.
+如果该脚本无法在此平台上解析，请在相同范围内手动应用其检查：扫描正文中不存在的引用路径、超出文件末尾的引用行号、在正文中的任何位置呈现为提交的十六进制单词（在命令和代码块中以及在散文中）、`Learning(s) N` / `{{…}}` 脚手架以及损坏的相关链接。请注意，在运行输出中，检查是手动的。不要默默地跳过。
 
-After any body edit from this step or Step 2, re-run the script until it reports clean or every remaining flag is confirmed intentional.
+在此步骤或步骤 2 中进行任何正文编辑后，重新运行脚本，直到报告干净或确认每个剩余标志是有意为之。
 
-## Step 2: Semantic validator subagent (Full and non-interactive; skipped in lightweight)
+## 步骤 2：语义验证器子代理（完整且非交互式；轻量级跳过）
 
-Dispatch **one generic read-only subagent** covering the written solution doc plus any `CONCEPTS.md` entries added or edited this run. Phase 2.4's entries are claims too; a glossary entry written from a session-level summary is exactly how wrong semantics enter the vocabulary. Use the same mid-tier model class as other reviewer subagents when the platform exposes one.
+调度**一个通用只读子代理**，涵盖书面解决方案文档以及本次运行添加或编辑的任何 `GLOSSARY.md` 条目。第 2.4 阶段的条目也是声明；从会话级摘要编写的词汇表条目正是错误语义进入词汇表的方式。当平台公开一个中间层模型类时，请使用与其他审查者子代理相同的中间层模型类。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-Build its prompt from this template:
+从此模板构建提示：
 
 ```
-You are a grounding validator for documentation about to enter a permanent
-knowledge store. You are read-only: never edit files. Inspect with Read,
-Grep, Glob, git (non-mutating), and gh when available.
+您是即将进入永久居留权的文件的接地验证员
+知识库。您是只读的：从不编辑文件。检查阅读，
+Grep、Glob、git（非变异）和 gh（如果可用）。
 
-Inputs: the doc content below, the CONCEPTS.md entries below (if any), and
-this staleness context: <INFO line from the mechanical script, or "none">,
-and the tree to verify code against: <"working tree", or a git ref to
-read with git show <ref>:<path>>.
+输入：下面的文档内容、下面的 GLOSSARY.md 条目（如果有），以及
+此陈旧上下文：<来自机械脚本的 INFO 行，或“none”>，
+以及用于验证代码的树：<“工作树”，或 git 引用
+使用 git show <ref>:<path>> 读取。
 
-Check every factual claim in three categories:
+检查三个类别中的每项事实主张：
 
-1. CODE-BEHAVIOR CLAIMS — assertions about how code behaves: enum values,
-   status semantics, limits, defaults, ordering, state transitions. For
-   each, locate the defining source in the tree named above and quote the
-   defining line(s) with file:line. Verdict: verified (with quote),
-   contradicted (with the quote showing otherwise), or unverifiable
-   (defining source not found).
+1. 代码行为声明 — 关于代码行为方式的断言：枚举值，
+   状态语义、限制、默认值、排序、状态转换。为了
+   每个，在上面命名的树中找到定义源并引用
+   用 file:line 定义线。结论：已验证（带报价），
+   矛盾（引用另有说明），或无法验证
+   （未找到定义源）。
 
-2. MERGE-STATE CLAIMS — assertions that a change landed ("fixed in",
-   "merged", "shipped in", "resolved by #N"). Primary check: gh pr view
-   <n> --json state,mergedAt,baseRefName (remote truth). Fallback: git
-   reachability from the upstream default branch. Verdict: verified,
-   contradicted (e.g. PR open, not merged), or unverifiable (offline / no
-   gh) — mark unverifiable as "degraded", do not guess.
+2. MERGE-STATE CLAIMS — 断言发生了变化（“固定”，
+   “合并”、“运送”、“由#N 解决”）。主要检查：gh pr view
+   <n>--json状态，mergedAt，baseRefName（远程真相）。后备：git
+   从上游默认分支的可达性。结论：已核实，
+   矛盾（例如 PR 打开，未合并），或无法验证（离线/无
+   gh）；无法验证时使用 `degraded`，不要猜测。
 
-3. INTERNAL COMPLETENESS — countable assertions ("six PRs", "three root
-   causes", "all N consumers"). Count the substantiating items in the doc
-   itself. Verdict: complete, or short (found M of N).
+3. 内部完整性——可数断言（“六PRs”，“三个根
+   原因”、“所有 N 个消费者”）。计算文档中证实的项目
+   本身。结论：完整或简短（找到 N 中的 M）。
 
-Ignore session narrative ("we first tried X") — that describes the
-conversation, not the tree. Ignore style.
+忽略会话叙述（“我们首先尝试了 X”）——描述了
+对话，而不是树。忽略风格。
 
-Return a structured list, one entry per claim checked:
-  claim (verbatim) | category | verdict | evidence (quote + file:line, or
-  command output) | suggested edit (only for non-verified claims)
+返回一个结构化列表，每个索赔检查一个条目：
+  索赔（逐字）|类别 |判决|证据（引用 + file:line，或
+  命令输出）|建议编辑（仅适用于未经验证的声明）
 ```
 
-**Orchestrator handling of verdicts:**
+**协调员处理判决：**
 
-- **contradicted** → fix the doc using the quoted evidence (the quote, not the conversation, is authoritative)
-- **unverifiable** (behavior) → soften or attribute ("per this session's conclusion…"), or drop the claim
-- **unverifiable/degraded** (merge-state) → keep with an as-of qualifier; record degraded verification in the report
-- **short** (completeness) → complete the enumeration or restate the count to match what the doc substantiates
-- **verified** → no change
+- **矛盾** → 使用引用的证据修复文档（引用，而不是对话，才是权威的）
+- **无法验证**（行为）→软化或归因（“根据本次会议的结论......”），或放弃声明
+- **unverifiable/degraded**（合并状态）→ 保留现状限定符；在报告中记录降级验证
+- **简短**（完整性）→ 完成枚举或重述计数以匹配文档证实的内容
+- **已验证** → 没有变化
 
-## Reporting
+## 报告
 
-Summarize the phase in one line of the run output (non-interactive report's `Grounding:` line; interactive success output): flags adjudicated (fixed / annotated / confirmed), claims checked, claims softened or corrected, and `degraded — merge-state claims unverified offline` when applicable.
+在运行输出的一行中总结该阶段（非交互式报告的 `Grounding:` 行；交互式成功输出）：判定的标志（固定/注释/确认）、已检查的声明、软化或更正的声明以及适用时的 `degraded——离线无法核实合并状态`。

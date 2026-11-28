@@ -1,44 +1,44 @@
-# Classifying a doc, and deciding when to ask
+# 对文档进行分类，并决定何时询问
 
-Assign each doc one outcome:
+为每个文档分配一个结果：
 
-| Outcome | Meaning | Action |
+| 结果 | 意义 | 行动 |
 |---------|---------|--------|
-| **Keep** | Still accurate and useful | No edit, except clearing an earlier stale mark (`references/refresh/investigate.md`) — report it as reviewed. Do not write a review breadcrumb or `last_refreshed` on its own. |
-| **Update** | Solution still correct; references drifted (paths, names, links, snippets, metadata, misfiling), or some claims are stated by a named artifact (`references/refresh/worth-audit.md`) | Fix in place |
-| **Consolidate** | Docs overlap heavily, both correct | Merge unique content into the canonical doc, delete the subsumed one |
-| **Replace** | Guidance is now misleading; a trustworthy successor can be written | Successor via subagent, then delete the old |
-| **Delete** | No longer useful, applicable, or distinct | Delete the file — git history is the archive; there is no `_archived/` |
+| **保持** | 仍然准确且有用 | 没有编辑，除了清除早期的陈旧标记 (`references/refresh/investigate.md`) - 将其报告为已审核。不要单独撰写评论面包屑或`last_refreshed`。 |
+| **更新** | 解决方案仍然正确；引用漂移（路径、名称、链接、片段、元数据、错误归档），或某些声明由命名产物陈述 (`references/refresh/worth-audit.md`) | 固定到位 |
+| **巩固** | 文档严重重叠，两者都正确 | 将唯一内容合并到规范文档中，删除包含的内容 |
+| **代替** | 现在的指导具有误导性；可以写出一个值得信赖的继任者 | 通过子代理继承，然后删除旧的 |
+| **删除** | 不再有用、适用或独特 | 删除文件——git历史记录是存档；没有`_archived/` |
 
-Judgment rules that are easy to get wrong:
+容易出错的判断规则：
 
-- **Separate descriptive drift from implementation conflict.** Claims about current mechanics follow current code, so the doc changes and product code does not. Guidance with independent evidence that it still governs is classified from that evidence; when current code stops satisfying it, keep the guidance intact and report the conflict as a potential product regression. Do not adjudicate or fix the code here. Without independent support for the guidance, use the normal Update, Replace, or stale-mark rules below.
-- **A met retirement condition is contradicting evidence, not age.** When the `retire_when` check finds the condition met, the premise the guidance depended on is gone; classify the doc from that evidence under the rules here. When repo code still carries the workaround the doc explains, the doc stays (Keep, or Update where the evidence contradicts a claim it makes), and removing that code is the recommended action in the doc's report entry (non-interactive: under **Recommended**). A met condition is a reason to verify the removal, not proof it is safe. An unmet condition decides nothing on its own; one that could not be checked falls under **Unverifiable is not false**.
-- **The Update/Replace boundary:** Replace only when evidence shows that the doc's recommendation no longer governs and a trustworthy successor can be written; rewriting the solution section or changing what the doc recommends is Replace, not Update. Cutting claims another artifact states changes no recommendation, so it is Update. Current-code contradiction alone is classified under the descriptive-drift/implementation-conflict rule above. For guidance the learning names, Replace when the named guidance is right and the learning's recommendation no longer governs; when the learning is right and the named guidance is wrong, the guidance path is the recommended action in that file's report entry (non-interactive: under **Recommended**, beside the discoverability recommendation). When current code witnesses neither side, ask (interactive) or stale-mark and report the contradiction under **Recommended** (non-interactive). The refresh never edits skills, runbooks, or root instruction files.
-- **Age alone is not staleness** — a two-year-old doc that still matches the code is a Keep; use age only as a prompt to inspect harder.
-- **No churn:** never edit just for typos, wording, or cosmetics.
-- **Replace needs real evidence** — from the investigation itself, the conversation, newer docs/PRs, or the user. If you cannot confidently document the current approach, stale-mark and recommend `ce-compound` for the user's next encounter with that area instead of guessing.
-- **Consolidate vs separate — the retrieval-value test:** would a maintainer searching this topic in six months benefit from separate docs (genuinely different sub-problems, different audiences), or do they just create drift risk? Two docs saying the same thing will eventually say different things. Two accurate docs about *different sub-problems* of one feature (e.g., request volume vs response ordering) stay separate even when they cite the same file — shared code is not shared problem. If the subsumed doc adds nothing unique, it's a straight Delete. Deleting the subsumed doc after merging its unique content is part of the Consolidate action itself — it is a safe, unattended-appliable step and does not require the auto-delete gate below.
-- **Unverifiable is not false.** A claim the repo cannot corroborate — a schema or index fact, an operational practice, an environment behavior — is not thereby wrong; repos rarely witness their own operations. Never delete, strip during a merge, or stale-mark content solely because no in-repo artifact confirms it. Act only on contradiction (code demonstrably does otherwise); for unverifiable-but-plausible claims, keep them and note the verification gap in the report. **Split** (one doc holding several independent problems → focused successors) is the inverse and the bar is high: each fragment must have independent retrieval value; length alone is never a reason.
-- **Relocation** (an Update variant): move a doc only when directory and frontmatter category disagree or content unambiguously belongs in a different **existing** category. A mismatch proves something is wrong, not which side — resolve the direction from content before moving, and never relocate on an arguable judgment call. Non-interactive auto-relocation requires all four: (1) frontmatter and directory disagree per the category mapping, (2) content clearly resolves the direction as directory-wrong, (3) the target category directory exists, (4) all inbound citations are in-repo and mechanically rewritable. Otherwise recommend.
+- **将描述性偏差与实现冲突分开。** 有关当前机制的声明遵循当前代码，因此文档会更改，而产品代码不会更改。具有独立证据且仍具有支配力的指导是从该证据中分类出来的；当当前代码不再满足它时，请保持指南不变并将冲突报告为潜在的产品回归。不要在这里裁决或修复代码。如果没有独立的指导支持，请使用下面的正常更新、替换或过时标记规则。
+- **满足退休条件是矛盾的证据，而不是年龄。**当`retire_when`检查发现满足条件时，指导所依赖的前提就消失了；根据此处的规则对证据中的文档进行分类。当回购代码仍然包含文档解释的解决方法时，文档将保留（保留，或在证据与其提出的声明相矛盾时更新），并且删除该代码是文档报告条目中的建议操作（非交互式：在**推荐**下）。满足条件是验证删除的理由，而不是证明其安全。未满足的条件本身并不能决定什么；无法检查的属于**无法验证的不是错误**。
+- **Update/Replace边界：** 仅当有证据表明文档的建议不再有效并且可以编写值得信赖的继任者时才进行替换；重写解决方案部分或更改文档建议的是替换，而不是更新。削减声称另一个产物状态没有改变建议，所以它是更新。仅当前代码矛盾属于上述descriptive-drift/implementation-conflict规则。对于学习名称的指导，当指定的指导正确并且学习的推荐不再起作用时进行替换；当学习正确而指定的指导错误时，指导路径是该文件的报告条目中推荐的操作（非交互式：在**推荐**下，可发现性建议旁边）。当当前代码没有见证任何一方时，请询问（交互式）或陈旧标记并在**推荐**（非交互式）下报告矛盾。刷新不会编辑技能、操作手册或根指令文件。
+- **年龄本身并不意味着陈旧**——两年前仍符合代码的文档就是 Keep；仅使用年龄作为更严格检查的提示。
+- **无流失：**切勿仅因拼写错误、措辞或修饰而进行编辑。
+- **替换需要真实的证据**——来自调查本身、对话、更新的docs/PRs或用户。如果您无法自信地记录当前方法，请为用户下次遇到该区域进行陈旧标记并推荐`ce-compound`，而不是猜测。
+- **合并与分离——检索价值测试：**在六个月内搜索该主题的维护者是否会从单独的文档（真正不同的子问题、不同的受众）中受益，或者它们只是造成漂移风险？两个文档说同样的事情最终会说不同的事情。关于一个功能的“不同子问题”（例如，请求量与响应顺序）的两个准确文档即使引用同一文件，也保持独立 - 共享代码不是共享问题。如果包含的文档没有添加任何独特的内容，则直接删除。合并其独特内容后删除包含的文档是合并操作本身的一部分 - 这是一个安全、无人值守的适用步骤，并且不需要下面的自动删除门。
+- **无法验证并非错误。** 存储库无法证实的主张（模式或索引事实、操作实践、环境行为）并不是错误的；而是错误的。回购很少见证自己的操作。切勿仅因为没有存储库内产物确认而在合并期间删除、剥离或陈旧标记内容。仅针对矛盾采取行动（代码显然不这样做）；对于无法核实但合理的说法，请保留它们并在报告中注明核实差距。 **分割**（一个文档包含几个独立的问题→集中的后继者）是相反的，并且门槛很高：每个片段必须具有独立的检索价值；长度本身从来都不是原因。
+- **重新定位**（更新变体）：仅当目录和 frontmatter 类别不一致或内容明确属于不同的 **现有** 类别时才移动文档。不匹配证明出了问题，而不是哪一方出了问题——在移动之前确定内容的方向，并且永远不要根据有争议的判断来重新定位。非交互式自动重定位需要全部四个：(1) frontmatter 和目录在类别映射方面不一致，(2) 内容明确将方向解析为目录错误，(3) 目标类别目录存在，(4) 所有入站引用都是存储库内的且可机械重写。否则推荐。
 
-A memory-sourced signal never carries an outcome on its own: it corroborates codebase evidence or prompts a deeper look, and in non-interactive mode memory-only drift is a stale-mark, never a Replace or Delete.
+来自内存的信号本身永远不会产生结果：它证实代码库证据或提示进行更深入的研究，并且在非交互模式下，仅内存漂移是一个陈旧标记，而不是替换或删除。
 
-**Before any Delete**, two checks:
+**在任何删除之前**，进行两项检查：
 
-1. **Is the problem domain still active?** Missing files prove the *implementation* is gone, not the problem. If the app still deals with what the doc addresses (e.g., the auth-token file is gone but sessions are still handled), that is Replace, not Delete. A doc that never referenced in-repo code (developer environment, onboarding, process) can never satisfy "implementation gone" and **never auto-deletes** — stale-mark (non-interactive) or ask (interactive) when its currency is in doubt. A worth-based Delete has its own gate below.
-2. **Inbound links.** Search the repo's markdown (not source code) for the filename slug; read context around matches. **Decorative** citations (see-also pointers, principle already stated inline) permit Delete with mechanical cleanup in the same commit. **Substantive** citations (the citing doc relies on the cited content) signal Replace — or Keep with narrowed scope. Mixed or unclear: stale-mark.
+1. **问题域仍然活跃吗？** 丢失的文件证明*实现*已经消失，而不是问题。如果应用程序仍然处理文档地址的内容（例如，身份验证令牌文件已消失，但会话仍在处理），那就是替换，而不是删除。从未引用回购代码（开发人员环境、入门、流程）的文档永远无法满足“实现消失”的要求，并且**永远不会自动删除**——当其货币有疑问时进行过时标记（非交互式）或询问（交互式）。基于价值的删除在下面有它自己的门。
+2. **入站链接。** 在存储库的 Markdown（而不是源代码）中搜索文件名 slug；阅读比赛周围的上下文。 **装饰性**引用（另请参阅指针，已内联说明的原则）允许在同一提交中通过机械清理进行删除。 **实质性**引用（引用文档依赖于引用的内容）表示替换 - 或保留缩小的范围。混合或不清楚：陈旧标记。
 
-**Worth-based Delete (no confirmation needed, either mode):** `references/refresh/worth-audit.md` routed the doc to Delete with a quoted artifact for every claim, and inbound citations are absent or decorative. Those quotes answer check 1 above, because the lesson survives in the artifact.
+**基于价值的删除（无需确认，无论哪种模式）：** `references/refresh/worth-audit.md` 将文档路由到删除，并为每个声明添加了引用的产物，并且入站引用不存在或具有装饰性。这些引用回答了上面的检查 1，因为该课程在产物中仍然存在。
 
-**Auto-delete (no confirmation needed, either mode) only when all three hold:** the implementation once lived in this repo and is gone (or the doc is fully superseded or plainly redundant); the problem domain is gone — or, for a superseded/redundant doc, the surviving canonical doc itself already states the subsumed doc's guidance (topical overlap is not coverage: verify the specific content exists there before deleting); inbound citations are absent or unambiguously decorative. Any condition fails → Replace, Update, Consolidate, stale-mark, or ask.
+**仅当所有三个都成立时才自动删除（无需确认，无论哪种模式）：**该实现曾经存在于该存储库中并且消失了（或者该文档被完全取代或明显冗余）；问题域消失了——或者，对于 superseded/redundant 文档，幸存的规范文档本身已经说明了所包含文档的指导（主题重叠不是覆盖范围：在删除之前验证特定内容是否存在）；入站引文不存在或具有明确的装饰性。任何条件失败 → 替换、更新、合并、过时标记或询问。
 
-**Pattern docs** (`<root>/solutions/patterns/`) get the same five outcomes evaluated as *derived* guidance: does the generalized rule still hold given the refreshed learnings beneath it? A pattern with no supporting learnings is itself a stale signal. Base any pattern Replace on the refreshed learning set, not fresh invention.
+**模式文档** (`<root>/solutions/patterns/`) 得到与*派生*指导相同的五个结果评估：鉴于其下面的更新知识，通用规则是否仍然成立？没有支持性学习的模式本身就是一个陈旧的信号。任何模式替换都基于更新的学习集，而不是新鲜发明。
 
-## Decide (interactive mode only)
+## 决定（仅限交互模式）
 
-Apply unambiguous Keeps, Updates, and Consolidations directly — no confirmation. Ask (per Blocking questions) only when: the action is genuinely ambiguous; a Delete fails both the auto-delete gate and the worth-based gate; the canonical doc in a Consolidate isn't clear-cut; you are about to Replace; or you are about to Split (it writes successors and deletes the original — confirm fragment boundaries like a Replace). Present the file path, 2-4 evidence bullets, and the recommended action; offer only plausible alternatives plus "skip for now". For broad sweeps, work in batches and confirm continuation between them rather than front-loading a full maintenance queue.
+直接应用明确的保留、更新和合并——无需确认。仅在以下情况下询问（根据阻止问题）： 操作确实不明确； a 删除同时通过自动删除门和基于价值的门；合并中的规范文档并不明确；您即将更换；或者您即将拆分（它写入后继并删除原始的 - 像替换一样确认片段边界）。呈现文件路径、2-4 个证据要点以及建议的操作；仅提供合理的替代方案以及“暂时跳过”。对于广泛的扫描，分批工作并确认它们之间的连续性，而不是预先加载完整的维护队列。
 
-## Relationship to capture
+## 捕捉关系
 
-A capture records a newly solved problem. A refresh maintains the store as the codebase evolves: each doc's accuracy and worth, the design of the set, and the standards rules that `references/refresh/worth-audit.md` covers. Replace only on real evidence; without it, stale-mark the doc and point the user at `ce-compound`. Consolidate proactively, because captures add docs and redundant docs drift.
+捕获记录了新解决的问题。随着代码库的发展，更新会维护存储：每个文档的准确性和价值、集合的设计以及 `references/refresh/worth-audit.md` 涵盖的标准规则。仅替换真实证据；如果没有它，就会对文档进行过时标记，并将用户指向 `ce-compound`。主动整合，因为捕获添加文档和冗余文档漂移。

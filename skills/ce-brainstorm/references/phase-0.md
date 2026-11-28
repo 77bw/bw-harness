@@ -1,104 +1,104 @@
-# Phase 0: resume, classify, route, and scope
+# 阶段 0：恢复、分类、路线和范围
 
-#### 0.1 Resume Existing Work When Appropriate
+#### 0.1 适当时恢复现有工作
 
-This resume scan needs `<root>/plans/`, so it applies only to a repo-backed run. If there is no git repository, or resolving `<root>` fails (a bad `docs_root`), skip the scan and continue — do not fail the run here, since Phase 0.1b may route non-software work to `references/universal-brainstorming.md`, whose contract does not write a unified plan under `<root>/plans/`.
+此恢复扫描需要`<root>/plans/`，因此它仅适用于回购支持的运行。如果没有 git 存储库，或者解析 `<root>` 失败（不好的 `docs_root`），请跳过扫描并继续 — 不要在此处运行失败，因为阶段 0.1b 可能会将非软件工作路由到 `references/universal-brainstorming.md`，其合同不会在 `<root>/plans/` 下编写统一计划。
 
-Only when that check passes — a repo-backed run whose `<root>` resolved — evaluate this resume condition; never resolve `<root>` here on a run the check told you to skip. When it applies, if the user references an existing brainstorm topic or document, or there is an obvious recent matching unified plan in `<root>/plans/` with `artifact_contract: ce-unified-plan/v1` and `product_contract_source: ce-brainstorm`, whose contents are still a Product Contract without implementation planning:
-- Read the document
-- Confirm with the user before resuming: "Found an existing requirements-only plan for [topic]. Should I continue from this, or start fresh?"
-- If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
-- **Resume preserves the existing artifact's format.** Write back in whatever format the existing artifact uses — markdown if the existing file is `.md`, HTML if it is `.html`. Explicit `output:` arguments on this run override (e.g., resuming an `.html` doc with `output:md` switches the artifact to markdown). A headless run resumes in the existing format like any other run. When the format switches, the resume writes the new-format file at the parallel path and the original is left in place untouched.
+仅当该检查通过时（由回购支持的运行，其`<root>`已解决）才评估此恢复条件；永远不要在运行时解析`<root>`，检查告诉你要跳过。适用时，如果用户引用了已有的头脑风暴主题或文档，或者`<root>/plans/`与`artifact_contract: ce-unified-plan/v1`、`product_contract_source: ce-brainstorm`近期有明显匹配的统一计划，其内容仍然是没有实施计划的产品合同：
+- 阅读文档
+- 在继续之前与用户确认：“找到了 [主题] 的现有仅需求计划。我应该从此继续，还是重新开始？”
+- 如果恢复，请简要总结当前状态，继续现有决策和悬而未决的问题，并更新现有文档而不是创建副本
+- **Resume 保留现有产物的格式。** 以现有产物使用的任何格式写回 — 如果现有文件为 `.md`，则为 markdown；如果为 `.html`，则为 HTML。此运行覆盖中的显式 `output:` 参数（例如，使用 `output:md` 恢复 `.html` 文档会将产物切换为 markdown）。无头运行会像任何其他运行一样以现有格式恢复。当格式切换时，简历会在并行路径上写入新格式的文件，而原始文件则保持不变。
 
-Historical `docs/brainstorms/*-requirements.{md,html}` files remain legacy inputs for `ce-plan`, but new `ce-brainstorm` outputs do not write there.
+历史 `docs/brainstorms/*-requirements.{md,html}` 文件仍保留 `ce-plan` 的旧输入，但新的 `ce-brainstorm` 输出不会写入其中。
 
-#### 0.1b Classify Task Domain
+#### 0.1b 任务域分类
 
-Before proceeding to Phase 0.2, classify whether this is a software task. The key question is: **does the task involve building, modifying, or architecting software?** -- not whether the task *mentions* software topics.
+在进入阶段 0.2 之前，先对这是否是软件任务进行分类。关键问题是：**任务是否涉及构建、修改或构建软件？**——而不是任务是否*提及*软件主题。
 
-**Software** (continue to Phase 0.2) -- the task references code, repositories, APIs, databases, or asks to build/modify/debug/deploy software.
+**软件**（继续到阶段 0.2）——任务引用代码、存储库、API、数据库或要求 build/modify/debug/deploy 软件。
 
-**Non-software brainstorming** (route to universal brainstorming) -- BOTH conditions must be true:
-- None of the software signals above are present
-- The task describes something the user wants to explore, decide, or think through in a non-software domain
+**非软件头脑风暴**（通向通用头脑风暴的途径）——两个条件都必须为真：
+- 上述软件信号均不存在
+- 该任务描述了用户想要在非软件领域探索、决定或思考的内容
 
-**Neither** (respond directly, skip all brainstorming phases) -- the input is a quick-help request, error message, factual question, or single-step task that doesn't need a brainstorm.
+**都不是**（直接回复，跳过所有头脑风暴阶段）——输入是快速帮助请求、错误消息、事实问题或不需要头脑风暴的单步任务。
 
-**Verdict-shape carve-out — do not exit before the 0.1c check.** A request weighing whether to **adopt / switch to / replace** a *named external technology, library, pattern, platform, or architecture* for this project is a **software** decision even when it only names the tool and asks the bare question ("should we adopt Biome here?"). Classify it as **Software** and continue so the 0.1c check below can catch it — do **not** route it to *Neither* or *Non-software*, which would skip that check and lose the exact verdict-shape prompts it exists for.
+**判决型剥离——在 0.1c 检查之前不要退出。** 权衡是否为此项目**采用/切换到/替换***指定的外部技术、库、模式、平台或架构*的请求是一个**软件**决定，即使它只命名工具并提出简单的问题（“我们应该在这里采用 Biome 吗？”）。将其分类为**软件**并继续，以便下面的 0.1c 检查可以捕获它 - 不要**将其路由到*两者都*或*非软件*，这将跳过该检查并丢失其存在的确切判决形状提示。
 
-**If non-software brainstorming is detected:** Read `references/universal-brainstorming.md` now and follow it — it replaces Phases 0.2–4 entirely. Scope assessment, exploration moves, convergence, and the wrap-up menu for this route live there, not here; improvising them produces an unstructured chat with no synthesis and no handoff. The non-software route does **not** write `artifact_contract: ce-unified-plan/v1`; that contract is reserved for software Product Contracts that can later become implementation-ready code plans. The **Core Principles and Interaction Rules in `references/interaction-rules.md` still apply unchanged** — including one-question-per-turn, asking only decisions the environment cannot settle, and the default to the platform's blocking question tool — and are the only part of this workflow that survives the route.
+**如果检测到非软件头脑风暴：** 立即阅读 `references/universal-brainstorming.md` 并遵循它 — 它完全取代阶段 0.2–4。该路线的范围评估、探索行动、融合和总结菜单都在那里，而不是在这里；即兴创作它们会产生一种非结构化的聊天，没有合成，也没有切换。非软件路由**不**写`artifact_contract: ce-unified-plan/v1`；该合同是为软件产品合同保留的，这些合同稍后可以成为可实施的代码计划。 **`references/interaction-rules.md`中的核心原则和交互规则仍然适用不变** - 包括每轮一个问题，仅询问环境无法解决的决定，以及平台的阻塞问题工具的默认设置 - 并且是此工作流程中唯一在路线中幸存的部分。
 
-#### 0.1c Route a Verdict Question to ce-pov
+#### 0.1c 将判决问题路由至 ce-pov
 
-A brainstorm scopes **what to build** once a direction is chosen. Deciding **whether to adopt, switch to, or replace** a *specific named external candidate* (technology, library, pattern, platform, or architecture) judged against this project is a different job — a decisive, project-grounded verdict, which is `ce-pov`'s purpose.
+一旦选择了方向，就可以通过头脑风暴来确定**要构建什么**。决定**是否采用、切换到或替换**根据该项目进行评判的*特定命名的外部候选人*（技术、库、模式、平台或架构）是另一项工作——一个决定性的、基于项目的裁决，这就是`ce-pov`的目的。
 
-**The verdict shape — all three hold:** a **named external candidate** (one outside thing, or a bounded set the user already named like "X vs Y vs Z" — not an open field for *you* to enumerate); a **whether-to-commit intent** (adopt / switch to / migrate / replace / is-it-time-for / revisit — not "how should we design or scope Y"); judged **against this project** (fit, migration cost, worth it here), not a neutral explainer. Open-ended design or scoping where *you'd* invent the options stays here. The whether-to-commit trigger separates the two: "help me **pick** between X, Y, Z" is a verdict; "I'm **mulling** X, Y, Z" stays here.
+**结论形状——所有三个都成立：**一个**命名的外部候选者**（一个外部事物，或者用户已经命名的有界集合，如“X vs Y vs Z”——不是*你*可以枚举的开放字段）； **是否提交意图**（采用/切换到/迁移/替换/是时候/重新访问——而不是“我们应该如何设计或范围Y”）； **针对这个项目**进行判断（适合，迁移成本，在这里值得），而不是中立的解释者。开放式设计或“你”发明选项的范围都留在这里。是否提交触发器将两者分开：“帮我在 X、Y、Z 之间**选择**”是一个判决； “我正在**考虑** X、Y、Z”留在这里。
 
-When the shape matches — at intake, or whenever later dialogue (Phases 1.3–2) clarifies a request into it — read `references/verdict-routing.md` and follow it: offer the `ce-pov` handoff interactively (never silently switch), invoke `ce-pov` on accept, drop the offer and continue the normal workflow unchanged on decline. That reference defines how to build the offer, how to map its fields, and what to pass to `ce-pov`.
+当形状匹配时 - 在接收时，或每当稍后的对话（阶段 1.3-2）澄清其中的请求时 - 阅读`references/verdict-routing.md`并遵循它：以交互方式提供`ce-pov`交接（绝不静默切换），在接受时调用`ce-pov`，放弃要约并在拒绝时继续正常工作流程不变。该参考定义了如何构建报价、如何映射其字段以及传递给 `ce-pov` 的内容。
 
-#### 0.2 Assess Whether Brainstorming Is Needed
+#### 0.2 评估是否需要头脑风暴
 
-**Clear requirements indicators:**
-- Specific acceptance criteria provided
-- Referenced existing patterns to follow
-- Described exact expected behavior
-- Constrained, well-defined scope
+**明确的需求指标：**
+- 提供具体的验收标准
+- 参考现有模式遵循
+- 描述了确切的预期行为
+- 受约束的、明确的范围
 
-**If requirements are already clear:**
-Keep the interaction brief. Confirm understanding and present concise next-step options rather than forcing a long brainstorm. Whether a file is written is decided by the Lightweight rule in 0.3 below. Skip Phase 1.1's scan and scout and all of Phase 1.2 — Pack discovery at the top of 1.1 still runs, because declared packs constrain the synthesis on every path — still classify tier in Phase 0.3, then go straight to Phase 1.3 or Phase 2.5 and follow `references/synthesis-summary.md`'s Path A / Path B rule exactly. Do not assume the synthesis is announce-only: a richly pre-loaded prompt classifies as Standard or Deep, which routes to Path B (full scoping synthesis + confirmation), not Path A — collapsing that rule is the defect `synthesis-summary.md` warns against.
+**如果要求已经明确：**
+保持互动简短。确认理解并提出简洁的下一步选项，而不是强迫进行长时间的头脑风暴。文件是否写入由下面0.3中的轻量级规则决定。跳过阶段 1.1 的扫描和侦察以及所有阶段 1.2 - 1.1 顶部的包发现仍然运行，因为声明的包限制了每条路径上的合成 - 仍然在阶段 0.3 中对层进行分类，然后直接进入阶段 1.3 或阶段 2.5，并严格遵循 `references/synthesis-summary.md` 的路径 A / 路径 B 规则。不要假设综合只是公告：丰富的预加载提示分为标准或深度，其路由到路径 B（全面范围综合 + 确认），而不是路径 A — 崩溃该规则是缺陷 `synthesis-summary.md` 警告的缺陷。
 
-#### 0.3 Assess Scope
+#### 0.3 评估范围
 
-Use the feature description plus a light repo scan to classify the work:
-- **Lightweight** - small, well-bounded, low ambiguity
-- **Standard** - normal feature or bounded refactor with some decisions to make
-- **Deep** - cross-cutting, strategic, or highly ambiguous
+使用功能描述加上简单的回购扫描来对工作进行分类：
+- **轻量级** - 小、界限清楚、模糊性低
+- **标准** - 正常功能或有界重构，需要做出一些决定
+- **深入** - 跨领域、战略性或高度模糊
 
-If the scope is unclear, ask one targeted question to disambiguate and then proceed; when it stays uncertain, take the heavier tier.
+如果范围不清楚，可以提出一个有针对性的问题来消除歧义，然后继续；当不确定时，采取较重的一层。
 
-**Lightweight ends in chat.** The result is a paragraph in the synthesis: what is being built, the one or two decisions made, and where they go next (`ce-plan`'s prompt, the commit message). No file is written, and Phase 1.1's scout, Phase 2's approach generation, and Phase 2.6's verifier do not run. A file is written only when the dialogue produced a decision that a downstream consumer needs recorded under a stable ID, or when the user asks for one; then Phase 3 (write the plan) writes it from the dialogue's decisions, and the Ready for Planning Check covers what the dialogue established.
+**轻量级以聊天结束。** 结果是综合中的一个段落：正在构建什么，做出的一两个决定，以及下一步去哪里（`ce-plan`的提示，提交消息）。未写入任何文件，并且阶段 1.1 的侦察、阶段 2 的方法生成和阶段 2.6 的验证程序不运行。仅当对话产生下游消费者需要记录在稳定 ID 下的决定时，或者当用户要求做出决定时，才会写入文件；然后第三阶段（编写计划）根据对话的决定编写计划，准备计划检查涵盖对话所建立的内容。
 
-**Coherent-work gate.** Before entering Phase 1, check whether the request contains more than one independently plannable product outcome: each has its own user value or acceptance boundary and could be delivered without completing the others. Shared actors, one end-to-end outcome, or coverage across named devices/providers do not by themselves justify a split.
+**连贯工作门。** 在进入第一阶段之前，检查请求是否包含多个可独立规划的产品结果：每个结果都有自己的用户价值或接受边界，并且可以在不完成其他结果的情况下交付。共同的参与者、一个端到端的结果或跨命名devices/providers的报道本身并不能证明分裂是合理的。
 
-When this check finds multiple coherent areas:
+当此检查发现多个相干区域时：
 
-1. Propose a plain-language breakdown and state only relationships supported now: which areas depend on or enable others, share a product rule, or can proceed independently.
-2. Ask which one area this brainstorm should own. If the user already chose one, carry it forward instead of asking again.
-3. Treat that area as the sole source of Requirements, Flows, Acceptance Examples, and later Implementation Units. Other areas remain contextual candidates, not scope.
-4. Preserve the current broader understanding for Phase 3's **How This Work Fits Together** section. Mark tentative relationships as tentative; later brainstorms may revise, split, merge, or discard them.
-5. Carry the boundary into the Goal Capsule: name the current area in its objective and state that the surrounding areas are not active scope.
+1. 提出一个简单的语言细分，并仅说明现在支持的关系：哪些领域依赖于或支持其他领域、共享产品规则或可以独立进行。
+2. 询问这次头脑风暴应该属于哪一个领域。如果用户已经选择了一项，请继续选择，而不是再次询问。
+3. 将该区域视为需求、流程、验收示例和后续实施单元的唯一来源。其他领域仍然是上下文候选者，而不是范围。
+4. 保留对第 3 阶段的**如何配合**部分的当前更广泛的理解。将暂定关系标记为暂定；稍后的头脑风暴可能会修改、拆分、合并或丢弃它们。
+5. 将边界带入目标胶囊：在其目标中命名当前区域，并声明周围区域不是活动范围。
 
-Keep the work together when the outcomes cannot be independently useful or validated, or when separating them would force this Product Contract to invent the missing shared behavior. This check narrows the active artifact; it does not create a parent plan or a roadmap.
+当结果无法独立使用或验证时，或者当将它们分开时将迫使该产品契约发明缺失的共享行为时，请将工作放在一起。此检查缩小了活动伪影的范围；它不会创建父级计划或路线图。
 
-**Deep sub-mode: feature vs product.** For Deep scope, also classify whether the brainstorm must establish product shape or inherit it:
+**深度子模式：功能与产品。** 对于深度范围，还可以对头脑风暴是否必须建立产品形状或继承它进行分类：
 
-- **Deep — feature** (default): existing product shape anchors decisions. Primary actors, core outcome, positioning, and primary flows are already established in the product or repo. The brainstorm extends or refines within that shape.
-- **Deep — product**: the brainstorm must establish product shape rather than inherit it. Primary actors, core outcome, positioning against adjacent products, or primary end-to-end flows are materially unresolved. Existing code lowers the odds of product-tier but does not by itself rule it out — a half-built tool with ambiguous shape is still product-tier.
+- **深度 — 功能**（默认）：现有产品形状锚定决策。主要参与者、核心成果、定位和主要流程已在产品或存储库中建立。头脑风暴在该形状内延伸或细化。
+- **深入——产品**：头脑风暴必须建立产品形状而不是继承它。主要参与者、核心成果、针对相邻产品的定位或主要的端到端流程实质上尚未解决。现有代码降低了产品层的可能性，但本身并不能排除它——形状不明确的半成品工具仍然是产品层。
 
-Product-tier triggers additional Phase 1.2 questions and additional Product Contract sections. Feature-tier uses the current Deep behavior unchanged.
+产品层触发额外的第 1.2 阶段问题和额外的产品合同部分。功能层使用当前的 Deep 行为不变。
 
-**Visual probe tripwire.** If the feature is inherently visual or spatial — drawing/canvas tools, annotation behavior, visual editors, UI layout or navigation, interaction states, charts, diagrams, animation, maps, timelines, or spatial flows — read `references/visual-probes.md` now. Strong signals include freehand vs constrained drawing behavior, canvas annotation tools, layout comparisons, and state/flow placement. Loading the reference here only prepares you; that reference decides when the offer must be made (state-based, at the first shape/behavior/state/layout/flow/diagram decision), the wording of the text-vs-visual offer, and how to invoke the display helper.
+**视觉探针绊线。** 如果该功能本质上是视觉或空间的 - drawing/canvas 工具、注释行为、可视化编辑器、UI 布局或导航、交互状态、图表、图表、动画、地图、时间线或空间流 - 立即阅读 `references/visual-probes.md`。强信号包括手绘与约束绘图行为、画布注释工具、布局比较和 state/flow 放置。在此处加载参考资料只是让您做好准备；该参考决定何时必须做出报价（基于状态，在第一个 shape/behavior/state/layout/flow/diagram 决策时）、文本与视觉报价的措辞以及如何调用显示助手。
 
-**Unfamiliarity tripwire.** If the user signals they lack working knowledge of the domain or the territory the topic touches — "I know nothing about X", "never touched the auth modules", "I don't know what's possible / what I should be asking" — read `references/blindspot-pass.md` now. Loading it here only prepares you; that reference decides when the offer is made (territory-scoped, before the first substantive question into the flagged territory), the shape of the map, and how mapped decisions re-enter the dialogue.
+**不熟悉绊网。** 如果用户表示他们缺乏该主题涉及的领域或领域的工作知识 - “我对 X 一无所知”，“从未接触过身份验证模块”，“我不知道什么是可能的/我应该问什么” - 现在阅读 `references/blindspot-pass.md`。在这里加载它只是让您做好准备；该参考决定何时提出要约（在领土范围内，在进入标记领土的第一个实质性问题之前）、地图的形状以及映射的决策如何重新进入对话。
 
-#### 0.4 Surface the Workflow Spine
+#### 0.4 展现工作流程脊柱
 
-For **Standard and Deep** scope, use the platform's task-tracking capability when available (`TaskCreate`/`TaskUpdate`/`TaskList` in Claude Code, `update_plan` in Codex, or the equivalent on other harnesses). Skip it entirely for Lightweight and on the Phase 0.1b non-software route. Create it here, not earlier — 0.1b and 0.1c exit before this point, and the tier is unknown until 0.3.
+对于**标准和深度**范围，请使用平台的任务跟踪功能（如果可用）（Claude Code中的`TaskCreate`/`TaskUpdate`/`TaskList`、Codex中的`update_plan`或其他宿主上的同等功能）。对于轻量级和阶段 0.1b 非软件路线，完全跳过它。在这里创建它，而不是更早 - 0.1b 和 0.1c 在此之前退出，并且直到 0.3 为止，层都是未知的。
 
-If the harness exposes no task-tracking capability — including `ToolSearch` or its equivalent returning no match — continue normally without simulating a task list in chat.
+如果该工具未公开任何任务跟踪功能（包括 `ToolSearch` 或其等效项返回不匹配项），则正常继续，无需在聊天中模拟任务列表。
 
-The task list is the user's view of the run. The spine is five tasks, in order:
+任务列表是用户的运行视图。脊柱有五项任务，依次为：
 
-1. Check what already exists
-2. Ask scoping questions
-3. Weigh approaches and recommend
-4. Confirm scope before writing
-5. Write the requirements plan
+1. 检查已经存在的内容
+2. 提出范围界定问题
+3. 权衡方法并提出建议
+4. 写作前确认范围
+5. 编写需求计划
 
-**Conditional work gets a task only once its condition is met** — never at creation, and never as a placeholder for a branch that may not run. A branch gets one when the user is either waiting on it or would be surprised to learn it happened: an accepted blindspot pass, a dispatched Slack researcher, a Phase 2.6 verifier working in the background. A step that runs once per decision rather than once per run does not get one — it would thrash the list. Insert the task at the position where the work runs.
+**条件工作仅在满足条件时才获取任务** - 永远不会在创建时，也永远不会作为可能无法运行的分支的占位符。当用户正在等待或者惊讶地发现它发生时，分支就会得到一个：一个被接受的盲点通行证，一个被派遣的 Slack 研究人员，一个在后台工作的 2.6 阶段验证者。每个决策运行一次而不是每次运行一次的步骤不会得到一个结果——它会破坏列表。将任务插入工作运行的位置。
 
-**Name every task you add the way the spine is named:** verb first, five words or fewer, naming the outcome the user can hold you to — not the phase, the internal activity, or the tool. `Verify claims against the code`, not `Phase 2.6 claim verification`. Never restate counts, quotas, or pacing in a name; that contract lives in the phase that defines it.
+**以脊柱的命名方式命名您添加的每个任务：**动词在前，五个单词或更少，命名用户可以要求您完成的结果 - 而不是阶段、内部活动或工具。 `Verify claims against the code`，而不是`Phase 2.6 claim verification`。切勿以名称重述计数、配额或进度；该合约存在于定义它的阶段。
 
-**When a condition resolves so that a listed task will not run, record the skip — never mark it plainly complete, and never let it vanish unexplained.** In order of preference: set a `cancelled` or `skipped` status if the harness has one; otherwise rename the task to name the skip (`Skipped: no doc warranted`) and then mark it complete; only if the name cannot be changed, delete it. Say why in the conversation either way — the list carries the fact, not the reason. If Phase 3 decides no doc is warranted, that is task 5. If the 0.1c handoff is accepted mid-dialogue, clear the list entirely — `ce-pov` runs the rest of the session. A task you find yourself skipping routinely is misnamed: it encodes a branch rather than an outcome, so rename it to what happens in the common case.
+**当条件解决导致列出的任务无法运行时，记录跳过 - 永远不要将其简单地标记为完成，也永远不要让它在未解释的情况下消失。** 按照优先顺序：设置 `cancelled` 或 `skipped` 状态（如果宿主有状态）；否则重命名任务以命名跳过 (`Skipped: no doc warranted`)，然后将其标记为完成；仅当名称无法更改时，才将其删除。不管怎样，在谈话中说出原因——这份清单载的是事实，而不是原因。如果第 3 阶段决定不需要任何文档，则为任务 5。如果在对话中接受 0.1c 交接，则完全清除列表 - `ce-pov` 运行会话的其余部分。您发现自己经常跳过的任务命名错误：它编码的是分支而不是结果，因此将其重命名为常见情况下发生的情况。
 
-The list is a view for the user, not an instruction to you. It does not change when a phase runs or what that phase requires, and it never substitutes for a phase's own exit condition.
+该列表仅供用户查看，而不是给您的说明。当阶段运行时或该阶段需要什么时，它不会改变，并且它永远不会替代阶段自己的退出条件。

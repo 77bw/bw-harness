@@ -1,17 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Code Review Findings",
-  "description": "Structured output schema for code review sub-agents",
+  "title": "代码审查结果",
+  "description": "代码审查子代理的结构化输出模式",
   "type": "object",
   "required": ["reviewer", "findings", "residual_risks", "testing_gaps"],
   "properties": {
     "reviewer": {
       "type": "string",
-      "description": "Persona name that produced this output (e.g., 'correctness', 'security')"
+      "description": "产生此输出的角色名称（例如“正确性”、“安全性”）"
     },
     "findings": {
       "type": "array",
-      "description": "List of code review findings. Empty array if no issues found.",
+      "description": "代码审查结果列表。如果没有发现问题则清空数组。",
       "items": {
         "type": "object",
         "required": [
@@ -30,40 +30,40 @@
         "properties": {
           "title": {
             "type": "string",
-            "description": "Short, specific issue title. 10 words or fewer.",
+            "description": "简短、具体的问题标题。 10 个字或更少。",
             "maxLength": 100
           },
           "severity": {
             "type": "string",
             "enum": ["P0", "P1", "P2", "P3"],
-            "description": "Issue severity level"
+            "description": "问题严重级别"
           },
           "file": {
             "type": "string",
-            "description": "Relative file path from repository root"
+            "description": "存储库根目录的相对文件路径"
           },
           "line": {
             "type": "integer",
-            "description": "Primary line number of the issue",
+            "description": "问题的主行号",
             "minimum": 1
           },
           "why_it_matters": {
             "type": "string",
-            "description": "Impact and failure mode -- not 'what is wrong' but 'what breaks'"
+            "description": "影响和故障模式——不是“出了什么问题”，而是“出了什么问题”"
           },
           "autofix_class": {
             "type": "string",
             "enum": ["gated_auto", "manual", "advisory"],
-            "description": "Routing hint for the caller after review (this skill does not apply fixes). gated_auto = concrete suggested_fix proposed; caller applies after judgment. manual = needs design or cross-cutting decisions. advisory = report-only."
+            "description": "审核后为呼叫者提供路由提示（此技能不适用修复）。 gated_auto = 提议的具体suggested_fix；调用者判断后申请。手册 = 需要设计或横切决策。咨询=仅报告。"
           },
           "owner": {
             "type": "string",
             "enum": ["downstream-resolver", "human", "release"],
-            "description": "Who should own the next action for this finding after synthesis"
+            "description": "综合后谁应该负责针对这一发现的下一步行动"
           },
           "requires_verification": {
             "type": "boolean",
-            "description": "Whether any fix for this finding must be re-verified with targeted tests or a follow-up review pass"
+            "description": "针对此发现的任何修复是否必须通过有针对性的测试或后续审核通过重新验证"
           },
           "protected_subject": {
             "type": ["string", "null"],
@@ -78,47 +78,47 @@
               "cryptography",
               null
             ],
-            "description": "Protected subject this finding's alleged failure falls under, or null when none applies. Optional: set by the Stage 5b validation pass, never by the reviewing sub-agent. Classify the actual claim, not a scary word in the title -- a naming preference about a token helper is not a token-handling defect. A protected finding may only be rejected on cited evidence that refutes it; without such evidence its validation_status is 'unresolved'."
+            "description": "该调查结果所声称的失败属于受保护主体，或者在没有适用的情况下无效。可选：由第 5b 阶段验证通过设置，而不是由审核子代理设置。对实际声明进行分类，而不是标题中的可怕单词——关于令牌助手的命名偏好不是令牌处理缺陷。受保护的发现只能在引用的证据反驳它的情况下才能被拒绝；如果没有这样的证据，它的validation_status是“未解决的”。"
           },
           "validation_status": {
             "type": "string",
             "enum": ["confirmed", "rejected", "unresolved"],
-            "description": "Outcome of the Stage 5b validation pass for this finding. Optional: absent when no validator ran, so unvalidated findings stay schema-valid. 'unresolved' means the claim was neither confirmed nor disproven -- it is a verification gate, not a proven defect, and it is report-only."
+            "description": "该发现的第 5b 阶段验证结果已通过。可选：当没有验证器运行时不存在，因此未经验证的结果保持架构有效。 “未解决”意味着该声明既未被确认也未被反驳——它是一个验证门，而不是已证明的缺陷，并且仅是报告。"
           },
           "validation_reason": {
             "type": "string",
-            "description": "One sentence citing the inspected evidence behind a confirmed or rejected outcome, or naming the missing evidence behind an unresolved one. Optional; present whenever validation_status is present."
+            "description": "一句话引用已确认或拒绝的结果背后经过检查的证据，或指出未解决的结果背后缺失的证据。选修的;每当 validation_status 存在时就存在。"
           },
           "suggested_fix": {
             "type": ["string", "null"],
-            "description": "Concrete minimal fix the reviewer can defend from the diff and surrounding code. Propose one whenever any defensible code change is reachable from review context (parallel patterns, framework conventions, or the cited code itself). Imperfect information is not grounds for omission -- propose the most defensible default given what you can see, name any assumption you are making, and let the user override. 'I need <specific input> to commit' is a soft punt: the right question is 'what code change would I propose if I had to choose now?' and propose that, with the assumption named. Omit only when there is genuinely no code-level change to propose -- e.g., the finding is a question rather than a fix ('what is the intended SLA here?'), or the resolution is purely an organizational action with no code component (legal sign-off, business policy decision). These cases are rare in code review. A bad suggestion is still worse than none, but a soft punt is the failure mode this field is designed to prevent."
+            "description": "审阅者可以防御差异和周围代码的具体最小修复。每当可以从审查上下文（并行模式、框架约定或引用的代码本身）中访问任何可防御的代码更改时，就提出一项建议。不完美的信息不是遗漏的理由——根据您所看到的情况提出最合理的默认值，说出您所做的任何假设，并让用户覆盖。 “我需要<特定输入>来提交”是一个软双关语：正确的问题是“如果我现在必须选择，我会建议更改哪些代码？”并提出该假设，并命名该假设。仅当确实没有需要提出的代码级更改时才忽略 - 例如，发现的结果是一个问题而不是解决方案（“这里预期的 SLA 是什么？”），或者解决方案纯粹是没有代码组件的组织行为（法律签署、业务策略决策）。这些情况在代码审查中很少见。一个糟糕的建议仍然比没有更糟糕，但软下注是该领域旨在防止的失败模式。"
           },
           "confidence": {
             "type": "integer",
             "enum": [0, 25, 50, 75, 100],
-            "description": "Anchored confidence score. Use exactly one of 0, 25, 50, 75, 100. Each anchor has a behavioral criterion the reviewer must honestly self-apply. 0: Not confident. This is a false positive that does not stand up to light scrutiny. Pre-existing status is the pre_existing field, not this anchor. 25: Somewhat confident. Might be a real issue but could also be a false positive; the reviewer could not verify from the diff and surrounding code alone. 50: Moderately confident. The reviewer verified this is a real issue but it may be a nitpick, narrow edge case, or have minimal practical impact. Relative to the diff's other concerns, it is not very important. Style preferences and subjective improvements land here. 75: Highly confident. The reviewer double-checked the diff and confirmed the issue will affect users, downstream callers, or runtime behavior in normal usage. The bug, vulnerability, or contract violation is clearly present and actionable. 100: Absolutely certain. The issue is verifiable from the code itself -- compile error, type mismatch, definitive logic bug, or an explicit project-standards violation with a quotable rule. No interpretation required."
+            "description": "锚定置信度得分。仅使用 0、25、50、75、100 之一。每个主播都有一个行为标准，审核者必须诚实地自行应用。 0：不自信。这是经不起严格审查的误报。预先存在的状态是 pre_existing 字段，而不是该锚点。 25：有点自信。可能是一个真正的问题，但也可能是误报；审阅者无法仅从差异和周围代码进行验证。 50：有一定的信心。审阅者证实这是一个真正的问题，但它可能是一个挑剔的、狭隘的边缘案例，或者具有最小的实际影响。相对于 diff 的其他关注点来说，它并不是很重要。风格偏好和主观改进都在这里。 75：非常有信心。审阅者仔细检查了差异并确认该问题将影响用户、下游调用者或正常使用中的运行时行为。错误、漏洞或违反合同的行为明显存在且可采取行动。 100：绝对确定。该问题可以从代码本身进行验证——编译错误、类型不匹配、明确的逻辑错误或明显违反可引用规则的项目标准。无需解释。"
           },
           "evidence": {
             "type": "array",
-            "description": "Code-grounded evidence: snippets, line references, or pattern descriptions. At least 1 item. For any finding at confidence anchor 75 or 100, the first item MUST be the verbatim motivating line(s) with file:line -- the exact code text that makes the finding true (the quote-the-line gate). A finding whose triggering line cannot be quoted must step down to anchor 50. When the finding's claim depends on line history (pre_existing, intentional design, introduced-by-this-diff, or P0/P1 confidence that depends on authorship/age), include one additional concise provenance line from targeted git blame/log (short hash, author, date/subject) -- never replace the quote-the-line item, never dump full-file blame, omit when the finding is justified from the diff alone.",
+            "description": "基于代码的证据：片段、行引用或模式描述。至少 1 件。对于置信度锚点 75 或 100 处的任何发现，第一项必须是带有 file:line 的逐字激励行——使发现成立的确切代码文本（引用行门）。无法引用触发线的发现必须下降到锚点 50。当发现的声明取决于行历史记录（pre_existing、故意设计、引入此差异或依赖于authorship/age的P0/P1置信度）时，请包含来自目标 git blame/log（短哈希、作者、date/subject）的额外简明出处行 - 从不替换引用行项目，永远不要转储完整文件的责任，当仅从差异中证明发现是合理的时，请省略。",
             "items": { "type": "string" },
             "minItems": 1
           },
           "pre_existing": {
             "type": "boolean",
-            "description": "True if this issue exists in unchanged code unrelated to the current diff"
+            "description": "如果此问题存在于与当前差异无关的未更改代码中，则为 True"
           }
         }
       }
     },
     "residual_risks": {
       "type": "array",
-      "description": "Unresolved risks whose relevance and material consequence are supported by project evidence; exclude rejected claims and duplicates of findings",
+      "description": "未解决的风险，其相关性和重大后果得到项目证据的支持；排除被拒绝的主张和重复的调查结果",
       "items": { "type": "string" }
     },
     "testing_gaps": {
       "type": "array",
-      "description": "Worthwhile missing coverage for a concrete scenario in the reviewed scope; exclude hypothetical cases and gaps already carried by findings",
+      "description": "值得忽略的是审查范围内具体场景的覆盖范围；排除假设案例和调查结果已经存在的差距",
       "items": { "type": "string" }
     }
   }

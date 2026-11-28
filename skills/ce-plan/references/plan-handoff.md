@@ -1,118 +1,118 @@
-# Plan Handoff
+# 计划交接
 
-This file contains post-plan-writing instructions for the Durable path: document review, post-generation options, and issue creation. Load it after the plan file has been written and the confidence check (5.3.1-5.3.7) is complete. Direct and Chat brief results never reach it.
+该文件包含持久路径的计划后编写说明：文档审查、生成后选项和问题创建。写入计划文件并完成置信度检查 (5.3.1-5.3.7) 后加载它。直接和聊天简短的结果永远达不到它。
 
-## 5.3.8 Document Review
+## 5.3.8 文件审查
 
-Invoke the `ce-doc-review` skill with arguments `mode:non-interactive <plan-path>` using the host's normal skill-invocation mechanism. Do not substitute a generic Task, Agent, or subagent; those are delegation mechanisms, not skill invocation. This phase runs for both markdown and HTML; `ce-doc-review` applies fixes in the artifact's native format. It is mandatory — do not skip it because the confidence check already ran. The two workflows catch different classes of issues.
+使用主机的正常技能调用机制，使用参数 `mode:non-interactive <plan-path>` 调用`ce-doc-review` 技能。不要替换通用任务、代理或子代理；这些是委托机制，而不是技能调用。此阶段适用于 Markdown 和 HTML； `ce-doc-review` 以产物的本机格式应用修复。这是强制性的 - 不要跳过它，因为置信度检查已经运行。这两个工作流程捕获不同类别的问题。
 
-While authoring or revising a draft within the user's planning request, carry that permission to edit into the review: "Apply corrections to this draft's implementation and verification sections needed to satisfy its established Product Contract. Preserve that contract, existing constraints, and user-reserved or session-settled decisions." Supply the document path and the actual contract; the skill name or non-interactive mode alone does not grant permission. If the request does not authorize revising the document, grant no permission to edit. `ce-doc-review` decides whether a fix is applied and enforces its restriction on fixes that only another model found; do not apply a returned proposal merely to bypass that restriction.
+在用户的规划请求中创作或修改草案时，将编辑权限带入审查：“对此草案的实现和验证部分进行更正，以满足其既定的产品合同。保留该合同、现有的约束以及用户保留的或会话解决的决策。”提供文件路径和实际合同；单独的技能名称或非交互模式不会授予权限。如果请求未授权修改文档，则不授予编辑权限。 `ce-doc-review` 决定是否应用修复并对只有另一个模型找到的修复实施限制；不要仅仅为了绕过该限制而应用返回的提案。
 
-`ce-doc-review` writes its structured result to a file and prints the path on a `Full result:` line; read that file before acting on the review. If it printed the result inline instead, use that.
+`ce-doc-review`将其结构化结果写入文件并在`Full result:`行上打印路径；在进行审查之前阅读该文件。如果它改为内联打印结果，请使用它。
 
-If `ce-doc-review` cannot be invoked, record a stand-in structured review result (the shape `ce-doc-review` would normally return) with these values and proceed to Final Checks:
+如果无法调用`ce-doc-review`，请使用这些值记录替代结构化审核结果（形状`ce-doc-review`通常会返回）并继续进行最终检查：
 - `fixes_applied = 0`
 - `proposed_fixes_count = 0`, `decisions_count = 0`, `fyi_count = 0`
 - `skipped_reason: skill_unreachable`
-- `skipped_detail: <why the host's normal skill-invocation mechanism could not start ce-doc-review>`
+- `skipped_detail: <为什么宿主正常的技能调用机制无法启动ce-doc-review>`
 
-The review never started: say that `ce-doc-review` did not run. Report a review error or timeout only after the `ce-doc-review` workflow actually begins.
+审查从未开始：说`ce-doc-review`没有运行。仅在 `ce-doc-review` 工作流程实际开始后报告审核错误或超时。
 
-Non-interactive is the default at this phase because most users want to start work after planning, not adjudicate every reviewer concern up front. Non-interactive returns structured findings without blocking prompts. Its applied list includes corrections covered by the permission to edit you supplied; proposals still needing approval and unresolved user decisions remain separate. The post-generation menu (see 5.4) offers `Decide on the review's open items` as a first-class option so users can opt into the full interactive walkthrough when they want it.
+非交互式是此阶段的默认设置，因为大多数用户希望在计划之后开始工作，而不是预先裁决每个审查者关注的问题。非交互式返回结构化结果，不会阻塞提示。其应用列表包括您提供的编辑权限所涵盖的更正；仍需要批准的提案和未解决的用户决定仍然是分开的。后生成菜单（参见 5.4）提供 `逐项决定未结的审查问题` 作为一流选项，因此用户可以在需要时选择进入完整的交互式演练。
 
-The confidence check and ce-doc-review are complementary:
-- The confidence check strengthens rationale, sequencing, risk treatment, and grounding
-- Document-review checks coherence, feasibility, scope alignment, and surfaces role-specific issues
+置信度检查和 ce-doc-review 是互补的：
+- 置信度检查强化了理由、排序、风险处理和基础
+- 文件审查检查连贯性、可行性、范围一致性，并揭示特定于角色的问题
 
-**Take responsibility for the completed plan.** Before applying or presenting review results, save a resolved review alongside the original evidence. Each claim has a disposition and its reason. A retained claim needs project evidence of a practical consequence if the plan stays unchanged, plus an explanation of why the existing plan and settled decisions do not already address it. A retained claim that would add a mechanism must also pass `references/structure.md` 3.8; one that fails it goes to the considered-and-not-built list instead. Review can also claim that a committed mechanism fails 3.8, or that something on the considered-and-not-built list passes it. Retain such a claim when its reasoning holds under 3.8, and make the removal or restoration yourself, since the review does not apply those changes. A reviewer label, recommendation, or request for more detail does not satisfy that condition. Dismiss claims that do not meet it, including advisory observations.
+**对已完成的计划负责。** 在应用或提交审核结果之前，请将已解决的审核与原始证据一起保存。每个主张都有一个倾向及其理由。如果计划保持不变，保留的索赔需要提供实际后果的项目证据，并解释为什么现有计划和已解决的决定尚未解决该问题。添加机制的保留声明也必须通过 `references/structure.md` 3.8；失败的项目将转入已考虑但未构建的列表。审查还可以声称已提交的机制未通过 3.8，或者已考虑但未构建的列表中的某些内容通过了它。当其推理符合 3.8 时，保留此类声明，并自行删除或恢复，因为审查不应用这些更改。审查者标签、建议或更多详细信息的请求不满足该条件。驳回不符合要求的主张，包括咨询意见。
 
-Your result is a plan the user can act on, with only worthwhile unresolved choices. Investigate factual uncertainty and choose technical corrections within the planning request. Leave an already adequate plan unchanged. A user decision remains only when progress requires essential information you cannot obtain or a consequential choice that the request and constraints do not settle. Record what remains for the user to decide and why you cannot settle it from that context.
+您的结果是用户可以执行的计划，只有有价值的未解决的选择。调查事实的不确定性并在规划要求内选择技术修正。保持已经足够的计划不变。仅当进展需要您无法获得的基本信息或请求和约束无法解决的相应选择时，用户决策才会保留。记录剩下的内容供用户决定，以及为什么您无法从该上下文中解决它。
 
-For a retained correction, invoke `ce-doc-review` with the resolved review, evidence, and the existing permission to edit. It applies the correction and reuses completed review results. Do not apply returned proposals yourself or treat your agreement as permission to bypass its application restrictions.
+对于保留的更正，请使用已解决的审查、证据和现有的编辑权限调用 `ce-doc-review`。它应用更正并重新使用已完成的审核结果。请勿自行应用返回的提案或将您的同意视为绕过其应用限制的许可。
 
-Save actual edits and the reviewed document's identity with the resolved review. Only its remaining findings supply the handoff and menu counts; original counts stay in the saved evidence. Dismissed and completed items must not reappear as FYIs or deferred questions. The review records the items it leaves open under the plan's `Deferred / Open Questions` section; when you dismiss or complete one of them, remove its entry, then remove the review subsection and the section once they are empty. Proceed to Final Checks when the resolved review and any authorized corrections are complete.
+将实际编辑和已审阅文档的标识与已解决的审阅一起保存。只有剩下的调查结果提供了交接和菜单计数；原始计数保留在保存的证据中。已驳回和已完成的项目不得再次作为仅供参考或推迟的问题出现。审核将未完成的项目记录在计划的`Deferred / Open Questions`部分下；当您关闭或完成其中之一时，删除其条目，然后删除评论小节和空的部分。当已解决的审核和任何授权的更正完成后，继续进行最终检查。
 
-**Pipeline mode:** Invoke `ce-doc-review` with `mode:non-interactive` and the plan path — non-interactive mode is identical to the interactive default at this phase, except that the items it leaves open are recorded in the plan's `Deferred / Open Questions` section. No further routing is offered in pipeline mode; the caller decides what to do with the returned findings. Address any P0/P1 findings before returning control to the caller. If the review could not start and ce-plan recorded the `skill_unreachable` stand-in result, return that result explicitly so the caller does not treat review as complete.
+**管道模式：** 使用 `mode:non-interactive` 和计划路径调用 `ce-doc-review` — 非交互模式与此阶段的交互默认模式相同，只是它保持打开状态的项目记录在计划的 `Deferred / Open Questions` 部分中。管道模式下不提供进一步的路由；调用者决定如何处理返回的结果。在将控制权返回给调用者之前解决任何 P0/P1 发现的问题。如果审核无法开始并且 ce-plan 记录了 `skill_unreachable` 替代结果，请显式返回该结果，以便调用者不会将审核视为已完成。
 
-## 5.3.9 Final Checks and Cleanup
+## 5.3.9 最终检查和清理
 
-Before proceeding to post-generation options:
-- Confirm the plan is stronger in specific ways, not merely longer
-- Confirm the planning boundary is intact
-- Confirm origin decisions were preserved when an origin document exists
+在继续进行后生成选项之前：
+- 确认计划在特定方面更强大，而不仅仅是更长
+- 确认规划边界完好
+- 当原始文档存在时，确认保留原始决策
 
-If artifact-backed mode was used:
-- Clean up the temporary scratch directory after the plan is safely updated
-- If cleanup is not practical on the current platform, note where the artifacts were left
+如果使用产物支持模式：
+- 计划安全更新后清理临时暂存目录
+- 如果清理在当前平台上不可行，请记下产物残留的位置
 
-**Format-specific composition.** When `OUTPUT_FORMAT=html` (resolved in SKILL.md Phase 0.0), the plan is written as a single self-contained `.html` file — there is no markdown sibling. Read `references/html-rendering.md` for composition rules: invariants, agent-consumability rules, readability, styling, and the post-compose audit. The `.html` file is the artifact downstream consumers (`ce-doc-review`, `ce-work`, human readers) read and update directly.
+**特定于格式的组合。** 当 `OUTPUT_FORMAT=html` （在 SKILL.md 阶段 0.0 中解决）时，计划被编写为单个独立的 `.html` 文件 - 没有 Markdown 同级文件。阅读`references/html-rendering.md`了解组合规则：不变量、代理消耗性规则、可读性、样式和组合后审核。 `.html`文件是下游消费者（`ce-doc-review`、`ce-work`、人类读者）直接读取和更新的产物。
 
-When `OUTPUT_FORMAT=md`, write the markdown directly per `references/markdown-rendering.md`. No HTML is composed.
+当`OUTPUT_FORMAT=md`时，直接按`references/markdown-rendering.md`写markdown。没有编写 HTML。
 
-After all mutations in this run have settled (initial write, deepening synthesis, and `ce-doc-review` fixes in the artifact's native format), the artifact at its single path reflects the final state.
+在此运行中的所有突变都已解决之后（初始写入、深化综合以及产物本机格式中的 `ce-doc-review` 修复），其单个路径上的产物反映了最终状态。
 
-## 5.4 Post-Generation Options
+## 5.4 生成后选项
 
-**Already-authorized next action:** If the request already authorizes what happens after the plan (implement, create an issue, stop), fire that action. Do not present the menu to re-ask. Pipeline mode still returns to the caller.
+**已授权的下一步操作：** 如果请求已授权计划后发生的事情（实施、创建问题、停止），则触发该操作。请勿出示菜单再次询问。管道模式仍然返回给调用者。
 
-**Execution handoff:** After review and any corrections, assess the final plan against its implementation contract and repository evidence. Do not offer execution while a material prerequisite is unverified or a launch-blocking question or finding remains. Name the blocker in the plan and handoff; in pipeline mode return `status: blocked` with the artifact path, blocker, and recovery path. A skipped review is not a pass; establish the needed evidence within the planning request or report the gap. Deferred details and explicitly planned new files do not prevent handoff.
+**执行移交：** 经过审查和任何更正后，根据其实施合同和存储证据评估最终计划。当重大先决条件未经验证或仍存在阻碍启动的问题或发现时，请勿提供执行。在计划和交接中列出阻止者的名称；在管道模式下，返回 `status: blocked` 以及产物路径、阻塞项和恢复路径。跳过审核不等于通过；在规划要求中建立所需的证据或报告差距。推迟的细节和明确计划的新文件不会阻止移交。
 
-**Pipeline mode:** No interactive menu. The result below is the last thing this skill writes. It ends this skill, not the turn. The caller runs in this same session, and its next step follows the result. If document review started but did not complete, return the skill's `status: blocked` result with `phase`, `blocker`, `recovery_path`, and the preserved `artifact_path`. Otherwise return the artifact path and the resolved review state: its counts, one line for each item still open after your judgment, and the `Full result:` path when `ce-doc-review` printed one. Do not paste the review's result block; the caller reads the file if it needs more. When the review never started, return the `skill_unreachable` stand-in.
+**管道模式：** 无交互式菜单。下面的结果是这个技能最后写的东西。它结束了该技能，而不是回合。调用者在同一个会话中运行，其下一步遵循结果。如果文档审核已开始但未完成，则返回技能的`status: blocked`结果以及`phase`、`blocker`、`recovery_path`和保留的`artifact_path`。否则返回产物路径和已解决的审阅状态：其计数、判断后仍打开的每个项目一行，以及 `ce-doc-review` 打印时的 `Full result:` 路径。不要粘贴评论的结果块；如果需要更多，调用者将读取该文件。当审核从未开始时，返回`skill_unreachable`替身。
 
-**Path format:** Use absolute paths for chat-output file references — relative paths are not auto-linked as clickable in most terminals.
+**路径格式：** 使用聊天输出文件引用的绝对路径 - 在大多数终端中，相对路径不会自动链接为可单击的。
 
-**Summary line above the menu (always):** Print a single concise line summarizing the resolved review state — e.g., `Doc review applied 3 fixes. 2 decisions, 1 proposed fix, 4 FYI observations remain (1 at P1).` When no fixes were applied and no findings remain, print `Doc review clean — no fixes needed.` When the structured review result carries `skipped_reason: skill_unreachable`, print `Doc review skipped — ce-doc-review could not be invoked (<skipped_detail>); it did not run.` If a review that actually began failed, print `Doc review failed after starting — <actual error>; the plan was not fully reviewed.` This line establishes what the autofix pass did (or didn't) so the user has the context to choose between the menu options below. Never describe a harness or delegation failure that kept the review from starting as a downstream skill timeout.
+**菜单上方的摘要行（始终）：** 打印一条简洁的行，总结已解决的审阅状态 - 例如， `文档审查已应用 3 项修复；仍有 2 个决定、1 项拟议修复和 4 条补充说明（其中 1 条为 P1）。` 当未应用任何修复且没有发现任何结果时，打印 `文档审查结束，没有需要修复的事项。` 当结构化审阅结果带有 `skipped_reason: skill_unreachable` 时，打印 `Doc review skipped — ce-doc-review could not be invoked (<skipped_detail>); it did not run.` 如果实际开始的审阅失败，则打印 `Doc review failed after starting — <actual error>; the plan was not fully reviewed.` 此行确定自动修复过程做了（或没有）什么用户可以在下面的菜单选项之间进行选择。切勿将导致审核无法启动的控制或委派失败描述为下游技能超时。
 
-**Render only the findings that still need the reader.** Preserve the decision-first structure (Recommendation / Consequence if unchanged / Change / Basis) for retained actionable findings. Do not re-narrate them into dense paragraphs or unexplained identifiers. Explain any changed disposition in the saved review evidence; do not copy dismissed findings into the handoff. The summary reports changes actually made and items still unresolved after your judgment.
+**仅呈现仍然需要读者的发现。** 保留决策优先结构（建议/结果（如果未更改）/更改/基础）以保留可操作的发现。不要将它们重新叙述成密集的段落或无法解释的标识符。解释保存的审核证据中任何已更改的处置；不要将已驳回的调查结果复制到交接中。摘要报告了实际发生的更改以及您判断后仍未解决的项目。
 
-**Question:** "Plan ready at `<absolute path to plan>`. What would you like to do next?"
+**问题：**“计划在`<计划的绝对路径>`准备好。接下来你想做什么？”
 
-**Options:**
-1. **Start `ce-work`** - Build and ship the plan in this session, with verification, simplification, code review, and commits. Show only when the plan contents support implementation and no launch-blocking question or finding remains; universal-planning, answer-seeking, approach-plan, and requirements-only artifacts keep their own handoff/checkpoint behavior.
+**选项：**
+1. **开始 `ce-work`** - 在本次会议中构建并发布计划，并进行验证、简化、代码审查和提交。仅当计划内容支持实施并且不存在阻碍启动的问题或发现时才显示；通用规划、寻求答案、方法计划和仅需求产物保留自己的 handoff/checkpoint 行为。
 
-**Recommended marker:** render option 1 as **Start `ce-work`** *(recommended)*. No other option carries the marker.
-2. **Decide on the review's open items** - Confirm or skip the suggested edits, and settle the judgment calls the auto-pass left for you. (Authorized corrections were already applied; you can also defer items into Open Questions.) Hide this option when **Prototype a remaining feel-question** is shown.
-2. **Prototype a remaining feel-question** - Invoke `ce-prototype` on a named remaining question that is expensive to unravel and that neither talk nor a cheap sketch can settle. A question turning on finish or motion is already past the sketch tier; a cheap-to-reverse decision does not qualify however visual it is. Shown only when such a question remains. A visual-probe question that already settled fails this predicate. The option description names the proposed slice. When this option is shown, omit **Decide on the review's open items** from the same menu.
-3. **Create Issue** - Create a tracked issue from this plan in your configured issue tracker (e.g., GitHub Issues, Linear, Jira)
-4. **Open in browser** - Open the HTML plan file locally for review. **Render only when `OUTPUT_FORMAT=html`**, unless `references/publishing.md` chooses a publisher (one the user named, or the host's artifact tool); then label this option with that destination, e.g. **Publish a copy to <destination>**, render it for any format the destination accepts, and publish a copy there instead of opening the file locally.
+**推荐标记：** 将选项 1 渲染为 **Start `ce-work`** *（推荐）*。没有其他选项带有标记。
+2. **决定审阅的未决项目** - 确认或跳过建议的编辑，并解决留给您的自动通过的判断调用。 （已应用授权的更正；您还可以将项目推迟到开放问题中。）当显示 **原型剩余的感觉问题** 时，隐藏此选项。
+2. **原型一个剩余的感觉问题** - 对一个命名的剩余问题调用 `ce-prototype`，该问题的解开成本很高，并且无论是谈话还是廉价的草图都无法解决。关于完成或动作的问题已经超出了草图层；无论多么直观，廉价的逆转决定都不合格。仅当存在此类问题时才显示。已经解决的视觉探测问题无法满足该谓词。选项描述命名建议的切片。显示此选项时，请从同一菜单中省略**决定审阅的未清项目**。
+3. **创建问题** - 在您配置的问题跟踪器中从此计划创建跟踪问题（例如，GitHub问题、Linear、Jira）
+4. **在浏览器中打开** - 在本地打开 HTML 计划文件以供查看。 **仅在`OUTPUT_FORMAT=html`**时渲染，除非`references/publishing.md`选择发布者（用户指定的发布者，或主持人的产物工具）；然后用该目的地标记此选项，例如**将副本发布到 <destination>**，将其呈现为目标接受的任何格式，并在那里发布副本，而不是在本地打开文件。
 
-There is no "done" / "pause" option — the blocking question already waits, and the user ends the turn by dismissing it (Esc) or just not picking anything. The plan file is already saved.
+没有“完成”/“暂停”选项 - 阻塞问题已经等待，用户通过关闭它（Esc）或不选择任何东西来结束回合。计划文件已保存。
 
-**Open or publish option.** Only one output format is ever in effect, so the plan exists as exactly one artifact — `.md` or `.html`, never both. Render **Open in browser** only for HTML runs; a publisher chosen by `references/publishing.md` replaces that label. Implementation handoff (option 1) remains available in both modes only when the artifact is implementation-ready code; `ce-work` reads either format.
+**打开或发布选项。** 只有一种输出格式有效，因此该计划仅作为一个产物存在 - `.md` 或 `.html`，绝不会同时存在。渲染 **在浏览器中打开** 仅适用于 HTML 运行； `references/publishing.md` 选择的出版商取代了该标签。仅当产物是可实现的代码时，实现切换（选项 1）在两种模式下仍然可用； `ce-work` 读取任一格式。
 
-**Menu rendering:** The menu has up to 4 options (option 1 renders only for implementation-ready code; option 2 is the exclusive review-or-prototype slot — see below; Open in browser is HTML-only unless a publisher replaces it). Account for each platform's blocking-question option cap rather than trimming choices: Claude Code `AskUserQuestion` supports up to 4 explicit options, and Codex `request_user_input` supports only 2-3 explicit options. When the visible menu exceeds the current platform's cap, render it as a numbered list in chat with the hint "Pick a number or describe what you want." When the visible menu fits the cap, use the platform's blocking tool and renumber the visible options 1-N. When no matching tool is in the current list or a real question call errors, fall back to the same numbered-list-in-chat rendering. Never silently skip the question.
+**菜单呈现：** 菜单最多有 4 个选项（选项 1 仅针对可实施的代码呈现；选项 2 是专有的审查或原型插槽 - 见下文；在浏览器中打开仅限 HTML，除非发布者替换它）。考虑每个平台的阻塞问题选项上限而不是修剪选择：Claude Code`AskUserQuestion`最多支持4个显式选项，而Codex`request_user_input`仅支持2-3个显式选项。当可见菜单超出当前平台的上限时，在聊天中将其呈现为编号列表，并提示“选择一个数字或描述您想要的内容”。当可见菜单适合上限时，使用平台的阻止工具并将可见选项重新编号 1-N。当当前列表中没有匹配的工具或真正的问题调用错误时，回退到相同的聊天中编号列表渲染。永远不要默默地跳过这个问题。
 
-**Show `Decide on the review's open items` (option 2) only when the resolved review state has `proposed_fixes_count + decisions_count > 0` and no `skipped_reason: skill_unreachable`.** FYIs alone do not offer a decision to make. Keep their retained count in the summary even when this option is hidden. Renumber the visible menu options after applying this condition. `ce-doc-review` defines how a selected review resumes and returns.
+**仅当已解决的审核状态有 `proposed_fixes_count + decisions_count > 0` 而没有 `skipped_reason: skill_unreachable` 时才显示 `逐项决定未结的审查问题`（选项 2）。** 仅仅供参考并不能提供决策。即使隐藏此选项，仍将其保留计数保留在摘要中。应用此条件后重新编号可见菜单选项。 `ce-doc-review` 定义所选评论如何恢复和返回。
 
-**Cross-skill invocation rule:** Invoke `ce-work`, `ce-doc-review`, and `ce-prototype` using the host's normal skill-invocation mechanism. Do not substitute a generic Task, Agent, or subagent; the invoked skill may still dispatch its own subagents according to its protocol.
+**跨技能调用规则：** 使用宿主正常的技能调用机制来调用`ce-work`、`ce-doc-review`、`ce-prototype`。不要替换通用任务、代理或子代理；被调用的技能仍然可以根据其协议调度自己的子代理。
 
-Before acting on any selection received after a user turn, reload this file. Then act on the selection; rendering the menu or announcing the route is not the routed action:
-- **Start `ce-work`** -> Classify the artifact first. If the plan contents do not support code implementation or a launch blocker remains, do not execute it; route requirements-only artifacts back to `ce-plan` enrichment and non-code artifacts to their own workflow. If it is executable, invoke the `ce-work` skill under the cross-skill invocation rule, passing the plan path as the skill argument; `ce-work` then chooses how to execute and carries the implementation through verification and shipping. If `ce-work` cannot be invoked, print the existing `ce-work` fallback prompt for the user to run; in that prompt, tell the executor to read Goal Capsule, Verification Contract, Definition of Done, and active U-IDs (scanning headings to find them) rather than the whole document first. Do not merely tell the user to type an invocation when the host can invoke it directly.
-- **Decide on the review's open items** -> Invoke the `ce-doc-review` skill again under the cross-skill invocation rule, passing the plan path **without** `mode:non-interactive` so the interactive routing question and walkthrough run. The non-interactive pass already applied `safe_auto` fixes and recorded its findings in the session, so the interactive pass reuses that prior `safe_auto` / R29 decision state (its R29 suppression rule prevents prior-round Skipped/Deferred entries from re-raising) — "picks up where non-interactive stopped" means that state reuse, **not** skipping Phase 4 presentation or jumping straight to routing with a count. `ce-doc-review`'s walkthrough enforces the same-turn presentation-before-routing rule on this re-entry; a structured review result shown in an earlier turn beside this menu does not satisfy it. If the skill cannot be invoked, say that it did not run and return to the menu. After it returns, re-render this menu with the refreshed counts so the user can pick what to do next.
-- **Create Issue** -> Follow the Issue Creation section below through an available connector, MCP, API, or documented CLI; no `linear` CLI is guaranteed, and one missing binary is not proof that the tracker is unavailable.
-- **Prototype a remaining feel-question** -> Invoke the `ce-prototype` skill under the cross-skill invocation rule, passing the plan path as the skill argument. Do not build a prototype in this skill. If it cannot be invoked, say that it did not run and return to the menu. After it returns, re-render this menu from the artifact's current contents — a plan it wrote back to needs implementation planning again, so the execution options drop out on their own; when it returned decisions instead of writing them, say so, since the plan still describes the pre-prototype behavior.
-- **Open in browser** or **Publish a copy** -> Read `references/publishing.md` and follow it for the saved plan file; the plan file stays the record. Show the user the resulting URL or absolute path, then return to the post-generation options so the user can pick a follow-up action.
-- **Free-form prompts that target the findings** (e.g., the user types "review", "walk through", "deep review" instead of picking a numbered option) -> route as if they had picked `Decide on the review's open items`. When the user asks for a deeper or full review, also pass `depth:full` so a lite review reruns with the full team. Do not loop back to the menu without running the review. When the structured review result carries `skipped_reason: skill_unreachable`, say that `ce-doc-review` could not be invoked and loop back without misreporting a review failure.
-- **Other free-form input** -> Accept revisions to the plan and loop back to options.
+在对用户转动后收到的任何选择进行操作之前，请重新加载此文件。然后根据选择采取行动；渲染菜单或宣布路由不是路由操作：
+- **开始`ce-work`** -> 首先对产物进行分类。如果计划内容不支持代码实现或者存在启动阻碍，则不要执行；将仅需求产物路由回`ce-plan`丰富，并将非代码产物路由到他们自己的工作流程。如果可执行，则在跨技能调用规则下调用`ce-work`技能，并将计划路径作为技能参数传递； `ce-work`然后选择如何执行并通过验证和运输进行执行。如果无法调用`ce-work`，则打印现有的`ce-work`回退提示供用户运行；在该提示中，告诉执行者阅读目标胶囊、验证合同、完成定义和活动 U-ID（扫描标题以找到它们），而不是首先阅读整个文档。当主机可以直接调用它时，不要仅仅告诉用户键入调用。
+- **决定评审的未完成项目** -> 在跨技能调用规则下再次调用 `ce-doc-review` 技能，传递计划路径 **不带** `mode:non-interactive`，以便运行交互式路由问题和演练。非交互式通道已经在会话中应用了 `safe_auto` 修复并记录了其发现，因此交互式通道重用了之前的 `safe_auto` / R29 决策状态（其 R29 抑制规则防止前一轮 Skipped/Deferred 条目重新引发）——“在非交互式停止的地方拾取”意味着状态重用，**不是**跳过第 4 阶段演示或直接跳到带有计数的路由。 `ce-doc-review` 的演练在此重新进入时强制执行同轮演示前路由规则；在此菜单旁边的较早回合中显示的结构化审核结果不能满足它。如果无法调用该技能，则表明该技能未运行并返回菜单。返回后，使用刷新的计数重新呈现此菜单，以便用户可以选择下一步要做什么。
+- **创建问题** -> 通过可用的连接器、MCP、API 或记录的 CLI 按照下面的问题创建部分进行操作；无法保证 `linear` CLI，并且丢失一个二进制文件并不能证明跟踪器不可用。
+- **原型剩余的感觉问题** -> 在跨技能调用规则下调用 `ce-prototype` 技能，并将计划路径作为技能参数传递。不要在此技能中构建原型。如果无法调用，则说明它没有运行并返回到菜单。返回后，从产物的当前内容重新渲染此菜单 - 它写回的计划需要再次执行计划，因此执行选项会自行退出；当它返回决策而不是编写决策时，请这样说，因为该计划仍然描述了原型前的行为。
+- **在浏览器中打开**或**发布副本** -> 阅读`references/publishing.md`并按照它保存的计划文件；计划文件保留记录。向用户显示生成的 URL 或绝对路径，然后返回到生成后选项，以便用户可以选择后续操作。
+- **针对结果的自由形式提示**（例如，用户输入“审查”、“走查”、“深度审查”，而不是选择编号选项）-> 路线，就好像他们选择了 `逐项决定未结的审查问题` 一样。当用户要求进行更深入或全面的审查时，也请通过 `depth:full`，以便与整个团队重新进行精简审查。请勿在未运行检查的情况下循环返回菜单。当结构化审核结果带有`skipped_reason: skill_unreachable`时，说`ce-doc-review`无法被调用并循环返回而不误报审核失败。
+- **其他自由格式输入** -> 接受对计划的修订并循环回选项。
 
-## Issue Creation
+## 问题创建
 
-When the user selects "Create Issue":
+当用户选择“创建问题”时：
 
-1. **Identify the project's issue tracker from the active instructions and conventions already in your context** — the issue / project-management tool the project uses (e.g., GitHub Issues, Linear, Jira). Don't open or name specific instruction files to do this; the project's instructions are already available to you. Look for an explicit `project_tracker:` declaration (`github`, `linear`, …) or any documented tracker convention. Only if your context doesn't already carry the project's instructions (e.g., you're a fresh subagent) or they're silent, consult supplementary signals: `README.md`, `CONTRIBUTING.md`, PR templates under `.github/`, or visible tracker URLs.
+1. **从您的上下文中已有的活动指令和约定中识别项目的问题跟踪器** - 项目使用的问题/项目管理工具（例如，GitHub问题、Linear、Jira）。不要打开或命名特定的指令文件来执行此操作；该项目的说明已经可供您使用。查找明确的 `project_tracker:` 声明（`github`、`linear`、...）或任何记录的跟踪器约定。仅当您的上下文尚未包含项目说明（例如，您是新的子代理）或它们保持沉默时，请参阅补充信号：`README.md`、`CONTRIBUTING.md`、`.github/`下的PR模板或可见的跟踪器 URL。
 
-2. **Create the issue through whatever interface that tracker actually exposes in this environment** — a platform connector/MCP tool, documented API/GraphQL credentials, or a documented CLI. First actively discover what's available: use the platform's tool-discovery primitive (e.g., `ToolSearch` in Claude Code) to look for a tracker connector or MCP tool before assuming none exists — lazy-loaded connectors and credentials stored outside the shell won't surface in a passive check. Do not assume a tracker means a particular CLI, and do not treat a missing binary, env var, or unloaded MCP server as proof the tracker is unavailable — those are false negatives when access comes through a connector or a raw API with credentials stored outside the shell. When using a direct API, never print secret values; read the plan body from disk and send it as the issue's markdown/description per the API contract. Worked examples for the common cases:
+2. **通过跟踪器在此环境中实际公开的任何接口创建问题** — 平台 connector/MCP 工具、记录的 API/GraphQL 凭证或记录的 CLI。首先主动发现可用的内容：使用平台的工具发现原语（例如，Claude Code中的`ToolSearch`）在假设不存在之前查找跟踪器连接器或MCP工具 - 延迟加载的连接器和存储在外壳外部的凭据不会在被动检查中出现。不要假设跟踪器意味着特定的 CLI，并且不要将丢失的二进制文件、环境变量或卸载的 MCP 服务器视为跟踪器不可用的证据 - 当通过连接器或原始 API 进行访问且凭据存储在 shell 外部时，这些都是误报。当使用直接API时，永远不要打印秘密值；从磁盘读取计划正文，并将其作为问题的 markdown/description 根据 API 合同发送。常见情况的工作示例：
    - **GitHub** — `gh issue create --title "<type>: <title>" --body-file <plan_path>`
-   - **Linear** (no guaranteed first-party CLI) — prefer, in order: a Linear connector or MCP tool that can create issues → documented direct API/GraphQL credentials and endpoint → a documented local Linear CLI, only when the project or user explicitly states it is installed and authenticated.
+   - **线性**（不保证第一方 CLI） - 更喜欢按顺序：可以创建问题的线性连接器或 MCP 工具 → 记录的直接 API/GraphQL 凭证和端点 → 记录的本地线性 CLI，仅当项目或用户明确声明它已安装并经过身份验证时。
 
-3. If no tracker is configured, ask the user which tracker they use with the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to asking on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip. Offer three explicit options — `GitHub`, `Linear`, `Skip` — and let the user name a different tracker (Jira, etc.) through the tool's built-in free-form / "Other" input. Don't add an explicit fourth `Other` option — that's redundant where the tool already offers free-form and can exceed a 2–3 explicit-option cap. When the tool exposes no free-form path, capture the other-tracker name via the chat fallback. Then:
-   - Proceed with the chosen tracker's creation path above
-   - If the user names a different tracker through the free-form path, ask for its reachable interface if they didn't say, then create the issue via the capability path in step 2
-   - Offer to persist the choice by adding a `project_tracker: <value>` declaration to the project's root agent-instructions file (e.g., `AGENTS.md`; if it `@`-includes another file, write to the substantive one). Use the lowercase tracker key (`github`, `linear`, `jira`, …) — not the display label — so future runs match step 1 and skip this prompt
-   - If `Skip`, return to the options without creating an issue
+3. 如果未配置跟踪器，则询问用户他们使用哪个跟踪器以及当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上进行询问。永远不要默默地跳过。提供三个显式选项 - `GitHub`、`Linear`、`Skip` - 并让用户通过工具内置的自由格式/“其他”输入命名不同的跟踪器（Jira 等）。不要添加显式的第四个 `Other` 选项 - 如果该工具已经提供自由格式并且可能超过 2-3 个显式选项上限，那么这是多余的。当该工具未公开任何自由格式路径时，请通过聊天后备捕获其他跟踪器名称。然后：
+   - 继续上面所选跟踪器的创建路径
+   - 如果用户通过自由格式路径命名不同的跟踪器，则询问其可访问的接口（如果他们没有说），然后通过步骤 2 中的功能路径创建问题
+   - 通过向项目的根代理指令文件添加 `project_tracker: <value>` 声明来保留选择（例如，`AGENTS.md`；如果`@`-包含另一个文件，则写入实质性文件）。使用小写跟踪器键（`github`、`linear`、`jira`、...） - 而不是显示标签 - 因此以后的运行将匹配步骤 1 并跳过此提示
+   - 如果`Skip`，返回选项而不产生问题
 
-4. If the detected tracker has no reachable interface after actively discovering available connector/MCP tools and following its documented access method — no working connector, MCP tool, CLI, or API path — report a clear error (e.g., "`gh` CLI not found or not authenticated for GitHub Issues"; "Linear is documented for this project, but no connector, MCP tool, or API credentials were found") and return to the options. Do not silently fall back to a local issue-plan document unless the user explicitly asks for a local-only artifact.
+4. 如果在主动发现可用的connector/MCP工具并遵循其记录的访问方法（无工作连接器、MCP工具、CLI或API路径）后检测到的跟踪器没有可访问的接口，则报告明确的错误（例如，“未找到`gh`CLI或未针对GitHub问题进行身份验证”；“此项目记录了Linear，但没有连接器， MCP 工具，或找到API 凭据”）并返回到选项。除非用户明确要求仅本地产物，否则不要默默地退回到本地问题计划文档。
 
-After issue creation:
-- Display the issue URL
-- Ask whether to proceed with `ce-work` using the host's blocking question tool already in the current tool list
+创建问题后：
+- 显示问题 URL
+- 询问是否使用当前工具列表中已有的主持人拦截提问工具继续进行`ce-work`

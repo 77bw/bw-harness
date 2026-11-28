@@ -1,26 +1,26 @@
-# Resolving the output mode (Phase 0.0)
+# 解析输出模式（阶段0.0）
 
-#### 0.0 Resolve Output Mode
+#### 0.0 解析输出模式
 
-`SKILL.md` states the two rules that must hold even when this file is not read: the mode is exclusive, and markdown is written unless HTML was requested. This file states the precedence that decides the rest — in-prompt request > user-stated preference > config > default (`md`) — and the token-parsing convention.
+`SKILL.md` 规定了即使不读取此文件也必须遵守的两个规则：模式是独占的，并且除非请求 HTML，否则将写入 Markdown。该文件规定了决定其余部分的优先级 - 提示请求 > 用户声明的首选项 > 配置 > 默认 (`md`) - 以及令牌解析约定。
 
-**Read config.** Resolve `<repo-root>` with `git rev-parse --show-toplevel`, then apply the ordinary-key rule stated in `SKILL.md`. Read both files when they exist. If the root cannot be resolved, fall through to the defaults below.
+**读取配置。** 用`git rev-parse --show-toplevel`解析`<repo-root>`，然后应用`SKILL.md`中所述的普通键规则。当两个文件存在时读取它们。如果无法解析根，请使用以下默认值。
 
-Resolution steps:
+解决步骤：
 
-1. **In-prompt request.** Reason over the user's prompt for this run for a request about *this document's* output format, expressed either as the `output:` shorthand or in plain language ("make this a webpage", "I want this in HTML"). On an explicit format, match it case-insensitively to `md`/`html`, and ignore the `output:` shorthand token when reading the rest of the prompt as the feature description. Distinguish a request about the document's format from a format named as subject matter: "explore an HTML export feature" is the work, not a doc-format request — do not switch on it.
-   - `output:` alone (no value) → no-op, fall through to step 2.
-   - `output:<unknown>` (e.g., `output:pdf`) → drop the token, fall through to step 2, and remember to emit a one-line note above the post-generation menu after final resolution: `Ignored unknown output: value '<value>' — using <resolved_format> instead.` where `<resolved_format>` is the value `OUTPUT_FORMAT` actually resolved to after the remaining precedence steps. Do not hardcode `md` in the note — that misleads users when config has set HTML.
-2. **User-stated preference.** If this prompt holds no format request, honor an output-format preference (markdown vs HTML) the user established earlier — earlier in this session, in your memory, or written into their active instructions — that is already in your context (match `md`/`html` case-insensitively). A remembered preference is more current than the rarely-edited config, so it **overrides** the config in step 3. Do not open or search instruction files to find it — act only on a preference already present in your context; if none is, fall through to the config.
-3. **Config.** If steps 1-2 did not resolve, apply the ordinary-key rule: first **active (non-commented)** `brainstorm_output:` in `config.local.yaml` then `config.yaml` matching `md` or `html` (case-insensitive) wins. Missing, invalid, or commented values continue to the next layer, then step 4. Critical: lines starting with `#` are YAML comments and must be ignored — the shipped config template includes commented examples like `# brainstorm_output: html` to document the option, and matching those as active settings would silently force HTML mode on every run without the user having opted in.
-4. **Default.** Otherwise `OUTPUT_FORMAT=md`.
+1. **提示请求。** 原因是用户针对此运行的提示请求有关*此文档的*输出格式，以 `output:` 简写形式或用简单语言表示（“使其成为网页”、“我想要 HTML 格式”）。在显式格式中，不区分大小写地与 `md`/`html` 匹配，并在将提示的其余部分作为功能描述读取时忽略 `output:` 速记标记。区分有关文档格式的请求和名为主题的格式：“探索 HTML 导出功能”是工作，而不是文档格式请求 — 不要打开它。
+   - `output:` 单独（无值）→ 无操作，进入步骤 2。
+   - `output:<unknown>`（例如，`output:pdf`）→ 删除令牌，进入步骤 2，并记住在最终解析后在生成后菜单上方发出一行注释：`Ignored unknown output: value '<value>' — using <resolved_format> instead.`，其中 `<resolved_format>` 是在剩余优先步骤之后实际解析到的值 `OUTPUT_FORMAT`。不要在注释中硬编码 `md` — 当配置设置了 HTML 时，这会误导用户。
+2. **用户声明的首选项。** 如果此提示不包含任何格式请求，请遵循用户之前建立的输出格式首选项（Markdown 与 HTML） - 在此会话的早期，在您的记忆中，或写入他们的活动指令中 - 已经在您的上下文中（匹配 `md`/`html` 不区分大小写）。记住的首选项比很少编辑的配置更新，因此它**覆盖**步骤 3 中的配置。不要打开或搜索说明文件来查找它 - 仅对上下文中已存在的首选项进行操作；如果没有，则转到配置。
+3. **配置。** 如果步骤 1-2 未解决，请应用普通键规则：首先 **活动（未注释）** `config.local.yaml` 中的 `brainstorm_output:`，然后`config.yaml` 匹配 `md` 或 `html`（不区分大小写）获胜。缺失、无效或注释的值继续到下一层，然后执行步骤 4。 关键：以 `#` 开头的行是 YAML 注释，必须忽略 — 附带的配置模板包含注释示例（如 `# brainstorm_output: html`）来记录选项，将这些示例匹配为活动设置将在每次运行时默默地强制使用 HTML 模式，而无需用户选择。
+4. **默认值。** 否则`OUTPUT_FORMAT=md`。
 
-There is no pipeline override. A headless or non-interactive run resolves the format by the same four steps; if it asked for HTML, or its config or project instructions say HTML, it gets HTML. Downstream skills read either format.
+没有管道覆盖。无头或非交互式运行通过相同的四个步骤解析格式；如果它要求 HTML，或者它的配置或项目说明说 HTML，它就会获取 HTML。下游技能可以读取任一格式。
 
-**Token-parsing convention:** only literal-prefix flag tokens (`output:`, `mode:`, `brainstorm_model:<alias>`, `delegate:` where applicable) are consumed and stripped. Other `<word>:<word>` tokens — including conventional commit prefixes like `feat:`, `fix:`, `chore:` that may appear inside a feature description — pass through verbatim. A stripped `brainstorm_model:<alias>` token (passed by an orchestrator) is kept for the model-elevation step before approach generation; it is not woven into the feature description.
+**令牌解析约定：** 仅消耗和剥离文字前缀标志令牌（`output:`、`mode:`、`brainstorm_model:<alias>`、`delegate:`，如果适用）。其他`<word>:<word>`标记——包括可能出现在功能描述中的传统提交前缀，如`feat:`、`fix:`、`chore:`——逐字传递。在方法生成之前，会保留一个剥离的 `brainstorm_model:<alias>` 令牌（由协调器传递）用于模型提升步骤；它没有融入到功能描述中。
 
-**Model-elevation visibility.** Treat a stripped `brainstorm_model:<alias>` token, or a `brainstorm_model` config value you have read, as a pending input to Phase 2 (Explore Approaches), not a resolved choice. Phase 2 resolves the choice from the current conversation, the token, and the config immediately before generating approaches, so later user intent cannot be lost. A headless or non-interactive run still evaluates the token and the config.
+**模型标高可见性。** 将剥离的 `brainstorm_model:<alias>` 标记或您已读取的 `brainstorm_model` 配置值视为第 2 阶段（探索方法）的待处理输入，而不是已解决的选择。第 2 阶段在生成方法之前立即解析当前对话、令牌和配置中的选择，因此以后的用户意图不会丢失。无头或非交互式运行仍会评估令牌和配置。
 
-**Resolve the format here; load the rendering reference at Phase 3, not now.** The format-rendering reference (`references/markdown-rendering.md` for `md`, `references/html-rendering.md` for `html`) is consumed only when the doc is composed — loading it during Phase 0 would carry 200+ lines through the entire dialogue. Phase 3 (write the plan) says when to load it. Section content is the same in either format; presentation differs.
+**这里解决格式；在第 3 阶段加载渲染参考，而不是现在。** 格式渲染参考（`md` 为 `references/markdown-rendering.md`，`references/html-rendering.md` 为 `html`）仅在文档撰写时消耗 - 在第 0 阶段加载它会在整个对话中携带 200 多行。第三阶段（编写计划）说明何时加载它。两种格式的部分内容都是相同的；演示有所不同。
 
-The `output:` preference does NOT auto-propagate to `ce-plan` on handoff — ce-plan re-resolves its own `plan_output` config independently. Because both skills now operate on the same unified artifact, an explicit conversion by `ce-plan` must report the old path and new canonical path, and leaves the other-format sibling in place as non-canonical for automated discovery.
+`output:` 首选项不会在切换时自动传播到 `ce-plan` — ce-plan 独立地重新解析其自己的 `plan_output` 配置。由于这两种技能现在都在相同的统一产物上运行，因此`ce-plan`的显式转换必须报告旧路径和新规范路径，并将其他格式同级保留为非规范以供自动发现。

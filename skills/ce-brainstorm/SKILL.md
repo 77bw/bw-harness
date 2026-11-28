@@ -1,69 +1,71 @@
 ---
 name: ce-brainstorm
-description: "Explore vague or ambitious ideas into a right-sized requirements-only unified plan. Use when the user wants to brainstorm or scope what to build. Not for executing already-specified work. Use ce-pov for a verdict on adopting a named external technology."
-argument-hint: "[feature idea or problem to explore] [output:html]"
+description: "将模糊或雄心勃勃的想法探索成一个大小合适、仅满足需求的统一计划。当用户想要集思广益或确定要构建的内容时使用。不用于执行已经指定的工作。使用 ce-pov 来判断是否采用指定的外部技术。"
+argument-hint: "[要探索的功能想法或问题] [output:html]"
 ---
 
-# Brainstorm a Feature or Improvement
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Brainstorming answers **WHAT** to build through dialogue; `ce-plan` then enriches the same unified plan artifact with **HOW**. This skill does not implement code.
+# 集体讨论功能或改进
 
-**Outcome:** a result sized to the work that `ce-plan` can build on without inventing product behavior, scope boundaries, or success criteria: a chat paragraph for Lightweight work, or a requirements-only unified plan under `<root>/plans/` when a file is earned.
+集思广益，回答通过对话构建**什么**； `ce-plan` 然后用 **HOW** 丰富相同的统一计划产物。该技能不实现代码。
 
-**Done, on the brainstorm path:** that artifact is written and passes the Ready for Planning Check — or no file was written because the dialogue produced no decision that a later reader (the planner, a reviewer, or a future reader) needs recorded under a stable ID and the user asked for none — and Phase 4's handoff has been presented.
+**结果：** `ce-plan` 可以在不发明产品行为、范围边界或成功标准的情况下构建的工作结果：轻量级工作的聊天段落，或者在获得文件时在 `<root>/plans/` 下的仅需求统一计划。
 
-**Lightweight work ends in chat.** Phase 0.3 classifies the tier from the request and bounded inline reads before anything is dispatched; when the tier is uncertain, take the heavier one. Lightweight work — small, well-bounded, low ambiguity — ends in a chat paragraph with no file, no grounding scout, no approach generation, and no claim verifier. A file is earned only by a decision that a later reader needs recorded under a stable ID, or by the user asking for one.
+**完成，在头脑风暴路径上：**该产物已写入并通过了准备计划检查 - 或者没有写入文件，因为对话没有产生后续读者（规划者、审查者或未来读者）需要记录在稳定 ID 下的决定，并且用户不需要任何记录 - 并且第 4 阶段的移交已经提出。
 
-**Stop and route instead** in three cases, decided by `references/phase-0.md`, not from memory. Each ends the run its own way, so the done condition above does not apply: non-software work, where `references/universal-brainstorming.md` replaces Phases 0.2–4; a verdict question about a named external candidate, where you offer the `ce-pov` handoff; and neither — quick help, a factual question, a single-step task — answered directly.
+**轻量级工作在聊天中结束。**阶段 0.3 在分派任何内容之前根据请求和有界内联读取对层进行分类；当不确定层数时，选择较重的一层。轻量级工作——小、边界明确、低歧义——以没有文件、没有接地侦察、没有方法生成和没有声明验证器的聊天段落结束。只有当后来的读者需要以稳定的 ID 记录下来的决定，或者用户要求一个文件时，才能获得文件。
 
-The feature description is what the invocation carries, whether the user wrote it or a calling skill passed it. If none came, ask the user what they want to explore and do not proceed until you have one.
+**在三种情况下改为停车并改行**，由 `references/phase-0.md` 决定，而不是凭记忆。每个阶段都以自己的方式结束运行，因此上面的完成条件不适用：非软件工作，其中 `references/universal-brainstorming.md` 替换阶段 0.2–4；关于指定外部候选人的判断问题，您提供 `ce-pov` 交接；无论是快速帮助、实际问题还是单步任务，都没有直接回答。
 
-**`mode:return-to-caller`** (a leading token a calling skill such as `lfg` sets): strip it, run the dialogue unchanged, and replace Phase 4 with the structured return `references/handoff.md` defines: no menu, no `lfg` or `ce-plan` invocation.
+功能描述是调用所携带的内容，无论是用户编写的还是调用技能传递的。如果没有，请询问用户他们想探索什么，直到找到为止不要继续。
+
+**`mode:return-to-caller`**（调用技能如`lfg`设置的前导标记）：将其剥离，不改变地运行对话，并将阶段4替换为结构化返回`references/handoff.md`定义：无菜单，无`lfg`或`ce-plan`调用。
 
 
-## Artifact Root
+## 神器根
 
-Resolve `<root>` the first time you compose or read a `<root>/` path, never earlier; a scratch-only or no-repo run that touches none skips this entirely.
+第一次编写或读取 `<root>/` 路径时就解析 `<root>`，切勿更早；仅从头开始或不进行回购的运行不会完全跳过此操作。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-`brainstorm_output` and `brainstorm_model` resolve by this rule instead:
+`brainstorm_output` 和 `brainstorm_model` 则按此规则解析：
 
 <!-- ce-config-layers:start -->
-**Resolve ordinary CE yaml keys from the two repo files.**
+**解析两个存储库文件中的普通 CE yaml 密钥。**
 
-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
+- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
+- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
 <!-- ce-config-layers:end -->
 
-## Execution Flow
+## 执行流程
 
-Phases run in this order. Each names the files it cannot run correctly without: read them when you reach it, and never do its work from this table alone.
+阶段按此顺序运行。每个文件都命名了它无法正确运行的文件：当你到达它时读取它们，并且永远不要单独从这个表中完成它的工作。
 
-| Phase | Read first | What only those files carry |
+| 阶段 | 首先阅读 | 只有这些文件携带什么 |
 |---|---|---|
-| before the first question, and for the whole run — non-software route included | Read `references/interaction-rules.md` | the Core Principles, and the Interaction Rules: one question per turn, ask only decisions the environment cannot settle, the blocking-question-tool default and the visual-probe gate that overrides it, when a question is genuinely open-ended, and the one `ce-prototype` routing test this skill states in full there |
-| before treating a decision the conversation carries as settled | Read `references/settled-decisions.md` | the settlement test; skipping it re-asks a decided question or promotes an unexamined assertion |
-| 0.0 output mode | `references/output-mode.md` | the `OUTPUT_FORMAT` precedence; the token-parsing convention |
-| 0.1–0.4 resume, classify, route, scope | `references/phase-0.md` | resume scan; the stop-and-route classification; scope tiers; the coherent-work gate (is this one piece of work?); both tripwires (visual or spatial features; unfamiliar territory); the task list |
-| 1 understand the idea | `references/dialogue.md` | context scan and grounding scout; opt-in Slack researcher; pressure test; blindspot and visual-probe gates; the conflict gate against existing `CONCEPTS.md` and verified code; Phase 1.3 exit condition |
-| 2–2.6 approaches, synthesis, verification | `references/approaches.md`, plus `references/synthesis-summary.md` before composing the synthesis | approach generation; model elevation; the scoping synthesis; the claim verifier |
-| 3 write the plan | `references/plan-write.md`, then `references/brainstorm-sections.md` and the rendering reference for the format | whether a doc is warranted; the section contract; the Ready for Planning Check |
-| 4 handoff | `references/handoff.md` | the option set and its visibility conditions; the rendering-mode rule; per-selection dispatch, including what `ce-plan` is passed; closing summaries |
+| 在第一个问题之前，以及整个运行过程中——包括非软件路线 | 阅读`references/interaction-rules.md` | 核心原则和交互规则：每轮一个问题，只询问环境无法解决的决定，阻塞问题工具默认值和覆盖它的视觉探针门，当问题真正开放时，以及该技能完整说明的一个`ce-prototype`路由测试 |
+| 在做出决定之前，对话已确定 | 阅读`references/settled-decisions.md` | 沉降试验；跳过它会重新提出一个已决定的问题或宣扬未经审查的断言 |
+| 0.0输出模式 | `references/output-mode.md` | `OUTPUT_FORMAT` 优先级；标记解析约定 |
+| 0.1–0.4 简历、分类、路线、范围 | `references/phase-0.md` | 恢复扫描；停靠站和路线分类；范围层；连贯工作门（这是一项工作吗？）；两条绊线（视觉或空间特征；不熟悉的领域）；任务清单 |
+| 1 理解思路 | `references/dialogue.md` | 情境扫描和接地侦察；选择加入 Slack 研究员；压力测试；盲点和视觉探测门；针对现有`GLOSSARY.md`和验证代码的冲突门； 1.3阶段退出条件 |
+| 2–2.6 方法、综合、验证 | `references/approaches.md`，在合成之前加上`references/synthesis-summary.md` | 方法生成；模型高程；范围界定综合；声明验证者 |
+| 3 写出计划 | `references/plan-write.md`，然后`references/brainstorm-sections.md` 以及格式的渲染参考 | 文件是否有保证；分段合同；准备计划检查 |
+| 4 交接 | `references/handoff.md` | 选项集及其可见性条件；渲染模式规则；每次选择调度，包括传递的`ce-plan`；结束语总结 |
 
-These rules hold without any read:
+这些规则无需任何阅读即可生效：
 
-**`OUTPUT_FORMAT` is exclusive** — markdown OR HTML, never both. The format is the first that applies: a request in this prompt, a preference the user stated earlier, config, then markdown, in every run including headless ones.
+**`OUTPUT_FORMAT` 是排他性的** — markdown 或 HTML，不能两者兼而有之。第一个适用的格式是：此提示中的请求、用户之前声明的首选项、配置，然后是 Markdown，在每次运行（包括无头运行）中。
 
-**When a file is written on the brainstorm path the artifact contract does not change**: write to `<root>/plans/YYYY-MM-DD-HHMM-<type>-<topic>-plan.<md|html>`, with `HHMM` from local wall-clock time at write; frontmatter carries `artifact_contract: ce-unified-plan/v1` and `product_contract_source: ce-brainstorm`; the body is a Goal Capsule plus the Product Contract. Do **not** emit a Goal Launch Block or Reader Index. The non-software route writes none of this.
+**当文件写入头脑风暴路径时，产物契约不会改变**：写入`<root>/plans/YYYY-MM-DD-HHMM-<type>-<topic>-plan.<md|html>`，写入时使用本地挂钟时间的`HHMM`； frontmatter 带有 `artifact_contract: ce-unified-plan/v1` 和 `product_contract_source: ce-brainstorm`；主体是目标胶囊加上产品合同。 **不要**发出目标启动块或读者索引。非软件路线没有写这些。
 
-**When a file is written, do not declare it written or enter Phase 4 while any check fails** in the Ready for Planning Check; a chat result enters Phase 4 (the handoff) with no check to run. An improvised handoff menu is the other silent failure: it shows options that should be hidden and passes the wrong input to the next skill.
+**当文件写入时，在准备计划检查中任何检查失败时不要声明已写入或进入阶段 4；聊天结果进入阶段 4（移交），无需运行检查。临时的切换菜单是另一个无声的失败：它显示了应该隐藏的选项，并将错误的输入传递给下一个技能。
 
-The Phase 1.1 grounding scout, the Phase 2.6 claim verifier, and the opt-in Slack researcher are tiered by task shape, never hardcoded to a model name; read `references/model-tiers.md` before dispatching one. Model elevation is a separate mechanism (`references/reasoning-elevation.md`).
+第 1.1 阶段的接地侦察员、第 2.6 阶段的声明验证者和选择加入的 Slack 研究人员按任务形状分层，从未硬编码为模型名称；在发送之前请阅读`references/model-tiers.md`。模型提升是一个单独的机制（`references/reasoning-elevation.md`）。

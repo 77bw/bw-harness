@@ -1,4 +1,4 @@
-# Depth and session-history: why neither is a question
+# 深度和会话历史：为什么两者都不是问题
 
 ```bash
 /ce-compound [brief context]
@@ -6,20 +6,20 @@
 /ce-compound mode:non-interactive depth:full [context]
 ```
 
-An interactive run picks its own depth rather than asking the user. Default to **Full**. Choose **Lightweight** only when the session is near its context limit.
+交互式运行会选择自己的深度，而不是询问用户。默认为**完整**。仅当会话接近其上下文限制时才选择**轻量级**。
 
-A non-interactive run takes its depth only from an explicit token, and at most one depth token is accepted. `depth:lightweight` routes directly to Lightweight Mode. `depth:full` or no depth token enters Full Mode, including its automatic session-history probe. A non-interactive call carrying no depth token therefore behaves as it always has. Non-interactive lightweight asks no blocking questions and launches no subagents. If the invocation carries an unknown `depth:` token, multiple `depth:` tokens, or a `depth:` token without non-interactive intent, do not guess: emit the non-interactive failure report with the reason and end with `Documentation skipped`.
+非交互式运行仅从显式令牌获取其深度，并且最多接受一个深度令牌。 `depth:lightweight` 直接路由至轻量级模式。 `depth:full` 或没有深度令牌进入完整模式，包括其自动会话历史记录探测。因此，不携带深度令牌的非交互式调用的行为与往常一样。非交互式轻量级不会提出阻塞问题，也不会启动子代理。如果调用携带未知的 `depth:` 令牌、多个 `depth:` 令牌或没有非交互意图的 `depth:` 令牌，请不要猜测：发出包含原因的非交互故障报告并以 `Documentation skipped` 结尾。
 
-Lightweight mode skips session history entirely; non-interactive Full runs the same automatic probe, which asks nothing and so preserves the non-interactive contract.
+轻量级模式完全跳过会话历史记录；非交互式 Full 运行相同的自动探测，它不询问任何内容，因此保留了非交互式合约。
 
-Both are decisions the agent is better positioned to make than the user. Depth depends on the context budget the agent can observe and the user cannot. Neither party can know in advance whether session history will pay off, because the payoff is an unrelated earlier session the current agent was never in. So a cheap probe decides it instead of a question to the user.
+这两者都是代理比用户更适合做出的决定。深度取决于代理可以观察而用户不能观察到的上下文预算。双方都无法提前知道会话历史记录是否会得到回报，因为回报是当前代理从未参与过的不相关的早期会话。因此，廉价的探针可以决定它，而不是向用户提出问题。
 
-**Full is the right choice for essentially every documented learning.** Its token cost is small next to the engineering work that produced the learning, and it is dwarfed by the value of a doc that compounds. Lightweight buys back context at the cost of cross-referencing, overlap detection, and semantic grounding validation, so it is for real context pressure only. If Lightweight turns out to be the wrong call for the user's taste, re-running is a rare, cheap correction. It is cheaper than taxing every run with a question.
+**完整的基本上是每个记录学习的正确选择。**与产生学习的工程工作相比，它的代币成本很小，并且与复合文档的价值相形见绌。轻量级以交叉引用、重叠检测和语义基础验证为代价买回上下文，因此它仅用于真正的上下文压力。如果事实证明轻量级不符合用户的口味，那么重新运行是一种罕见的、廉价的修正。这比每次带着问题征税要便宜。
 
-**The session-history probe is near-free on wall-clock** because it runs alongside the Related Docs Finder and your drafting, and it escalates to the expensive extraction and synthesis only when genuinely relevant candidate sessions turn up (`references/session-history.md`). This support exists only inside the compounding workflow; there is no standalone session-history feature for users.
+**会话历史记录探针在挂钟上几乎是免费的**，因为它与相关文档查找器和您的起草一起运行，并且仅当真正相关的候选会话出现时，它才会升级为昂贵的提取和合成（`references/session-history.md`）。这种支持仅存在于复合工作流程中；没有为用户提供独立的会话历史记录功能。
 
-## Auto-Invoke
+## 自动调用
 
-Completion phrases such as "that worked", "it's fixed", "working now", and "problem solved" identify the completion checkpoint; they do not establish that a lesson qualifies. The Preconditions in `SKILL.md` decide that on every run, automatic or explicit, and a run where nothing qualifies writes nothing.
+诸如“有效”、“已修复”、“正在工作”和“问题已解决”之类的完成短语标识了完成检查点；他们没有确定课程是否合格。 `SKILL.md` 中的先决条件决定每次运行时，自动或显式，并且没有任何符合条件的运行不写入任何内容。
 
-An explicit invocation with optional context requests immediate evaluation without waiting for auto-detection. It does not waive the solved, verified, and durable-learning preconditions.
+具有可选上下文的显式调用请求立即评估，而无需等待自动检测。它并不放弃已解决、已验证和持久学习的先决条件。

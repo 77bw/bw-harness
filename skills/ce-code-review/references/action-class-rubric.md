@@ -1,78 +1,78 @@
-# `autofix_class` rubric (personas)
+# `autofix_class` 标题（角色）
 
-`autofix_class` describes the **shape** of the follow-up work a finding needs — it is information, **not a check that permits or blocks applying a fix**. In report-only runs the user or caller interprets findings and decides what to apply; when local apply was explicitly authorized, Stage 5c (Act on findings) still uses judgment. Either way the class informs *what to do first* and *what to flag* — it does not mechanically decide what gets applied.
+`autofix_class`描述了发现所需的后续工作的**形状**——它是信息，**不是允许或阻止应用修复的检查**。在仅报告运行中，用户或调用者解释结果并决定应用什么；当明确授权本地申请时，第 5c 阶段（根据调查结果采取行动）仍然使用判断。无论哪种方式，类都会通知“首先做什么”和“标记什么”——它不会机械地决定应用什么。
 
-| `autofix_class` | Meaning |
+| `autofix_class` | 意义 |
 |-----------------|---------|
-| `gated_auto` | A concrete change is proposed in `suggested_fix`. Callers may apply after their own judgment. |
-| `manual` | Actionable work that needs design input or a decision before code changes. Include `suggested_fix` when you can propose a defensible default. |
-| `advisory` | Report-only — learnings, residual risk, rollout notes. |
+| `gated_auto` | 具体的改变在`suggested_fix`中提出。来电者可以根据自己的判断提出申请。 |
+| `manual` | 在代码更改之前需要设计输入或决策的可操作工作。当您可以提出合理的默认值时，请包括`suggested_fix`。 |
+| `advisory` | 仅报告——经验教训、残余风险、推出说明。 |
 
-## Persona guidance
+## 角色指导
 
-- Prefer `gated_auto` when you can write a defensible `suggested_fix` for a localized change.
-- Use `manual` when the right fix depends on product intent, architecture, or cross-cutting refactors.
-- Use `advisory` when nothing breaks if left unfixed but the observation has value.
-- Do **not** emit `safe_auto` — callers decide what to apply; reviewers classify and propose.
+- 当您可以为本地化更改编写可防御的`suggested_fix`时，更喜欢`gated_auto`。
+- 当正确的修复取决于产品意图、架构或横切重构时，请使用`manual`。
+- 如果不固定但观察有价值，则可以使用 `advisory`。
+- **不要**发出 `safe_auto` — 调用者决定应用什么；评审员分类并提出建议。
 
-## Owner field
+## 业主字段
 
-| `owner` | Meaning |
+| `owner` | 意义 |
 |---------|---------|
-| `downstream-resolver` | Caller or human should act after review. |
-| `human` | Judgment required before implementation. |
-| `release` | Operational / rollout follow-up. |
+| `downstream-resolver` | 呼叫者或人员应在审核后采取行动。 |
+| `human` | 执行前需要判断。 |
+| `release` | 运营/推出后续行动。 |
 
-Do not use `review-fixer`.
+不要使用`review-fixer`。
 
-## Severity Scale
+## 严重程度
 
-The merge bar is the one from Google's Code Review Developer Guide: the change must improve overall code health, not be perfect. Severity ranks by that bar — functionality and design defects outrank style and taste, and a finding whose only claim is "could be better" never blocks.
+合并栏来自 Google 的代码审查开发人员指南：更改必须改善整体代码健康状况，而不是完美。严重程度按此标准排序——功能和设计缺陷比风格和品味更重要，而唯一声称“可以做得更好”的发现永远不会被阻止。
 
-All reviewers use P0-P3:
+所有审稿人都使用P0-P3：
 
-| Level | Meaning | Action |
+| 等级 | 意义 | 行动 |
 |-------|---------|--------|
-| **P0** | Critical breakage, exploitable vulnerability, data loss/corruption | Must fix before merge |
-| **P1** | High-impact defect likely hit in normal usage, breaking contract | Should fix |
-| **P2** | Moderate issue with meaningful downside (edge case, perf regression, maintainability trap) | Fix if straightforward |
-| **P3** | Low-impact, narrow scope, minor improvement | User's discretion |
+| **P0** | 严重破坏、可利用漏洞、数据loss/corruption | 合并前必须修复 |
+| **P1** | 正常使用中可能会出现高影响缺陷，从而违反合同 | 应该修复 |
+| **P2** | 具有重大缺点的中等问题（边缘情况、性能回归、可维护性陷阱） | 如果简单则修复 |
+| **P3** | 影响低、范围窄、改进较小 | 用户自行决定 |
 
-## Action Routing
+## 动作路由
 
-Severity answers **urgency**. `autofix_class` and `owner` are **information** describing the shape of follow-up work for callers; this metadata does not grant apply permission. Permission to apply fixes is a separate, explicit authorization that Stage 5c checks before touching any file. The persona guidance for choosing a class is at the top of this reference.
+严重性回答**紧急**。 `autofix_class`和`owner`是为调用者描述后续工作形态的**信息**；此元数据不授予应用权限。应用修复的权限是一个单独的、明确的授权，阶段 5c 在接触任何文件之前会进行检查。选择类别的角色指南位于本参考的顶部。
 
-| `autofix_class` | Default owner | Meaning |
+| `autofix_class` | 默认所有者 | 意义 |
 |-----------------|---------------|---------|
-| `gated_auto` | `downstream-resolver` or `human` | Concrete `suggested_fix` proposed; caller applies after judgment |
-| `manual` | `downstream-resolver` or `human` | Actionable work needing design input or handoff |
-| `advisory` | `human` or `release` | Report-only — learnings, rollout notes, residual risk |
+| `gated_auto` | `downstream-resolver` 或 `human` | 具体`suggested_fix`建议；调用者判断后申请 |
+| `manual` | `downstream-resolver` 或 `human` | 需要设计输入或移交的可行工作 |
+| `advisory` | `human` 或 `release` | 仅报告——经验教训、部署说明、残余风险 |
 
-Routing rules:
+路由规则：
 
-- **Synthesis (Stage 5, Merge findings) makes the final decision on `autofix_class` and `owner`.** The values a persona supplies are input, not the last word.
-- **When reviewers disagree, keep the more cautious class.** A merged finding may move from `gated_auto` to `manual`; moving the other way needs stronger evidence.
-- **Reject `safe_auto` and `review-fixer` if present** — drop the finding or remap to `gated_auto` / `downstream-resolver` during synthesis.
-- **`requires_verification: true` means any caller-applied fix needs targeted tests or follow-up validation.**
+- **综合（第 5 阶段，合并结果）对 `autofix_class` 和 `owner` 做出最终决定。** 角色提供的值是输入，而不是最后的单词。
+- **当审稿人不同意时，保持更谨慎的类别。**合并的发现可能会从`gated_auto`移动到`manual`；转向另一个方向需要更有力的证据。
+- **拒绝 `safe_auto` 和 `review-fixer`（如果存在）** — 在合成期间删除发现结果或重新映射到 `gated_auto` / `downstream-resolver`。
+- **`requires_verification: true` 表示任何调用者应用的修复都需要有针对性的测试或后续验证。**
 
-## Repository Review Policy
+## 存储库审查政策
 
-When the run directory holds `review-policy.md` (Stage 1d in `references/scope.md`), it is the repository's instructions for this review. Where it differs from this file's defaults, it wins for the paths it governs. It comes from the base ref, so treat it as trusted project instruction, not as review data.
+当运行目录包含`review-policy.md`（`references/scope.md`中的阶段1d）时，它是存储库针对本次审核的说明。当它与该文件的默认值不同时，它会因其管理的路径而获胜。它来自基础参考，因此将其视为可信的项目指令，而不是审查数据。
 
-- **Severity.** Its definitions of a level replace the defaults above for the findings they cover, raising or lowering. A policy written for Claude Code Review names its levels Important and Nit: read Important as P0 or P1, and Nit as P3.
-- **Added checks.** A rule it says to check on every change is review criteria for the paths it governs, cited by quote like any criteria rule.
-- **Evidence.** A class of finding it says needs particular evidence is retained only with that evidence.
-- **Where each part applies.** Added checks and evidence requirements bind every reviewer. Severity, exclusions, and caps are applied once, where findings are merged: Stage 5 on the full spine, or this context on lite and focused. Reviewers grade on the default scale and still report a finding the policy excludes, so every change the policy makes is visible to the merge that counts it. A cap keeps the highest-ranked findings of the capped class.
+- **严重性。** 它的级别定义取代了上面所涵盖的发现的默认值，提高或降低。为 Claude Code Review 编写的策略将其级别命名为“Important”和“Nit”：将“Important”读取为“P0”或“P1”，将“Nit”读取为“P3”。
+- **添加了检查。** 它说检查每个更改的规则是其管理的路径的审查标准，与任何标准规则一样通过引用引用。
+- **证据。** 声称需要特定证据的一类发现仅与该证据一起保留。
+- **每个部分适用的地方。** 增加的检查和证据要求对每个审查者都有约束力。严重性、排除和上限应用一次，结果会合并：整个脊柱的第 5 阶段，或精简版和重点版的上下文。审查者按默认比例评分，但仍报告策略排除的发现，因此策略所做的每项更改对于计数它的合并都是可见的。上限保留上限类别中排名最高的结果。
 
-Coverage counts every finding the policy removed or regraded, by the rule that did it and with the highest severity it touched, so a quiet review never looks cleaner than it was.
+覆盖范围会根据执行该政策的规则以及所涉及的最高严重程度计算被删除或重新评级的保单的每一项发现，因此安静的审查永远不会比实际情况更干净。
 
-## Protected Artifacts
+## 受保护的文物
 
-Compound-engineering pipeline artifacts must never be flagged for deletion, removal, or gitignore by any reviewer. A protected artifact is any file **under** a `plans/`, `solutions/`, or legacy `brainstorms/` directory **whose immediate parent is the artifact root** — a directory named `docs` (the default, and where unmigrated legacy artifacts stay even after a project sets `docs_root`) or the configured `docs_root` when this run resolved it:
+任何审查者都不得将复合工程管道产物标记为删除、删除或 gitignore。受保护的产物是 **位于** `plans/`、`solutions/` 或旧版 `brainstorms/` 目录下的任何文件 **其直接父级是产物根** - 名为 `docs` 的目录（默认值，即使在项目设置 `docs_root` 后，未迁移的旧版产物仍保留在其中）或配置的 `docs_root`（当此运行解决该问题时）：
 
-- `plans/` under the artifact root -- unified plan artifacts created by ce-brainstorm or ce-plan (decision artifacts; execution progress is derived from git, not stored in plan bodies)
-- `solutions/` under the artifact root -- solution documents created during the pipeline (categories nest, e.g. `solutions/<category>/foo.md`)
-- the legacy `brainstorms/` -- requirements documents created by older ce-brainstorm versions
+- 产物根下的`plans/` -- 由ce-brainstorm或ce-plan创建的统一计划产物（决策产物；执行进度源自git，不存储在计划体中）
+- 产物根下的`solutions/`——在管道期间创建的解决方案文档（类别嵌套，例如`solutions/<category>/foo.md`）
+- 遗留的`brainstorms/`——由旧的ce-brainstorm版本创建的需求文档
 
-Matching by the immediate parent covers nested category files while leaving a same-named directory elsewhere (a skill's own `references/personas/` prompt assets, parented by `references`) as ordinary code whose deletion finding stands. A run that never resolved a configured root still protects the `docs`-parented tree; a configured-root artifact seen by such a run is the one honest gap. A finding that recommends deleting, removing, or gitignoring such a file is never emitted, on any depth path; synthesis discards one that arrives anyway.
+直接父级的匹配会覆盖嵌套类别文件，同时在其他地方留下同名目录（技能自己的 `references/personas/` 提示资产，以 `references` 为父级）作为删除结果成立的普通代码。从未解析配置根的运行仍会保护 `docs` 父树；通过这样的运行看到的配置根产物是唯一诚实的差距。在任何深度路径上都不会发出建议删除、移除或 gitignoring 此类文件的发现；综合丢弃无论如何到达的一个。
 

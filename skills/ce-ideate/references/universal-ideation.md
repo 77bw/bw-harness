@@ -1,119 +1,119 @@
-# Universal Ideation Facilitator
+# 通用创意促进者
 
-This file is loaded when ce-ideate detects an elsewhere-mode topic that is not about any software artifact — naming (independent of product), narrative writing, personal decisions, non-digital business strategy, physical-product design. Topics that concern a software artifact (page, app, feature, flow, product) are routed to elsewhere-software and do not load this file, even when the ideas are about copy, UX, or visual design for that artifact.
+当 ce-ideate 检测到与任何软件产物无关的其他模式主题时加载此文件 - 命名（独立于产品）、叙述性写作、个人决策、非数字业务策略、物理产品设计。涉及软件产物（页面、应用程序、功能、流程、产品）的主题将被路由到其他软件，并且不会加载此文件，即使想法与该产物的复制、UX 或视觉设计有关。
 
-Phase 1 elsewhere-mode grounding runs before this reference takes over — user-context synthesis and web-research feed the facilitation below. Learnings-researcher is skipped by default for elsewhere-non-software since the CWD's `<root>/solutions/` almost always contains engineering patterns that do not transfer to non-digital topics. What this file replaces is Phase 2's software-flavored frame dispatch and the post-ideation wrap-up; the repo-specific codebase scan never runs in elsewhere mode. Absorb these principles and facilitate ideation in the topic's native domain, using the Phase 1 grounding summary as input.
+第 1 阶段其他模式接地在此参考接管之前运行 - 用户上下文综合和网络研究提供以下便利。对于其他非软件，默认情况下会跳过学习研究员，因为 CWD 的 `<root>/solutions/` 几乎总是包含不会转移到非数字主题的工程模式。该文件取代的是第 2 阶段的软件风格的帧调度和构思后总结；特定于存储库的代码库扫描永远不会在其他模式下运行。使用第一阶段的基础总结作为输入，吸收这些原则并促进主题本身领域的构思。
 
-The mechanism that makes ideation good — generate many, critique adversarially, present survivors with reasons — is preserved. Only the framing of the work changes.
+使构想变得美好的机制——产生许多人、进行对抗性批评、向幸存者提出理由——被保留了下来。只是作品的框架发生了变化。
 
 ---
 
-## Your role
+## 你的角色
 
-Be a divergent thinking partner, not a delivery service. The user came here for a stronger candidate set than they could generate alone, not a single recommendation. Resist the urge to converge early. A premature favorite anchors the conversation and crowds out better candidates that have not come up yet.
+成为一个发散思维的合作伙伴，而不是送货服务。用户来到这里是为了获得比他们单独生成的更强大的候选集，而不是单个推荐。抵制尽早集合的冲动。过早的热门候选人会主导对话，并排挤尚未出现的更好候选人。
 
-Match the tone to the stakes. For business or product decisions (pricing, positioning, roadmap), lead with constraints and tradeoffs. For creative work (naming, narrative, visual concepts), lead with energy and range. For personal decisions, lead with values before mechanics.
+将语气与赌注相匹配。对于业务或产品决策（定价、定位、路线图），以限制和权衡为主导。对于创意工作（命名、叙述、视觉概念），以精力和范围为主导。对于个人决定，先以价值观为主导，再以机制为主导。
 
-## How to start
+## 如何开始
 
-Match depth to scope:
+将深度与范围相匹配：
 
-- **Quick** — the user wants a starter set right now. Generate one round, critique briefly, present 3-5 survivors, done.
-- **Standard** — light intake (one or two questions), one round of generation, adversarial critique, present 5-7 survivors.
-- **Full** — rich intake, multiple frames in parallel, deep critique, present 5-7 survivors with strong rationale.
+- **快速** — 用户现在想要一套入门套件。生成一轮，简要批评，呈现 3-5 个幸存者，完成。
+- **标准** — 光摄入（一两个问题），一轮生成，对抗性批评，呈现 5-7 个幸存者。
+- **全**——摄入丰富，多帧并行，深度批判，呈现5-7个幸存者，有理有据。
 
-**Depth is the fleet decision in this mode, so choose it with tactical scope in mind — before you get to "How to generate."** Only Full dispatches frames as parallel sub-agents; Quick and Standard run all six inline in the facilitator. When tactical scope is active (Phase 0.5), prefer **Quick or Standard**, which dispatch no ideation sub-agents at all. Either way tactical's real levers here are the lowered per-frame volume and the waived floor, not a smaller fleet.
+**在此模式下，深度是由舰队决定的，因此在选择它时要考虑到战术范围 - 在您开始“如何生成”之前。** 仅“完全”将帧作为并行子代理进行调度；快速和标准在辅助器中运行所有六个内联。当战术范围处于活动状态时（阶段 0.5），更喜欢**快速或标准**，它们根本不派遣构思子代理。无论哪种方式，战术的真正杠杆是降低的每帧体积和放弃的地板，而不是更小的机队。
 
-Apply the discrimination test before asking anything. Would swapping one piece of the user's stated context for a contrasting alternative materially change which ideas survive? If yes, the context is specific enough to shape the ideas — proceed. If no, ask 1-3 narrowly chosen questions. Follow the questioning principles from `references/scope-gates.md` Phase 0.2: ask only about the **subject** (what to ideate on) or **substance** (what Phase 1 agents need to say something specific) — never about solution direction, constraints, audience, tone, or success criteria. Those belong to `ce-brainstorm`. Build on what the user already provided rather than starting from a template. After each answer, re-apply the test before asking another. Stop on dismissive responses ("idk just go") and treat genuine "no constraint" answers as real answers.
+在提出任何问题之前先进行歧视测试。将用户陈述的上下文中的一个部分替换为对比鲜明的替代方案是否会实质上改变哪些想法得以生存？如果是，则上下文足够具体以形成想法 - 继续。如果不是，请提出 1-3 个经过精心挑选的问题。遵循`references/scope-gates.md`阶段0.2的提问原则：仅询问**主题**（构思什么）或**实质**（第一阶段代理需要说哪些具体内容），而不询问解决方案方向、约束、受众、语气或成功标准。那些属于`ce-brainstorm`。基于用户已经提供的内容进行构建，而不是从模板开始。每次回答后，在询问另一个问题之前重新应用测试。停止轻蔑的回答（“idk just go”）并将真正的“无限制”答案视为真正的答案。
 
-**Grounding freshness.** Phase 1 elsewhere-mode grounding (user-context synthesis + web-research by default; learnings skipped for non-software, see `references/grounding.md` Phase 1) has already run before this reference takes over, and its outputs feed the generation below. If intake answers here materially refine the topic or constraints — new scope, different audience, a domain shift that the original grounding did not cover — re-dispatch the affected Phase 1 agents on the refined topic before generating ideas. This mirrors `references/scope-gates.md` Phase 0.4's rule that mode and grounding re-evaluate when intake changes the scope to be acted on; ranking against stale grounding risks returning ideas fit to the wrong topic.
+**接地新鲜感。** 第 1 阶段其他模式接地（默认情况下用户上下文综合 + 网络研究；跳过非软件的学习，请参阅 `references/grounding.md` 第 1 阶段）在此参考接管之前已经运行，其输出馈送到下面的一代。如果此处的接收答案实质上细化了主题或限制（新的范围、不同的受众、原始基础未涵盖的领域转变），则在产生想法之前重新派遣受影响的第一阶段代理处理细化的主题。这反映了`references/scope-gates.md`阶段0.4的规则，即当摄入量改变作用范围时，模式和接地会重新评估；根据陈旧的基础进行排名可能会导致返回适合错误主题的想法。
 
-When the user provides rich context up front (a paste, a brief, an existing draft), confirm understanding in one line and skip intake.
+当用户预先提供丰富的上下文（粘贴、摘要、现有草稿）时，请用一行确认理解并跳过吸收。
 
-## How to decompose
+## 如何分解
 
-Before generating, decompose the topic into 3-5 orthogonal **axes** that name *what aspects of the subject to think about*. Frames in "How to generate" determine *how to think* (the lens); axes determine *what to think on* (the parts of the subject to examine). Without explicit axes, the same topic interpreted six ways through six lenses still leaves most of the subject unexamined — lens diversity does not cover the subject on its own.
+在生成之前，将主题分解为 3-5 个正交的**轴**，这些轴**命名为*要考虑主题的哪些方面*。 “如何生成”中的框架决定*如何思考*（镜头）；轴决定*思考什么*（要检查的主题的部分）。如果没有明确的轴线，通过六个镜头以六种方式解释同一主题仍然会使大部分主题未经审查——镜头多样性本身并不能涵盖主题。
 
-This step is the facilitator's own analysis — no sub-agent, no additional research. The Phase 1 grounding supplies the substance.
+这一步是协调员自己的分析——没有子代理，没有额外的研究。第一阶段接地提供该物质。
 
-Axes should be:
+轴应该是：
 
-- **3-5 in number** (3 max when tactical scope is active). Fewer means atomic — skip decomposition. More fragments coverage.
-- **Orthogonal.** A single idea should fall on one axis, not span multiple.
-- **Derived from grounding**, not from a generic template.
-- **At the same level** of granularity.
-- **Named in the topic's language**, not meta-language about ideation.
+- **数量为 3-5**（战术范围激活时最多 3 个）。更少意味着原子——跳过分解。更多片段覆盖。
+- **正交。** 单个想法应该落在一个轴上，而不是跨越多个轴。
+- **源于基础**，而不是来自通用模板。
+- **处于相同的粒度级别**。
+- **以主题语言命名**，而不是关于构思的元语言。
 
-**Worked examples (illustrative, not a template):**
+**工作示例（说明性的，不是模板）：**
 
-- "Name my new coffee shop" → atomic; skip decomposition (the candidate *is* a name)
-- "Plot ideas for a short story" → atomic; skip decomposition (the candidate *is* a plot)
-- "Brand strategy for a launch" → axes might be: positioning; visual identity; voice; launch channels; pricing/packaging
-- "Career options for the next 5 years" → axes might be: domain (industry/role); structure (employee/founder/freelance); geography; growth ambition; financial floor
+- “为我的新咖啡店命名” → 原子；跳过分解（候选*是*一个名字）
+- “短篇小说的情节构思” → 原子；跳过分解（候选*是*一个图）
+- “发布的品牌策略” → 轴心可能是：定位；视觉识别；嗓音;发射渠道； pricing/packaging
+- “未来5年的职业选择”→轴可能是：领域（industry/role）；结构（employee/founder/freelance）；地理;成长抱负；金融楼层
 
-**Skip condition.** Many elsewhere-non-software topics are atomic by nature — a single name, tagline, or one-shot creative output. When 3+ orthogonal axes do not emerge, skip decomposition and note `Decomposition skipped — atomic subject` in the grounding summary.
+**跳过条件。** 许多其他非软件主题本质上都是原子的 - 单个名称、标语或一次性创意输出。当 3 个以上正交轴未出现时，跳过分解并在基础摘要中记下 `Decomposition skipped — atomic subject`。
 
-**Surprise-me skip.** No settled subject in surprise-me mode; skip decomposition and note `Decomposition skipped — surprise-me mode`.
+**惊喜我跳过。** 惊喜我模式中没有固定的主题；跳过分解并记下`Decomposition skipped — surprise-me mode`。
 
-Record the axes (or skip-reason) at the head of generation. Generation will distribute ideas across axes; convergence will weight axis spread alongside other rubric criteria.
+在生成的头部记录轴（或跳过原因）。一代人将跨轴传播思想；收敛将权重轴与其他标准标准一起展开。
 
-## How to generate
+## 如何生成
 
-Generate the full candidate list before critiquing any idea. Use the same six frames as software ideation, described in domain-agnostic language. Each frame is a **starting bias, not a constraint** — follow promising threads across frames. When dispatching frames as parallel sub-agents (Full depth), follow the model tiers in `references/grounding.md`: evidence-driven frames (pain, inversion, leverage) on the generation tier; ceiling frames (assumption-breaking, analogy, constraint-flipping) on the ceiling tier.
+在批评任何想法之前生成完整的候选人列表。使用与软件构思相同的六个框架，以与领域无关的语言进行描述。每个框架都是一个**起始偏差，而不是一个约束**——跨框架遵循有希望的线索。当将帧调度为并行子代理（全深度）时，遵循`references/grounding.md`中的模型层：生成层上的证据驱动框架（痛苦、反转、杠杆）；天花板层上的天花板框架（打破假设、类比、约束翻转）。
 
-**Tactical scope applies here too.** This mode replaces the software frame dispatch, so it never loads `references/divergent-ideation.md` and would otherwise miss the Phase 0.5 scaling entirely — a request like "quick wins for this launch strategy" must not get the full treatment.
+**战术范围也适用于此。**此模式取代了软件帧调度，因此它永远不会加载`references/divergent-ideation.md`，否则将完全错过阶段 0.5 扩展 - 像“此启动策略快速获胜”这样的请求一定不能得到充分处理。
 
-When tactical scope is active, **apply all of tactical's dials** as `references/scope-gates.md` Phase 0.5 defines them — the whole named set, not the subset that happens to be repeated here. Two of them need a mode-specific reading, because this mode decides *whether any sub-agent runs at all*:
+当战术范围处于活动状态时，**应用所有战术表盘**，因为`references/scope-gates.md`阶段 0.5 定义了它们 - 整个命名集，而不是此处碰巧重复的子集。其中两个需要特定于模式的读取，因为此模式决定*是否有任何子代理运行*：
 
-- **Depth is the fleet decision here.** Unlike software mode, only Full depth dispatches frames as parallel sub-agents; Quick and Standard run all six inline in the facilitator. Resolve depth *first*, then let the count follow — never announce a fleet the selected depth will not dispatch. Tactical scope is a reason to prefer Quick or Standard, and when you do, the Phase 0.6 cost notice names the grounding and verifier agents only.
-- **The per-agent dials bind to whatever this mode actually dispatches.** At Full depth each ideation sub-agent gets the reduced idea target *and* the reduced verification-read budget from the dial set, and you keep one frame per agent — never pack frames to economize, since the read budget is per agent and packing thins each idea's basis check. At Quick or Standard there are **zero ideation sub-agents**, so the per-agent dials have nothing to bind to; the reduced idea target still governs what the facilitator generates inline.
-- **The same budget pairing applies here.** The reduced read budget is justified only by the reduced idea target, so a volume override that raises generation returns the ordinary budget — never raised volume against the lowered cap. Budgets are ceilings, not guarantees of uniform scrutiny: where per-idea depth falls at a raised target, say so in the artifact.
+- **深度是这里的舰队决定。**与软件模式不同，只有全深度将帧作为并行子代理进行调度；快速和标准在辅助器中运行所有六个内联。 *首先*解决深度问题，然后让计数进行——永远不要宣布所选深度不会派遣的舰队。战术范围是选择快速或标准的一个原因，当您这样做时，阶段 0.6 成本通知仅指定接地和验证代理。
+- **每个代理拨号绑定到此模式实际调度的任何内容。** 在全深度，每个构思子代理从拨号集中获取减少的想法目标*和*减少的验证读取预算，并且每个代理保留一帧 - 永远不要打包帧以节省费用，因为读取预算是每个代理的，并且打包会减少每个想法的基础检查。在快速或标准中，有**零构思子代理**，因此每个代理拨号没有任何可绑定的；减少的想法目标仍然控制着协调员内联生成的内容。
+- **同样的预算配对也适用于此。** 减少的阅读预算仅通过减少的想法目标来证明，因此增加生成的数量覆盖会返回普通预算 - 从未根据降低的上限提高数量。预算是上限，而不是统一审查的保证：每个想法的深度都落在一个提高的目标上，在产物中是这样说的。
 
-Frame coverage is a floor here as in software mode — fewer agents, or none, never fewer lenses. `go deep` suppresses tactical scope entirely, per Phase 0.5.
+与软件模式一样，帧覆盖范围是这里的一个底线——更少的代理，或者没有，永远不会更少的镜头。每阶段 0.5 `go deep` 完全抑制战术范围。
 
-- **Pain and friction** — what is consistently annoying, slow, or broken in the current state of the topic? Generate ideas that remove or reduce that friction.
-- **Inversion, removal, automation** — what would happen if a step were inverted, removed entirely, or automated away? The result is often a candidate even if the inversion itself is unrealistic.
-- **Assumption-breaking and reframing** — what is being treated as fixed that is actually a choice? Reframe the problem one level up or sideways.
-- **Leverage and compounding** — what choices, once made, make many future moves cheaper or stronger? Look for second-order effects.
-- **Cross-domain analogy** — how do completely different fields solve a structurally similar problem? The grounding domain is the user's topic; the analogy domain is anywhere else (other industries, biology, games, infrastructure, history). Push past the obvious analogy to non-obvious ones.
-- **Constraint-flipping** — invert the obvious constraint to its opposite or extreme. What if the budget were 10x or 0? What if there were one constraint instead of ten, or ten instead of one? Use the resulting design as a candidate even if the flip itself is not realistic.
+- **痛苦和摩擦**——在该主题的当前状态下，什么是一直令人烦恼、缓慢或破坏的？产生消除或减少摩擦的想法。
+- **反转、删除、自动化** — 如果某个步骤被反转、完全删除或自动消失，会发生什么？即使反转本身不切实际，结果通常也是候选的。
+- **打破假设并重新构建**——什么被视为固定的，而实际上是一种选择？向上一级或横向重新构建问题。
+- **杠杆和复利**——什么选择一旦做出，会使未来的许多举措变得更便宜或更强大？寻找二阶效应。
+- **跨领域类比**——完全不同的领域如何解决结构相似的问题？接地域是用户的主题；类比领域可以是其他任何地方（其他行业、生物学、游戏、基础设施、历史）。把显而易见的类比推向不明显的类比。
+- **约束翻转** — 将明显的约束反转到其相反或极端。如果预算是 10 倍或 0 该怎么办？如果有 1 个约束而不是 10 个，或者有 10 个约束而不是 1 个怎么办？即使翻转本身并不现实，也可以使用最终的设计作为候选。
 
-Aim for 5-8 ideas per frame — 3-4 when tactical scope is active. **An explicit volume override in the prompt is applied after that default and wins over it**, exactly as in the software path — and a raw number is a **total**, not a per-frame multiplier: `100 ideas` on a tactical run means ~16-17 per frame across the six, not 100 each. Requests shaped like `top 3` constrain the survivor count instead and leave generation alone, as does any total too small to spread across the six frames — `3 ideas` is a survivor limit, never three raw candidates split six ways. **When axes are present, distribute ideas across axes** — each frame's lens applies to every axis, but ideas should not all cluster on one. Tag each idea with the axis it targets. After generating, merge and dedupe; scan for cross-cutting combinations (3-5 additions at most; more in surprise-me mode, where different frames often discover different subjects and combinations are the magic layer).
+目标是每帧 5-8 个想法 - 当战术范围处于活动状态时为 3-4 个。 **在默认值之后应用提示中的明确音量覆盖并克服它**，与软件路径中的完全相同 - 原始数字是**总数**，而不是每帧乘数：`100 ideas`在战术运行中意味着〜6个帧中每帧16-17，而不是每帧100。形状像 `top 3` 的请求会限制幸存者数量，而不会影响生成，就像任何总数太小而无法分布在六个帧中一样 - `3 ideas` 是幸存者限制，三个原始候选者不会分成六种方式。 **当存在轴时，跨轴分配想法** - 每个框架的镜头适用于每个轴，但想法不应全部聚集在一个轴上。用它的目标轴标记每个想法。生成后，进行合并、去重；扫描交叉组合（最多 3-5 个添加；更多以惊喜模式进行，不同的框架经常会发现不同的主题，而组合就是魔法层）。
 
-**Axis-coverage check (when axes are present).** After merging, count ideas per axis. If any axis has zero ideas, generate one additional small batch (3-5 ideas) targeting the empty axis with the frame whose lens best fits — Pain & friction for usability gaps, Cross-domain analogy for distribution or compounding gaps, etc. Cap recovery at 2 axes; beyond that, accept thin coverage rather than fan out. Note any axis that was not recovered in the rejection summary so the gap is visible.
+**轴覆盖检查（当轴存在时）。**合并后，计算每个轴的想法。如果任何轴有零个想法，则生成一个额外的小批量（3-5 个想法），针对具有最适合镜头的框架的空轴 - 可用性差距的疼痛和摩擦，分布或复合差距的跨域类比等。2 个轴的上限恢复；除此之外，接受薄覆盖而不是散开。请注意拒绝摘要中未恢复的任何轴，以便间隙可见。
 
-**Per-idea output contract (mirrors the software-mode contract in `references/divergent-ideation.md`):** each idea carries title, summary, **axis** (when decomposition produced an axis list — pick the one this idea most centrally targets; omit when skipped), **basis** (required, tagged `direct:` quoted evidence / `external:` named prior art or domain research / `reasoned:` written-out first-principles argument), why-it-matters connecting the basis to the move's significance, and a one-line meeting-test self-check (waived when tactical scope is active — Phase 0.5). Basis is required, not optional — unjustified speculation does not surface.
+**每个想法输出契约（镜像`references/divergent-ideation.md`中的软件模式契约）：**每个想法都带有标题、摘要、**轴**（当分解产生轴列表时 - 选择该想法最集中的目标；跳过时省略）、**基础**（必需，标记为`direct:`引用的证据/`external:`命名现有技术或领域研究/`reasoned:`写出的第一原理）论证）、为什么重要将基础与举措的重要性联系起来，以及单行会议测试自检（当战术范围处于活动状态时放弃 - 阶段 0.5）。基础是必需的，而不是可选的——不合理的猜测不会浮出水面。
 
-**Generation rules:**
+**生成规则：**
 
-- Every idea carries an articulated basis. The failure mode to prevent is plausible-sounding speculation that lacks any basis the user can verify.
-- Aim past the obvious. The first few ideas per frame are warm-up — keep only those that earn their place once the non-obvious ideas exist. If an idea would appear in a generic listicle about this topic, sharpen it with grounding or drop it.
-- Bias toward the basis type your frame naturally produces — pain/inversion/leverage tend toward `direct:`; analogy and constraint-flipping tend toward `reasoned:` — but don't exclude other types. When a frame produces a reasoned basis, write the argument out, don't gesture at it.
-- Apply the meeting-test as a default floor: would this idea warrant the equivalent of team discussion (or whatever maps to "worth talking through" in this topic's native domain)? If not, it's below the floor and is dropped. The floor is relaxed only when tactical scope is active (Phase 0.5).
-- Stay within the subject's identity. Expansions, new surfaces, new directions, retirements are fair game when the basis supports them. Subject-replacement moves (abandoning the subject, pivoting to an unrelated domain) are out regardless of basis.
+- 每个想法都有一个明确的基础。预防的故障模式是听起来似是而非的猜测，缺乏用户可以验证的任何基础。
+- 瞄准那些显而易见的事情。每帧的前几个想法是热身——只保留那些在非显而易见的想法存在后就占据一席之地的想法。如果某个想法出现在有关该主题的通用列表中，请通过扎根来强化它或放弃它。
+- 偏向您的框架自然产生的基本类型 - pain/inversion/leverage 倾向于 `direct:`；类比和约束翻转倾向于`reasoned:`——但不排除其他类型。当一个框架产生一个合理的基础时，把论点写出来，不要对它做出手势。
+- 将会议测试应用为默认楼层：这个想法是否可以保证相当于团队讨论（或在该主题的本机领域中映射到“值得讨论”的任何内容）？如果没有，它就会在地板下方并掉落。仅当战术范围处于活动状态时（阶段 0.5），地板才会放松。
+- 保持在主体的身份范围内。当基础支持时，扩建、新表面、新方向、退役都是公平的游戏。无论基础如何，主题替换举措（放弃主题，转向不相关的领域）都是过时的。
 
-**Surprise-me mode in this reference.** When Phase 0.2 routed to surprise-me, there is no user-specified subject. Through each frame's lens, explore the Phase 1 grounding (user-context synthesis + web research) and identify the subject(s) you find most interesting for that lens. Different frames finding different subjects is the feature. The basis may include identification of the subject itself — why this subject is worth ideating on through this lens, citing what in the Phase 1 material signals it.
+**本引用文档中的 Surprise-me 模式。** 当阶段 0.2 路由到 Surprise-me 时，没有用户指定的主题。通过每个框架的镜头，探索第一阶段的基础（用户上下文综合+网络研究）并确定您认为该镜头最有趣的主题。不同的框架找到不同的主题是其特点。基础可能包括对主题本身的识别——为什么这个主题值得通过这个镜头来构思，引用第一阶段材料中的信号。
 
-## How to converge
+## 如何收敛
 
-Before the final cut, dispatch one fresh-context basis verifier (generation tier — see the model tiers in `references/grounding.md`) whose payload is only the grounding summary and the candidate list, prompted to refute: bases that don't support the claimed move, prior art that isn't real or relevantly analogous, reasoned arguments that don't hold. **When tactical scope is active, tell the verifier the meeting-test floor is waived** and have it judge basis only — it runs fresh with none of the generation history, so a waiver it is not told about does not reach it. In this mode verification runs against the user-supplied context and web research — no repo reads. Weigh its verdicts in the cut, overruling with stated reasons; if dispatch is unavailable, fall back to facilitator-only critique and note the degradation.
+在最终剪辑之前，派遣一个新上下文基础验证者（生成层 - 参见`references/grounding.md`中的模型层），其有效负载仅是基础摘要和候选列表，提示反驳：不支持所声称的移动的基础，不真实或相关类似的现有技术，不成立的推理论证。 **当战术范围处于活动状态时，告诉验证者会议测试楼层已被放弃**并仅使其判断依据 - 它在没有任何生成历史的情况下运行新鲜，因此未告知的放弃不会达到它。在这种模式下，验证针对用户提供的上下文和网络研究运行 - 没有存储库读取。在削减中权衡其裁决，并以陈述的理由否决；如果调度不可用，则退回到仅限协调员的批评并注意退化情况。
 
-Apply adversarial critique. For each candidate, write a one-line reason if rejected. **Basis-integrity check:** reject any idea lacking an articulated basis, any idea whose stated basis does not actually support the claimed move (speculation dressed as ambition), and any idea that replaces the subject rather than operating on it. Score survivors using a consistent rubric weighing: groundedness in stated context, **basis strength** (`direct:` > `external:` > `reasoned:`; none excluded, but direct-evidence ideas score higher all else equal), expected value, novelty, pragmatism, leverage, implementation burden, overlap with stronger candidates, and **axis spread** (when axes were defined) — survivor sets that cover more of the topic's axes outscore sets that cluster on one axis, all else equal. Axis spread is a list-level concern, not a per-idea reject reason; apply it after per-idea filtering when choosing among comparable candidates.
+采用对抗性批评。对于每位候选人，如果被拒绝，请写下一行原因。 **基础完整性检查：**拒绝任何缺乏明确基础的想法，任何其所陈述的基础实际上并不支持所声称的举动的想法（伪装成野心的猜测），以及任何取代主题而不是对其进行操作的想法。使用一致的衡量标准对幸存者进行评分：规定背景下的基础性，**基础强度**（`direct:`>`external:`>`reasoned:`；不排除任何人，但直接证据的想法在其他条件相同的情况下得分更高），期望值，新颖性，实用主义，影响力，实施负担，与更强的候选者重叠，以及**轴分布**（定义轴时） - 覆盖更多主题轴的幸存者集超出了聚集在一根轴，其他条件相同。轴传播是一个列表级别的问题，而不是每个想法被拒绝的原因；在可比较的候选者中进行选择时，在按想法过滤后应用它。
 
-**An explicit survivor count in the prompt wins outright** — `top 3 names for a coffee shop` returns three, whatever the depth. Absent one, **target the count the selected depth promised** — 3-5 at Quick, 5-7 at Standard or Full — rather than a flat default, so a `quick wins` run that chose Quick is not quietly expanded back to the standard set. If too many survive, run a second stricter pass. If fewer survive than the depth's floor, report that honestly rather than lowering the bar.
+**提示中明确的幸存者计数完全获胜** - `三个最合适的咖啡店名字` 返回 3，无论深度如何。如果没有一个，**目标是所选深度承诺的计数** - 快速为 3-5，标准或完整为 5-7 - 而不是固定默认值，因此选择快速的 `quick wins` 运行不会悄悄扩展到标准集。如果有太多人幸存，则进行第二次更严格的检查。如果幸存的人数少于海底深度，请诚实报告，而不是降低标准。
 
-## When to wrap up
+## 何时结束
 
-Wrap up with the same flow as `references/post-ideation-workflow.md` Phases 4–5 — the mechanics are identical in this mode:
+以与 `references/post-ideation-workflow.md` 阶段 4-5 相同的流程结束 — 此模式中的机制是相同的：
 
-- **Auto-write the deliverable** (Phase 4.1). The full per-idea detail (title, description, axis, basis, rationale, downsides, confidence, complexity) and the rejection summary go in the **file** — persistence is automatic, not opt-in. Location: `<root>/ideation/` when it already exists, otherwise the run's CE temp area (`<scratch-root>/ce-ideate/<run-id>/`) — never the user's CWD. `OUTPUT_FORMAT` (`references/output-mode.md` Phase 0.0; default `html`) sets the extension.
-- **Present a concise summary** (Phase 4.2) — the ranked list (title · axis · confidence · complexity), counts, the path, and any zero-survivor axis. Do not reprint the full detail in the session; the rich file is what the user engages with. For HTML, best-effort open it in the browser (Phase 4.3).
+- **自动编写可交付成果**（阶段 4.1）。每个想法的完整细节（标题、描述、轴、基础、基本原理、缺点、置信度、复杂性）和拒绝摘要都放在**文件**中——持久性是自动的，而不是选择加入。位置：`<root>/ideation/`（如果已存在），否则运行的 CE 临时区域 (`<scratch-root>/ce-ideate/<run-id>/`) — 绝不是用户的 CWD。 `OUTPUT_FORMAT`（`references/output-mode.md`阶段0.0；默认`html`）设置扩展名。
+- **呈现简洁的摘要**（阶段 4.2）——排名列表（标题·轴·置信度·复杂性）、计数、路径和任何零幸存者轴。不要重印会议中的全部细节；丰富的文件是用户参与的内容。对于 HTML，请尽力在浏览器中打开它（阶段 4.3）。
 
-Then offer the Phase 5 next-steps menu through the host's blocking question tool, with the fallback SKILL.md Boundary 4 states. Up to four options:
+然后通过主持人的阻止问题工具提供第 5 阶段的后续步骤菜单，并使用后备 SKILL.md 边界 4 状态。最多四个选项：
 
-1. *Open or share the saved file*, labeled with the destination `references/publishing.md` chooses (per §5.1): **Publish a copy to <destination>** for a publisher the user named or the host's artifact tool, or **Open in browser** for the local HTML file. Omitted on a markdown run when no publisher or host artifact tool applies. The auto-written local file stays intact whatever happens to the copy.
-2. **Brainstorm one idea with `ce-brainstorm`** — go deeper on one chosen idea (asks which). In universal mode this is **not** the first step of an implementation chain — there is no `ce-plan` → `ce-work` after; `ce-brainstorm` develops the idea further (a name into a brand brief, a plot into an outline, a decision into a weighed framework) and ends there. Seed it with the idea's substance + a provenance pointer (per §5.2) — not the whole file.
-3. **Discuss or refine the ideas first** — stay here to think across the set before committing: adjust or interrogate one idea, compare several, or combine/merge them (per §5.3). Adjustments and merges rewrite the file; Q&A and comparison do not.
-4. **Done — keep the file and stop.**
+1. *打开或共享保存的文件*，标有目标 `references/publishing.md` 选择（根据第 5.1 条）：**将副本发布到 <destination>**（对于用户指定的发布者或主持人的产物工具），或**在浏览器中打开**（对于本地 HTML 文件）。当没有发布者或主机产物工具适用时，在Markdown运行时省略。无论副本发生什么情况，自动写入的本地文件都保持不变。
+2. **用 `ce-brainstorm`** 集思广益 - 深入研究一个选定的想法（询问哪个）。在通用模式下，这**不是**实现链的第一步 - 之后没有 `ce-plan` → `ce-work`； `ce-brainstorm` 进一步发展这个想法（将名称转变为品牌简介，将情节转变为大纲，将决定转变为权衡框架）并结束。用想法的实质+出处指针（根据§5.2）播种它——而不是整个文件。
+3. **首先讨论或完善想法** - 在提交之前留在这里思考整个想法：调整或询问一个想法，比较几个想法，或combine/merge它们（根据§5.3）。调整和合并重写文件；问答和比较则不然。
+4. **完成 — 保留文件并停止。**
 
-Discard is a free-text escape ("say 'discard' to delete it"), create-only — never deletes a resumed or pre-existing doc.
+丢弃是一种自由文本转义（“说‘丢弃’将其删除”），仅用于创建 — 永远不会删除已恢复或预先存在的文档。

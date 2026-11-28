@@ -1,61 +1,62 @@
-# GLOSSARY.md Format
+# GLOSSARY.md 格式
 
-## Structure
+## 结构
 
 ```md
-# {Context Name}
+# {上下文名称}
 
-{One or two sentence description of what this context is and why it exists.}
+{用一两句话描述这个上下文是什么以及它存在的原因。}
 
 ## Language
 
-**Order**:
-{A one or two sentence description of the term}
-_Avoid_: Purchase, transaction
+**命令**：
+{对该术语的一两句话描述}
+_避免_：购买、交易
 
-**Invoice**:
-A request for payment for an **Order**, sent to its **Customer** after delivery.
-_Avoid_: Bill, payment request
+**发票**：
+**订单**的付款请求，在交货后发送给其**客户**。
+_避免_：账单、付款请求
 
-**Customer**:
-A person or organization that places an **Order**.
-_Avoid_: Client, buyer, account
+**顾客**：
+下**订单**的个人或组织。
+_避免_：客户、买家、账户
 ```
 
-## Rules
+## 规则
 
-- **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others under `_Avoid_`.
-- **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
-- **Bold other glossary terms inside a definition.** When a definition mentions another term, write it as `**Order**`, and let the sentence around it say how the two relate.
-- **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
-- **Group terms under subheadings** when natural clusters emerge. If all terms belong to a single cohesive area, a flat list is fine.
+- **固执己见。** 当同一概念存在多个单词时，选择最好的一个并将其他单词列在 `_Avoid_` 下。
+- **保持定义严格。** 最多一到两句话。定义它是什么，而不是它做什么。
+- **定义中的其他术语用粗体表示。**当定义提到另一个术语时，将其写为 `**Order**`，并让其周围的句子说明两者之间的关系。
+- **仅包含特定于该项目上下文的术语。** 即使项目广泛使用一般编程概念（超时、错误类型、实用程序模式），它们也不属于其中。在添加术语之前，先问一下：这是该上下文特有的概念，还是通用的编程概念？只有前者属于。
+- **确定后保留区别。**仅在改变术语含义时记录域不变量或关系。使用可选的 `## Relationships` 或 `## Flagged ambiguities` 部分进行此类决策。保留`## Retired`用于读者仍会遇到的已证明的先前概念；说出它曾经的含义并区分它的替代品。别名位于活动条目下，而不是位于已停用条目下。切勿通过静默覆盖定义来解决不兼容的定义。
+- **当自然集群出现时，将术语分组在副标题下**。如果所有术语都属于一个单一的内聚区域，那么平面列表就可以了。
 
-## Single vs multi-context repos
+## 单一与多上下文存储库
 
-**Single context (most repos):** One `GLOSSARY.md` at the repo root.
+**单一上下文（大多数存储库）：** 存储库根目录中有一个 `GLOSSARY.md`。
 
-**Multiple contexts:** A `GLOSSARY-MAP.md` at the repo root lists the contexts, where they live, and how they relate to each other:
+**多个上下文：** 存储库根目录中的 `GLOSSARY-MAP.md` 列出了上下文、它们所在的位置以及它们彼此之间的关系：
 
 ```md
-# Glossary Map
+# 词汇表地图
 
-## Contexts
+## 上下文
 
-- [Ordering](./src/ordering/GLOSSARY.md): receives and tracks customer orders
-- [Billing](./src/billing/GLOSSARY.md): generates invoices and processes payments
-- [Fulfillment](./src/fulfillment/GLOSSARY.md): manages warehouse picking and shipping
+- [订单](./src/ordering/GLOSSARY.md)：接收并追踪客户订单
+- [账单](./src/billing/GLOSSARY.md)：生成发票并处理付款
+- [履行](./src/fulfillment/GLOSSARY.md)：管理仓库拣货和运输
 
 ## Relationships
 
-- **Ordering → Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
-- **Fulfillment → Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
-- **Ordering ↔ Billing**: Shared types for `CustomerId` and `Money`
+- **订购 → 履行**：订购发出 `OrderPlaced` 事件；满足感让他们开始挑选
+- **履行 → 计费**：履行发出 `ShipmentDispatched` 事件；计费消耗它们来生成发票
+- **订购 ↔ 计费**：`CustomerId` 和 `Money` 的共享类型
 ```
 
-The skill infers which structure applies:
+该技能推断出应用哪种结构：
 
-- If `GLOSSARY-MAP.md` exists, read it to find contexts
-- If only a root `GLOSSARY.md` exists, single context
-- If neither exists, create a root `GLOSSARY.md` lazily when the first term is resolved
+- 如果`GLOSSARY-MAP.md`存在，则读取它以查找上下文
+- 如果仅存在根`GLOSSARY.md`，则单个上下文
+- 如果两者都不存在，则在第一项解析时懒惰地创建根`GLOSSARY.md`
 
-When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.
+当存在多个上下文时，推断当前主题与哪一个相关。如果不清楚，请询问。

@@ -1,175 +1,79 @@
-# Shared Rendering Floor
+# 共享渲染层
 
-The single source of truth for how any finding is rendered for a human decision, in **every** place a
-finding is shown: the interactive walkthrough terminal block (`references/walkthrough.md`), the
-walkthrough blocking-question string (same file — compact What's wrong / Proposed fix / If left as-is
-duplicated into the question so modal dialogs are decidable), the interactive report
-(`references/review-output-template.md`), the structured non-interactive result
-(`references/synthesis-and-presentation.md` Phase 4), the bulk-action preview line
-(`references/bulk-preview.md`), and the Open Questions entry a Defer persists into the document
-(`references/open-questions-defer.md`). Each of these keeps its own layout and maps that layout onto the
-rules below; the rules themselves are the same in every place. The token policy applies wherever a
-finding is shown; the full decision-first field order applies wherever the reader is asked to act on a
-finding. A persisted
-Open Questions entry is a concern and an obligation block is an already-entailed correction; neither is
-an actionable finding, so both take the token policy and consequence-first phrasing only. The walkthrough question string is derived from the terminal block
-and inherits this floor's opaque-token policy and two-anchor budget; it must not invent a denser second
-narrative.
+关于如何为人类决策呈现任何发现的单一事实来源，在**每个**位置都显示了一个发现：交互式演练终端块（`references/walkthrough.md`）、演练阻塞问题字符串（同一文件 - 紧凑出了什么问题/建议的修复/如果按原样复制到问题中，以便模态对话框可判定）、交互式报告（`references/review-output-template.md`）、结构化非交互式结果（`references/synthesis-and-presentation.md`阶段） 4)、批量操作预览行 (`references/bulk-preview.md`) 和延迟保留到文档中的开放问题条目 (`references/open-questions-defer.md`)。其中每一个都保留自己的布局，并将该布局映射到以下规则；每个地方的规则本身都是一样的。令牌政策适用于显示结果的任何地方；完整的决策优先字段顺序适用于要求读者根据发现采取行动的任何地方。持续存在的开放问题条目是一个问题，义务块是一个已经需要的更正；两者都不是可操作的发现，因此两者都仅采用象征性政策和结果优先的措辞。演练问题字符串源自终端块，继承了该楼层的不透明代币政策和双锚预算；它绝不能发明更密集的第二种叙述。
 
-The reader is someone who does not have the document open and has not internalized its identifiers
-or the reviewed product's codebase. The output exists so they can decide **Apply / Defer / Skip**
-without reconstructing the finding from expert narrative. A finding whose only path to a decision is
-"go read the code" has failed this floor regardless of how correct it is.
+读者是没有打开文档并且没有内化其标识符或所审查产品的代码库的人。输出存在，因此他们可以决定**应用/推迟/跳过**，而无需根据专家叙述重建结果。做出决定的唯一途径是发现
+“去读代码”无论它多么正确，这层楼都失败了。
 
-Preserve exact document identifiers and domain terms when they help the decision, and preserve
-coverage, evidence, technical depth, and every distinct consequence, qualification, or required action.
+在有助于决策时保留准确的文档标识符和领域术语，并保留覆盖范围、证据、技术深度以及每个不同的结果、资格或所需的操作。
 
-Write every finding through the `ce-noslop` skill. The rules in this file are what this skill adds
-on top.
+通过`ce-noslop`技能写下每一个发现。该文件中的规则是该技能在其之上添加的规则。
 
-## Decision-first field order
+## 决策优先场序
 
-**Scope: this applies to a finding the reader is being asked about — a decision, or a member of a
-grouped confirmation. It does not apply to a reported change**, which carries no recommendation because
-there is nothing to recommend; see "Reporting versus asking" below, which governs that case and wins
-where the two appear to conflict.
+**范围：这适用于读者被询问的发现——决定或分组确认的成员。它不适用于已报告的变更**，该变更不包含任何建议，因为没有什么可建议的；请参阅下面的“报告与询问”，该案例适用于该案例，并在两者似乎发生冲突时获胜。
 
-Every finding the reader is asked about carries these fields, and each place it is shown makes them
-decision-first in its own layout rather than reproducing the exact label sequence. Two things must
-always hold: the **consequence is legible up front with no opaque token**, and the **recommendation is
-unmistakably marked**. Concretely:
-the **non-interactive result** prints them as explicit labeled lines; the **walkthrough block** leads with a
-consequence-phrased title, then What's-wrong / Proposed-fix / If-left-as-is, and marks the recommendation
-on its question options; the **walkthrough question string** duplicates those three compact fields so a
-modal dialog is decidable without prior chat; the **interactive report** leads each line with the
-consequence and states each decision's recommendation beside it; the **bulk-preview line** leads
-with the consequence and takes its recommendation from the bucket it is grouped under (Applying /
-Appending / Skipping). A rendering satisfies the floor when those two conditions hold, not when it
-emits the four field labels verbatim.
+向读者询问的每个发现都带有这些字段，并且显示的每个位置都使他们在自己的布局中首先做出决策，而不是复制确切的标签序列。有两件事必须始终保持：**结果是清晰易读的，没有不透明的标记**，并且**建议是明确标记的**。具体来说：**非交互式结果**将它们打印为显式标记行； **演练块**以结果短语标题开头，然后是“哪里错了”/“建议修复”/“如果保留原样”，并在其问题选项上标记了建议； **演练问题字符串**复制这三个紧凑字段，因此无需事先聊天即可确定模式对话框； **交互式报告**以结果引导每一行，并在旁边说明每个决定的建议； **批量预览行**引导结果，并从分组的存储桶中获取建议（应用/追加/跳过）。当这两个条件成立时，渲染就满足底层要求，而不是当它逐字发出四个字段标签时。
 
-1. **Recommendation** — the recommended action (`Apply` / `Defer` / `Skip`, from the finding's
-   `recommended_action`), stated up front. This is what the user is being asked to accept or reject.
-2. **Consequence if unchanged** — one short sentence per distinct consequence: what goes wrong, for
-   whom, if the finding is not acted on. Use multiple sentences only when required to preserve
-   independent consequences. **Contains no opaque identifier at all** (see the token policy). A reader
-   who skimmed the document once must be able to judge it without looking anything up. This tells the reader why the finding matters.
-3. **Change** — one sentence of intent: what the fix achieves and where it lives. Prefer intent
-   language over quoted text or raw markup.
-4. **Basis** — at most **two** sentences of mechanism explaining how the problem arises. Every opaque
-   token is glossed per the token policy, and the block carries **at most two identifiers or references that need explanation**.
-5. **Trace on request** — anything beyond that (file-level tracing, multi-hop call paths, competing
-   call sites) is not printed. Offer it in one closing line (e.g. `Ask for the call-path detail.`).
-   Moving this cost onto the reader, who has less context than the review did, is the failure this
-   floor exists to prevent.
+1. **建议** — 建议的操作（`Apply` / `Defer` / `Skip`，来自发现的 `recommended_action`），前面已说明。这是要求用户接受或拒绝的内容。
+2. **如果不变，则后果** — 每个不同的后果只有一个简短的句子：出了什么问题，对谁来说，如果不采取行动的话。仅在需要保留独立结果时才使用多个句子。 **根本不包含不透明标识符**（请参阅令牌政策）。浏览过一次该文档的读者必定能够在不查找任何内容的情况下对其进行判断。这告诉读者为什么这一发现很重要。
+3. **改变** — 一句话的意图：修复实现了什么以及它存在于何处。与引用文本或原始标记相比，更喜欢意图语言。
+4. **基础**——至多**两**句机制来解释问题是如何产生的。每个不透明令牌都根据令牌策略进行注释，并且该块携带**至多两个需要解释的标识符或引用**。
+5. **根据请求进行跟踪** — 不会打印超出此范围的任何内容（文件级跟踪、多跳调用路径、竞争调用站点）。在结束行中提供它（例如 `Ask for the call-path detail.`）。将这一成本转嫁给读者，因为他们的背景知识比评论少，这就是本层要防止的失败。
 
-## Reporting versus asking
+## 报告与询问
 
-Make it clear whether the agent is reporting a completed change, requesting approval, or asking the user to choose. The wording must make this clear even when the section header is off screen:
+明确代理是否正在报告已完成的更改、请求批准或要求用户选择。即使节标题不在屏幕上，措辞也必须清楚地表明这一点：
 
-- **A report** — a change already applied. Say what changed, with no recommendation field or offered actions.
-  The reader's job is to notice, and to revert if they disagree. Never phrase a report as a question.
-- **A grouped confirmation** — a batch that applies on one answer. Render every member in full *before*
-  the question. A confirmation with nothing visible above it is a rubber stamp, not a decision. Shape it
-  per "Presenting a batch" below.
-- **A question** — a choice requiring the user’s judgment. Carries its options and names what differs between them. When the fix is already determined, report it if applied or present it for approval if approval is still required.
+- **报告** — 已应用更改。说出发生了什么变化，没有推荐字段或提供的操作。读者的工作是注意，如果不同意则回复。切勿将报告表述为问题。
+- **分组确认** — 适用于一个答案的一批。 *在问题之前*完整地呈现每个成员。上面没有任何可见内容的确认是橡皮图章，而不是决定。根据下面的“呈现批次”来塑造它。
+- **问题**——需要用户判断的选择。携带其选项并命名它们之间的不同之处。当修复已确定后，如果已应用，请报告它；如果仍需要批准，则将其提交以供批准。
 
-Any summary follows the same split: say what changed, what awaits approval, and what needs the reader's judgment as separate things. If no judgment is needed but approval is still pending, say both. Never imply a proposed fix has already been applied.
+任何摘要都遵循相同的划分：将哪些内容更改、哪些内容等待批准以及哪些内容需要读者的判断作为单独的事物来说明。如果不需要判断但仍待批准，则两者都说。切勿暗示已应用建议的修复方案。
 
-## Presenting a batch
+## 呈现一批
 
-A grouped confirmation lets the reader answer once instead of N times. That only pays off if they can
-also *understand* it once. A batch rendered as N independent entries costs exactly what N questions cost
-to read: the volume moved, the comprehension did not.
+分组确认可以让读者回答一次而不是 N 次。只有当他们也能“理解”一次时，这才有回报。渲染为 N 个独立条目的批次的成本与阅读 N 个问题的成本完全相同：卷移动了，理解却没有。
 
-So lead with what the batch does, then put the members under it:
+因此，以批次的作用为主导，然后将成员放在其下面：
 
-- **Open with the shape of the batch, not a count.** One or two sentences naming what is about to change
-  in the document. "Six fixes update the setup instructions to match the renamed commands" tells
-  the reader what they are approving. "6 proposed fixes" tells them only how much scrolling is left.
-- **Group members by what they share, and head each group with the consequence they share.** The axis
-  that helps is almost always *the change*: one root cause, one kind of edit, one section. Severity and
-  reviewer are review-internal bookkeeping; they sort the list without helping anyone decide.
-- **Every member still appears** under its group, rendered per this floor. Grouping reorganizes; it never
-  hides. A member the reader cannot see is one they cannot exclude.
-- **Do not manufacture structure.** Findings that share nothing stand alone, and a batch with no theme
-  worth naming is just a short list. An invented grouping is worse than none: it asserts a relationship
-  the reader will then act on.
+- **以批次的形状打开，而不是计数。** 用一两个句子来命名文档中即将更改的内容。 “六个修复更新了设置说明以匹配重命名的命令”告诉读者他们正在批准什么。 “6 个建议的修复”只告诉他们还剩下多少滚动。
+- **根据成员共享的内容对成员进行分组，并以他们共享的结果领导每个组。** 有帮助的轴几乎总是*更改*：一个根本原因，一种编辑，一个部分。严重程度和审核人为审核-内部记账；他们对列表进行排序而不帮助任何人做出决定。
+- **每个成员仍然出现在其组下**，按该楼层渲染。分组重组；它从不隐藏。读者看不到的成员就是他们无法排除的成员。
+- **不要制造结构。** 没有任何独立内容的发现，没有值得命名的主题的批次只是一个简短的列表。发明的分组比没有更糟糕：它断言了读者将采取行动的关系。
 
-You are the only one who can do this. You hold every finding at once; the reader holds none of them
-and has not read the document as closely as the reviewers did. Finding the two or three real themes in a
-batch of eleven is the work this step exists to do.
+你是唯一能做到这一点的人。你立刻掌握每一个发现；读者没有掌握其中任何一个，也没有像审稿人那样仔细阅读文档。在一组十一个主题中找到两三个真正的主题是此步骤要做的工作。
 
-The same shape applies wherever a set of findings is rendered together — the interactive report, the
-non-interactive result's proposed-fixes section, the bulk preview. A flat list is the failure mode
-each of those inherits by default.
+相同的形状适用于一组结果一起呈现的地方 - 交互式报告、非交互式结果的建议修复部分、批量预览。平面列表是每个列表默认继承的故障模式。
 
-## Obligation blocks
+## 义务块
 
-An **obligation** (synthesis step 3.7, Route by Autofix Class) is a correction the reviewed document already entails *and for
-which a fix exists*. One with no fix written stays a decision, since the line below has no change to
-name. It carries no recommendation, because there is no decision to make, so it takes the token policy and
-consequence-first phrasing, and **not** the full field order above. This is the same treatment a
-persisted Open Questions entry gets, and for the same reason.
+**义务**（综合步骤 3.7，按自动修复类路由）是对已审阅的文档进行的修正*并且存在修复*。没有写出解决方案的仍然是一个决定，因为下面的行没有更改名称。它不包含任何建议，因为没有需要做出的决定，因此它采用令牌策略和结果优先的措辞，而不是上面的完整字段顺序。这与持续存在的开放问题条目得到的处理相同，并且出于相同的原因。
 
-An obligation renders as a single line: the consequence, then the change as intent. It is grouped under
-the part of the document it affects: the implementation unit when the document has units, and otherwise
-the section that carries the decision it follows from — a requirements-shaped document has no units, and
-an obligation there still needs a home rather than being dropped or filed under a unit that does not
-exist. Whichever it is, that name is the only navigation anchor the group needs; do not repeat it per
-line. The group's opaque-anchor budget is **two per line**, unchanged; grouping does
-not permit a denser block. Anything beyond the change belongs in the on-request trace, exactly as for an
-actionable finding.
+义务表现为一行：结果，然后是意图的改变。它按其影响的文档部分进行分组：当文档有单位时为实施单位，否则为包含其所依据的决策的部分 - 需求型文档没有单位，并且那里的义务仍然需要一个家，而不是被丢弃或归档到不存在的单位下。无论它是什么，这个名字都是团队需要的唯一导航锚点；不要每行重复它。该组的不透明锚点预算是**每行两个**，不变；分组不允许形成更密集的块。任何超出更改的内容都属于应请求的跟踪，就像可操作的发现一样。
 
-## Opaque-token policy (domain-agnostic, by function)
+## 不透明令牌策略（与域无关，按功能）
 
-An **opaque token** is any token the reader would have to open the document, the issue tracker, or the
-code to understand. This skill reviews arbitrary products, so classify by the token's **function**,
-never by a product-specific vocabulary list:
+**不透明令牌**是读者必须打开文档、问题跟踪器或代码才能理解的任何令牌。此技能审查任意产品，因此请按令牌的**功能**进行分类，而不是按特定于产品的词汇列表进行分类：
 
-- **Navigation anchors** — identifiers the reviewed document itself defines (`R6`, `U3`, `KTD2`,
-  `AE1`). Keep the ID and add a short document-derived handle at first mention:
-  `R6 (suppress peer panels on low-stakes calls)`, never bare `R6`. The ID anchors the finding for
-  whoever edits the document; the handle makes it legible. Later mentions in the same block stay bare.
-- **Provenance anchors** — references to events outside the document: ticket IDs (`ESP-3373`), PR
-  numbers (`PR #1776`), prior incidents. Gloss with the role **only when the referenced event changes
-  the decision** — `PR #1776 (the prior false-negative that shipped)`. Otherwise move it to the trace;
-  a bare ticket or PR number in the default block is noise the reader cannot resolve.
-- **Mechanism symbols** — code the document happens to name: functions, files, variables, line
-  references (`clearMuxStatus`, `codebookTranscriptMode.ts:46`). **Translate to the role the symbol
-  plays in the decision** — "the check for a permanent failure", "the code that clears retry state". Keep the
-  exact symbol only when precise scope is what the decision turns on. Do not fill the default block
-  with raw symbols the reader cannot evaluate.
+- **导航锚点** — 审阅文档本身定义的标识符（`R6`、`U3`、`KTD2`、`AE1`）。保留 ID 并在第一次提及时添加一个简短的文档派生句柄：`R6 (suppress peer panels on low-stakes calls)`，切勿裸露`R6`。 ID 为文档的编辑者确定了结果；手柄使其清晰可见。稍后在同一块中提到的内容保持不变。
+- **出处锚** — 对文档外部事件的引用：票证 ID (`ESP-3373`)、PR 数字 (`PR #1776`)、先前的事件。 **仅当引用的事件改变决策时** - `PR #1776 (the prior false-negative that shipped)` 才对角色进行修饰。否则将其移至迹线；默认块中的裸票或 PR 数字是读者无法解析的噪音。
+- **机制符号** — 文档恰好命名的代码：函数、文件、变量、行引用（`clearMuxStatus`、`codebookTranscriptMode.ts:46`）。 **转化为符号在决策中扮演的角色** - “检查永久性故障”，“清除重试状态的代码”。仅当决策开启精确范围时才保留精确符号。不要用读者无法评估的原始符号填充默认块。
 
-**Anchor budget:** at most **two** opaque anchors in the default block. The rest are not deleted; they
-live in the on-request trace. Universally understood section names (`Requirements`, `Open Questions`)
-are not opaque and need no handle.
+**锚点预算：**默认块中最多**两个**不透明锚点。其余不删除；他们住在请求的跟踪中。普遍理解的节名称（`Requirements`、`Open Questions`）不是不透明的，也不需要句柄。
 
-**The handle arrives with the finding; rendering does not reconstruct it.** The reviewer that raised the
-finding had the document open and knew what `U1` was at no cost, so it writes the handle into the
-finding's own fields (see `references/subagent-template.md`). Render what the finding gives you.
+**手柄随发现物一起到达；渲染不会重建它。** 提出结果的审查者打开了文档，并且免费知道 `U1` 是什么，因此它将句柄写入结果自己的字段中（参见 `references/subagent-template.md`）。呈现结果给你的结果。
 
-This placement is deliberate. Rendering happens after a long dispatch has filled the
-context with reviewer returns. Asking the renderer to re-derive fifteen handles from a document it may no
-longer hold is asking the step that lost the information to reconstruct it, which is why bare
-identifiers survive into output even with this rule in force.
+这个位置是经过深思熟虑的。在长时间调度用审查者返回填充上下文后进行渲染。要求渲染器从它可能不再保存的文档中重新派生 15 个句柄，就是要求丢失信息的步骤重建它，这就是为什么即使这条规则有效，裸露的标识符也会保留在输出中。
 
-Two consequences follow. **Never emit a bare identifier.** If a finding arrives without a handle, look
-it up in the document before rendering rather than passing the bare token through, and treat that as a
-defect in the reviewer's output rather than the normal path. And **re-resolve a handle at render time
-only when an Apply has renumbered or renamed the item it names**, so a stale handle does not outlive the
-edit that moved it.
+接下来有两个后果。 **永远不要发出裸标识符。** 如果结果到达时没有句柄，请在渲染之前在文档中查找它，而不是传递裸标记，并将其视为审查者输出中的缺陷而不是正常路径。并且**仅当“应用”重新编号或重命名其命名的项目时才在渲染时重新解析句柄**，因此过时的句柄不会比移动它的编辑寿命更长。
 
-## Code-span and block budget
+## 代码跨度和块预算
 
-- At most **2** inline backtick spans per sentence, each a single identifier, flag, or short phrase
-  (`` `safe_auto` ``, `` `<work-context>` ``). Always leave a space before and after each span.
-- **No diff blocks.** Document mutations render as prose describing intent.
-- Raw code blocks only for short (≤5-line) genuinely-additive content where no before-state exists;
-  above that, switch to a prose summary.
+- 每个句子最多 **2** 个内联反引号，每个反引号都是一个标识符、标志或短语 (`` `safe_auto` ``, `` `<work-context>` ``)。始终在每个跨度之前和之后留出一个空格。
+- **没有差异块。** 文档突变呈现为描述意图的散文。
+- 原始代码块仅适用于不存在之前状态的短（≤5 行）真正可添加的内容；在此之上，切换到散文摘要。
 
-## The one rule, restated
+## 重申一则规则
 
-The first sentence the user reads about any finding states the consequence and contains **no opaque
-identifier**. Everything that requires opening the document or the code is mechanism or trace, and
-mechanism is capped at two sentences and two anchors. This is a rule, not a style preference: it is what lets a
-reader decide without becoming an expert in the reviewed product first.
+用户读到的任何发现的第一句话都会说明结果并包含**不透明标识符**。所有需要打开文档或代码的东西都是机制或踪迹，而机制的上限是两个句子和两个锚点。这是一条规则，而不是风格偏好：它让读者在不首先成为所评论产品的专家的情况下做出决定。

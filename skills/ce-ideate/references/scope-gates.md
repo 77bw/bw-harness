@@ -1,135 +1,135 @@
-# Scope gates (Phase 0.2-0.6)
+# 范围门（阶段 0.2-0.6）
 
-Required read at the start of Phase 0, before any grounding dispatch. A gate here is a check the run must pass before anything is dispatched. This file defines the subject-identification check and its scope question, mode classification, the elsewhere-mode substance check, focus/volume interpretation with the tactical dials, and the cost-transparency line.
+需要在第 0 阶段开始、任何接地调度之前阅读。这里的门是在发送任何东西之前运行必须通过的检查。该文件定义了主题识别检查及其范围问题、模式分类、其他模式实质检查、战术刻度盘的 focus/volume 解释以及成本透明度线。
 
-## Asking (applies to every gate below)
+## 询问（适用于以下每个登机口）
 
-Ask through the host's blocking question tool, with the fallback SKILL.md Boundary 4 states.
+通过主持人的屏蔽提问工具提问，后备SKILL.md边界4状态。
 
-Ask one question at a time. Prefer concise single-select choices when natural options exist.
+一次问一个问题。当存在自然选项时，更喜欢简洁的单选选项。
 
-#### 0.2 Subject-Identification Gate
+#### 0.2 主体识别门
 
-Before classifying mode or dispatching any grounding, check whether the subject of ideation is identifiable. Every downstream agent needs to know what it is working on; if reasonable sub-agents would diverge on what the topic even is (bare words like `improvements`, `ideas`, `birthday cakes`), the output will be scattered.
+在对模式进行分类或分配任何基础之前，请检查构思的主题是否可识别。每个下游代理都需要知道自己在做什么；如果合理的子代理在主题是什么上存在分歧（诸如`improvements`、`ideas`、`birthday cakes`之类的裸词），则输出将会分散。
 
-**Questioning principles (apply in this phase and in 0.4):**
+**提问原则（适用于本阶段和0.4）：**
 
-- Questions exist only to supply what sub-agents need to operate: an identifiable subject (this phase) and enough context to say something specific about it (0.4, elsewhere modes only). Nothing else.
-- Never ask about solution direction, constraints, audience, tone, or success criteria — those belong to `ce-brainstorm`.
-- Always keep "Surprise me" as a real option, not a fallback for a user who cannot name a subject. Ideation is allowed to be greenfield by design.
-- Stop as soon as the subject is identifiable or the user has delegated to "Surprise me." More than 3 questions total across 0.2, 0.3, 0.4, and the Phase 1 issue-scoping question is a smell that ideation is not the right workflow — consider suggesting `ce-brainstorm`.
+- 问题的存在只是为了提供子代理需要操作的内容：一个可识别的主题（此阶段）和足够的上下文来说明有关它的具体内容（0.4，仅限其他模式）。没有别的了。
+- 永远不要询问解决方案的方向、限制、受众、基调或成功标准——这些都属于`ce-brainstorm`。
+- 始终将“给我惊喜”作为一个真正的选择，而不是无法命名主题的用户的后备选择。设计允许创意处于未开发阶段。
+- 一旦主题被识别或用户已委托给“给我惊喜”，请立即停止。超过 3 个问题总共跨越 0.2、0.3、0.4，并且第一阶段的问题范围问题让人感觉构思不是正确的工作流程 — 考虑建议 `ce-brainstorm`。
 
-**Detection — issue-tracker intent (repo mode only; subject-identifying).** Issue-tracker intent means the user asks about the reports already filed — the open issues, the themes across them, what users are reporting — as a body of material, whether or not a tracker is named. A bug named as the thing to improve is a focus hint on regular ideation, not this intent. `bug reports about checkout` is issue-tracker intent; `fix the login issue` is a focus hint. A bare `bugs` names neither and is a vague subject, handled by the identifiability check below. With intent detected, the subject is "issues in the tracker", against whichever tracker is reachable (GitHub, Linear, Jira, or another); do not require GitHub. Proceed to 0.3 with issue-tracker intent flagged.
+**检测 - 问题跟踪器意图（仅限存储库模式；主题识别）。**问题跟踪器意图意味着用户询问已提交的报告 - 未解决的问题、其中的主题、用户报告的内容 - 作为材料主体，无论跟踪器是否被命名。被命名为“需要改进”的错误是对常规构思的焦点提示，而不是此意图。 `bug reports about checkout` 是问题跟踪器意图； `fix the login issue` 是焦点提示。裸露的 `bugs` 两者都没有命名，是一个模糊的主题，由下面的可识别性检查处理。检测到意图后，主题是“跟踪器中的问题”，针对任何可访问的跟踪器（GitHub、Linear、Jira 或其他）；不需要GitHub。继续到 0.3，并标记问题跟踪器意图。
 
-When combined (e.g., `top 3 issue themes in authentication`, `biggest bug reports about checkout`): detect issue-tracker intent first, volume override in 0.5, remainder is the focus hint. The focus narrows which issues matter; the volume override controls survivor count.
+组合时（例如，`认证相关问题中最常见的三个主题`、`biggest bug reports about checkout`）：首先检测问题跟踪器意图，音量覆盖 0.5，剩余部分是焦点提示。焦点缩小了哪些问题是重要的；音量覆盖控制幸存者数量。
 
-**Detection — subject identifiability.**
+**检测——对象可识别性。**
 
-The test: would a reader, seeing only this prompt, know what subject the agent should ideate on? Vagueness is about what the words *refer to*, not phrase length: `browser sniff` is two words but plausibly names a feature (identifiable — proceed to 0.3); `quick wins` is two words but names only a quality (vague — ask the scope question). A prompt that refers to a catch-all quality, category, or placeholder (`improvements`, `bugs` alone, an empty prompt) is vague; one that names or plausibly names a specific feature, concept, document, flow, or topic is identifiable, in any domain. Being inside a repo does not settle this — `improvements` in any repo is still scattered across DX, reliability, features, docs, tests, and architecture, and the repo supplies grounding material *after* a subject is settled, not the subject itself.
+测试：仅看到这个提示的读者是否知道代理应该构思什么主题？模糊性是关于单词 * 指代 * 的内容，而不是短语长度：`browser sniff` 是两个单词，但合理地命名了一个特征（可识别 - 继续 0.3）； `quick wins` 是两个词，但仅命名了一种性质（含糊不清——询问范围问题）。涉及包罗万象的质量、类别或占位符（仅`improvements`、`bugs`，空提示）的提示是模糊的；命名或貌似合理地命名特定功能、概念、文档、流程或主题的名称在任何领域都是可识别的。位于回购协议中并不能解决这个问题——任何回购协议中的`improvements`仍然分散在DX、可靠性、功能、文档、测试和架构中，并且回购协议在主题解决后提供了基础材料，而不是主题本身。
 
-**Genuine ambiguity (repo mode).** When real doubt remains on a short phrase, one cheap check settles it: search filenames for the phrase with the host's file-search tool, or search README/docs for it with its content-search tool. Any repo footprint → identifiable; none and still vague → ask. Otherwise err toward asking — one question is trivial compared to dispatching a dozen agents on a scattered interpretation.
+**真正的歧义（repo 模式）。** 当对某个短语存在真正的疑问时，一项廉价的检查可以解决它：使用主机的文件搜索工具在文件名中搜索该短语，或者使用其内容搜索工具搜索 README/docs 。任何回购足迹 → 可识别；没有并且仍然含糊→询问。否则就犯了一个错误——与派遣十几个特工进行分散的解释相比，一个问题是微不足道的。
 
-**The scope question.**
+**范围问题。**
 
-Ask via the platform's blocking question tool per the Asking section above — never silently skip.
+根据上面的“提问”部分，通过平台的阻止问题工具提问——切勿默默跳过。
 
-- **Stem:** "What should the agent ideate about?"
-- **Options:**
-  - "Specify a subject the agent should ideate on"
-  - "Surprise me — let the agent decide what to focus on"
-  - "Cancel — let me rephrase"
+- **茎：**“代理人应该考虑什么？”
+- **选项：**
+  - “指定代理应该思考的主题”
+  - “让我感到惊讶——让代理决定关注什么”
+  - “取消——让我重新表述一下”
 
-Routing:
+路由：
 
-- **Specify** → accept the user's follow-up as the subject. Re-apply the identifiability check once. If still ambiguous, ask once more with "Surprise me" still on the menu. Do not cascade toward specificity about *how* to solve — only about *what* the subject is.
-- **Surprise me** → mark the run as **surprise-me mode** and apply the table below at every phase it names.
-- **Cancel** → exit cleanly. Narrate that the user can rephrase and re-invoke.
+- **指定** → 接受用户的后续作为主题。重新应用一次可识别性检查。如果仍然不清楚，请再次询问，菜单上仍然有“给我惊喜”。不要针对“如何”解决的具体问题进行级联——仅涉及“主题是什么”。
+- **让我惊喜** → 将运行标记为 **惊喜我模式** 并在其指定的每个阶段应用下表。
+- **取消** → 干净地退出。说明用户可以改写并重新调用。
 
-**Surprise-me mode — every delta, in one place.** The agent discovers subjects from Phase 1 material instead of carrying a user-specified one. This is a first-class mode, not a fallback for a user who cannot name a subject. Each downstream phase repeats a one-clause hook pointing here; this table is what those hooks mean.
+**惊喜模式 - 每个增量都在一个地方。** 特工从第一阶段材料中发现对象，而不是携带用户指定的对象。这是一种一流的模式，而不是无法命名主题的用户的后备模式。每个下游阶段都会重复指向此处的单子句钩子；这张表就是那些钩子的意思。
 
-| Phase | Delta |
+| 阶段 | 三角洲 |
 |---|---|
-| 0.3 mode | **Deterministic — skip Decision 1/2.** CWD inside a git repo → repo-grounded; otherwise elsewhere-software. Never elsewhere-non-software: with no subject there is no naming/narrative/personal intent to infer. No ambiguity-confirmation question. |
-| 0.4 substance | Required, not optional, when routed to elsewhere-software: with no subject *and* no repo, Phase 1 has nothing to discover from. One ask; if the user still has no URL, description, or paste, end cleanly so they can re-invoke with material. |
-| Model tiers | Whole ideation fleet moves to the ceiling tier — subject discovery is judgment-heavy and is the mode's whole value. |
-| 1 grounding | Go deeper, because Phase 2 discovers subjects from what Phase 1 returns. Repo: sample representative files per top-level area and review recent PR/commit activity, bounded — representative, not exhaustive. Elsewhere: extract themes, recurring language, tensions, and omissions rather than restating the user's context; broaden web research to the domain's landscape. |
-| 1.5 axes | Skipped — no settled subject to decompose. Note `Decomposition skipped — surprise-me mode`. |
-| 2 generation | Each frame picks its own subject (see `references/divergent-ideation.md`); cross-cutting synthesis carries the coverage role Phase 1.5 would have, so expect 5-8 combinations rather than 3-5. No axis-coverage recovery dispatch. |
+| 0.3模式 | **确定性 — 跳过决策 1/2。** git 存储库内的 CWD → 存储库接地；否则其他地方的软件。切勿在其他地方-非软件：没有主题就没有 naming/narrative/personal 意图进行推断。没有歧义确认问题。 |
+| 0.4物质 | 当路由到其他软件时，这是必需的，而不是可选的：没有主题*并且*没有存储库，第一阶段没有什么可发现的。一问；如果用户仍然没有 URL、描述或粘贴，请干净地结束，以便他们可以重新调用材料。 |
+| 型号等级 | 整个创意团队已达到最高层——主题发现需要大量判断，这也是该模式的全部价值。 |
+| 1 接地 | 更深入，因为第二阶段从第一阶段返回的内容中发现主题。回购：每个顶级区域的代表性文件样本，并审查最近的 PR/commit 活动，有界 - 代表性，而不是详尽无遗。其他地方：提取主题、重复出现的语言、紧张局势和遗漏，而不是重述用户的上下文；将网络研究扩展到该领域的景观。 |
+| 1.5轴 | 跳过——没有固定的主题可以分解。注意`Decomposition skipped — surprise-me mode`。 |
+| 2代 | 每帧都会选择自己的主题（参见`references/divergent-ideation.md`）；交叉综合具有阶段 1.5 所具有的覆盖作用，因此预计有 5-8 个组合，而不是 3-5 个。无轴覆盖恢复调度。 |
 
-The user can correct at any point by interrupting and re-invoking with a named subject.
+用户可以随时通过中断并重新调用指定主题来进行更正。
 
-#### 0.3 Mode Classification
+#### 0.3 模式分类
 
-Do not resolve or create the artifact root before mode is classified — an elsewhere or no-repo run never needs it.
+在模式分类之前不要解析或创建产物根 - 其他地方或无存储库运行永远不需要它。
 
-Classify the **subject of ideation** (settled in 0.2) into one of three modes for dispatch routing. A user inside any repo can ideate about something unrelated to that repo; a user in `/tmp` can ideate about code they hold in their head.
+将**构思主题**（在 0.2 中解决）分类为调度路由的三种模式之一。任何存储库中的用户都可以构思与该存储库无关的内容； `/tmp` 中的用户可以构思他们头脑中的代码。
 
-**Surprise-me short-circuit.** In surprise-me mode, skip the two decisions below and the ambiguity-confirmation step; apply the 0.2 table's `0.3 mode` row. State the chosen mode in one sentence and proceed to 0.4.
+**惊喜我短路。** 在惊喜我模式下，跳过下面的两个决定和歧义确认步骤；应用 0.2 表的 `0.3 mode` 行。用一句话陈述所选择的模式并继续进行 0.4。
 
-For specified subjects, make two sequential binary decisions:
+对于指定的主题，做出两个连续的二元决策：
 
-**Decision 1 — repo-grounded vs elsewhere.** Weigh prompt content first, topic-repo coherence second, and CWD repo presence as supporting evidence only. **Repo-grounded** when the prompt references repo files, code, architecture, modules, tests, or workflows, or the topic is bounded by the current codebase; issue-tracker intent from 0.2 is always repo-grounded. **Elsewhere** when the prompt names things absent from the repo — pricing, naming, narrative, business model, personal decisions, brand, content, market positioning — or the topic is creative, business, or personal and involves no code.
+**决定 1 — 基于存储库与其他地方。** 首先权衡提示内容，其次考虑主题与存储库的一致性，然后仅考虑 CWD 存储库的存在作为支持证据。 **基于仓库**当提示引用仓库文件、代码、架构、模块、测试或工作流程，或者主题受当前代码库限制时；从 0.2 开始，问题跟踪器意图始终以 repo 为基础。 **其他地方**当提示列出存储库中缺少的内容时——定价、命名、叙述、商业模式、个人决策、品牌、内容、市场定位——或者主题是创意、商业或个人且不涉及代码。
 
-**Decision 2 (applies only when Decision 1 = elsewhere) — software vs non-software.** Classify by whether the *subject* is a software artifact or system, not by where the ideas will land. A product, app, SaaS, web/mobile UI, feature, page, or service is **elsewhere-software** — even when the ideas themselves are about copy, UX, CRO, pricing, onboarding, visual design, or positioning *for that product*. **Elsewhere-non-software** is reserved for topics that are not about any software artifact: company or brand naming (independent of product), narrative and creative writing, personal decisions, non-digital business strategy, physical-product design.
+**决策 2（仅当决策 1 = 其他地方时适用）——软件与非软件。** 根据*主题*是否是软件产物或系统进行分类，而不是根据想法落地的地方。产品、应用程序、SaaS、web/mobile UI、功能、页面或服务都是**其他软件**——即使创意本身是关于复制、用户体验、CRO、定价、入门、视觉设计或*该产品*的定位。 **其他非软件**保留用于与任何软件产物无关的主题：公司或品牌命名（独立于产品）、叙事和创意写作、个人决策、非数字业务策略、实体产品设计。
 
-Contrast pair: "Improve conversion on our sign-up page" → elsewhere-software (the subject is a page, even though the ideas may be copy or CRO); "Name my new coffee shop" → elsewhere-non-software (the subject is a brand, not a software artifact).
+对比对：“提高我们注册页面的转化率”→其他软件（主题是页面，尽管想法可能是复制或 CRO）； “为我的新咖啡店命名”→其他地方-非软件（主题是品牌，而不是软件产物）。
 
-State the inferred approach in one sentence, in plain language, adapting a domain word from the topic itself ("landing page", "onboarding flow", "naming", "career decision"). **Never print the internal taxonomy label** (`repo-grounded`, `elsewhere-software`, `elsewhere-non-software`) — those are for routing only.
+用简单的语言用一句话陈述推断的方法，改编主题本身的领域单词（“登陆页面”、“入职流程”、“命名”、“职业决策”）。 **永远不要打印内部分类标签**（`repo-grounded`、`elsewhere-software`、`elsewhere-non-software`）——这些仅用于路由。
 
-- **Repo-grounded:** "Treating this as a topic in this codebase — about X."
-- **Elsewhere-software:** "Treating this as a product/software topic outside this repo — about X."
-- **Elsewhere-non-software:** "Treating this as a [naming | narrative | business | personal] topic — about X."
+- **基于存储库：**“将此视为此代码库中的一个主题 - 关于 X。”
+- **其他地方软件：**“将此视为本存储库之外的 product/software 主题 — 关于 X。”
+- **其他非软件：**“将其视为一个[命名|叙述|商业|个人]主题——关于X。”
 
-Do not prescribe correction phrases ("say X to switch"). State the mode and proceed; if the user disagrees they will correct in their own words, and you reclassify and re-run any affected routing.
+不要规定更正短语（“说 X 进行切换”）。说出模式并继续；如果用户不同意，他们会用自己的话进行更正，然后您重新分类并重新运行任何受影响的路由。
 
-**Active confirmation on mode ambiguity.** Most subjects settled in 0.2 classify cleanly — ask only when the mode is genuinely ambiguous afterward (e.g., "our docs" could be repo docs or public marketing docs). Then ask one blocking question whose two labels name the candidate interpretations in plain language ("Treat as repo docs in this codebase" vs "Treat as public marketing docs") — never leaking internal mode names.
+**对模式模糊性进行主动确认。** 大多数主题在 0.2 中都进行了清晰的分类——仅当模式确实模糊之后才询问（例如，“我们的文档”可以是回购文档或公共营销文档）。然后提出一个阻塞性问题，其两个标签以简单语言命名候选解释（“视为此代码库中的回购文档”与“视为公共营销文档”）——永远不要泄漏内部模式名称。
 
-**Routing rule (non-software mode).** When Decision 2 = non-software: run Phase 1 elsewhere-mode grounding (user-context synthesis + web research; skip phrases honored, learnings skipped by default), never the repo codebase scan. Then read `references/universal-ideation.md` and follow it in place of Phase 2's frame dispatch and the Phase 5 menu — the domain-agnostic frames, critique rubric, and wrap-up menu for this mode live only there. The deliverable is still auto-written per `references/post-ideation-workflow.md` Phase 4.
+**路由规则（非软件模式）。** 当决策 2 = 非软件时：运行第 1 阶段其他模式基础（用户上下文综合 + 网络研究；跳过所尊重的短语，默认情况下跳过学习内容），从不进行存储库代码库扫描。然后阅读 `references/universal-ideation.md` 并按照它代替第 2 阶段的框架调度和第 5 阶段菜单 - 与领域无关的框架、评论标题和此模式的总结菜单仅存在于此。可交付成果仍然是按照第 4 阶段 `references/post-ideation-workflow.md` 自动编写的。
 
-#### 0.4 Context-Substance Gate (Elsewhere Modes Only)
+#### 0.4 上下文物质门（仅限其他模式）
 
-Skip in repo mode — the repo provides the substance Phase 1 agents work from. In elsewhere modes (both software and non-software), Phase 1 agents depend on user-supplied context for substance. A bare prompt with no description, URL, or artifact leaves the user-context-synthesis agent with nothing to synthesize and weakens web research's relevance.
+跳过回购模式 - 回购提供第一阶段代理工作的物质。在其他模式（软件和非软件）中，第一阶段代理依赖于用户提供的内容上下文。没有描述、URL 或产物的裸提示会让用户上下文合成代理无法合成任何内容，并削弱网络研究的相关性。
 
-Apply the discrimination test: would swapping one piece of the user's stated context for a contrasting alternative materially change which ideas survive? If yes, the context is specific enough to shape the ideas — proceed. If no, ask 1-3 narrowly chosen questions focused on **supplying substance, not characterizing the subject**:
+应用歧视测试：将用户陈述的上下文中的一个部分替换为对比性的替代方案是否会实质上改变哪些想法得以生存？如果是，则上下文足够具体以形成想法 - 继续。如果不是，请提出 1-3 个经过精心挑选的问题，重点是**提供实质内容，而不是描述主题**：
 
-- A URL or file to read
-- A brief description of the current state
-- A paste of an existing draft or brief
+- 要读取的 URL 或文件
+- 当前状态的简要描述
+- 现有草稿或摘要的粘贴
 
-Build on what the user already provided rather than starting from a template. Default to free-form questions; use single-select only when the answer space is small and discrete. After each answer, re-apply the test before asking another. Stop on dismissive responses ("idk just go") — treat genuine "no context" answers as real answers and note context is thin in the summary so Phase 2 can compensate with broader generation.
+基于用户已经提供的内容进行构建，而不是从模板开始。默认为自由形式问题；仅当答案空间较小且离散时才使用单选。每次回答后，在询问另一个问题之前重新应用测试。停止轻蔑的回答（“idk just go”）——将真正的“无上下文”答案视为真正的答案，并注意摘要中的上下文很薄弱，因此第二阶段可以通过更广泛的生成来弥补。
 
-**Surprise-me exception.** In surprise-me mode routed to elsewhere-software, substance is required and a dismissive response is not an acceptable answer — apply the 0.2 table's `0.4 substance` row.
+**惊喜我例外。** 在路由到其他软件的惊喜模式下，需要实质内容，轻蔑的响应不是可接受的答案 - 应用 0.2 表的 `0.4 substance` 行。
 
-When the user provides rich context up front (a paste, a brief, an existing draft, a URL), confirm understanding in one line and skip this step entirely.
+当用户预先提供丰富的上下文（粘贴、摘要、现有草稿、URL）时，用一行确认理解并完全跳过此步骤。
 
-If this step materially changes the topic (not just adds context but shifts the subject), re-run 0.2 and 0.3 against the refined scope before dispatching Phase 1 — classify on what's actually being ideated on, not the scope at first read.
+如果此步骤实质上改变了主题（不仅添加了上下文，而且转移了主题），请在分派阶段 1 之前针对细化的范围重新运行 0.2 和 0.3 — 根据实际构思的内容进行分类，而不是第一次阅读的范围。
 
-#### 0.5 Interpret Focus and Volume
+#### 0.5 解释焦点和音量
 
-Infer two things from the argument and any intake so far:
+从论证和迄今为止的任何摄入中推断出两件事：
 
-- **Focus context** — concept, path, constraint, or open-ended
-- **Volume override** — any hint that changes candidate or survivor counts
+- **焦点上下文** — 概念、路径、约束或开放式
+- **体积覆盖** - 任何改变候选者或幸存者计数的提示
 
-Default volume: keep the top **5-7 survivors**. Per-frame idea targets and the raw/dedupe counts they imply live in `references/divergent-ideation.md` — the dispatch spec defines them. Honor clear overrides such as `top 3`, `100 ideas`, or `raise the bar`.
+默认数量：保留前 **5-7 名幸存者**。每帧创意目标和它们暗示的raw/dedupe计数存在于`references/divergent-ideation.md`中——调度规范定义了它们。支持清除覆盖，例如 `top 3`、`100 ideas` 或 `raise the bar`。
 
-Two symmetric depth overrides scale the run. Both are opt-in from the user's own words; the default sits between them.
+两个对称的深度覆盖可以缩放运行。两者都是根据用户自己的话选择加入的；默认值位于它们之间。
 
-**`go deep` (or equivalent) — scale up.** Every ideation agent moves to the ceiling tier, the Phase 2 verification read budget doubles, and Phase 3 adds a second critic. Users opt into top-tier cost explicitly rather than inheriting it from whichever model the conversation happens to run on.
+**`go deep`（或同等水平）——扩大规模。** 每个构思代理都移动到最高层，第 2 阶段验证读取预算加倍，第 3 阶段添加了第二个批评者。用户明确选择顶级成本，而不是从对话运行的任何模型继承它。
 
-**Tactical signals — scale down.** Words like `polish`, `typo`, `typos`, `quick wins`, `small improvements`, `cleanup`, or `small fixes` in the focus hint (or a 0.2 intake answer) mean the user opted into tactical scope. Use reasonable interpretation rather than formal parsing.
+**战术信号 - 缩小。** 焦点提示（或 0.2 摄入答案）中的 `polish`、`typo`、`typos`、`quick wins`、`small improvements`、`cleanup` 或 `small fixes` 等词语表示用户选择进入战术范围。使用合理的解释而不是形式化的解析。
 
-**Tactical's dials — the complete list.** 3-4 ideas per frame; 2-3 verification reads per agent; at most 3 axes; the meeting-test floor waived at both layers. Everywhere below and in the references, "tactical's dials" means exactly this list.
+**战术表盘 — 完整列表。** 每帧 3-4 个想法；每个代理 2-3 次验证读取；最多3个轴；会议测试层两层都放弃了。在下面和引用文档中，“战术刻度盘”正是指这个列表。
 
-- **The waiver reaches both the generators *and* the Phase 3 basis verifier's dispatch prompt.** The verifier runs on a fresh context with none of the generation history, so a waiver it is not told about does not reach it.
-- **Tactical changes nothing else** — not the agent count, not the frame set, not the model tier — and it never skips basis verification. Packing frames into fewer agents is not a tactical lever: the verification budget is **per agent, not per frame** (`references/divergent-ideation.md`).
+- **豁免到达生成器*和*第3阶段基础验证者的调度提示。**验证者在没有生成历史的新上下文上运行，因此未告知的豁免不会到达它。
+- **战术不会改变任何其他东西**——不是代理数量，不是框架集，不是模型层——而且它永远不会跳过基础验证。将帧打包到更少的代理中并不是一个战术杠杆：验证预算是**每个代理，而不是每个帧**（`references/divergent-ideation.md`）。
 
-**Resolve the overrides before anything keys on them.** `go deep` cancels tactical: a prompt carrying both runs as a `go deep` run, with no tactical dial and no waiver. Everything downstream — the fleet, the dials, and every waiver — keys on which overrides are active after this, never on a signal that was merely spotted. When another variant decides the frame set or the fleet (issue-tracker themes, surprise-me, or the universal path's depth), it keeps that decision, and an active tactical scope still contributes its dials.
+**在按下任何键之前解决覆盖问题。** `go deep` 取消战术：提示将两次运行作为 `go deep` 运行，没有战术旋钮，也没有放弃。下游的所有东西——舰队、表盘和每一项豁免——在此之后超驰的按键都被激活，而不仅仅是被发现的信号。当另一个变体决定框架集或舰队（问题跟踪器主题、惊喜或通用路径的深度）时，它会保留该决定，并且主动战术瞄准镜仍然会贡献其刻度盘。
 
-#### 0.6 Cost Transparency Notice
+#### 0.6 成本透明度通知
 
-Before dispatching Phase 1, tell the user in one short line which grounding and ideation agents this run will dispatch, plus the skip phrases (e.g. 'no external research', 'no slack'), so multi-agent cost is not invisible. Derive the line from the dispatch decisions already made; do not carry a memorized total. Leave out the web researcher when the user issued a skip phrase — that much is readable from the prompt right now.
+在调度第 1 阶段之前，用简短的一行告诉用户本次运行将调度哪些基础代理和构思代理，以及跳过短语（例如“无外部研究”、“无松弛”），因此多代理成本并非不可见。从已经做出的调度决策中得出线路；不携带记忆总数。当用户发出跳过短语时，请忽略网络研究人员 - 现在可以从提示中读取这些内容。
 
-Say "conditional" for anything this phase cannot yet resolve; do not pre-subtract it. Where a number depends on a decision a later phase makes — web-research cache reuse, the issue cluster call only if that scan returns usable signal, a depth-dependent count — name the leg and say it is conditional. State a total only if you just derived it; reaching for the ordinary five-agent figure to fill a gap is the one answer certain to be wrong.
+对于此阶段尚未解决的任何问题说“有条件”；不要预先减去它。其中数字取决于后续阶段做出的决定 - 网络研究缓存重用、仅当扫描返回可用信号时才发出集群调用、与深度相关的计数 - 命名该分支并说它是有条件的。仅当您刚刚得出总数时才说明总数；用普通的五名特工人员来填补空白是一个肯定是错误的答案。
 
-The line is informational; users do not need to acknowledge it.
+该行是信息性的；用户不需要承认它。

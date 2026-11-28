@@ -1,43 +1,43 @@
-# Craft floor
+# 工艺地板
 
-Load this when the question is settled by seeing. It carries the floor the render has to clear and the rule for how avenues differ. A question settled by driving does not load it.
+当问题通过查看解决后加载此内容。它承载了渲染必须清除的地板以及路径如何不同的规则。通过驾驶解决的问题不会加载。
 
-The floor exists because a variant judged through a broken render is a false negative. Text the user cannot read, a control with no visible focus, copy that overflows at the width they are looking at — each of those gets read as "that direction is worse" when the direction was never the problem. Clearing the floor is what makes their judgment about the idea.
+地板之所以存在，是因为通过损坏的渲染判断的变体是漏报。用户无法阅读的文本、没有可见焦点的控件、在他们正在查看的宽度处溢出的副本——当方向从来都不是问题时，这些内容中的每一个都会被读作“那个方向更糟糕”。清理地板是他们对这个想法做出判断的依据。
 
-## Apply only what the question puts in play
+## 只应用问题所涉及的内容
 
-Take the items the question's dimensions reach and leave the rest. A placement question does not acquire a motion moment or an empty state because they are listed here; a typographic direction does not need a loading state to be judged. Adding items the question does not turn on inflates the build past the dimension under test, which the rule against faking or overbuilding the dimension being tested already forbids.
+选取问题维度所达到的项目，留下其余的项目。布置问题不会获得运动时刻或空状态，因为它们列在这里；印刷方向不需要加载状态来判断。添加问题未打开的项目会使构建超出被测试的维度，而反对伪造或过度构建被测试的维度的规则已经禁止。
 
-## The floor
+## 地板
 
-- **Contrast.** Body text at 4.5:1 against its background, large text (roughly 24px, or 19px bold and up) at 3:1. Controls, focus rings, and any graphic carrying meaning at 3:1. Tint secondary text from the surface it sits on rather than dropping it to gray.
-- **Measure.** Body text 65 to 75 characters a line. Wider reads as a wall; much narrower breaks the rhythm of reading.
-- **Spacing.** One rhythm across the surface, not per-component guesses. Group related things tightly and separate unrelated ones generously; a heading sits closer to the text it introduces than to the block above it.
-- **Type scale.** Steps that are obvious at a glance in size or weight. Two sizes four pixels apart read as a mistake rather than a hierarchy.
-- **States.** Whatever states the surface actually has: hover, focus, disabled, loading, error, empty. Show them with real content, at the shortest and longest values the product plausibly holds — not with placeholder text sized to fit.
-- **Keyboard focus.** Visible on every interactive element, and never removed without a replacement that is at least as clear.
-- **Motion.** At most one authored moment, and content is legible without it. Motion changes what is on screen; it does not reveal it for the first time. Scattered hover effects are not a motion decision.
-- **Copy.** Controls name the action they perform. Errors name what went wrong and what to do next. Placeholder copy is for placeholders, not for labels.
+- **对比度。** 正文文本与背景的比例为 4.5:1，大文本（大约 24 像素或 19 像素粗体及以上）比例为 3:1。控件、对焦环和任何具有 3:1 含义的图形。从辅助文本所在的表面对其进行着色，而不是将其变为灰色。
+- **测量。** 正文每行 65 到 75 个字符。 Wider 读作一堵墙；太窄了，打乱了阅读的节奏。
+- **间距。** 表面上有一种节奏，而不是针对每个组件的猜测。相关的事物紧密地组合在一起，而无关的事物则大方地分开；标题离它介绍的文本的距离比离它上面的块的距离更近。
+- **键入刻度。** 尺寸或重量一目了然的步骤。相距四个像素的两种尺寸被视为错误而不是层次结构。
+- **状态。** 表面实际具有的任何状态：悬停、焦点、禁用、加载、错误、空。以产品合理的最短和最长值向他们展示真实内容，而不是使用大小适合的占位符文本。
+- **键盘焦点。** 在每个交互元素上都可见，并且在没有至少同样清晰的替代品的情况下永远不会被删除。
+- **动作。** 最多一个创作时刻，即使没有它，内容也清晰可辨。运动会改变屏幕上的内容；这并不是第一次透露。分散的悬停效果不是运动决定。
+- **复制。** 控件为其执行的操作命名。错误指出出了什么问题以及下一步要做什么。占位符副本用于占位符，而不是标签。
 
-Read the rendered result before handing it over — measured, not assumed. A stylesheet that should produce 4.5:1 and a screen that does are different claims.
+在交付之前阅读渲染的结果——测量的，而不是假设的。应该生成 4.5:1 的样式表和可以生成 4.5:1 的屏幕是不同的声明。
 
-## Make it specific, not only clean
+## 使其具体，而不仅仅是干净
 
-A surface can clear every item above and still be a template — the arrangement any product would get for any subject. That is the failure this floor exists to catch, so judge specificity as well as cleanliness.
+表面可以清除上面的每一项，但仍然是一个模板——任何产品针对任何主题都会得到的安排。这就是该地板存在的缺陷，因此请判断其特异性和清洁度。
 
-Treat these as evidence the arrangement was reached for rather than chosen, and rework rather than soften:
+将这些视为安排是达成而不是选择的证据，并进行修改而不是软化：
 
-- A full-width opening block with a centered headline, a subhead, and two buttons.
-- A row of equal cards, each an icon in a circle above a heading and a line of text.
-- A gradient behind headline text.
-- Small uppercase letter-spaced labels above every section.
-- One corner radius applied to every surface regardless of what the surface is.
-- A numbered sequence over things that are not a sequence.
+- 带有居中标题、副标题和两个按钮的全角开头块。
+- 一排相同的卡片，每张卡片上都有一个标题和一行文本上方的圆圈中的图标。
+- 标题文本后面的渐变。
+- 每个部分上方都有小写字母间隔的标签。
+- 无论表面是什么，都会对每个表面应用一个圆角半径。
+- 对非序列事物进行编号的序列。
 
-The test: with the product's name and copy removed, could a reader tell which product this is? If the honest answer is no, the direction has not been decided yet.
+测试：去掉产品名称和文案后，读者能否分辨出这是哪款产品？如果诚实的答案是否定的，那么方向还没有确定。
 
-## How avenues differ
+## 途径有何不同
 
-The wide-run rule in `references/scoping.md` already requires distinct mechanisms rather than tweaks of one idea. On a seeing question that means the avenues differ by organizing principle — what governs the arrangement, what the eye is meant to do first, what the surface is behaving like. A palette swap or a typeface swap over one arrangement is one avenue shown twice.
+`references/scoping.md` 中的广泛规则已经需要不同的机制，而不是对一种想法的调整。在视觉问题上，这意味着途径因组织原则而异——什么支配着排列，眼睛首先要做什么，表面的表现如何。一种排列上的调色板交换或字体交换是一种显示两次的方法。
 
-Say what each avenue's principle is before building it. If two of them resolve to the same sentence, one of them is not a separate avenue, and building both spends the run to give the user a choice they do not actually have.
+在建造之前先说一下每条大道的原理是什么。如果其中两个解析为同一个句子，则其中一个不是单独的途径，并且构建两者都会花费运行时间来为用户提供他们实际上没有的选择。

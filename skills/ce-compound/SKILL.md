@@ -1,77 +1,79 @@
 ---
 name: ce-compound
-description: Capture a solved problem's lesson in its cheapest durable form, a test or lint rule, a coding standard, or a repo learning, or refresh existing learnings against the codebase. Use when verified work corrected a wrong belief about how something behaves, such as a failed approach, a real defect a review caught, or a wrong assumption or document, or when auditing stale, overlapping, or drifted learnings. Do not auto-invoke it for work that went as first planned.
-argument-hint: "[optional: brief context, or refresh and a scope] [mode:refresh] [mode:non-interactive] [depth:lightweight|full]"
+description: "以最便宜的持久形式、测试或 lint 规则、编码标准或仓库经验来捕获已解决问题的教训，或者根据代码库刷新现有的学习内容。当经过验证的工作纠正了对某事物行为方式的错误信念时使用，例如失败的方法、审查发现的真正缺陷、错误的假设或文档，或者在审核陈旧、重叠或偏离的学习内容时使用。不要为按最初计划进行的工作自动调用它。"
+argument-hint: "[可选：简要上下文，或刷新和范围] [mode:refresh] [mode:non-interactive] [depth:lightweight|完整]"
 ---
+
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
 # /ce-compound
 
-## Choosing the job
+## 选择工作
 
-This skill does one of two jobs. **Capture** holds the lesson of one solved problem. **Refresh** audits the existing learnings against the current codebase and can delete docs and open a PR.
+该技能可以完成两项工作之一。 **捕获**包含一个已解决问题的教训。 **刷新** 根据当前代码库审核现有学习内容，并可以删除文档并打开 PR。
 
-Run refresh when the arguments contain `mode:refresh`, or when an interactive run was invoked to do one, as in `/ce-compound refresh payments`, "clean up the learnings", or a standalone request to create `CONCEPTS.md`. An earlier remark in the session does not count. Read `references/refresh/overview.md` and follow it instead of the rest of this file. The refresh references name the parts of this file they reuse.
+当参数包含 `mode:refresh` 时，或者调用交互式运行来执行某项操作（如 `/ce-compound refresh payments`“清理学习内容”）或创建 `GLOSSARY.md` 的独立请求时，运行刷新。会议中之前的发言不算数。阅读 `references/refresh/overview.md` 并遵循它而不是此文件的其余部分。刷新引用命名了他们重复使用的文件部分。
 
-When an interactive run is asked to create or update the project's coding standards or review docs as a whole, invoke the `ce-setup` skill with `standards` and stop.
+当要求交互式运行创建或更新项目的编码标准或审查整个文档时，请使用 `standards` 调用 `ce-setup` 技能并停止。
 
-Otherwise run capture. A non-interactive run without `mode:refresh` is always capture, whatever its context says. Capture takes free-text context, so `refresh token rotation` after fixing that bug is a capture. If an interactive run's words could mean either job, ask once with the host's blocking question tool, and capture if there is no answer.
+否则运行捕获。没有 `mode:refresh` 的非交互式运行始终会被捕获，无论其上下文如何。捕获需要自由文本上下文，因此修复该错误后的`refresh token rotation`是一个捕获。如果交互式运行的单词可能意味着任一工作，请使用主持人的阻塞问题工具询问一次，并捕获是否没有答案。
 
-## Capture
+## 捕获
 
-**Outcome:** the lesson of one qualifying solved problem is held in the cheapest form that stops the repeat, grounded against the current tree, discoverable by the next agent.
+**结果：** 一个合格解决问题的教训以最便宜的形式保留，停止重复，基于当前树，可由下一个代理发现。
 
-**Done:** the chosen form is written or updated and validated, vocabulary capture recorded, and the mode's completion report emitted; when no lesson qualifies, nothing is written and the report says why.
+**完成：** 编写或更新并验证所选表格，记录词汇捕获，并发出模式的完成报告；如果没有课程合格，则不会写任何内容，报告也会说明原因。
 
-**One learning per run.** A session that produced several gets several sequential runs, never one batched run. Read `references/research.md`; it explains what batching breaks.
+**每次运行一次学习。** 产生多次的会话会进行多次连续运行，而不是一次批量运行。读`references/research.md`；它解释了批处理中断的情况。
 
 
-## Preconditions
+## 前提条件
 
-Document only a problem that is solved and verified.
+仅记录已解决和验证的问题。
 
 <!-- ce-durable-bar:start -->
-A lesson earns a durable form only when it holds durable project reasoning that is not readily recoverable from the current code, tests, checks, coding standards, comments, or documentation, and losing it would plausibly cause recurrence, material risk, or substantial rediscovery. Apply this counterfactual: without a record of this lesson, would a future engineer working from the current tree still be likely to repeat the mistake or redo substantial investigation? Completion, effort, and diff size do not establish eligibility.
+只有当课程具有持久的项目推理，而这些推理无法从当前的代码、测试、检查、编码标准、注释或文档中轻易恢复，并且丢失它可能会导致复发、重大风险或大量的重新发现时，课程才能获得持久的形式。应用这个反事实：如果没有本课程的记录，未来在当前树上工作的工程师是否仍然可能重复错误或重新进行实质性调查？完成度、努力程度和差异大小并不构成资格。
 <!-- ce-durable-bar:end -->
 
-If the counterfactual fails, write nothing and report why. Judge this from the session rather than asking. An explicit invocation requests the judgment now but does not lower the bar.
+如果反事实失败，则什么也不写并报告原因。从会议中判断这一点，而不是询问。显式调用现在请求判断，但不会降低标准。
 
-An existing learning that became materially inaccurate or incomplete qualifies because leaving it would mislead. Update that learning instead of creating a duplicate.
+现有的学习如果在实质上变得不准确或不完整，则符合资格，因为离开它会产生误导。更新学习内容而不是创建重复内容。
 
-## Mode Detection
+## 模式检测
 
-Enter non-interactive mode when **either** holds: the arguments you were invoked with contain the `mode:non-interactive` token or its deprecated alias `mode:headless`, **or** the invocation makes non-interactive intent unmistakable, such as a caller or standing instruction asking to run `ce-compound` "headless", "non-interactively", "unattended", or "without prompts/questions". Both tokens together is not a conflict. Bare "automatically" or "auto-run" is **not** on its own a non-interactive signal: it speaks to *invoking* the skill, not to suppressing its prompts. An ambiguous or absent signal defaults to interactive. Tokens starting with `mode:` or `depth:` are flags, not context: strip them before treating the remainder as the brief context hint. Once detected, non-interactive mode applies for the entire run.
+当**任一**成立时，进入非交互模式：调用的参数包含`mode:non-interactive`令牌或其已弃用的别名`mode:headless`，**或**调用使非交互意图明确无误，例如调用者或常设指令要求运行`ce-compound`“无头”，“非交互”，“无人值守”或“没有prompts/questions”。两个令牌在一起并不冲突。纯粹的“自动”或“自动运行”本身**不是**非交互式信号：它表示“调用”技能，而不是抑制其提示。不明确或缺失的信号默认为交互式。以 `mode:` 或 `depth:` 开头的标记是标志，而不是上下文：在将其余部分视为简短上下文提示之前将其剥离。一旦检测到，非交互模式将应用于整个运行。
 
-`references/modes.md` decides depth, including what a `depth:` token does, as in `mode:non-interactive depth:lightweight` or `mode:non-interactive depth:full`. **Read it before step 1.**
+`references/modes.md`决定深度，包括`depth:`标记的作用，如`mode:non-interactive depth:lightweight`或`mode:non-interactive depth:full`。 **在步骤 1 之前阅读它。**
 
-**Non-interactive mode asks nothing.** It asks no blocking question of any kind, in any phase, because a caller reaching this path has no human to answer one. Every non-interactive exit, including one taken before any phase runs, ends on a terminal signal a caller parses: `Documentation complete`, or `Documentation skipped` with the reason when the run wrote nothing. Interactive mode asks only where a step's own reference says to.
+**非交互模式不提出任何问题。** 它在任何阶段都不会提出任何类型的阻塞问题，因为到达此路径的调用者没有人可以回答。每个非交互式退出（包括在任何阶段运行之前进行的退出）都会以调用者解析的终端信号结束：`Documentation complete`或`Documentation skipped`，并给出运行未写入任何内容的原因。交互模式仅询问步骤自己的引用所说的位置。
 
-## Artifact Root
+## 神器根
 
-Resolve `<root>` when you first compose a `<root>/solutions/` path, and pass a subagent the resolved path rather than the config.
+当您第一次编写 `<root>/solutions/` 路径时解析 `<root>`，并将解析的路径而不是配置传递给子代理。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Write boundary
+## 写边界
 
-**Only the orchestrator writes product files.** Phase 1 subagents write to per-run scratch only, and never touch `<root>/`, project instruction files, or any other tracked path.
+**只有协调器写入产品文件。** 第 1 阶段子代理仅写入每次运行的草稿，并且永远不会触及 `<root>/`、项目说明文件或任何其他跟踪路径。
 
-The orchestrator writes what `references/form.md` chooses, in every mode and without asking: at most one added test, added or tightened lint rule with any baseline entries it needs, or condition in an existing `CODING_STANDARDS.md`, and at most one learning under `<root>/solutions/`. It never changes product code. It also writes two maintenance side effects that their own step describes: `CONCEPTS.md` during vocabulary capture, and — **only in interactive Full mode after consent** — a small discoverability line in a project instruction file. Two further writes exist **only in interactive Full mode when the user selects them at the assembly destination step**: a rule file inside a writable declared Compound Pack, and the `packs:` entry appended to `.compound-engineering/config.yaml`. An instruction file is only ever edited, never created. Nothing else in the tree is written. Edits to *other* docs belong to a refresh, which a capture recommends or runs with a narrow scope.
+协调器在每种模式下编写`references/form.md`选择的内容，并且无需询问：最多添加一项测试，添加或收紧 lint 规则及其所需的任何基线条目，或现有`CODING_STANDARDS.md`中的条件，以及在`<root>/solutions/`下最多一项学习。它永远不会更改产品代码。对于下面的词汇步骤和报告标签，在多上下文项目中首先解决GLOSSARY-MAP.md； GLOSSARY.md 是范围内的术语表，绝不是并行根副本。它还编写了他们自己的步骤描述的两个维护副作用：词汇捕获期间的`GLOSSARY.md`，以及 - **仅在同意后的交互式完整模式下** - 项目说明文件中的一个小可发现性行。还有两个写入 **仅在交互式完整模式下存在，当用户在组装目标步骤中选择它们时**：可写声明的Compound Pack内的规则文件，以及附加到 `.compound-engineering/config.yaml` 的 `packs:` 条目。指令文件仅被编辑，从未创建。树上没有写任何其他内容。对*其他*文档的编辑属于刷新，捕获建议或在狭窄的范围内运行。
 
-## Full Mode
+## 完整模式
 
-Run these in order. Each reference is a required read at the step that names it.
+按顺序运行这些。每个引用文档都是在为其命名的步骤中必读的。
 
-1. **Research** — read `references/research.md`.
-2. **Session history** — read `references/session-history.md`, and start it *after* dispatching the Related Docs Finder so it overlaps your drafting rather than serializing.
-3. **Form, assembly, and write** — wait for every Phase 1 input, read `references/form.md` and write what it chooses, then read `references/assembly.md`.
-4. **Refresh check and discoverability** — read `references/refresh-and-discoverability.md`.
-5. **Optional enhancement** — read `references/enhancement.md`. Interactive only.
-6. **Report** — read `references/report.md` for the report shape your mode must emit and how the skill ends.
+1. **研究** — 阅读`references/research.md`。
+2. **会话历史记录** — 读取 `references/session-history.md`，并在*调度相关文档查找器之后*启动它，以便它与您的草稿重叠而不是序列化。
+3. **形成、组装和写入** — 等待每个阶段 1 输入，读取 `references/form.md` 并写入它选择的内容，然后读取 `references/assembly.md`。
+4. **刷新检查和可发现性** — 阅读`references/refresh-and-discoverability.md`。
+5. **可选增强** — 阅读`references/enhancement.md`。仅限互动。
+6. **报告** — 阅读 `references/report.md` 了解您的模式必须发出的报告形状以及技能如何结束。
 
-**Lightweight Mode** replaces steps 1-6 with a single pass; read `references/lightweight.md`, which defines its own completion output for both modes.
+**轻量级模式** 用单遍替换步骤 1-6； read `references/lightweight.md`，它为两种模式定义了自己的完成输出。

@@ -1,64 +1,64 @@
-# Execution Engines
+# 执行引擎
 
-`ce-work` has two implementation engines: native execution (inline or subagents, scheduled by `references/execution-strategy.md`) and cross-model execution. The engine decides who authors the code. It never changes who runs the finishing steps (final simplify, review, PR, and CI; see "Resume the correct tail" below). Native execution is the default: it stays selected unless applicable live intent, a caller binding, or an enabled standing preference selects cross-model execution.
+`ce-work`有两个实现引擎：本机执行（内联或子代理，由`references/execution-strategy.md`调度）和跨模型执行。引擎决定谁编写代码。谁运行完成步骤永远不会改变（最终简化、审查、PR和CI；请参阅下面的“恢复正确的尾部”）。本机执行是默认设置：除非适用的实时意图、调用者绑定或启用的常设首选项选择跨模型执行，否则它保持选中状态。
 
-Engine selection applies only to code execution. Knowledge-work keeps its carve-out. Legacy plans and bare code prompts may select cross-model execution; otherwise they use the inline/subagent flow in `references/execution-strategy.md`.
+引擎选择仅适用于代码执行。知识工作保持其独特性。遗留计划和裸代码提示可以选择跨模型执行；否则他们使用`references/execution-strategy.md`中的inline/subagent流。
 
-Invocation origin supplies no routing authority and may not be detectable. Resolve the same inputs whether `ce-work` was explicitly invoked or selected by the host: current-task intent, still-active session intent, typed caller binding, active project instructions, enabled checkout configuration, then native execution.
+调用源不提供路由权限并且可能无法检测到。无论 `ce-work` 是由主机显式调用还是选择，都解析相同的输入：当前任务意图、仍然活动的会话意图、键入的调用者绑定、活动项目指令、启用的结帐配置，然后本机执行。
 
-## Decide whether an external route applies
+## 决定是否应用外部路由
 
-Resolve one implementation binding from applicable authority and scope; do not reduce routing to keyword matching or a closed state machine. Obey the host's instruction hierarchy first. Within the same authority, prefer narrower and more current intent, using these sources:
+解决一项对适用权限和范围具有约束力的实施；不要减少对关键字匹配或封闭状态机的路由。首先服从主人的指令。在同一权限内，更喜欢使用以下来源的更窄和更当前的意图：
 
-1. an explicit assignment or constraint in the current task;
-2. a still-active session preference or constraint;
-3. a typed caller binding at its recorded provenance (for example, an LFG current-task assignment keeps current-task authority when it reaches `ce-work`);
-4. the project's active instructions and conventions already in context;
-5. enabled per-checkout configuration; then
-6. native execution.
+1. 当前任务中的明确分配或约束；
+2. 仍然有效的会话偏好或约束；
+3. 类型化调用者绑定在其记录的来源处（例如，LFG 当前任务分配在达到 `ce-work` 时保留当前任务权限）；
+4. 该项目的现行指令和惯例已经在上下文中；
+5. 启用每次结账配置；然后
+6. 本机执行。
 
-Lower sources may fill an unspecified detail but cannot contradict or broaden a higher source. Incidental mentions in feature prose, quoted material, examples, comparisons, filenames, or discussion do not activate routing. If two applicable instructions of equal authority genuinely conflict on which external worker receives the work, or on whether work leaves the host at all, tell the user about the conflict instead of guessing.
+较低的来源可能会填补未指定的细节，但不能与较高的来源相矛盾或扩大范围。专题散文、引用材料、示例、比较、文件名或讨论中偶然提及的内容不会激活路由。如果两个具有同等权限的适用指令在外部工作人员接收工作或工作是否完全离开主机方面确实存在冲突，请告诉用户该冲突而不是猜测。
 
-For example, current-task strict Composer resolves to Composer with `require` even when a caller Codex binding and config Cursor preference are both present. Without that task instruction, a caller Codex binding sourced from the current LFG task keeps that provenance. Without applicable live or caller intent, the ordered config candidates apply only when standing mode is enabled.
+例如，当前任务严格 Composer 会解析为带有 `require` 的 Composer，即使调用者 Codex 绑定和配置游标首选项都存在。如果没有该任务指令，来自当前 LFG 任务的调用者 Codex 绑定将保留该来源。如果没有适用的实时或呼叫者意图，则仅在启用站立模式时才应用排序的配置候选。
 
-### Typed caller binding
+### 类型化调用者绑定
 
-Input triage passes only a fully validated and normalized typed caller binding. Treat it as one already-selected candidate; preserve its caller-visible provenance in the durable run record and never send its fields into planning or review input. Downstream consumers and workers may narrow its authority or restrictions but never broaden them.
+输入分类仅传递经过完全验证和规范化的类型化调用者绑定。将其视为一名已选定的候选人；在持久运行记录中保留其调用者可见的来源，并且永远不会将其字段发送到计划或审查输入中。下游消费者和工人可以缩小其权力或限制，但绝不会扩大。
 
-A validated recovery run id selects durable state. It never authorizes a fresh dispatch or a different route.
+经过验证的恢复运行 ID 选择持久状态。它从不授权新的调度或不同的路线。
 
-### Standing configuration
+### 站立配置
 
 <!-- ce-config-layers:start -->
-**Resolve ordinary CE yaml keys from the two repo files.**
+**解析两个存储库文件中的普通 CE yaml 密钥。**
 
-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
+- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
+- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
 <!-- ce-config-layers:end -->
 
 
 
-Standing configuration selects cross-model execution only when `work_engine_mode` resolves to `prefer` or `require` (`off | prefer | require`) from the two repo files, `config.local.yaml` then `config.yaml`. `off` disables only the standing preference. It does not cancel applicable live intent or a typed caller binding.
+仅当`work_engine_mode`从两个存储库文件（`config.local.yaml`然后`config.yaml`）解析为`prefer`或`require`（`off | prefer | require`）时，常设配置才会选择跨模型执行。 `off` 仅禁用站立首选项。它不会取消适用的实时意图或键入的调用者绑定。
 
-When no source applies, run native execution and do not load the cross-model reference. When one does, read `references/cross-model-execution.md` and resolve the route there before any content or authority leaves the host. It owns route strength, the target vocabulary, the `work_engine_preferences` and `work_engine_effort` schema, candidate traversal, and preflight. If no candidate qualifies there, continue natively as that reference directs.
+当没有适用的源时，运行本机执行并且不加载跨模型引用。当有人这样做时，在任何内容或权限离开主机之前读取`references/cross-model-execution.md`并解析那里的路由。它拥有路线强度、目标词汇表、`work_engine_preferences`和`work_engine_effort`模式、候选遍历和预检。如果没有候选人符合条件，请按照参考资料的指示继续进行。
 
-For a bare prompt, cross-model execution is eligible only after Phase 0 has established a concrete goal, bounded scope, and authoritative verification. The cross-model reference turns that discovery into a private prompt brief and conservative P-unit packet. An unclear bare prompt returns to clarification or planning before any work is sent to an external worker; it does not fall through to a smarter external worker and ask that worker to invent the scope.
+简单来说，只有在阶段 0 建立了具体的目标、有限的范围和权威验证之后，跨模型执行才符合资格。跨模型参考将这一发现转化为私人提示简报和保守的 P 单元数据包。在将任何工作发送给外部工作人员之前，不明确的提示又会导致澄清或计划；它不会落入更聪明的外部工作人员的手中，并要求该工作人员发明范围。
 
-## Run the chosen engine
+## 运行所选引擎
 
-- **Native:** follow `references/execution-strategy.md` for scheduling and dispatch, and the Phase 2 loop in `references/implementation-loop.md`. `ce-work` creates the tasks, orders the units, dispatches, verifies, and commits.
-- **Cross-model:** follow the serial external-unit transaction in `references/cross-model-execution.md` through the bundled controller, detached runner, and fixed adapter. Never let the detached worker select a fallback recipient.
+- **Native：**遵循`references/execution-strategy.md`进行调度和分派，以及`references/implementation-loop.md`中的第2阶段循环。 `ce-work` 创建任务、订购单元、调度、验证和提交。
+- **跨模型：**通过捆绑的控制器、分离的运行器和固定适配器遵循`references/cross-model-execution.md`中的串行外部单元事务。切勿让分离的工作人员选择后备收件人。
 
-## Resume the correct tail
+## 恢复正确的尾巴
 
-After either engine finishes implementation, inspect the diff and continue with the finishing steps that belong to whoever owns them. On its own, an engine does no more than implementation and local verification.
+任一引擎完成实现后，检查差异并继续属于拥有它们的人的完成步骤。就其本身而言，引擎仅执行实现和本地验证。
 
-| Mode | After implementation, `ce-work` ... |
+| 模式 | 实施后，`ce-work`... |
 |---|---|
-| **Standalone** (user invoked `ce-work` directly, or `ce-plan` handed off interactively) | Resumes its Phase 3-4 finishing steps: quality checks, simplification, review, commit, and handoff in `references/shipping-workflow.md`. |
-| **Return-to-caller** (`mode:return-to-caller`, e.g. under `lfg`) | Performs implementation and local verification only, then returns the structured summary in `references/return-to-caller.md` (`standalone_shipping_skipped: true`). Does not run simplify/review/PR/CI; the caller runs those. |
+| **独立**（用户直接调用`ce-work`，或`ce-plan`交互切换） | 在 `references/shipping-workflow.md` 中恢复第 3-4 阶段的完成步骤：质量检查、简化、审查、提交和移交。 |
+| **返回呼叫者**（`mode:return-to-caller`，例如在 `lfg` 下） | 仅执行实现和本地验证，然后返回`references/return-to-caller.md`（`standalone_shipping_skipped: true`）中的结构化摘要。不运行simplify/review/PR/CI；调用者运行这些。 |
 
-## Progress visibility (independent of tail ownership)
+## 进度可见性（独立于尾部所有权）
 
-Whoever runs the finishing steps opens the PR. During a long run, commit each completed unit so progress stays observable in git. In return-to-caller mode `ce-work` must not open any PR, but it may commit and report progress in its structured summary. Never write progress or status into the plan body; git, commits, and the returned summary carry it.
+完成最后步骤的人会打开 PR。在长期运行中，提交每个已完成的单元，以便在 git 中保持可观察到的进度。在返回调用者模式下，`ce-work`不得打开任何PR，但它可以在其结构化摘要中提交并报告进度。切勿将进度或状态写入计划正文； git、提交和返回的摘要都带有它。

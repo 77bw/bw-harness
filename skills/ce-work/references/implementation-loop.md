@@ -1,72 +1,72 @@
-# Implementation Loop
+# 实施循环
 
-1. **Task Execution Loop**
+1. **任务执行循环**
 
-Work the tasks in dependency order. Mark a task completed only after each of these holds, in this order:
+按依赖顺序执行任务。仅在这些保留中的每一个之后按以下顺序标记任务已完成：
 
-- **Completion signal checked first.** If any part of the unit's completion depends on out-of-repo state (a console setting, DNS record, CMS object, live-system rows), that part has no git-derived completion signal: decide it from the observed state of the deliverable, never from a clean tree or a tracker write. Mark it complete only when that state is already satisfied; execute only when it is observably unsatisfied and re-applying is safe or the user has authorized it; otherwise ask or block. If the unit's entire completion signal is repository-derived and that work is already present and matches the plan's intent (files exist with the expected capability, or the unit's `Verification` criteria are already satisfied by the current code), the work has likely shipped on a prior branch or session. Verify it matches, mark the task complete, and move on. Do not silently reimplement.
-- **Evidence chosen before behavior changes.** Find the existing tests for the files you will change (Test Discovery, below). Choose the evidence strategy for this task before changing behavior: use an existing failing test, update or strengthen an existing test, add a new failing test, add characterization coverage, or record a deliberate no-test exception with replacement verification. For behavior-bearing changes, default to test-first or characterization-first when the current code and its tests make that practical, even if the plan has no `Execution note`. When the evidence strategy calls for pre-implementation proof, create/update/strengthen the test or characterization coverage now and verify the expected failure or baseline capture before changing production code.
-- **Built to the plan.** Implement following existing conventions and the unit's `Patterns to follow`. Add, update, or remove any remaining tests needed to match implementation changes.
-- **Nothing that worked is broken.** Run System-Wide Test Check (below). Run tests after changes. If two fixes for the same failing check have not worked, stop patching: name the assumption both fixes relied on and check it, so the next change targets the root cause. When that assumption came from the plan and correcting it stays within the agreed scope, correct it and note what changed; report a blocker only when correcting it would change a settled decision, need authority the run lacks, or need input only the user can give.
-- **Evidence recorded.** Assess testing coverage: did this task change behavior? If yes, were existing tests inspected and were tests written, updated, strengthened, or deliberately left unchanged with a reason? If no tests were added or changed, is the justification deliberate (e.g., pure config, no behavioral change, manual-only surface) and paired with replacement verification? Record verification evidence for the task: behavior-change signal, existing tests inspected, tests added/changed/used unchanged, red failure or characterization observed when applicable, verification run, and any exception reason.
+- **首先检查完成信号。** 如果单元完成的任何部分取决于仓库外状态（控制台设置、DNS 记录、CMS 对象、实时系统行），则该部分没有 git 派生的完成信号：根据可交付成果的观察状态决定它，而不是根据干净的树或跟踪器写入。仅当该状态已满足时才将其标记为完成；仅当明显不满意且重新申请安全或用户已授权时才执行；否则询问或阻止。如果单元的整个完成信号是存储库派生的，并且该工作已经存在并且符合计划的意图（具有预期功能的文件存在，或者当前代码已经满足单元的`Verification`标准），则该工作可能已在先前的分支或会话上交付。验证其匹配，将任务标记为完成，然后继续。不要默默地重新实施。
+- **行为更改之前选择的证据。** 查找您将更改的文件的现有测试（测试发现，如下）。在更改行为之前选择此任务的证据策略：使用现有的失败测试、更新或加强现有测试、添加新的失败测试、添加特征覆盖率或通过替换验证记录故意的无测试异常。对于行为承载的更改，当当前代码及其测试使其可行时，默认为测试优先或表征优先，即使计划没有`Execution note`。当证据策略要求实施前证明时，create/update/strengthen 现在测试或表征覆盖范围，并在更改生产代码之前验证预期的故障或基线捕获。
+- **按计划构建。** 实施以下现有惯例和单位的 `Patterns to follow`。添加、更新或删除匹配实现更改所需的任何剩余测试。
+- **没有任何工作被破坏。**运行系统范围的测试检查（如下）。更改后运行测试。如果对同一失败检查的两个修复都不起作用，请停止修补：命名两个修复所依赖的假设并检查它，以便下一个更改针对根本原因。当该假设来自计划并且纠正它保持在商定的范围内时，纠正它并记下发生了什么变化；仅当纠正阻塞项会改变既定决定、需要运行缺乏的权限或需要只有用户可以提供的输入时才报告阻塞项。
+- **记录证据。** 评估测试覆盖范围：此任务是否改变了行为？如果是，是否检查了现有测试，是否编写、更新、加强了测试，或故意保持不变（有原因）？如果没有添加或更改测试，其理由是否经过深思熟虑（例如，纯配置、无行为改变、仅手动表面）并与替换验证配对？记录任务的验证证据：行为改变信号、检查的现有测试、未更改的测试added/changed/used、适用时观察到的红色故障或特征、验证运行以及任何异常原因。
 
-Then mark the task completed in the task tracker and decide whether to commit it (Incremental Commits, below).
+然后在任务跟踪器中标记已完成的任务并决定是否提交它（增量提交，见下文）。
 
-When the selected engine is cross-model execution, this loop still decides unit order, the evidence strategy, inspection of what actually changed, authoritative verification, and incremental canonical commits; the worker's authoring follows the serial external-unit protocol in `references/cross-model-execution.md`. A detached worker process finishing proves only that authoring finished; do not mark the task complete until the controller records the host-owned canonical commit. A unit whose workspace was preserved, or whose restoration is blocked, stops this loop before any fallback, retry, or next unit.
+当选择的引擎是跨模型执行时，这个循环仍然决定单元顺序、证据策略、检查实际更改、权威验证和增量规范提交；工作人员的创作遵循`references/cross-model-execution.md`中的串行外部单元协议。一个独立的worker进程完成仅证明创作完成；在控制器记录主机拥有的规范提交之前，不要将任务标记为完成。工作空间被保留或恢复被阻止的单元会在任何回退、重试或下一个单元之前停止此循环。
 
-**Build what was asked.** The plan's units and scope, or the request itself when there is no plan, define what gets built. Add a mechanism neither asked for, such as a guard, retry, fallback, validation layer, option, mode, abstraction, or support on another interface, only when an existing contract requires it or one of these holds:
+**构建所要求的内容。** 计划的单位和范围，或没有计划时的请求本身，定义要构建的内容。仅当现有合约需要它或其中之一时，才添加不需要的机制，例如保护、重试、回退、验证层、选项、模式、抽象或对另一个接口的支持：
 
-- Leaving it out lets harm land before anyone catches it. Trace that the failure can actually happen here; something that notices the failure counts, while an instruction asking a person to avoid it, or to clean up by hand afterward, does not.
-- Adding it later would be expensive, because it concerns stored data or its format, a public or shared interface, money, or security.
+- 把它放在一边，可以在任何人抓住它之前伤害土地。跟踪故障实际上可能发生在这里；注意到故障的事情很重要，而要求人们避免故障或事后手工清理的指示则不算。
+- 稍后添加它的成本会很高，因为它涉及存储的数据或其格式、公共或共享接口、金钱或安全性。
 
-Give a mechanism that passes its smallest form. One that fails is not built: report it with the task's outcome as considered and not built, with one line on why. When you cannot tell, build it. An item the plan already lists as a non-goal stays unbuilt unless implementation turns up evidence the plan did not have; then build it and say what that evidence was. Never narrow requested behavior to fit a safeguard by delaying, gating, capping, or skipping part of what was asked. When a needed safeguard truly conflicts with requested behavior, check whether the plan or request already specified the design that carries the risk. If it did, that trade-off is decided: build it as specified and report the risk. Only a conflict the plan and request leave open is the requester's decision; stop before building either side and ask, or return it as a blocker.
+给出一个通过其最小形式的机制。失败的任务不会被构建：报告它时考虑到但未构建的任务结果，并用一行文字说明原因。当你无法分辨时，就构建它。计划中已列为非目标的项目将保持未建状态，除非实施过程中发现计划中没有的证据；然后构建它并说出证据是什么。切勿通过延迟、限制、限制或跳过部分要求的方式来缩小要求的行为以适应保障措施。当所需的防护措施确实与所请求的行为发生冲突时，请检查计划或请求是否已经指定了带来风险的设计。如果确实如此，则决定权衡：按规定构建并报告风险。只有当计划和请求存在冲突时，请求者才做出决定；在建造任何一侧之前停下来询问，或者将其作为阻挡物返回。
 
-When the work replaces a function, type, or module whose callers are all in this repository, update those callers and remove the old version in the same change instead of keeping it as a wrapper or alias. An interface used outside this repository, or one the plan says to keep, is an existing contract and keeps working.
+当工作替换其调用者都在此存储库中的函数、类型或模块时，请更新这些调用者并在同一更改中删除旧版本，而不是将其保留为包装器或别名。在此存储库之外使用的接口或计划要求保留的接口是现有合同并且可以继续工作。
 
-Batch independent reads within a task: the plan's referenced files, pattern searches, and test discovery don't depend on one another — request them all in one response rather than one per turn. Only the write-and-verify steps are inherently sequential.
+任务中的批量独立读取：计划的引用文件、模式搜索和测试发现彼此不依赖 - 在一个响应中请求所有这些内容，而不是每轮一个响应。只有写入和验证步骤本质上是连续的。
 
-For a parallel wave, the loop pauses after every canonical result so the host can integrate it. Inspect the actual result rather than its declared scope, re-run the independence judgment against the advancing tree, and recompute readiness from committed prerequisites. Affected dependents remain queued. An unaffected sibling may continue only after any failed apply or verification has been restored exactly and the prior integration lock released. Re-dispatch a stale or colliding result on the new base, resolve it explicitly, or finish it serially. Never treat a conflict-free apply as proof that the results are compatible. Repeated collision or broad edits disable further parallel waves for the run.
+对于并行波，循环在每个规范结果后暂停，以便主机可以对其进行积分。检查实际结果而不是其声明的范围，针对前进的树重新运行独立性判断，并根据已提交的先决条件重新计算准备情况。受影响的家属仍在排队。仅在任何失败的应用或验证已准确恢复并且先前的集成锁定已释放后，未受影响的同级才可以继续。在新的基础上重新发送陈旧或冲突的结果，显式解决它，或连续完成它。切勿将无冲突应用视为结果兼容的证据。重复碰撞或广泛编辑会禁用运行的更多平行波。
 
-When a unit carries an `Execution note`, honor its intent rather than matching a fixed vocabulary. For notes that ask for proof-first work, write or identify the relevant failing test before implementation for that unit. For notes that ask for characterization, capture existing behavior before changing it. For notes that point away from unit coverage, run the named replacement verification and record why ordinary tests were not the right proof. For units without an `Execution note`, make the same decision from code and test discovery: upgrade to proof-first or characterization-first when behavior changes and there is a practical place to test it; proceed pragmatically only when the task is non-behavioral or the exception is deliberate.
+当一个单元带有 `Execution note` 时，尊重其意图而不是匹配固定的词汇。对于要求先证明工作的注释，请在该单元实施之前编写或识别相关的失败测试。对于要求描述的注释，请在更改之前捕获现有行为。对于远离单元覆盖范围的注释，请运行指定的替换验证并记录为什么普通测试不是正确的证明。对于没有`Execution note`的单元，从代码和测试发现中做出相同的决定：当行为发生变化并且有实际的地方可以测试它时，升级到证明优先或表征优先；仅当任务是非行为性的或特例是故意的时，才务实地进行。
 
-Guardrails for execution evidence:
-- Do not write the test and implementation in the same step when working proof-first
-- Do not skip verifying that a new or changed test fails for the expected reason before implementing the fix or feature. When the behavior rests on more than one guard, also confirm after implementing that the test fails when each guard alone is removed, restoring each one afterward
-- Do not over-implement beyond the current behavior slice when working proof-first
-- Do not add a duplicate regression test when an existing test is the right home; update or strengthen that test instead, then observe the failure before changing code
-- A new or changed test must fail when the behavior it names breaks, and keep passing when only the implementation changes. It fails that bar when its expected value comes from the code under test, when a mock or fixture supplies the result the code should produce, or when it asserts calls between internal parts instead of what the code returns, stores, or sends across its boundary
-- Do not add a production export, flag, wrapper, or hook that only tests use when the real entry point can drive the behavior; test through that entry point instead
-- Skip proof-first discipline for trivial renames, pure configuration, pure styling, generated artifacts, and manual-only surfaces, but record the reason and replacement verification while continuing execution
+执行证据的护栏：
+- 当进行证明优先时，不要在同一步骤中编写测试和实现
+- 在实施修复或功能之前，请勿跳过验证新的或更改的测试是否因预期原因而失败。当该行为依赖于多个防护装置时，在实施后还要确认当每个防护装置单独被移除时测试失败，然后恢复每个防护装置
+- 在进行证明优先工作时，不要过度实施超出当前行为切片的内容
+- 当现有测试合适时，不要添加重复的回归测试；相反，更新或加强该测试，然后在更改代码之前观察失败
+- 当它所命名的行为被破坏时，新的或更改的测试必须失败，并且当只有实现发生变化时才能保持通过。当其预期值来自被测代码时，当模拟或固定装置提供代码应产生的结果时，或者当它断言内部部分之间的调用而不是代码返回、存储或跨其边界发送的内容时，它会失败。
+- 不要添加仅在真实入口点可以驱动行为时测试使用的生产导出、标志、包装器或挂钩；通过该入口点进行测试
+- 跳过琐碎的重命名、纯配置、纯样式、生成的产物和仅手动表面的证明第一规则，但在继续执行的同时记录原因和替换验证
 
-**Test Discovery** — Before implementing changes to a file, find its existing test files (search for test/spec files that import, reference, or share naming patterns with the implementation file). When a plan specifies test scenarios or test files, start there, then check for additional test coverage the plan may not have enumerated. Changes to implementation files should be accompanied by corresponding test updates — new tests for new behavior, modified tests for changed behavior, removed or updated tests for deleted behavior.
+**测试发现** - 在对文件实施更改之前，查找其现有测试文件（搜索导入、引用或与实施文件共享命名模式的 test/spec 文件）。当计划指定测试场景或测试文件时，从那里开始，然后检查计划可能未枚举的其他测试覆盖范围。对实现文件的更改应该伴随相应的测试更新——新行为的新测试、更改行为的修改测试、删除行为的删除或更新测试。
 
-**Evidence Strategy** — Test discovery decides where proof belongs:
+**证据策略** - 测试发现决定证据所属：
 
-| Situation | Action |
+| 情况 | 行动 |
 |-----------|--------|
-| Existing test already fails for the intended behavior | Use that as the red evidence; do not add a duplicate test |
-| Existing test covers the contract but asserts the old or wrong expectation | Update that test, run it, and verify the expected failure before implementation |
-| Existing test is over-mocked or misses the real chain | Strengthen/refactor it narrowly, then verify it fails for the right reason |
-| No existing test covers the behavior | Add the smallest focused failing test or characterization test that proves the behavior slice |
-| Testing is inappropriate for the task | Record the no-test exception and replacement verification before marking the task complete |
+| 现有测试已经无法实现预期行为 | 以此作为红色证据；不要添加重复的测试 |
+| 现有测试涵盖了合同，但断言了旧的或错误的期望 | 更新该测试，运行它，并在实施之前验证预期的失败 |
+| 现有测试过度模拟或错过真实链 | Strengthen/refactor 缩小范围，然后验证其失败的正确原因 |
+| 没有现有的测试涵盖该行为 | 添加证明行为切片的最小集中失败测试或表征测试 |
+| 测试不适合该任务 | 在标记任务完成之前记录无测试异常和替换验证 |
 
-**Test Scenario Completeness** — Tests prove the behavior the unit builds. Before writing tests for a feature-bearing unit, make any vague plan scenario concrete (e.g., "validates correctly" becomes named inputs and expected outcomes) from the unit's Goal and Approach. A scenario category the plan left out is not a gap to fill: do not add scenarios for failure handling, validation, or edge cases the unit does not build, and do not build handling so that such a scenario can exist. Draw from these categories where the unit has them: happy path; edge cases in inputs the unit really receives; error paths for failure handling the unit builds; integration across a layer the unit changes, exercised without mocks.
+**测试场景完整性** — 测试证明单元构建的行为。在为具有功能的单元编写测试之前，请根据单元的目标和方法将任何模糊的计划场景具体化（例如，“正确验证”成为指定的输入和预期结果）。计划中遗漏的场景类别并不是要填补的空白：不要添加单元未构建的故障处理、验证或边缘情况的场景，也不要构建处理以便存在此类场景。从单元拥有的这些类别中提取：快乐之路；单元实际接收的输入中的边缘情况；处理单元构建失败的错误路径；跨层集成单元更改，无需模拟即可执行。
 
-**System-Wide Test Check** — Before marking a task done, trace what the change touches beyond its own files: callbacks, middleware, observers, and hooks up to two levels out, and any other interface that already exposes the behavior you changed. Read the actual code, not docs. What already worked through those paths must still work, so run or update the tests that cover them. A leaf change that touches none of them passes at once.
+**系统范围的测试检查** - 在将任务标记为完成之前，跟踪更改超出其自身文件范围的内容：回调、中间件、观察者和最多两级的挂钩，以及已经公开您更改的行为的任何其他接口。阅读实际代码，而不是文档。通过这些路径已经起作用的东西必须仍然起作用，因此运行或更新覆盖它们的测试。没有触及任何一个的树叶变化会立刻过去。
 
-2. **Incremental Commits**
+2. **增量提交**
 
-After completing each task, decide whether to commit. Never commit while its tests fail. **Heuristic:** "Can I write a commit message that describes a complete, valuable change? If yes, commit. If the message would be 'WIP' or 'partial X', wait."
+完成每项任务后，决定是否提交。当测试失败时切勿提交。 **启发式：**“我可以编写一条提交消息来描述完整的、有价值的更改吗？如果可以，请提交。如果消息是“WIP”或“部分 X”，请等待。”
 
-If the plan has Implementation Units, use them as a starting guide for commit boundaries — but adapt based on what you find during implementation. A unit might need multiple commits if it's larger than expected, or small related units might land together. Use each unit's Goal to inform the commit message.
+如果计划有实施单元，请使用它们作为提交边界的起始指南 - 但根据您在实施过程中发现的内容进行调整。如果一个单元比预期大，则可能需要多次提交，或者小型相关单元可能会合并在一起。使用每个单元的目标来告知提交消息。
 
-**Message convention:** match project commit conventions already in context; else match the recent log pattern; else conventional commits (`type(scope): description`). User override wins.
+**消息约定：**匹配上下文中已有的项目提交约定；否则匹配最近的日志模式；否则常规提交 (`type(scope): description`)。用户覆盖获胜。
 
-Preserve the full resolved message as data through the selected engine's canonical commit owner. If that owner cannot accept the full message, stop and report the blocker rather than truncate it or bypass the owner's protocol. Cross-model commits follow the controller integration contract in `references/cross-model-execution.md`.
+通过所选引擎的规范提交所有者将完整解析的消息保留为数据。如果该所有者无法接受完整的消息，请停止并报告阻塞项，而不是截断它或绕过所有者的协议。跨模型提交遵循`references/cross-model-execution.md`中的控制器集成合同。
 
-For native host-owned Git commits, write the full resolved message to a file outside the repo with your file-write tool. Pass that file to Git so the shell never interprets message text.
+对于本机主机拥有的 Git 提交，请使用文件写入工具将完整解析的消息写入存储库外部的文件。将该文件传递给 Git，以便 shell 永远不会解释消息文本。
 
-**Native Git commit workflow:**
+**本机Git提交工作流程：**
 ```bash
 # 1. Verify tests pass (use project's test command)
 # Examples: bin/rails test, npm test, pytest, go test, etc.
@@ -78,33 +78,33 @@ git add <files related to this logical unit>
 git commit -F <message-file> -- <files related to this logical unit>
 ```
 
-**Note:** Incremental commits add no plugin-generated attribution. The final Phase 4 handoff passes `branding:on` so `ce-commit-push-pr` can add generic Compound Engineering branding to the PR.
+**注意：** 增量提交不添加插件生成的归因。最后的第 4 阶段交接通过了`branding:on`，因此`ce-commit-push-pr`可以将通用的Compound Engineering品牌添加到PR。
 
-**Workers:** worker commits follow the **No canonical commits** rule in `references/execution-strategy.md`; only the orchestrator makes canonical commits.
+**工作人员：**工作人员提交遵循`references/execution-strategy.md`中的**无规范提交**规则；只有协调器才会做出规范的提交。
 
-3. **Simplify as You Go**
+3. **随心所欲地简化**
 
-After completing a cluster of related implementation units (or every 2-3 units), review recently changed files for simplification opportunities — consolidate duplicated patterns, extract shared helpers, and improve code reuse and efficiency. This is especially valuable when using subagents, since each agent works with isolated context and can't see patterns emerging across units.
+完成一组相关的实现单元（或每 2-3 个单元）后，检查最近更改的文件以寻找简化机会 - 合并重复的模式、提取共享帮助程序并提高代码重用和效率。这在使用子代理时尤其有价值，因为每个代理都在隔离的上下文中工作，并且无法看到跨单元出现的模式。
 
-Don't simplify after every single unit — early patterns may look duplicated but diverge intentionally in later units. Wait for a natural phase boundary or when you notice accumulated complexity.
+不要在每个单元之后都进行简化——早期的模式可能看起来重复，但在后面的单元中故意有所不同。等待自然相边界或当您注意到累积的复杂性时。
 
-If **`ce-simplify-code`** is available, invoke it with `mode:pipeline` at phase boundaries (especially before Phase 3 when the accumulated cluster has >=30 substantive changed code lines — count human-authored code, not total diff lines, so a mostly test-fixture/config/generated/mechanical cluster does not trigger the check). Otherwise, review the changed files yourself for reuse and consolidation opportunities. When invoking it, pass each test the evidence record names as proving the work (a red-before-fix test, characterization coverage, or an existing test used unchanged) as `proof-test:<path>`, so the simplification leaves that test untouched.
+如果 **`ce-simplify-code`** 可用，请在阶段边界处使用 `mode:pipeline` 调用它（特别是在第 3 阶段之前，当累积的集群具有 >=30 个实质性更改的代码行时 - 计算人工编写的代码，而不是总 diff 行，因此主要为 test-fixture/config/generated/mechanical 的集群不会触发检查）。否则，请自行检查更改的文件以获取重用和整合的机会。调用它时，将每个测试的证据记录名称作为证明工作（修复前的红色测试、特征覆盖或未更改使用的现有测试）传递为`proof-test:<path>`，因此简化使该测试保持不变。
 
-When the plan carries `session-settled:`-labeled KTDs or Key Decisions, pass the plan path as context for which structures must stay as they are, not as the simplification scope, with the one-line constraint that labeled entries are settled decisions the simplification must preserve (e.g., deliberate duplication stays duplicated).
+当计划携带 `session-settled:` 标记的 KTD 或关键决策时，将计划路径作为结构必须保持原样的上下文传递，而不是作为简化范围，并带有标记条目是简化必须保留的已解决决策的单行约束（例如，故意重复保持重复）。
 
-In return-to-caller mode, commit the pass's edits once its checks pass, then record that commit's SHA (HEAD when the pass changed nothing) as `simplified_through`. The caller's own simplify step then covers only what came after it. A later pass replaces the recorded SHA. Reviewing the files yourself records nothing.
+在返回调用者模式下，一旦检查通过就提交该通行证的编辑，然后将该提交的 SHA（当该通行证未更改任何内容时为HEAD）记录为`simplified_through`。然后，调用者自己的简化步骤仅涵盖其后的内容。稍后的传递将替换记录的 SHA。自己查看文件没有任何记录。
 
-4. **UI Verification** (if applicable)
+4. **用户界面验证**（如果适用）
 
-For UI work built from a Figma design, read `references/agents/figma-design-sync.md` and dispatch a generic subagent seeded with that local prompt to compare the implementation against the design. Do not dispatch a standalone agent by type/name. Apply the reported fixes that hold up against the project's conventions, then compare again until it reports a match or only differences you judge intentional.
+对于从 Figma 设计构建的 UI 工作，读取 `references/agents/figma-design-sync.md` 并分派一个通用子代理，该子代理以该本地提示为种子，以将实现与设计进行比较。不要在 type/name 之前派遣独立代理。应用报告的符合项目惯例的修复，然后再次比较，直到报告匹配或仅报告您认为有意的差异。
 
-For other user-visible UI changes, check the changed UI in a browser at desktop and mobile widths when browser tooling is available. If none is available, review the layout code for overflow and responsive breakage and record that browser verification was unavailable.
+对于其他用户可见的 UI 更改，请在浏览器工具可用时在桌面和移动设备宽度的浏览器中检查更改的 UI。如果没有可用的，请检查布局代码是否有溢出和响应损坏，并记录浏览器验证不可用。
 
-5. **Track Progress**
-- Add a task when requested work turns out larger than expected; a mechanism nobody asked for goes through **Build what was asked** first
-- When the plan defines U-IDs for Implementation Units, or the plan or origin document carries stable R-IDs (and optionally A/F/AE IDs), reference them in blockers, deferred-work notes, task summaries, and final verification — not routine status updates. U-IDs anchor units across plan edits; R/A/F/AE anchor product intent across the brainstorm-plan handoff. Use the IDs the plan supplies and do not invent ones it does not. This preserves traceability without burying signal under noise.
-- **Plan IDs stay out of written files.** U-, R-, A-, F-, AE-, and KTD-IDs mean something only to a reader who has the plan open. Keep them out of the files the work writes, including code, comments, docs, scripts, and skills. Where an ID would go, write what the requirement or decision says instead: `# allowlist read-only tools`, not `# (R7)`.
+5. **跟踪进度**
+- 当请求的工作量超出预期时添加任务；没有人要求的机制首先通过**构建所要求的**
+- 当计划为实施单元定义 U-ID 时，或者计划或原始文档带有稳定的 R-ID（以及可选的 A/F/AE ID）时，请在阻塞项、延期工作注释、任务摘要和最终验证中引用它们，而不是例行状态更新。 U-ID 跨计划编辑锚定单元； R/A/F/AE 在头脑风暴计划交接过程中锚定产品意图。使用计划提供的 ID，不要发明计划未提供的 ID。这样可以保留可追溯性，而不会将信号隐藏在噪声之下。
+- **计划 ID 不存在于书面文件中。** U-、R-、A-、F-、AE- 和 KTD-ID 仅对打开计划的读者有意义。让它们远离工作编写的文件，包括代码、注释、文档、脚本和技能。在 ID 所在的位置，写下要求或决定的内容：`# allowlist read-only tools`，而不是`# (R7)`。
 
-## Settled decisions during implementation
+## 实施过程中做出的决定
 
-A KTD or Product Contract Key Decision carrying a `session-settled:` annotation (classes `user-directed` / `user-approved`) records a decision the user already made; it is not yours to improve. A product decision's label arrives through the Key Decision whose `Governs R…` links name your unit's Rs, not through a KTD. This scopes to labeled entries only: details the plan leaves open remain your judgment, and a real defect discovered inside a settled approach is still reported at full strength; the label never suppresses defect evidence. If implementation reveals a labeled decision is unworkable to the point of invalidating it (infeasible, wrong-thing, destructive), that is a genuine blocker: report it rather than silently working around or "fixing" the decision.
+带有`session-settled:`注释（类`user-directed`/`user-approved`）的KTD或产品合同关键决策记录了用户已经做出的决策；改进不是你的事。产品决策的标签通过关键决策到达，其 `Governs R…` 链接命名您的单位的卢比，而不是通过 KTD。这仅适用于标记的条目：计划中未确定的细节仍由您自行判断，并且在已确定的方法中发现的真正缺陷仍会完整报告；标签从不隐瞒缺陷证据。如果实施过程中发现标记的决策不可行，甚至导致其无效（不可行、错误、破坏性），那么这就是真正的阻碍：报告它，而不是默默地解决或“修复”该决策。

@@ -1,90 +1,94 @@
-# Shipping Workflow
+# 交付流程
 
-This file contains the shipping workflow (Phase 3-4). It is loaded when all Phase 2 tasks are complete and execution transitions to quality check.
+该文件包含交付流程（第 3-4 阶段）。当所有第 2 阶段任务完成并且执行转换到质量检查时加载它。
 
-## Phase 3: Quality Check
+## 第三阶段：质量检查
 
-1. **Run Core Quality Checks**
+对于已载入的 BW 项目，此转换是活动项目指令中指定的完成检查点，而不是新的捕获触发器。将其配置的知识沉淀指令应用于已解决的、经过验证的校正；包含实际结果（包括跳过或无限定更正），而不是对 wiki 条目是否值得的预测。如果该事件的捕获已运行，请重用其结果。当项目调用`project-governance close`时，在此处加载已安装的技能并将计划传递给它，检查已运行的情况，捕获结果和工作树范围； knowledge/status关闭，不交付。记录实际进度，而不是声称即将进行的 PR 或最终检查已经成功。这些步骤所做的更改属于下面检查的差异。
 
-   Run the project's full test suite and its configured lint command on the finished change before simplification and review.
+1. **运行核心质量检查**
 
-2. **Simplify** (conditional; separate from code review)
+   在简化和审查之前，对已完成的更改运行项目的完整测试套件及其配置的 lint 命令。
 
-   Before code review, apply the project’s simplification threshold when one is specified. Otherwise invoke **`ce-simplify-code`** with `mode:pipeline` at **>=30 substantive changed code lines**. Count human-authored code, not total diff lines. Skip when the diff is purely mechanical (formatting, dependency bumps, lint-only fixes, generated artifacts) or when substantive code stays under the threshold even though the total diff is larger.
+2. **简化**（有条件；与代码审查分开）
 
-   This step refines reuse, quality, and efficiency on the **current diff** so any later review sees cleaner code. It is not a substitute for code review.
+   在代码审查之前，在指定项目的简化阈值时应用该阈值。否则，在 **>=30 个实质性更改的代码行**处使用 `mode:pipeline` 调用 **`ce-simplify-code`**。计算人类编写的代码，而不是总差异行数。当差异纯粹是机械差异（格式化、依赖版本调整、仅 lint 修复、生成产物）时或当实质性代码保持在阈值以下（即使总差异较大）时，请跳过。
 
-   Pass `plan:<path>` or a scope hint when the plan or user narrowed what changed, and `proof-test:<path>` for each test the evidence record names as proving the work. If the skill is unavailable on the harness, skip or do a brief manual pass for obvious duplicate/dead code — code review (step 3) still runs regardless.
+   此步骤改进了**当前差异**的重用、质量和效率，因此以后的任何审查都会看到更清晰的代码。它不能替代代码审查。
 
-3. **Code Review**
+   当计划或用户缩小更改范围时，传递`plan:<path>`或范围提示，并为每个测试提供`proof-test:<path>`证据记录名称以证明工作。如果该技能在工具上不可用，请跳过或对明显的 duplicate/dead 代码进行简短的手动传递 - 无论如何，代码审查（步骤 3）仍然会运行。
 
-   Review the diff with **`ce-code-review`**, the plugin's portable review skill, as the single path. It sizes itself. Do not classify lite versus full; pass `depth:full` only when the plan, the task, or the user explicitly asked for a deep review. There is no harness-specific review detection. It behaves identically on every harness. A host catalog entry named `review` is not this step.
+3. **代码审查**
 
-   **Completion gate (standalone shipping).** Shipping is **not done** until exactly one of: (1) a **completed review receipt** from an actual `ce-code-review` invocation — `mode:agent` JSON with **`status: complete`** plus `artifact_path` or `run_id`, or default-mode markdown containing Actionable Findings, Coverage, and Verdict — or (2) an **explicit skip phrase** in the shipping summary: `Code review: skipped (mechanical diff)`, `Code review: skipped (ce-code-review unavailable)`, or (interactive only) `Code review: harness-native fallback`, each with a one-line reason. Silent omit is invalid. Do **not** accept `status: failed`, `degraded`, or `skipped` as a completed receipt even when `artifact_path`/`run_id` is present; treat those as review unavailable and follow the unavailable path below. **Never substitute** mental self-review, "external / prior findings already applied," or ad-hoc skimming. A host review command alone is **not** a substitute when `ce-code-review` can load; it only counts after the unavailable path below, via the `harness-native fallback` phrase.
+   使用插件的便携式审查技能 **`ce-code-review`** 作为单一路径来审查差异。它会调整自己的大小。不要将精简版与完整版进行分类；仅当计划、任务或用户明确要求深入审查时才通过`depth:full`。没有特定于宿主的审查检测。它在每个宿主上的行为都相同。名为 `review` 的主机目录条目不是此步骤。
 
-   **Skip dedicated review only for a purely mechanical diff**: formatting, dependency-version bumps, lint-only fixes, generated artifacts (the same class step 2 skips for simplify), including multi-file mechanical-only diffs (e.g. package + lockfile, formatter across files). **Not mechanical:** behavior-bearing edits (single- or multi-file), control-flow / error-class / tests-for-behavior changes, or applying external or prior review findings. Note the exact skip phrase above. Everything else gets reviewed.
+   **完成门（独立交付）。**交付**未完成**，直到满足以下条件之一：(1) 来自实际 `ce-code-review` 调用的 **已完成的审核收据** — `mode:agent` JSON 和 **`status: complete`** 加 `artifact_path` 或 `run_id`，或包含可操作发现、覆盖范围和结论的默认模式 Markdown — 或 (2) **交付摘要中的明确跳过短语**：`Code review: skipped (mechanical diff)`、`Code review: skipped (ce-code-review unavailable)`或（仅限交互式）`Code review: harness-native fallback`，每个都有一行原因。静默省略无效。即使存在 `artifact_path`/`run_id`，也**不**接受 `status: failed`、`degraded` 或 `skipped` 作为完整的收据；将这些视为无法审查，并按照下面的不可用路径进行操作。 **永远不要替代**心理自我审查、“已应用外部/先前的发现”或临时浏览。当 `ce-code-review` 可以加载时，单独的主机审查命令**不是**替代品；它仅在下面的不可用路径之后通过 `harness-native fallback` 短语进行计数。
 
-   **Review is not fix — two steps:**
+   **仅跳过纯粹机械差异的专门审查**：格式化、依赖项版本碰撞、仅 lint 修复、生成的产物（为了简化而跳过同一类步骤 2），包括多文件仅机械差异（例如包 + 锁定文件、跨文件的格式化程序）。 **非机械性：**行为承载编辑（单个或多文件）、控制流/错误类/行为测试更改，或应用外部或先前的审查结果。请注意上面的确切跳过短语。其他一切都会受到审查。
 
-   **3a. Review (read-only).** Invoke `ce-code-review` through the host's normal skill-invocation mechanism with `mode:agent` (add `plan:<path>` when known, plus `plan_group:<label>` when the diff builds one PR group of a multi-PR plan; `base:<ref>` when the diff base is resolved). Skill invocation means loading the cataloged skill definition and following it through that mechanism; `ce-code-review` does not require a separate executable, runner, or binary. Pass **`depth:full`** when the plan, the task, or the user explicitly asked for a full / deep / thorough review; that is the one escalation signal `ce-code-review` cannot infer from the diff alone. Do not pass `mode:autofix`. Parse the JSON and retain the receipt only when `status` is `complete` (plus `artifact_path` / `run_id`).
+   **审核并不能解决问题——两个步骤：**
 
-   **3b. Apply fixes (the caller applies them, not `ce-code-review`).** When the completed receipt has no actionable findings, record that and go straight to the Residual Work Gate. Otherwise load `references/review-findings-followup.md`: check findings against the evidence and agreed scope, then apply justified fixes inline or in subagent batches grouped by file, as that reference decides. The orchestrator merges, tests, and commits. Then proceed to the Residual Work Gate.
+   **3a。审核（只读）。** 通过主机的正常技能调用机制使用 `mode:agent` 调用 `ce-code-review`（已知时添加 `plan:<path>`，当 diff 构建多 PR 计划的一个 PR 组时添加 `plan_group:<label>`；解析 diff 基础时添加 `base:<ref>`）。技能调用意味着加载编目技能定义并通过该机制遵循它； `ce-code-review` 不需要单独的可执行文件、运行程序或二进制文件。当计划、任务或用户明确要求进行全面/深入/彻底的审查时通过**`depth:full`**；这是唯一一个升级信号 `ce-code-review` 无法单独从 diff 推断出来。不要超过`mode:autofix`。仅当`status`为`complete`（加上`artifact_path` / `run_id`）时，解析JSON并保留收据。
 
-   **If the top-level `ce-code-review` attempt cannot produce a completed receipt:** Preserve the review requirement by entering this branch only when the cataloged skill definition fails to load, or an attempted top-level invocation has terminated without a usable completed receipt and no recovery remains inside `ce-code-review`. Evidence comes from the definition load or the top-level terminal outcome; intermediate internal events never establish caller-owned unavailability. A missing dedicated runner, executable, or binary is not evidence when the definition loads, so proceed through 3a and let `ce-code-review` own its recovery. In an **interactive** session, run the harness-native review if the session catalog lists one (use that entry's listed path; it is not a Compound Engineering skill), fix inline, and note `Code review: harness-native fallback` with a one-line reason (that phrase is what satisfies the completion gate; a silent mental review does not). In a **non-interactive** session (autonomous pipeline, or no native review available), skip the dedicated step, note `Code review: skipped (ce-code-review unavailable)`, and add an explicit manual diff scan to Final Validation. Never silently ship a non-mechanical change with no review of any kind.
+   **3b.应用修复（调用者应用它们，而不是`ce-code-review`）。**当完成的收据没有可操作的发现时，记录下来并直接进入剩余工作门。否则加载`references/review-findings-followup.md`：根据证据和商定的范围检查结果，然后按照参考决定，内联或按文件分组的子代理批次中应用合理的修复。协调器合并、测试和提交。然后前往剩余工作门。
 
-4. **Residual Work Gate** (REQUIRED when `ce-code-review` ran and left justified unresolved findings)
+   **如果顶级 `ce-code-review` 尝试无法生成完整的收据：** 仅当编目技能定义加载失败，或者尝试的顶级调用已终止且没有可用的完整收据并且 `ce-code-review` 内没有保留任何恢复时，才通过进入此分支来保留审核要求。证据来自定义负载或顶层终端结果；中间内部事件永远不会造成调用者拥有的不可用性。当定义加载时，丢失的专用运行程序、可执行文件或二进制文件并不是证据，因此继续执行 3a 并让 `ce-code-review` 拥有其恢复。在**交互式**会话中，如果会话目录列出了一个（使用该条目的列出路径；它不是Compound Engineering技能），则运行harness-native审核，修复内联，并用一行原因注释`Code review: harness-native fallback`（该短语满足完成门；静默的心理审核则不能）。在**非交互式**会话（自主管道，或没有可用的本机审核）中，跳过专用步骤，注意`Code review: skipped (ce-code-review unavailable)`，并将显式手动差异扫描添加到最终验证。切勿在没有任何形式审查的情况下默默地发布非机械变更。
 
-   Compare the review's Actionable Findings with the fixes applied and the requested outcome. Close rejected claims; they are not unfinished work. Continue authorized fixes needed for completion without asking again for permission.
+4. **剩余工作门**（当 `ce-code-review` 运行并留下合理的未解决结果时需要）
 
-   If an unresolved problem prevents the requested outcome or shows that an agreed decision cannot work, do not accept it as a leftover risk. Resolve it within existing permission, or return `status: blocked` with the missing evidence or user decision, the consequence, and a recommendation. Autonomous runs return the blocker rather than assume consent. Group related decisions that need the user.
+   将审核的可操作结果与应用的修复和请求的结果进行比较。关闭被拒绝的索赔；它们不是未完成的工作。继续完成所需的授权修复，无需再次请求许可。
 
-   Leave an action outside the required outcome unapplied when evidence or permission is missing. Continue independent work that is already authorized. Remaining concerns that do not prevent completion do not need a menu asking what to do next. Before Final Validation, record each justified concern, why it is deferred, and which review raised it. Use the authorized PR's `## Unapplied review findings` section, or follow `references/tracker-defer.md` when authorized to record it in the issue tracker. If neither destination is authorized or available, return the concerns in full and state they are recorded nowhere else. Recording a concern does not give permission to act on it.
+   如果未解决的问题阻碍了所要求的结果或表明商定的决定无法发挥作用，请勿将其视为遗留风险。在现有许可范围内解决该问题，或者返回 `status: blocked` 以及缺少的证据或用户决定、后果和建议。自主运行返回阻塞项而不是假设同意。需要用户进行分组的相关决策。
 
-   Skip the gate when there are no justified remaining concerns or dedicated review was skipped. A reported count alone does not decide whether to stop.
+   当缺乏证据或许可时，不应用所需结果之外的操作。继续已授权的独立工作。不妨碍完成的剩余问题不需要菜单询问下一步做什么。在最终验证之前，记录每个合理的问题、推迟的原因以及哪个审核提出了该问题。使用授权的PR的`## Unapplied review findings`部分，或在授权时按照`references/tracker-defer.md`将其记录在问题跟踪器中。如果两个目的地均未获得授权或不可用，请完整返回问题并说明它们未在其他地方记录。记录问题并不代表允许对其采取行动。
 
-5. **Final Validation**
+   当没有合理的剩余顾虑或跳过专门审查时，请跳过大门。仅报告计数并不能决定是否停止。
 
-   Before shipping, re-open the plan and re-check its active units, requirements, Verification Contract, and Definition of Done against the diff (for one PR group of a multi-PR plan, check only that group's units, the requirements they trace to, and the parts of the Verification Contract and Definition of Done those units cover), because context may have been compacted to a summary that dropped detail. The change is ready when:
-   - every task is complete, and every `Deferred to Implementation` question was resolved;
-   - Testing addressed: tests and lint pass, and new or changed behavior has test coverage or a recorded reason it needs none;
-   - each plan requirement (`Requirements`, or legacy `Requirements Trace`) is satisfied by the work;
-   - code from approaches that did not pan out has been removed from the diff;
-   - UI work built from a Figma design matches it;
-   - when the review step recorded `Code review: skipped (ce-code-review unavailable)`, a manual scan of the diff found nothing that blocks shipping.
+5. **最终验证**
 
-## Phase 4: Ship It
+   稍后的审查修复可能会暴露*新的*已验证的更正。仅将相同的活动检查点应用于该事件；不要重新捕获已经有结果的事件。比较自上次checks/review以来的更改，包括测试、lint 配置以及通过捕获或关闭添加的审查标准。对最终树进行受影响的检查；如果先前审核未涵盖新的行为承载增量或修订的审核规则，请在交付前根据步骤 3 获取该增量的适用审核。保留范围不变的有效收据，并注明最终证据。纯粹的文档遵循适合变更的正常检查。
 
-1. **Prepare Validation Context**
+   在交付之前，重新打开计划并根据差异重新检查其活动单元、要求、验证合同和完成定义（对于多 PR 计划中的一个 PR 组，仅检查该组的单元、它们跟踪到的要求以及这些单元所涵盖的验证合同和完成定义的部分），因为上下文可能已被压缩为放弃了细节的摘要。在以下情况下更改已准备就绪：
+   - 每项任务都完成了，每一个`Deferred to Implementation`问题都得到了解决；
+   - 测试已解决：测试和 lint 通过，新的或更改的行为具有测试覆盖率或记录了不需要的原因；
+   - 工作满足每个计划要求（`Requirements`，或遗留`Requirements Trace`）；
+   - 未成功的方法中的代码已从差异中删除；
+   - 根据 Figma 设计构建的 UI 工作与其相匹配；
+   - 当审查步骤记录`Code review: skipped (ce-code-review unavailable)`时，手动扫描差异发现没有任何阻碍交付的东西。
 
-   Do not try to launch a dedicated CE evidence-capture workflow. Modern harnesses provide their own browser, screenshot, terminal recording, and artifact capture tools; use those directly only when the user asks or when the artifact already exists.
+## 第四阶段：交付
 
-   Note whether the completed work has observable behavior (UI rendering, CLI output, API/library behavior with a runnable example, generated artifacts, or workflow output), and summarize any manual validation performed. If the user supplied evidence (URL, markdown embed, local artifact path), pass it to `ce-commit-push-pr` as PR-description context.
+1. **准备验证上下文**
 
-2. **Commit and Create Pull Request**
+   不要尝试启动专用的 CE 证据捕获工作流程。现代宿主提供自己的浏览器、屏幕截图、终端记录和产物捕获工具；仅当用户询问或产物已存在时才直接使用它们。
 
-   **Ship-handoff gate.** Before loading `ce-commit-push-pr` or `ce-commit`, confirm the Phase 3 code-review completion gate is satisfied (completed review receipt **or** exact skip / harness-native-fallback phrase). If neither is present, stop and run step 3 (or write the legitimate skip); do not push "and review later." Pass the receipt summary (`status: complete` + `artifact_path`/`run_id`) or the skip phrase into the shipping summary and PR-description context, alongside the unapplied review findings.
+   注意已完成的工作是否具有可观察的行为（UI 渲染、CLI 输出、可运行示例的 API/library 行为、生成的产物或工作流输出），并总结执行的任何手动验证。如果用户提供了证据（URL、markdown 嵌入、本地产物路径），则将其作为 PR 描述上下文传递给 `ce-commit-push-pr`。
 
-   **Do not publish what the user did not offer.** `ce-commit-push-pr` pushes the whole branch and its PR spans every commit on it. Check the pre-work scope Phase 1 Step 2 recorded: if the branch carries pre-existing commits that are not on the remote (or Step 2 could not tell), and those commits are not already in an open PR for this branch, load `ce-commit` instead: commit the work locally under any `exclude:` paths, say in one line what stayed local and why, and say that you will push and open the PR on request. Do not ask first; a local commit is reversible and one word gets the rest. Otherwise:
+2. **提交并创建拉取请求**
 
-   **Project-defined shipping process wins.** If the project's active instructions already in your context name a process that handles the shipping handoff (committing, pushing, and opening the PR), such as a named skill or command (e.g. a `/create-pr` skill), a stacking tool, or documented steps, use that process instead of the default below. Conventions the default already honors (commit-message format, PR title style, PR template) are not a process and do not trigger this. Presence of a skill directory alone is not a directive; the instruction has to say so. Hand the process the same context this step would hand `ce-commit-push-pr` (plan summary, testing notes, evidence, review receipt, unapplied review findings). If it cannot take a piece, state that in the shipping summary. When this run recorded `Code review: skipped (mechanical diff)`, also hand it the condition that a mechanical diff needs no post-PR watch; the process decides how it honors that. The `exclude:` paths are a constraint, not context: if the process cannot keep them out of the commit, do not run it; use the default below, which can. The ship-handoff gate and the publish rule above hold whichever process runs. Precedence: the user's stated preference for this run > the project-defined process > the default. Absent a project-defined process:
+   **交付交接门。** 在加载 `ce-commit-push-pr` 或 `ce-commit` 之前，确认满足第 3 阶段代码审查完成门（已完成的审查收据 ** 或 ** 精确跳过/harness-native-fallback 短语）。如果两者都不存在，则停止并运行步骤 3（或写入合法的跳过）；不要催促“稍后再回顾”。将收据摘要 (`status: complete` + `artifact_path`/`run_id`) 或跳过短语传递到交付摘要和 PR 描述上下文中，以及未应用的审核结果。
 
-   Load the `ce-commit-push-pr` skill with `branding:on` to handle committing, pushing, and PR creation. When this run recorded `Code review: skipped (mechanical diff)`, also pass `babysit:off` (a mechanical diff needs no post-PR watch) and name that in the PR-description context. Pass `exclude:<paths>` naming every file from Phase 1 Step 2's pre-work scope that this run did not commit (untouched WIP and any leave-uncommitted files alike), so the skill's dirty-file scan leaves the user's work out of the shipping commit. This explicit signal records that the Compound Engineering workflow produced the work; the skill handles convention detection, branch safety, logical commit splitting, adaptive PR descriptions, and PR attribution. If the session already stated how the PRs are arranged (a PR stack, and any parent PR or branch to stack on), pass it on that invocation.
+   **不要发布用户未提供的内容。** `ce-commit-push-pr` 推送整个分支，其 PR 跨越其上的每个提交。检查记录的开始前的工作范围第 1 步第 2 步：如果分支携带不在远程上的预先存在的提交（或步骤 2 无法判断），并且这些提交尚未在该分支的打开 PR 中，则加载 `ce-commit`：在任何 `exclude:` 路径下本地提交工作，在一行中说明保留在本地的内容和原因，并说明您将推送并打开 PR根据要求。先不要问；本地提交是可逆的，一个词就可以得到其余的内容。否则：
 
-   When providing context for the PR description, include:
-   - The plan's summary and key decisions
-   - Testing notes (tests added/modified, manual testing performed)
-   - Evidence context from step 1, so `ce-commit-push-pr` can decide whether to ask about capturing evidence
-   - Figma design link (if applicable)
-   - Code-review receipt (`status` + `artifact_path`/`run_id`) or the exact skip phrase from the completion gate
-   - Any findings accepted in the Phase 3 Residual Work Gate, rendered verbatim as a dedicated `## Unapplied review findings` section: one checkbox bullet per finding (`- [ ] <severity> — <file:line> — <title>`, `suggested_fix` beneath when present) so the reviewer ticks what they close, plus the review run context
+   **项目定义的交付流程获胜。** 如果项目的活动指令已在您的上下文中命名了一个处理交付移交的流程（提交、推送和打开PR），例如指定的技能或命令（例如`/create-pr`技能）、堆叠工具或记录的步骤，请使用该流程而不是下面的默认流程。默认已遵循的约定（提交消息格式、PR标题样式、PR模板）不是一个过程，不会触发此过程。技能目录的存在本身并不是一个指令；而是一个指令。指令必须这么说。为该流程提供与此步骤相同的背景`ce-commit-push-pr`（计划摘要、测试说明、证据、审查收据、未应用的审查结果）。如果不能接受一件，请在交付摘要中注明。当这次运行记录`Code review: skipped (mechanical diff)`时，也给它一个条件，机械差异不需要PR后续看护；这个过程决定了它如何尊重这一点。 `exclude:` 路径是一个约束，而不是上下文：如果进程无法将它们排除在提交之外，则不要运行它；使用下面的默认即可。上面的传送门和发布规则保留运行的进程。优先级：用户对此运行指定的偏好 > 项目定义的流程 > 默认。缺少项目定义的流程：
 
-   If the Residual Work Gate filed residual findings as tracker tickets, back-fill the opened PR's URL into those tickets once it exists. This is best-effort, so that each ticket links to the PR carrying the finding.
+   使用 `branding:on` 加载 `ce-commit-push-pr` 技能来处理提交、推送和 PR 创建。当此运行记录`Code review: skipped (mechanical diff)`时，还传递`babysit:off`（机械差异不需要PR 后续看护）并在PR描述上下文中命名。通过 `exclude:<paths>` 命名第 1 阶段步骤 2 的开始前的工作范围中本次运行未提交的每个文件（未触及 WIP 以及任何未提交的文件），因此技能的脏文件扫描将用户的工作排除在交付提交之外。这个明确的信号记录了Compound Engineering工作流程产生了该作品；该技能处理约定检测、分支安全、逻辑提交拆分、自适应 PR 描述和 PR 归因。如果会话已经说明了 PRs 的排列方式（PR 堆栈，以及要堆栈的任何父级 PR 或分支），则在该调用中传递它。
 
-   If the user prefers to commit without creating a PR, load the `ce-commit` skill instead, and only after the same ship-handoff gate passes.
+   为 PR 描述提供上下文时，包括：
+   - 计划摘要和关键决定
+   - 测试说明（测试added/modified，执行手动测试）
+   - 步骤 1 中的证据上下文，因此 `ce-commit-push-pr` 可以决定是否询问捕获证据
+   - Figma 设计链接（如果适用）
+   - 代码审查收据 (`status` + `artifact_path`/`run_id`) 或来自完成门的确切跳过短语
+   - 在第 3 阶段剩余工作门中接受的任何发现，逐字呈现为专用 `## Unapplied review findings` 部分：每个发现有一个复选框项目符号（存在时在下方`- [ ] <severity> — <file:line> — <title>`、`suggested_fix`），以便审查者勾选他们关闭的内容以及审阅运行上下文
 
-3. **Notify User**
-   - Summarize what was completed
-   - Link to PR (if one was created)
-   - Note any follow-up work needed
-   - Suggest next steps if applicable
-   - For a multi-PR plan, include the group report defined in `references/multi-pr-delivery.md`
+   如果“剩余工作门”将剩余发现结果作为跟踪票证提交，则在这些票证存在后，将打开的 PR 的 URL 回填到这些票证中。这是尽最大努力，以便每张票都链接到携带发现的PR。
+
+   如果用户希望在不创建PR的情况下进行提交，请改为加载`ce-commit`技能，并且仅在相同的交付交接门通过后才加载。
+
+3. **通知用户**
+   - 总结一下已经完成的事情
+   - 链接到PR（如果已创建）
+   - 记下需要的任何后续工作
+   - 建议后续步骤（如果适用）
+   - 对于多PR计划，包括`references/multi-pr-delivery.md`中定义的组报告

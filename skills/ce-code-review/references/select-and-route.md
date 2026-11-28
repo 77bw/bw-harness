@@ -1,89 +1,89 @@
-# Selecting reviewers and binding the adversarial route
+# 选择审稿人并绑定对抗路线
 
-Read this at Stage 3 (Select reviewers), together with `references/persona-catalog.md`. It defines the layers reviewers are selected in, the search for project standards paths, the check that shrinks the reviewer list for a small low-risk diff, and the decision between the cross-model peer and the in-process adversarial reviewer.
+在第 3 阶段（选择审查者）与 `references/persona-catalog.md` 一起阅读此内容。它定义了选择审查者的层、项目标准路径的搜索、针对小的低风险差异缩小审查者列表的检查，以及跨模型同行和进程内对抗性审查者之间的决策。
 
-## Reviewers
+## 审稿人
 
-Reviewer personas are selected in layers. The persona catalog in `references/persona-catalog.md` (read it at Stage 3) has the full selection criteria and the condition for spawning each reviewer. Each selected reviewer is a generic subagent seeded with a local prompt file from `references/personas/`; do not dispatch standalone agents by type/name.
+审查者角色是分层选择的。 `references/persona-catalog.md`中的角色目录（在第3阶段阅读）具有完整的选择标准和产生每个评论者的条件。每个选定的审查者都是一个通用子代理，其种子来自 `references/personas/` 的本地提示文件；不要在 type/name 之前派遣独立代理。
 
-**Core (always-on):** `correctness-reviewer`.
+**核心（始终开启）：** `correctness-reviewer`。
 
-**Standards conditional:** `project-standards-reviewer` runs only when Stage 3b finds at least one applicable standards file (Stage 3b is the project-standards path search below). When the search succeeds but finds nothing, skip this persona and say so in Coverage, because this persona is not allowed to invent standards beyond those files.
+**标准条件：** `project-standards-reviewer` 仅当第 3b 阶段找到至少一个适用的标准文件时运行（第 3b 阶段是下面的项目标准路径搜索）。当搜索成功但没有找到任何内容时，请跳过此角色并在覆盖范围中如此说明，因为不允许此角色发明超出这些文件的标准。
 
-**Generic conditional:**
+**通用条件：**
 
-- `testing-reviewer` — test files, test infrastructure, mocks, fixtures, or harness behavior changed; or the diff changes meaningful runtime behavior without corresponding test work. Behavioral triggers include new or changed branches, state mutation, API/control-flow behavior, and error handling. Production-file presence alone and non-behavioral edits do not select it.
-- `maintainability-reviewer` — a large or structural diff: substantial refactor, new abstractions, file moves, coupling/type-boundary changes, or at least 200 executable changed lines.
-- `agent-native-reviewer` — an agent-facing product surface changed: an agent tool surface (MCP tools, agent tool or function definitions, system-prompt construction), or a user-facing capability added or changed in a product that already has such a surface. Editing only the prose of skills, agent definitions, or instruction files does not select it.
-- `learnings-researcher` — there is institutional knowledge to check the change against: `<root>/solutions/` exists and a cheap path/title search finds a plausible match for the changed modules or patterns (the existence of a corpus alone is not enough), or, in local scope, the repo's CE config declares Compound Packs (Stage 1b `declared_packs`). Declared packs need no pre-search; the persona matches their rules itself.
+- `testing-reviewer` — 测试文件、测试基础设施、模拟、固定装置或宿主行为已更改；或者 diff 改变了有意义的运行时行为而没有相应的测试工作。行为触发器包括新的或更改的分支、状态突变、API/control-flow行为和错误处理。单独的生产文件存在和非行为编辑不会选择它。
+- `maintainability-reviewer` — 大型或结构性差异：大量重构、新抽象、文件移动、coupling/type-boundary 更改或至少 200 个可执行更改行。
+- `agent-native-reviewer` — 面向代理的产品表面已更改：代理工具表面（MCP 工具、代理工具或功能定义、系统提示构建），或在已有此类表面的产品中添加或更改的面向用户的功能。仅编辑技能、代理定义或说明文件的散文不会选择它。
+- `learnings-researcher` — 有制度知识来检查更改：`<root>/solutions/` 存在，并且廉价的 path/title 搜索会找到更改的模块或模式的合理匹配（仅存在语料库是不够的），或者，在本地范围内，存储库的 CE 配置声明Compound Pack（阶段 1b `declared_packs`）。已申报的包无需预先搜索；人物角色符合他们的规则本身。
 
-**Cross-cutting conditional (per diff):**
+**横切条件（每个差异）：**
 
-- `security-reviewer` — auth, public endpoints, user input, permissions (including feature-flag or entitlement gates controlling reachability)
-- `performance-reviewer` — DB queries, data transforms, caching, async
-- `api-contract-reviewer` — routes, serializers, type signatures, versioning
-- `data-migration-reviewer` — migration files / schema dumps / backfills (see the `data-migration` spawn gate in Stage 3)
-- `reliability-reviewer` — error handling, retries, timeouts, background jobs
-- `adversarial-reviewer` lens — the Adversarial selection condition in `references/modes-and-output.md` applies. Satisfy this lens with the independent cross-model adversarial pass when a peer job on the approved route starts successfully. Dispatch the in-process `adversarial-reviewer` when the peer cannot start, or when the fold-in step later finds the peer never ran, or gives up after a retry on the same route fails on a rate limit and restores the local reviewer; do not run both reviews on the same brief.
-- `previous-comments-reviewer` — PR with existing review comments (PR-only, comment-gated)
+- `security-reviewer` — 身份验证、公共端点、用户输入、权限（包括控制可达性的功能标志或权利门）
+- `performance-reviewer` — 数据库查询、数据转换、缓存、异步
+- `api-contract-reviewer` — 路由、序列化器、类型签名、版本控制
+- `data-migration-reviewer` — 迁移文件/模式转储/回填（请参阅第 3 阶段中的 `data-migration` 生成门）
+- `reliability-reviewer` — 错误处理、重试、超时、后台作业
+- `adversarial-reviewer` 镜头 — 适用`references/modes-and-output.md` 中的对抗性选择条件。当批准路线上的对等作业成功启动时，通过独立的跨模型对抗性传递来满足此镜头。当对等点无法启动时，或者当稍后的折叠步骤发现对等点从未运行时，或者在同一路由上的重试因速率限制失败并恢复本地审核者后放弃时，调度进程内`adversarial-reviewer`；不要对同一份简报进行两项审查。
+- `previous-comments-reviewer` — PR 包含现有审阅评论（仅限PR，评论门控）
 
-**Stack-specific conditional (per diff):** `frontend-races-reviewer` (async UI state, timers, listeners, or lifecycle cleanup that can race, in any browser UI framework).
+**特定于堆栈的条件（每个差异）：** `frontend-races-reviewer`（异步 UI 状态、计时器、侦听器或可以在任何浏览器 UI 框架中竞争的生命周期清理）。
 
-**CE conditional (migration-specific):** local prompt asset `deployment-verification-agent` — deployment checklist + rollback when the migration gate applies and the change is risky.
+**CE 条件（特定于迁移）：** 本地提示资产 `deployment-verification-agent` — 部署清单 + 当迁移门适用并且更改有风险时回滚。
 
-## Review Scope
+## 审查范围
 
-A full review always spawns correctness, adds project-standards when applicable files exist, then adds only the generic, cross-cutting, stack-specific, and CE conditionals justified by the diff. This file runs only on the full spine; it does not invent irrelevant domains. A Rails auth feature might add security, reliability, and adversarial while still skipping agent-native and learnings when those surfaces are absent.
+完整的审查总是会产生正确性，在存在适用文件时添加项目标准，然后仅添加由差异证明的通用、横切、特定于堆栈和 CE 条件。该文件仅在整个脊柱上运行；它不会发明不相关的领域。 Rails 身份验证功能可能会增加安全性、可靠性和对抗性，同时在这些表面不存在时仍然跳过代理本机和学习。
 
-## Language-Aware Conditionals
+## 语言感知条件
 
-Select stack-specific reviewers only when the diff touches runtime behavior they specialize in (async UI races), never mechanically from file extensions alone. The trigger is meaningful changed behavior in that stack's runtime domain. Structural quality (complexity deletion, 1k-line regressions, type-boundary leaks) belongs to the conditional `maintainability-reviewer`; do not spawn extra reviewers for language conventions, philosophy, or "strict bar" passes.
+仅当差异涉及他们专门从事的运行时行为（异步 UI 竞争）时，才选择特定于堆栈的审查者，而不是仅机械地从文件扩展名中选择审查者。触发器是该堆栈的运行时域中有意义的更改行为。结构质量（复杂性删除、1k 线回归、类型边界泄漏）属于条件`maintainability-reviewer`；不要为语言约定、哲学或“严格标准”通过产生额外的审查者。
 
-### Stage 3: Select reviewers
+### 第三阶段：选择审稿人
 
-Read the diff and file list from Stage 1 and the helper JSON from Stage 1b. Correctness is automatic; project-standards is decided by the Stage 3b (Discover project standards paths) result. Read `references/persona-catalog.md` from this skill's directory now; it defines the spawn condition for every other reviewer. Select generic reviewers before domain reviewers: testing for changed test/harness surfaces, or when meaningful runtime behavior changed without corresponding test work; maintainability only for large or structural work; agent-native only for agent-facing work; and learnings when a cheap search finds plausible matches in an existing `<root>/solutions/` corpus or, in local scope, the repo declares Compound Packs (Stage 1b `declared_packs`). For the behavioral testing trigger, require concrete diff evidence such as new or changed branches, state mutation, API/control-flow behavior, or error handling. Do not select testing from production-file presence alone or for non-behavioral edits. For each remaining conditional, decide whether the diff warrants it. Diff-derived helper signals (`signals`, `test_files_changed`, `agent_surface`, `has_learnings_corpus`) are prompts to consider a persona, never automatic selection. `declared_packs` is a config fact the learnings selection condition reads, not a diff signal.
+读取阶段 1 中的差异和文件列表以及阶段 1b 中的帮助器 JSON。正确性是自动的；项目标准由阶段 3b（发现项目标准路径）结果决定。现在从该技能的目录中读取`references/persona-catalog.md`；它定义了每个其他审查者的生成条件。在领域审查者之前选择通用审查者：测试更改的test/harness表面，或者当有意义的运行时行为发生变化而没有相应的测试工作时；仅适用于大型或结构性工作的可维护性；代理本地仅适用于面向代理的工作；当廉价搜索在现有 `<root>/solutions/` 语料库中找到看似合理的匹配项时，或者在本地范围内，存储库声明Compound Pack（阶段 1b `declared_packs`）时，我们会学到知识。对于行为测试触发器，需要具体的差异证据，例如新的或更改的分支、状态突变、API/control-flow 行为或错误处理。不要仅从生产文件存在或非行为编辑中选择测试。对于每个剩余的条件，确定差异是否合理。 Diff 派生的辅助信号（`signals`、`test_files_changed`、`agent_surface`、`has_learnings_corpus`）是考虑角色的提示，而不是自动选择。 `declared_packs` 是学习选择条件读取的配置事实，而不是差异信号。
 
-**Adversarial selection is consequence-based.** Apply the condition already read in `references/modes-and-output.md`, including its explicit-request override. Instruction prose, configuration, and executable code receive the same assessment of the behavior they govern. For a verification mechanism, identify the material failure its false success could conceal; ordinary per-feature assertions remain the testing reviewer's job. Include the affected boundary and consequence in the conditional reviewer's selection reason.
+**对抗性选择是基于结果的。** 应用已在 `references/modes-and-output.md` 中读取的条件，包括其显式请求覆盖。指令散文、配置和可执行代码对其所管理的行为接受相同的评估。对于验证机制，识别其错误成功可能掩盖的重大故障；普通的按功能断言仍然是测试审查者的工作。将受影响的边界和后果纳入有条件评审者的选择理由中。
 
-**`previous-comments` is PR-only AND comment-gated.** Only select this persona when both conditions hold:
+**`previous-comments` 仅限于 PR 并且受评论限制。** 仅当两个条件都成立时才选择此角色：
 
-1. Stage 1 gathered PR metadata (PR number or URL was provided as an argument, or `gh pr view` returned metadata for the current branch).
-2. `hasPriorComments` from Stage 1 is true (the PR has at least one review submission or issue comment).
+1. 第 1 阶段收集 PR 元数据（PR 数字或 URL 作为参数提供，或 `gh pr view` 返回当前分支的元数据）。
+2. 第一阶段中的`hasPriorComments`为真（PR至少有一个审核提交或问题评论）。
 
-Skip it for standalone branch reviews with no associated PR, and skip it for PRs with no prior feedback yet -- there is nothing for the persona to verify, and a spawned subagent that returns empty findings still costs the full subagent startup overhead (persona spec, diff, schema, plus its own gh calls).
+对于没有关联 PR 的独立分支审查，请跳过它，对于没有事先反馈的PRs，请跳过它 - 角色没有任何内容需要验证，并且返回空结果的生成子代理仍然会花费全部子代理启动开销（角色规范、diff、模式以及其自己的 gh 调用）。
 
-Stack-specific personas are additive when runtime behavior warrants them. A UI change that adds polling or an async state update may warrant `frontend-races`; a TypeScript boundary change may warrant `api-contract` only when the diff changes an externally consumed contract, not merely because it exports a symbol.
+当运行时行为保证时，特定于堆栈的角色是附加的。添加轮询或异步状态更新的 UI 更改可能需要 `frontend-races`；仅当 diff 更改外部使用的合约时，TypeScript 边界更改才可能保证`api-contract`，而不仅仅是因为它导出符号。
 
-**`data-migration` spawn gate.** Select `data-migration-reviewer` only when the diff includes at least one migration or schema artifact: `db/migrate/*`, `db/schema.rb`, `db/structure.sql`, Alembic/Flyway/Liquibase migration paths, or explicit backfill/data-transform scripts (rake tasks, one-off data migration classes). **Do not spawn** for model-only changes, query-only refactors, serializers/controllers that reference columns without a migration or schema dump in the diff, or migration tests alone.
+**`data-migration` 生成门。** 仅当差异包含至少一个迁移或架构产物时才选择 `data-migration-reviewer`：`db/migrate/*`、`db/schema.rb`、`db/structure.sql`、Alembic/Flyway/Liquibase 迁移路径或显式 backfill/data-transform 脚本（rake 任务、一次性数据迁移类）。 **不要针对仅模型更改、仅查询重构、在差异中没有迁移或架构转储的引用列的serializers/controllers，或单独的迁移测试生成**。
 
-For `deployment-verification-agent`, use the same migration-artifact condition when the change is risky (destructive DDL, backfills, NOT NULL without default, column renames/drops).
+对于 `deployment-verification-agent`，当更改存在风险时，请使用相同的迁移产物条件（破坏性 DDL、回填、无默认值的 NOT NULL、列 renames/drops）。
 
-### Stage 3b: Decide the project-standards dispatch
+### 阶段 3b：决定项目标准调度
 
-Stage 1c already paired each criteria file governing this change with the changed files it governs. Decide from that mapping whether the `project-standards` persona runs. When the instruction-file fallback supplied the criteria for any changed file, name it as the fallback in Coverage. **When uncertain, run the persona rather than skip it** — an error is never an empty result:
+第 1c 阶段已将管理此更改的每个标准文件与其管理的更改文件配对。根据该映射决定 `project-standards` 角色是否运行。当指令文件后备为任何更改的文件提供标准时，将其命名为 Coverage 中的后备。 **当不确定时，运行角色而不是跳过它** - 错误永远不会是空结果：
 
-- One or more applicable paths: select `project-standards` and pass the mapping inside a `<standards-paths>` block in its Stage 4 context. The persona applies the precedence Stage 1c resolved rather than re-deriving it, and reads the files itself, targeting only relevant sections.
-- Empty successful search: do not dispatch `project-standards`; record `project standards: not run (no applicable standards files)` in Coverage.
-- Search failure or uncertain scope: dispatch `project-standards` with the uncertainty stated.
+- 一个或多个适用路径：选择 `project-standards` 并将映射传递到其第 4 阶段上下文中的 `<standards-paths>` 块内。角色应用阶段 1c 已解决的优先级，而不是重新派生它，并读取文件本身，仅针对相关部分。
+- 清空成功搜索：不调度`project-standards`；在覆盖范围中记录`project standards: not run (no applicable standards files)`。
+- 搜索失败或范围不确定：派遣 `project-standards` 并注明不确定性。
 
-### Stage 3c: Depth already decided
+### 阶段 3c：深度已定
 
-The Review depth gate in `references/modes-and-output.md` already chose lite, focused, or full, before this file was read. This stage does not size the run and does not shrink the roster. You are on the full spine. Continue to Stage 3d.
+在读取此文件之前，`references/modes-and-output.md` 中的查看深度门已选择精简、集中或完整。此阶段不会调整参赛规模，也不会缩小名单。你处于完整的脊柱上。继续阶段 3d。
 
-### Stage 3d: Bind the adversarial route and final roster
+### 第3d阶段：绑定对抗路线和最终名单
 
-Complete this stage **before reading persona prompt assets, `references/dispatch-reviewers.md`, or entering Stage 4** (Dispatch reviewers). That reference's persona-file instructions are valid only once you have settled which single route covers the adversarial lens: the peer, or the in-process fallback. This stage makes that exclusive choice between a cross-model adversarial peer and the in-process `adversarial-reviewer`. Later stages use that choice and must not decide it again, except when the fold-in step finds the peer never ran, or restores the in-process reviewer after a retry on the same route fails on a rate limit.
+完成此阶段**，然后阅读角色提示资产，`references/dispatch-reviewers.md`，或进入第 4 阶段**（派遣审查者）。仅当您确定了覆盖对抗镜头的单一路线：对等方或进程内后备时，该引用的角色文件说明才有效。此阶段在跨模型对抗性对等点和进程内`adversarial-reviewer`之间做出唯一选择。后面的阶段使用该选择，并且不得再次决定它，除非折叠步骤发现对等点从未运行过，或者在同一路由上的重试因速率限制而失败后恢复进程内审查者。
 
-Both routes share the run directory Stage 1b created; do not create another.
+两条路由共享Stage 1b创建的运行目录；不要创建另一个。
 
-When adversarial was selected and the working tree is the reviewed head (standalone, `base:`, or `local-aligned` scope), read `references/cross-model-review.md` from this skill's directory in full, verify the host as that reference requires, resolve one fixed route and approve it, and make the announcement that reference requires before anything is sent to the peer (its egress announcement, which tells the user what leaves the machine). Before start, write both inputs the reference defines; you, the orchestrator, write them, not the peer. They are the dedicated host-vetted constraints file, and the separate untrusted semantic brief containing intent plus material risk divisions inferred from the current file inventory and diff. Do not embed the diff, mechanically copy every path, or combine the two files. Then start the detached peer job using the reference's exact invocation and persist its job ID, target, requested model/reasoning, and start epoch in working state, recording `--start peer` in the stage log (`references/scope.md`) in that same shell call.
+当选择对抗性且工作树是已审查的头（独立、`base:`或`local-aligned`范围）时，从该技能的目录中完整读取`references/cross-model-review.md`，按照引用要求验证主机，解析一条固定路由并批准它，并在将任何内容发送到对等方之前发布引用所需的公告（其出口公告，告诉用户什么离开机器）。在开始之前，写入参考定义的两个输入；你，协调者，来编写它们，而不是同行。它们是专用的主机审查约束文件，以及单独的不受信任的语义摘要，其中包含从当前文件清单和差异推断出的意图和重大风险划分。不要嵌入差异、机械复制每个路径或合并两个文件。然后使用引用的精确调用启动分离的对等作业，并保留其作业 ID、目标、请求的 model/reasoning，并在工作状态下启动纪元，在同一 shell 调用中将 `--start peer` 记录在阶段日志 (`references/scope.md`) 中。
 
-- If the runner returns a job ID, the peer covers the adversarial lens for this run. Remove `adversarial-reviewer` from the local roster immediately. Do not read its local persona asset or dispatch it later — except when the owning fold-in rules in `references/cross-model-recovery.md` require the did-not-run fallback or the in-process restore after a failed same-route rate-limit retry.
-- If no job starts because of a dispatch-infrastructure failure (a non-zero exit before any job id, an unresolved `$SKILL_DIR`/script path), read `references/cross-model-recovery.md` at that point and first attempt its bounded same-route hand recovery before accepting the fallback. Re-run the identical resolved route, holding target/model and read scope fixed. Keep retrying only while each failure is a new, plausibly recoverable one and the shared peer deadline holds. If recovery returns a job id, treat it as the branch above (the peer covers the lens; remove `adversarial-reviewer`). Keep `adversarial-reviewer` in the local roster as the fallback, and record the peer skip reason for Coverage, only in two cases: recovery is exhausted (a failure repeats or the deadline is spent), or the peer was never eligible to start (selection condition not met, disabled by checkout config, host un-attestable, no different provider, or CLI missing).
-- In `pr-remote` / `branch-remote`, do not start the peer; keep the selected in-process adversarial reviewer because it can inspect the reviewed refs.
+- 如果跑步者返回作业 ID，则同行将覆盖本次跑步的对抗镜头。立即从本地名册中删除`adversarial-reviewer`。不要读取其本地角色资产或稍后分派它 - 除非 `references/cross-model-recovery.md` 中的所属折叠规则要求在相同路由速率限制重试失败后执行未运行回退或进程内恢复。
+- 如果由于调度基础设施故障（任何作业 id 之前的非零退出、未解析的`$SKILL_DIR`/脚本路径）而没有作业启动，则在该点读取`references/cross-model-recovery.md`，并在接受回退之前首先尝试其有界同路由手恢复。重新运行相同的已解析路由，保持 target/model 并固定读取范围。仅当每次故障都是新的、看似可恢复的故障且共享对等截止日期有效时，才继续重试。如果recovery返回一个job id，将其视为上面的分支（对等点覆盖镜头；删除`adversarial-reviewer`）。将`adversarial-reviewer`保留在本地名册中作为后备，并记录覆盖范围的对等跳过原因，仅在两种情况下：恢复已耗尽（故障重复或截止日期已过），或者对等点从未有资格启动（不满足选择条件、被签出配置禁用、主机不可证明、没有不同的提供程序或CLI丢失）。
+- 在`pr-remote`/`branch-remote`，不启动peer；保留选定的进程内对抗性审查者，因为它可以检查已审阅的引用文档。
 
-When a job ID is returned and task tracking is active, add a distinct task that names the independent cross-model adversarial review. Keep it in progress while the detached job runs, then record its terminal outcome when the artifact is collected. Never create this task before a peer starts or leave it behind when the local adversarial fallback runs.
+当返回作业 ID 并且任务跟踪处于活动状态时，添加一个名为独立跨模型对抗性审核的不同任务。在分离作业运行时保持其进行，然后在收集产物时记录其最终结果。切勿在对等方启动之前创建此任务，也不要在本地对抗性回退运行时将其留在后面。
 
-Do not proceed until the final local roster is settled. This is a hard rule, not a preference: a started peer and the in-process adversarial reviewer must never both receive the same review brief.
+在最终本地名单确定之前不要继续。这是一条硬性规则，而不是偏好：开始的同行和正在进行的对抗性审稿人绝不能同时收到相同的审稿摘要。
 
-Announce that final team before spawning, as a user-facing summary: name the always-on reviewers plainly, and for each conditional reviewer give the one-line reason it was added (the real concern, not the keyword that matched). Do **not** put local reviewer model-tier labels (`[session model]`/`[mid-tier]`) or the internal names of the scope modes in this announcement — those are internal. Still decide each local reviewer's tier here and keep it in working state for Stage 4. The cross-model line is separate; it uses the model/reasoning and route wording from its reference, which depends on what the peer's receipt attests. This is progress reporting, not a blocking confirmation.
+在生成之前宣布最终团队，作为面向用户的摘要：清楚地命名始终在线的审查者，并为每个条件审查者给出添加它的一行原因（真正关注的问题，而不是匹配的关键字）。 **不要**在此公告中放置本地审查者模型层标签 (`[session model]`/`[mid-tier]`) 或范围模式的内部名称 - 这些是内部名称。仍然在这里决定每个本地审稿人的等级，并保持其在第 4 阶段的工作状态。跨模型线是分开的；它使用引用文档中的model/reasoning和路由措辞，这取决于对等方的收据证明的内容。这是进度报告，而不是阻塞确认。

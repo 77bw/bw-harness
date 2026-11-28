@@ -1,29 +1,29 @@
-# Explainer HTML Rendering
+# 解释器 HTML 渲染
 
-How an explainer renders as HTML. Load at compose time, not earlier. These requirements keep a standalone artifact portable and honest about its provenance.
+解释器如何呈现为 HTML。在撰写时加载，而不是更早加载。这些要求使独立的产物保持可移植性并诚实地说明其出处。
 
-## Hard invariants
+## 硬不变量
 
-- **Single self-contained HTML5 file.** No companion `.css`, `.js`, or `.svg` files. CSS lives in `<style>`. SVG lives inline. Images are base64 data URIs or inline SVG. No external requests of any kind — explainers must read identically offline and inside CSP-restricted viewers, so unlike the plan-artifact convention there is **no webfont exception**: use a system font stack.
-- **All metadata appears as visible text — single source of truth.** The visible `<h1>` is the title. A visible header `<dl>` uses the exact field labels `Date`, `Input shape`, and `Subject`; `Input shape` is exactly one of `concept`, `diff`, `idea`, or `recap`, and `Subject` names the topic, ref, or recap window. When grounding fell back to model knowledge, the same header also carries the label `Unverified — from model knowledge, not checked against current sources`. When the request identifies another reader, the header carries one more row labelled exactly `Rendered for`, naming that reader; a personal rendering omits the row entirely rather than saying "the user". No hidden machine-readable copy: no JSON script block, no `data-*` mirror, no `<meta>` duplication. Keep these existing artifact field names and enum values stable. Do not invent additional metadata rows.
-- **Display-only.** No forms, no click handlers, no interactive quizzes, no "submit" affordances, no scripts. The check-in, when present, is the static `Check yourself` section that `references/check-in.md` owns: questions first, then their answers, all visible text.
-- **ASCII identifiers.** Class names and element IDs are ASCII-only.
-- **Composition signal.** A visible footer names the composition timestamp and the composing skill: `Composed 2026-07-02 by ce-explain`.
+- **单个独立的 HTML5 文件。** 无配套 `.css`、`.js` 或 `.svg` 文件。 CSS 存在于 `<style>` 中。 SVG 内嵌。图像是 base64 数据 URI 或内联 SVG。没有任何类型的外部请求 - 解释者必须在离线和 CSP 限制的查看者内部以相同的方式阅读，因此与计划产物约定不同，**没有网络字体例外**：使用系统字体堆栈。
+- **所有元数据均显示为可见文本 — 单一事实来源。** 可见的 `<h1>` 是标题。可见标头 `<dl>` 使用精确的字段标签 `Date`、`Input shape` 和 `Subject`； `Input shape` 正是 `concept`、`diff`、`idea` 或 `recap` 之一，`Subject` 命名主题、参考或回顾窗口。当接地回落到模型知识时，相同的标题也带有标签`未验证——依据模型已有知识，未对照当前来源`。当请求识别到另一个阅读器时，标头会再携带一行精确标记为 `Rendered for` 的行，命名该阅读器；个人渲染完全省略了该行，而不是说“用户”。没有隐藏的机器可读副本：没有JSON脚本块，没有`data-*`镜像，没有`<meta>`重复。保持这些现有产物字段名称和枚举值稳定。不要发明额外的元数据行。
+- **仅显示。**没有表单，没有点击处理程序，没有交互式测验，没有“提交”功能，没有脚本。签入（如果存在）是 `references/check-in.md` 拥有的静态 `Check yourself` 部分：首先是问题，然后是答案，所有可见文本。
+- **ASCII 标识符。** 类名称和元素 ID 均为 ASCII。
+- **构图信号。** 可见的页脚命名了构图时间戳和构图技能：`Composed 2026-07-02 by ce-explain`。
 
-## Presentation
+## 推介会
 
-The skill body's consumer contract governs depth, voice, and layout. Give the reader enough project context to follow the explanation without the original conversation. Adapt that context to what the reader already knows.
+技能主体的消费者契约控制深度、声音和布局。为读者提供足够的项目背景，让他们能够在没有原始对话的情况下理解解释。使上下文适应读者已经知道的内容。
 
-Use visuals when they clarify the explanation. Keep these HTML rendering requirements:
+当他们澄清解释时使用视觉效果。保持这些 HTML 渲染要求：
 
-- Keep prose near 70 characters per line with `max-width: 70ch` on text blocks. Diagrams and code may use the full width.
-- Use inline SVG for diagrams. Keep labels legible with sufficient contrast, using a halo behind text when needed.
-- Syntax-highlight code samples with classes defined in the file's `<style>` block, without scripts or external assets.
+- 将散文保持在每行 70 个字符左右，并在文本块上使用 `max-width: 70ch`。图表和代码可以使用全角。
+- 对图表使用内联 SVG。保持标签清晰易读并具有足够的对比度，必要时在文本后面使用光环。
+- 语法高亮显示具有文件 `<style>` 块中定义的类的代码示例，无需脚本或外部资源。
 
-Diagrams complement prose; a reader who skips them still gets the full explanation in text. Preserve source citations. Use real code from the inspected evidence for project behavior. Reserve invented minimal examples for external topics, and label them as examples.
+图表补充散文；跳过它们的读者仍然可以获得文本中的完整解释。保留来源引用。使用项目行为检查证据中的真实代码。保留为外部主题发明的最小示例，并将它们标记为示例。
 
-When the evidence exceeds the requested scope or depth, select the relevant threads and disclose what was left out. Never silently drop the tail of a recap and present it as the full window.
+当证据超出所要求的范围或深度时，选择相关主题并披露遗漏的内容。永远不要默默地放弃回顾的尾部并将其呈现为完整的窗口。
 
-## Post-compose audit
+## 撰写后审核
 
-Verify the file opens standalone, makes no external resource requests, and carries the required visible metadata. Check that every visual has a prose equivalent. Ordinary source hyperlinks are allowed; offline readability must not depend on fetching them.
+验证文件独立打开、不发出外部资源请求并携带所需的可见元数据。检查每个视觉效果是否都有对应的散文。允许普通来源超链接；离线可读性不能依赖于获取它们。

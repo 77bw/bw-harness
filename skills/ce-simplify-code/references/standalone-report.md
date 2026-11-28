@@ -1,27 +1,27 @@
-# Standalone Report and Apply
+# 独立报告和申请
 
-Read this at the start of a standalone run, and again before applying any reported finding. It covers the empty-scope question, when to report instead of applying, the report itself, and how a later request to apply findings works.
+在独立运行开始时阅读本文，并在应用任何报告的发现之前再次阅读。它涵盖了空范围问题、何时报告而不是应用、报告本身以及稍后应用调查结果的请求如何运作。
 
-When the user names an area, a path, or the whole repo, so the scope is that code as it stands rather than a set of changes, also read `references/structural-pass.md` before Step 2, unless the request is only about tests or only about comments.
+当用户命名一个区域、一条路径或整个存储库时，范围是代码本身而不是一组更改，请在步骤 2 之前阅读 `references/structural-pass.md`，除非请求仅与测试或仅与注释有关。
 
-## Empty scope
+## 空范围
 
-When Step 1 finds no scope, ask the user what to simplify rather than guessing. Use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question.
+当步骤 1 找不到范围时，询问用户要简化什么，而不是猜测。使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项。永远不要默默地跳过这个问题。
 
-## Report or apply
+## 举报或申请
 
-Report first, and leave every file unchanged, unless the request tells you to make the changes without review ("just fix them", "no need to check with me", "remove the useless comments without asking"). A request to audit, find, review, or list always reports first. When the request does say to fix, apply per Step 3, verify per Step 4, and report what changed in the shape below.
+首先报告，并保持每个文件不变，除非请求告诉您无需审查即可进行更改（“只需修复它们”，“无需与我检查”，“无需询问即可删除无用的注释”）。审核、查找、审查或列出的请求始终首先报告。当请求确实要求修复时，请按照步骤 3 应用，按照步骤 4 进行验证，并以下面的形式报告发生的更改。
 
-## The report
+## 报告
 
-- Open with one line: what scope was covered, which reviewers ran, and the totals per group.
-- Number findings continuously across three groups: **Delete**, **Refactor**, and **Encode as a test**. Each finding names its location, what is wrong, and the evidence the reviewer returned. A test deletion carries what failure the test could catch, which remaining test covers that (or that the test asserts nothing that could fail), any production seam the deletion unlocks, and how that was checked.
-- When several comments share one cause in the code, report one refactor finding for the cause, not one finding per comment.
-- List tests that fail before any change separately, as possible defects, never as deletions.
-- When nothing qualifies, say so in one line, naming what was covered.
-- For a scope too large for one reviewer to read in full, you may split each review by top-level directory. The report then gives totals per group and the strongest findings, and offers the rest on request.
-- End by saying how to apply: all findings, specific numbers, or a described subset.
+- 以一行开头：涵盖的范围、审查者进行的审查以及每组的总数。
+- 连续对三个组的结果进行编号：**删除**、**重构**和**编码为测试**。每项发现都列出了其位置、问题所在以及审查者返回的证据。测试删除包含测试可以捕获哪些失败、哪些剩余测试涵盖了该失败（或者测试断言没有任何可能失败的内容）、删除解锁的任何生产接缝以及如何检查。
+- 当多个注释在代码中共享一个原因时，请报告该原因的一项重构发现，而不是每个注释报告一个发现。
+- 将在任何更改之前失败的测试单独列出，作为可能的缺陷，而不是删除。
+- 如果没有任何内容符合条件，请在一行中说出，并指出所涵盖的内容。
+- 对于一个审查者无法完整阅读的范围太大，您可以按顶级目录拆分每个审阅。然后，报告给出了每组的总数和最有力的发现，并根据要求提供其余的内容。
+- 最后说明如何应用：所有发现、具体数字或所描述的子集。
 
-## Applying reported findings
+## 应用报告的发现
 
-Apply only the findings the user picked. Before editing for a finding, re-check it against the current code. If the code under it changed since the report, skip it and say why. Apply the rest under Step 3's rules, verify under Step 4, and summarize under Step 5, listing applied and skipped findings by number.
+仅应用用户选择的结果。在编辑结果之前，请根据当前代码重新检查它。如果报告下的代码发生了变化，请跳过它并说明原因。根据步骤 3 的规则应用其余内容，在步骤 4 下进行验证，并在步骤 5 下进行总结，按编号列出已应用和跳过的结果。

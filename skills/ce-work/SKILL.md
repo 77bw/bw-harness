@@ -1,64 +1,66 @@
 ---
 name: ce-work
-description: Execute a plan or concrete work prompt end-to-end. Use when implementing from a plan document, a spec path, or a clear build request; use ce-debug for open-ended bugs. Use when an outer orchestrator needs implementation and local verification only, without the shipping tail.
-argument-hint: "[Plan path, work description, or recovery request with run id; blank uses latest] | [mode:return-to-caller [implementation_engine:<compact-json>] [implementation_run:<safe-id>] <plan path> for outer orchestrators]"
+description: "从现有计划、规格或明确工作请求实施并验证；需要独立完成时走原生审查和交付。原因未明的故障先用 ce-debug；由外层编排时按 mode:return-to-caller 返回实施与验证结果。"
+argument-hint: "[规划路径、工作描述或带有运行 ID 的恢复请求；空白使用最新] | [mode:return-to-caller [implementation_engine:<compact-json>] [implementation_run:<safe-id>] <外部协调器的计划路径>]"
 ---
 
-# Work Execution Command
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-## Outcome
+# 工作执行命令
 
-- **Result:** A fully implemented, locally verified change set from a plan, specification, or concrete work prompt.
-- **Next consumer:** In standalone use, the shipping workflow takes the verified change through review and delivery. In Return-to-Caller Mode, the invoking workflow receives the structured implementation and verification result and owns its remaining gates.
-- **Done:** Every in-scope task is complete, required verification evidence is recorded, relevant checks pass, and the run reaches either its owned shipping handoff (with a code-review receipt or explicit skip phrase — see Phase 3-4), a complete return result, or an explicit blocker.
-- **Intent:** Finish the requested feature without renegotiating the plan or transferring canonical integration authority. Workers receive bounded units; the host orchestrator inspects actual changes and owns authoritative verification and canonical commits.
+## 结果
 
-## Execution Workflow
+- **结果：** 根据计划、规范或具体工作提示完全实施、本地验证的变更集。
+- **下一个消费者：** 在独立使用中，交付流程通过审核和交付来进行验证的更改。在返回调用者模式下，调用工作流接收结构化实现和验证结果并拥有其剩余的门。
+- **完成：** 每个范围内的任务都已完成，所需的验证证据已被记录，相关检查已通过，并且运行达到其拥有的交付移交（带有代码审查收据或显式跳过短语 - 请参阅第 3-4 阶段）、完整的返回结果或显式阻塞项。
+- **意图：** 完成所请求的功能，无需重新协商计划或转移规范集成权限。工人获得有界单位；主机协调器检查实际更改并拥有权威验证和规范提交。
 
-**Bundled references must be read, never approximated.** Resolve each reference or script path named below from this skill's loaded `SKILL.md` directory, using the full skill path the harness supplied, and never glob the target repository to find a bundled file. Read each reference when you enter the phase it governs; a read made before that phase does not satisfy it. A reference this file says to read again is read again at its step only when its full text is no longer in context, as after a compaction. If the harness does not expose the skill directory, or a required file cannot be read, stop before the action it governs and report which file is missing. Do not reconstruct its rules from memory; report the missing reference instead of continuing natively.
+## 执行工作流程
 
-### Phase 0: Input Triage
+**必须读取捆绑的引用，切勿近似。** 使用该工具提供的完整技能路径，从此技能加载的 `SKILL.md` 目录中解析下面指定的每个引用或脚本路径，并且切勿通过 glob 目标存储库来查找捆绑文件。当您进入其管辖的阶段时，请阅读每个引用文档；在该阶段之前进行的读取不能满足它。仅当其全文不再在上下文中（如压缩后）时，该文件表示要再次读取的引用才会在其步骤中再次读取。如果工具未公开技能目录，或者无法读取所需的文件，请在其控制的操作之前停止并报告丢失的文件。不要凭记忆重建其规则；报告丢失的引用而不是继续本地操作。
 
-**Recovery activation comes first.** Before classifying the input as a plan, a path, a blank, or a bare prompt, recognize requests to resume, inspect, reap, or clean up an existing run. Recovery never dispatches a new worker, selects a new route, discovers another plan, reruns completed verification, or enters either shipping path. If the run id is missing, ask for it; never guess one.
+### 阶段 0：输入分类
 
-Before any other input decision, read `references/input-triage.md`. It decides the source, control tokens, recovery, read-only discovery, plan readiness, and bare-prompt sizing. Three rules from it hold here:
+**首先恢复激活。** 在将输入分类为计划、路径、空白或裸提示之前，识别恢复、检查、收获或清理现有运行的请求。恢复不会派遣新工作人员、选择新路线、发现另一个计划、重新运行已完成的验证或进入任一交付路径。如果运行 ID 丢失，请询问；永远不要猜一个。
 
-- A bare prompt that is Trivial — one or two files, no behavioral change — skips the task list but still resolves its execution engine before writing. A purely mechanical diff also ships without a post-PR watch. When either is uncertain, take the fuller route.
-- A bare prompt that `ce-plan` already sized in this session is executed, not planned again. A decision the user would weigh is asked as a question, never as a route back to `ce-plan` or `ce-brainstorm`.
-- If that reference cannot be read, stop; never treat control tokens or a non-executable artifact as code work.
+在做出任何其他输入决定之前，请阅读`references/input-triage.md`。它决定源、控制令牌、恢复、只读发现、计划准备情况和裸提示大小调整。其中的三个规则在这里成立：
 
-When triage selects Return-to-Caller Mode, read `references/return-to-caller.md` immediately and record that it governs how this run ends. If it cannot be read, stop before any mutation; do not fall back to standalone behavior.
+- 一个简单的简单提示（一两个文件，没有行为变化）会跳过任务列表，但仍然在写入之前解析其执行引擎。纯机械差异也没有配备PR 后续看护。当其中一个不确定时，请采取更完整的路线。
+- 执行此会话中已调整大小的 `ce-plan` 的裸提示，不再计划。用户权衡的决定是作为一个问题提出的，而不是作为返回`ce-plan`或`ce-brainstorm`的路线。
+- 如果无法读取该引用，请停止；切勿将控制令牌或不可执行的产物视为代码工作。
 
-### Phase 1: Quick Start
+当分类选择“返回呼叫者模式”时，立即读取`references/return-to-caller.md`并记录它控制本次跑步的结束方式。如果无法读取，则在任何突变之前停止；不要退回到独立行为。
 
-1. **Establish the workspace.** Before moving branches, editing, dispatching, or committing, read `references/workspace-setup.md`. It decides the checkout, branch, dirty files, and task setup. Never write without a writable canonical checkout, and never write on the real default branch unless the user explicitly directed that in this session.
+### 第一阶段：快速启动
 
-   **Do not commit or publish anything the user did not offer.** When a unit needs a file that was already dirty, standalone mode asks once whether to include or exclude that file. Return-to-Caller Mode neither asks nor edits it; it returns blocked, naming the collision and how to recover.
+1. **建立工作区。** 在移动分支、编辑、调度或提交之前，请阅读`references/workspace-setup.md`。它决定签出、分支、脏文件和任务设置。永远不要在没有可写规范签出的情况下进行写入，并且永远不要在真正的默认分支上写入，除非用户在此会话中明确指示。
 
-2. **Resolve the engine, then strategy.** After bounded plan intake and task derivation, but before selecting a unit for execution, writing, dispatching, or committing, read `references/execution-engines.md` and complete its route selection. It applies with or without a typed binding; native execution is eligible only when that reference selects it or exhausts an allowed fallback. The engine choice never changes which reference governs how the run ends.
+   **不要提交或发布用户未提供的任何内容。** 当一个单元需要一个已经脏的文件时，独立模式会询问是否包含或排除该文件。返回呼叫者模式既不询问也不编辑它；它返回阻塞，命名冲突以及如何恢复。
 
-   If cross-model execution is selected, read `references/cross-model-execution.md` before any content or authority crosses to the other model. It defines controller initialization, the post-init engine lock, bounded egress, transactions, recovery, and receipts.
+2. **解决引擎，然后解决策略。** 在有界计划摄入和任务派生之后，但在选择执行、写入、调度或提交的单元之前，读取`references/execution-engines.md`并完成其路线选择。无论是否有类型化绑定，它都适用；仅当该引用选择它或耗尽允许的回退时，本机执行才有效。引擎的选择永远不会改变控制运行如何结束的参考。
 
-   On native execution, work that is one unit, or units that each depend on the one before, runs inline in this context without that reference. Otherwise, before choosing inline, serial, or parallel execution, and before dispatching any worker, read `references/execution-strategy.md`. It decides scheduling, worker packets, and integration. The host orchestrator keeps authoritative verification and makes the canonical commits.
+   如果选择跨模型执行，在任何内容或权限交叉到其他模型之前，请先读取`references/cross-model-execution.md`。它定义了控制器初始化、初始化后引擎锁、有界出口、事务、恢复和收据。
 
-### Phase 2: Execute
+   在本机执行中，作为一个单元或每个依赖于前一个单元的单元的工作将在此上下文中内联运行，而无需该引用。否则，在选择内联、串行或并行执行之前以及分派任何工作程序之前，请阅读`references/execution-strategy.md`。它决定调度、工作包和集成。主机协调器保持权威验证并进行规范提交。
 
-Before the first implementation write, including on the Trivial route, read `references/implementation-loop.md`. It decides evidence, verification, per-unit commits, and simplification.
+### 第二阶段：执行
 
-The commit rule from this file stays in force throughout: every implementation commit names only that unit's owned files. A bare `git commit` can absorb the user's pre-existing index, so it is forbidden.
+在第一次实现写入之前，包括在 Trivial 路线上，读取 `references/implementation-loop.md`。它决定证据、验证、每个单元的提交和简化。
 
-Keep going until every in-scope unit is done. A progress update does not end the run; stop before that only for a named blocker.
+该文件的提交规则始终有效：每个实现提交仅命名该单元拥有的文件。裸露的`git commit`会吸收用户已有的索引，所以是禁止的。
 
-### Phase 3-4: Quality Check and Finishing Work
+继续下去，直到完成范围内的每个单元。进度更新不会结束运行；在此之前仅针对指定的拦截器停止。在入职项目中发生实际暂停或阻塞时，如果工作流请求关闭，则索引实际计划、已完成 unit/commit 以及上次成功或失败检查项目的状态。切勿替换或编辑本机运行 ID、恢复路径或控制器收据；在调用者拥有的模式下，首先返回本机信封，并让其调用者维护项目状态。
 
-After the tasks and local verification are complete, standalone mode reads `references/shipping-workflow.md` before any quality check or delivery. It decides simplification, code review, final validation, and delivery.
+### 第 3-4 阶段：质量检查和收尾工作
 
-**Code-review completion gate (standalone only).** Code review must actually happen before shipping. The run is not done, must not call a commit or shipping skill, and must not report that shipping is complete until the shipping reference has recorded either an actual completed `ce-code-review` receipt or one of its exact authorized skip states. Never substitute a mental self-review or findings already applied earlier. This rule does not apply in Return-to-Caller Mode.
+任务和本地验证完成后，在进行任何质量检查或交付之前，独立模式会读取`references/shipping-workflow.md`。它决定简化、代码审查、最终验证和交付。
 
-## Return-to-Caller Mode
+**代码审查完成门（仅限独立）。**代码审查必须在交付前实际进行。运行尚未完成，不得调用提交或运输技能，并且不得报告运输已完成，直到运输参考记录了实际完成的 `ce-code-review` 收据或其确切授权的跳过状态之一。永远不要用心理自我回顾或之前已经应用的发现来代替。此规则不适用于返回呼叫者模式。
 
-Return-to-Caller Mode performs implementation and local verification only. It must not enter Phase 3-4 or run final simplification, code review, PR creation, CI watching, babysitting, or any other standalone shipping action; the caller owns those steps.
+## 返回主叫模式
 
-Immediately before emitting the result, read `references/return-to-caller.md` again. It alone defines the full return result, the check that evidence is complete, the route and model records, recovery semantics, and `standalone_shipping_skipped: true`. Do not build a complete result from this file.
+返回调用者模式仅执行实施和本地验证。它不得进入阶段 3-4 或运行最终简化、代码审查、PR 创建、CI 跟踪、PR 看护或任何其他独立的交付操作；调用者拥有这些步骤。
 
-If that required read fails after planning or implementation created state, preserve every changed file, commit, workspace, and controller record. Return the minimum blocked result from this file: `status: blocked`, `plan_path`, `run_id` when known, `changed_state`, `blockers` naming the missing reference, and `recovery_path`. Do not erase partial state, report success, or fall into the standalone shipping path.
+在发出结果之前，再次读取`references/return-to-caller.md`。它单独定义了完整的返回结果、证据是否完整的检查、路由和模型记录、恢复语义和`standalone_shipping_skipped: true`。不要从此文件构建完整的结果。
+
+如果在规划或实施创建状态后所需的读取失败，请保留每个更改的文件、提交、工作区和控制器记录。返回此文件中的最小阻止结果：`status: blocked`、`plan_path`、`run_id`（已知时）、`changed_state`、`blockers` 命名缺失的引用以及`recovery_path`。不要删除部分状态、报告成功或落入独立的交付路径。

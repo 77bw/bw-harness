@@ -1,68 +1,68 @@
-# Method and Point-of-View Contract
+# 方法和观点契约
 
-Read this before reasoning about the POV (SKILL.md Phase 2, Verify Grounding). It defines the Verify and POV steps, the two cross-cutting properties, the grounding gate (the evidence check every POV must pass), and the output contract for each subject shape.
+在推理 POV（SKILL.md 第 2 阶段，验证接地）之前请阅读本文。它定义了验证和 POV 步骤、两个横切属性、接地门（每个 POV 必须通过的证据检查）以及每个主题形状的输出契约。
 
-## The four steps
+## 四个步骤
 
-1. **Frame** (Phase 0, Frame and Classify) — the question, incumbent, horizon, and success criteria are settled, and a question with no bounded set of candidates has already been returned as a Hold under Phase 0's rule for open fields.
-2. **Precedent** (Phase 1, Ground) — the scout that looks for prior stances and recent activity has reported whether a prior stance exists. Precedent informs the order but does not have to come first: a CVE's urgency can lead, but you still read the precedent before grading.
-3. **Verify** (Phase 2, Verify Grounding) — apply the evidence check below to the evidence gathered so far (the scouts' reports and what you read directly from the authoritative source within the allowed budget).
-4. **Point of view** (Phase 3, Point of View) — deliver the content the contract for the active subject shape below requires.
+1. **框架**（阶段 0，框架和分类）- 问题、现任者、范围和成功标准已确定，并且根据阶段 0 的开放领域规则，没有有限候选集的问题已作为保留返回。
+2. **先例**（第一阶段，地面）——寻找先前立场和最近活动的侦察兵已报告先前立场是否存在。先例告知了顺序，但不必放在第一位：CVE 的紧迫性可能会导致，但您仍然在评分之前阅读先例。
+3. **验证**（第 2 阶段，验证基础）- 将下面的证据检查应用于迄今为止收集的证据（球探的报告以及您在允许的预算内直接从权威来源阅读的内容）。
+4. **观点**（第 3 阶段，观点）— 交付以下活动主题形状的合同所需的内容。
 
-## Two cross-cutting properties (not phases)
+## 两个交叉属性（不是阶段）
 
-- **Skeptic stance.** At every step, seek disconfirming evidence and name the real alternatives — including "keep the incumbent" and "do nothing." "No", "Reject", and "Not-our-problem" are first-class outcomes, not failures to complete. Do not let the framing (or, in warm mode, where the question grew out of the ongoing conversation, that conversation's momentum) pull the grade upward. When the POV goes against something the user backed with evidence, answer that evidence directly rather than leaving it out.
-- **Reversibility-tiered effort.** Scale evidence gathering and verification with the cost of being wrong. The tier assigned at intake sets how deep research goes; presentation follows the consumer's needs. Preserve material alternatives and the conditions that would change a consequential judgment.
+- **持怀疑态度。** 在每一步中，寻找反驳证据并提出真正的替代方案——包括“保留现任职位”和“什么也不做”。 “不”、“拒绝”和“这不是我们的问题”是一流的结果，而不是失败。不要让框架（或者在热模式下，问题是从正在进行的对话中产生的，即对话的动力）拉高成绩。当 POV 与用户有证据支持的某些内容相悖时，请直接回答该证据，而不是忽略它。
+- **可逆性分层工作。** 衡量证据收集和验证的规模，并考虑错误的成本。入学时分配的等级决定了研究的深入程度；展示遵循消费者的需求。保留可能改变相应判断的物质替代方案和条件。
 
-## The grounding gate
+## 接地门
 
-The project floor (the minimum verified project evidence a POV needs) always applies. The external floor (at least one verified outside source) applies in full to an external-adoption question. For a document or approach set, it applies only to external claims that materially support the POV's bottom line; when the bottom line depends on no external claim, no external source is required. A conversation claim (warm mode) never satisfies either floor until a scout or a bounded inline read of the authoritative source corroborated it — it sits in the *conversation hypotheses* bucket, never the *verified facts* bucket.
+项目底线（POV 需要的最低验证项目证据）始终适用。外部底线（至少一个经过验证的外部来源）完全适用于外部采用问题。对于文件或方法集，它仅适用于实质上支持 POV 底线的外部主张；当底线不依赖于外部主张时，就不需要外部来源。对话声明（热模式）永远不会满足任一楼层，直到侦察员或权威来源的有限内联阅读证实它 - 它位于“对话假设”桶中，而不是“已验证的事实”桶中。
 
-A call to another function establishes that the call occurs, not how that function behaves. Verify guarantees against the implementation or tests that establish them. When those sources are unavailable, keep the guarantee unknown in the explanation or recommendation. Label inferred purpose where you state it; a later caveat does not make an unsupported claim safe to use.
+对另一个函数的调用确定的是调用的发生，而不是该函数的行为方式。根据建立保证的实施或测试来验证保证。当这些来源不可用时，请在解释或建议中保留未知的保证。在您陈述的地方标记推断的目的；稍后的警告并不意味着不受支持的声明可以安全使用。
 
-A recommended change is also a claim about the project. Before recommending one, find what already does that job (a skill, script, setting, or recorded decision) and name it, or say that nothing does. This applies to every recommendation, including ones added after the main verdict.
+建议的更改也是对项目的声明。在推荐一项工作之前，先找到已经完成这项工作的内容（技能、脚本、场景或记录的决策）并为其命名，或者说没有任何功能。这适用于每项建议，包括在主要判决之后添加的建议。
 
-### External-adoption questions: the two-floor Invalid-Verdict gate
+### 外部收养问题：两层无效判决门
 
-The verdict must clear **two absolute floors**. They are independent: strong external evidence never compensates for thin project evidence, and vice versa. This is a pass/fail checklist, **not** a comparison of how much evidence each side has.
+判决必须清除**两个绝对楼层**。它们是独立的：强有力的外部证据永远无法弥补薄弱的项目证据，反之亦然。这是一个pass/fail清单，**不是**各方拥有多少证据的比较。
 
-- **Project floor** — PASS requires the verdict to rest on a concrete, *verified* project fact relevant to the decision, in one of these forms: a **named incumbent plus at least one concrete touchpoint** (a `file:line`, dependency, issue, PR, or doc passage from the dossiers or a bounded inline read) for a replace/migrate; the **verified absence of an incumbent plus a concrete integration/fit point** (where it would slot in, the conventions it must match) for a net-new adoption; or a **prior decision** on the question. FAIL means the project was not actually inspected. Return **"Hold — insufficient project grounding"** with a numbered list of exactly what to inspect to make the floor passable. Never return Adopt or Reject on a failed project floor, regardless of how strong the external evidence is.
-- **External floor** — PASS requires at least one verified external source whose text supports the claim it backs. FAIL (for example, no research tools were reachable) means return **"Hold — external evidence unavailable"**, not a graded verdict at lowered confidence.
+- **项目楼层** — PASS 要求裁决基于与决策相关的具体、*已验证*项目事实，采用以下形式之一：**指定现任人员加上至少一个具体接触点**（`file:line`、依赖项、问题、PR、或来自档案的文档段落或有界内联读取），用于 replace/migrate； **经核实现任者缺席，加上具体的integration/fit点**（它将插入的位置，它必须匹配的惯例）以实现全新的采用；或关于该问题的**事先决定**。 FAIL表示该项目未经实际检查。返回**“保留 - 项目接地不足”**，并附上一份编号列表，其中列出了要检查哪些内容才能使地板合格。无论外部证据有多么有力，都不要在失败的项目楼层上返回“采用”或“拒绝”。
+- **外部底线** — PASS 需要至少一个经过验证的外部来源，其文本支持其支持的主张。 FAIL（例如，没有可用的研究工具）意味着返回**“保留 - 外部证据不可用”**，而不是降低置信度的分级判决。
 
-A conversation claim (warm mode) never satisfies a floor until a scout or a bounded inline read of the authoritative source corroborated it — it sits in the *conversation hypotheses* bucket, never the *verified facts* bucket.
+对话声明（热模式）永远不会满足底线，除非侦察员或权威来源的有限内联阅读证实了它——它位于“对话假设”桶中，而不是“已验证的事实”桶中。
 
-### Documents and approach sets: explicit blocker returns
+### 文件和方法集：显式阻塞项返回
 
-Apply the same project-floor proof standard to a document or approach set, using a concrete verified project fact relevant to the take or choice. If it fails, return **"Blocked — insufficient project grounding"** with a numbered list of exactly what to inspect to make the floor passable. If the take or choice depends on an external claim that no verified external source supports, return **"Blocked — external evidence unavailable"** with a numbered list of exactly what evidence would make the floor passable. Do not disguise either failure as a confident bottom line.
+使用与采取或选择相关的具体经过验证的项目事实，将相同的项目现场证明标准应用于文档或方法集。如果失败，请返回**“已阻止 - 项目接地不足”**，并附上一份编号列表，其中列出了要检查的具体内容以使地板可以通过。如果采取或选择取决于没有经过验证的外部来源支持的外部主张，请返回**“已阻止 - 外部证据不可用”**，并附上一份编号列表，详细说明哪些证据可以使发言权通过。不要将任何一次失败伪装成自信的底线。
 
-## External-adoption verdict contract
+## 外部收养判决合同
 
-Every verdict preserves the grade vocabulary so decisions remain comparable and discoverable in precedent searches.
+每个判决都会保留等级词汇，因此判决在先例搜索中保持可比性和可发现性。
 
-**Grade** — exactly one of:
+**等级** — 恰好是以下之一：
 
-- **Adopt** — proven fit for us; use it.
-- **Trial** — promising; use on a low-risk slice first; the next step is a scoped spike.
-- **Hold** — a complete, valid decision to *wait* (promising but unstable, migration cost exceeds current pain, category moving too fast). "Hold — insufficient project grounding" and "Hold — external evidence unavailable" are the two gate-failure subtypes.
-- **Reject** — judged not worth it for us.
-- **Not-our-problem** — for an exposure question (CVE / deprecation) that does not reach us — avoids forcing an adopt/reject.
+- **采用** — 事实证明适合我们；使用它。
+- **试用**——有希望；首先在低风险切片上使用；下一步是范围内的尖峰。
+- **保留** - 一个完整、有效的决定“等待”（有希望但不稳定，迁移成本超过当前的痛苦，类别移动太快）。 “搁置——项目基础不足”和“搁置——外部证据不可用”是两种门故障子类型。
+- **拒绝** — 认为对我们来说不值得。
+- **不是我们的问题** — 对于我们未收到的暴露问题（CVE/弃用） — 避免强制使用 adopt/reject。
 
-When a test that takes a few minutes and changes no project files would settle a **Trial**, or a **Hold** that is not a gate failure, name that test as the next step, specifically enough to run. For a Trial, that test is the scoped spike.
+当需要几分钟且不更改任何项目文件的测试会解决“试用”或“保留”（不是门故障）时，将该测试命名为下一步，特别是足以运行。对于试验，该测试是范围内的峰值。
 
-Preserve the grade and its meaning, incumbent or integration point, verified project and external evidence, material conditions, and what would change a consequential verdict. Keep unverified conversation claims distinguishable from evidence. These are content requirements, not mandatory headings or a fixed layout. A recommended next action is useful only when the result calls for one; it is not permission to execute it.
+保留等级及其含义、现任或整合点、经过验证的项目和外部证据、物质条件以及什么会改变相应的判决。将未经证实的谈话主张与证据区分开来。这些是内容要求，而不是强制性标题或固定布局。仅当结果需要采取下一步行动时，推荐的下一步行动才有用；这不是执行它的权限。
 
-## Document-take contract
+## 取证合同
 
-A document POV judges its overall direction rather than inventorying findings. Explain the bottom line and the strengths, risks, and verified project facts that determine it. Verify the external claims the take depends on, and keep unverified conversation claims distinguishable. Applying revisions belongs to the workflow responsible for the document, under the follow-up authority check in `references/followup.md`.
+文档 POV 判断其总体方向，而不是盘点调查结果。解释底线以及决定它的优势、风险和经过验证的项目事实。验证该镜头所依赖的外部声明，并保持未经验证的对话声明可区分。应用修订属于该文档负责的工作流程，在`references/followup.md`进行后续权限检查。
 
-## Approach-set position contract
+## 方法设定位置合约
 
-An approach-set POV judges developed options supplied by the user, conversation, or calling skill. When comparison requires developing concrete solutions beyond their current form, route to `ce-bakeoff`; discovering an open field belongs to `ce-ideate`, and establishing goals or criteria belongs to `ce-brainstorm`. Preserve the reasons, material tradeoffs, evidence, and conditions behind the position.
+方法集 POV 判断由用户、对话或呼叫技能提供的开发选项。当比较需要制定超出当前形式的具体解决方案时，请选择`ce-bakeoff`；发现开放领域属于`ce-ideate`，建立目标或标准属于`ce-brainstorm`。保留该立场背后的理由、重大权衡、证据和条件。
 
-Choose when evidence provides a real basis. When the options are genuinely viable either way, say **"Either is viable"** and explain the tradeoffs. Never manufacture certainty with a scorecard or a mechanical count of advantages. Proceeding with an approach is a separate action governed by the follow-up authority check in `references/followup.md`.
+选择证据何时提供真正的基础。当两种选择都确实可行时，请说**“两者都可行”**并解释权衡。永远不要用记分卡或机械计算优势来制造确定性。继续进场是一项单独的操作，受`references/followup.md`中的后续权限检查管辖。
 
-## Delivery
+## 送货
 
-Write the chat block through the `ce-noslop` skill.
+通过`ce-noslop`技能编写聊天块。
 
-SKILL.md defines how to adapt the result to its consumer. Keep enough cited evidence to assess the judgment, name what remains uncertain, and make any option or requirement identifiers understandable. Do not reproduce research transcripts. Requested artifacts use `references/report.md`; ordinary answers need no artifact or continuation menu.
+SKILL.md 定义如何使结果适应其消费者。保留足够的引用证据来评估判断，指出仍然不确定的内容，并使任何选项或要求标识符易于理解。请勿复制研究成绩单。请求的产物使用`references/report.md`；普通答案不需要产物或延续菜单。

@@ -1,15 +1,15 @@
-# Single Pass
+# 单程
 
-Read this when the input carried a `size-cutoff:<N>` token. The caller sets the threshold. This file says how to measure the scope against it and what runs on each side.
+当输入带有 `size-cutoff:<N>` 标记时读取此内容。调用者设置阈值。该文件说明了如何衡量其范围以及每一侧运行的内容。
 
-**Measure.** After the preflight, count the added or changed lines of code, as the preflight defines it, in the resolved scope. Count only the code outside tests: leave out tests, test fixtures, and blank lines. Anything the preflight says is not code never counts, however many lines it has. Tests stay in scope for review; they only do not count toward the size.
+**测量。** 预检后，根据预检定义，在解析的范围内计算添加或更改的代码行数。仅计算测试之外的代码：省略测试、测试装置和空行。预检中所说的任何不是代码的内容都不会被计算在内，无论它有多少行。测试仍在审查范围内；它们只是不计入尺寸。
 
-**Choose.**
-- A count of N or more runs Step 2 as written: the full team, one reviewer per persona.
-- A count below N runs one combined reviewer. Give one generic subagent every persona file Step 2 would have dispatched for this scope, each passed verbatim, together with the same scope, mode, proof tests, constraints, and project standards. Ask for one findings list, each finding labeled with the persona that raised it. Dispatch it as `references/reviewer-dispatch.md` describes, including the inline fallback.
+**选择。**
+- N 或更多的计数运行步骤 2，如所写：整个团队，每个角色一名审查者。
+- 低于 N 的计数运行一位联合审查者。为第 2 步为此范围分派的每个角色文件提供一个通用子代理，每个角色文件都逐字传递，以及相同的范围、模式、验证测试、约束和项目标准。要求一份调查结果列表，每项调查结果都标有提出该调查结果的人物角色。按照 `references/reviewer-dispatch.md` 的描述调度它，包括内联后备。
 
-The cutoff is never a reason to skip the pass. A scope below N still gets reviewed, by the combined reviewer; whether to skip a small change is the caller's decision and was made before this skill ran.
+截止永远不是跳过通行证的理由。低于 N 的范围仍由联合审查者进行审阅；是否跳过小更改是调用者的决定，并且是在该技能运行之前做出的。
 
-Steps 3 through 5 run the same way after either choice.
+选择任一选项后，步骤 3 到 5 的运行方式相同。
 
-**Report.** Step 5's summary names the mode that ran and the count behind it, for example "single-pass (12 code lines, cutoff 30)" or "full team (45 code lines, cutoff 30)".
+**报告。** 步骤 5 的摘要命名了运行的模式及其背后的计数，例如“单通道（12 行代码，截止 30）”或“完整团队（45 代码行，截止 30）”。

@@ -1,0 +1,308 @@
+diff --git a/skills/domain-modeling/ADR-FORMAT.md b/skills/domain-modeling/ADR-FORMAT.md
+index d7e61f30a9fd8ca70d9ee68f019c2a9ebf2d13f7..77845286c4e3bfe8882675e4d603b0d271696ce9 100644
+--- a/skills/domain-modeling/ADR-FORMAT.md
++++ b/skills/domain-modeling/ADR-FORMAT.md
+@@ -1,47 +1,47 @@
+-# ADR Format
++# ADR 格式
+ 
+-ADRs live in `docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
++ADR 位于 `docs/adr/` 中并使用顺序编号：`0001-slug.md`、`0002-slug.md` 等。
+ 
+-Create the `docs/adr/` directory lazily: only when the first ADR is needed.
++延迟创建 `docs/adr/` 目录：仅当需要第一个 ADR 时。
+ 
+-## Template
++## 模板
+ 
+ ```md
+-# {Short title of the decision}
++# {决定的简称}
+ 
+-{1-3 sentences: what's the context, what did we decide, and why.}
++{1-3 句话：上下文是什么，我们决定什么，以及原因。}
+ ```
+ 
+-That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why*, not in filling out sections.
++就是这样。 ADR 可以是单个段落。价值在于记录*做出的决定以及*为什么*，而不是填写部分。
+ 
+-## Optional sections
++## 可选部分
+ 
+-Only include these when they add genuine value. Most ADRs won't need them.
++仅当它们能增加真正的价值时才包含它们。大多数 ADR 不需要它们。
+ 
+-- **Status** frontmatter (`proposed | accepted | deprecated | superseded by ADR-NNNN`): useful when decisions are revisited
+-- **Considered Options**: only when the rejected alternatives are worth remembering
+-- **Consequences**: only when non-obvious downstream effects need to be called out
++- **状态** frontmatter (`proposed | accepted | deprecated | superseded by ADR-NNNN`)：重新审视决策时有用
++- **考虑的选项**：仅当被拒绝的替代方案值得记住时
++- **后果**：仅当需要消除不明显的下游影响时
+ 
+-## Numbering
++## 编号
+ 
+-Scan `docs/adr/` for the highest existing number and increment by one.
++扫描 `docs/adr/` 查找现有的最大数字并加一。
+ 
+-## When to offer an ADR
++## 何时提供 ADR
+ 
+-All three of these must be true:
++所有这三项都必须为真：
+ 
+-1. **Hard to reverse**: the cost of changing your mind later is meaningful
+-2. **Surprising without context**: a future reader will look at the code and wonder "why on earth did they do it this way?"
+-3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
++1. **难以逆转**：以后改变主意的成本是有意义的
++2. **没有上下文就令人惊讶**：未来的读者会看到代码并想知道“他们到底为什么这样做？”
++3. **真正权衡的结果**：有真正的替代方案，而您出于特定原因选择了一个
+ 
+-If a decision is easy to reverse, skip it: you'll just reverse it. If it's not surprising, nobody will wonder why. If there was no real alternative, there's nothing to record beyond "we did the obvious thing."
++如果一个决定很容易逆转，那就跳过它：你只会逆转它。如果这并不奇怪，没有人会想知道为什么。如果没有真正的替代方案，除了“我们做了显而易见的事情”之外，就没有什么可记录的了。
+ 
+-### What qualifies
++### 什么资格
+ 
+-- **Architectural shape.** "We're using a monorepo." "The write model is event-sourced, the read model is projected into Postgres."
+-- **Integration patterns between contexts.** "Ordering and Billing communicate via domain events, not synchronous HTTP."
+-- **Technology choices that carry lock-in.** Database, message bus, auth provider, deployment target. Not every library: just the ones that would take a quarter to swap out.
+-- **Boundary and scope decisions.** "Customer data is owned by the Customer context; other contexts reference it by ID only." The explicit no-s are as valuable as the yes-s.
+-- **Deliberate deviations from the obvious path.** "We're using manual SQL instead of an ORM because X." Anything where a reasonable reader would assume the opposite. These stop the next engineer from "fixing" something that was deliberate.
+-- **Constraints not visible in the code.** "We can't use AWS because of compliance requirements." "Response times must be under 200ms because of the partner API contract."
+-- **Rejected alternatives when the rejection is non-obvious.** If you considered GraphQL and picked REST for subtle reasons, record it; otherwise someone will suggest GraphQL again in six months.
++- **建筑形状。**“我们正在使用 monorepo。” “写入模型是事件源的，读取模型被投影到 Postgres 中。”
++- **上下文之间的集成模式。**“订购和计费通过域事件进行通信，而不是同步 HTTP。”
++- **带有锁定的技术选择。**数据库、消息总线、身份验证提供者、部署目标。不是每个图书馆：只是那些需要四分之一的时间才能更换的图书馆。
++- **边界和范围决策。**“客户数据由客户上下文拥有；其他上下文仅通过 ID 引用它。”明确的“不”与“是”一样有价值。
++- **故意偏离明显的路径。**“我们使用手动 SQL 而不是 ORM，因为 X。”任何理性的读者都会做出相反的假设。这些会阻止下一位工程师“修复”故意的东西。
++- **约束在代码中不可见。**“由于合规性要求，我们无法使用 AWS。” “由于合作伙伴 API 合同，响应时间必须低于 200 毫秒。”
++- **当拒绝不明显时拒绝替代方案。** 如果您出于微妙原因考虑过 GraphQL 并选择了 REST，请记录下来；否则六个月后就会有人再次建议 GraphQL。
+diff --git a/skills/domain-modeling/GLOSSARY-FORMAT.md b/skills/domain-modeling/GLOSSARY-FORMAT.md
+index 09f5f79d9f625304e51ee93a1940167a582360c1..5026535cc9d8a991494bdb0788216b5c9dff1883 100644
+--- a/skills/domain-modeling/GLOSSARY-FORMAT.md
++++ b/skills/domain-modeling/GLOSSARY-FORMAT.md
+@@ -1,61 +1,62 @@
+-# GLOSSARY.md Format
++# GLOSSARY.md 格式
+ 
+-## Structure
++## 结构
+ 
+ ```md
+-# {Context Name}
++# {上下文名称}
+ 
+-{One or two sentence description of what this context is and why it exists.}
++{用一两句话描述这个上下文是什么以及它存在的原因。}
+ 
+ ## Language
+ 
+-**Order**:
+-{A one or two sentence description of the term}
+-_Avoid_: Purchase, transaction
++**命令**：
++{对该术语的一两句话描述}
++_避免_：购买、交易
+ 
+-**Invoice**:
+-A request for payment for an **Order**, sent to its **Customer** after delivery.
+-_Avoid_: Bill, payment request
++**发票**：
++**订单**的付款请求，在交货后发送给其**客户**。
++_避免_：账单、付款请求
+ 
+-**Customer**:
+-A person or organization that places an **Order**.
+-_Avoid_: Client, buyer, account
++**顾客**：
++下**订单**的个人或组织。
++_避免_：客户、买家、账户
+ ```
+ 
+-## Rules
++## 规则
+ 
+-- **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others under `_Avoid_`.
+-- **Keep definitions tight.** One or two sentences max. Define what it IS, not what it does.
+-- **Bold other glossary terms inside a definition.** When a definition mentions another term, write it as `**Order**`, and let the sentence around it say how the two relate.
+-- **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
+-- **Group terms under subheadings** when natural clusters emerge. If all terms belong to a single cohesive area, a flat list is fine.
++- **固执己见。** 当同一概念存在多个单词时，选择最好的一个并将其他单词列在 `_Avoid_` 下。
++- **保持定义严格。** 最多一到两句话。定义它是什么，而不是它做什么。
++- **定义中的其他术语用粗体表示。**当定义提到另一个术语时，将其写为 `**Order**`，并让其周围的句子说明两者之间的关系。
++- **仅包含特定于该项目上下文的术语。** 即使项目广泛使用一般编程概念（超时、错误类型、实用程序模式），它们也不属于其中。在添加术语之前，先问一下：这是该上下文特有的概念，还是通用的编程概念？只有前者属于。
++- **确定后保留区别。**仅在改变术语含义时记录域不变量或关系。使用可选的 `## Relationships` 或 `## Flagged ambiguities` 部分进行此类决策。保留`## Retired`用于读者仍会遇到的已证明的先前概念；说出它曾经的含义并区分它的替代品。别名位于活动条目下，而不是位于已停用条目下。切勿通过静默覆盖定义来解决不兼容的定义。
++- **当自然集群出现时，将术语分组在副标题下**。如果所有术语都属于一个单一的内聚区域，那么平面列表就可以了。
+ 
+-## Single vs multi-context repos
++## 单一与多上下文存储库
+ 
+-**Single context (most repos):** One `GLOSSARY.md` at the repo root.
++**单一上下文（大多数存储库）：** 存储库根目录中有一个 `GLOSSARY.md`。
+ 
+-**Multiple contexts:** A `GLOSSARY-MAP.md` at the repo root lists the contexts, where they live, and how they relate to each other:
++**多个上下文：** 存储库根目录中的 `GLOSSARY-MAP.md` 列出了上下文、它们所在的位置以及它们彼此之间的关系：
+ 
+ ```md
+-# Glossary Map
++# 词汇表地图
+ 
+-## Contexts
++## 上下文
+ 
+-- [Ordering](./src/ordering/GLOSSARY.md): receives and tracks customer orders
+-- [Billing](./src/billing/GLOSSARY.md): generates invoices and processes payments
+-- [Fulfillment](./src/fulfillment/GLOSSARY.md): manages warehouse picking and shipping
++- [订单](./src/ordering/GLOSSARY.md)：接收并追踪客户订单
++- [账单](./src/billing/GLOSSARY.md)：生成发票并处理付款
++- [履行](./src/fulfillment/GLOSSARY.md)：管理仓库拣货和运输
+ 
+ ## Relationships
+ 
+-- **Ordering → Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
+-- **Fulfillment → Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
+-- **Ordering ↔ Billing**: Shared types for `CustomerId` and `Money`
++- **订购 → 履行**：订购发出 `OrderPlaced` 事件；满足感让他们开始挑选
++- **履行 → 计费**：履行发出 `ShipmentDispatched` 事件；计费消耗它们来生成发票
++- **订购 ↔ 计费**：`CustomerId` 和 `Money` 的共享类型
+ ```
+ 
+-The skill infers which structure applies:
++该技能推断出应用哪种结构：
+ 
+-- If `GLOSSARY-MAP.md` exists, read it to find contexts
+-- If only a root `GLOSSARY.md` exists, single context
+-- If neither exists, create a root `GLOSSARY.md` lazily when the first term is resolved
++- 如果`GLOSSARY-MAP.md`存在，则读取它以查找上下文
++- 如果仅存在根`GLOSSARY.md`，则单个上下文
++- 如果两者都不存在，则在第一项解析时懒惰地创建根`GLOSSARY.md`
+ 
+-When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.
++当存在多个上下文时，推断当前主题与哪一个相关。如果不清楚，请询问。
+diff --git a/skills/domain-modeling/SKILL.md b/skills/domain-modeling/SKILL.md
+index a4438c6879c517d1a08e2b5fbca049b632688dfe..c4bae4661069e5c90b21410d5d7c07bd18e23ec9 100644
+--- a/skills/domain-modeling/SKILL.md
++++ b/skills/domain-modeling/SKILL.md
+@@ -1,74 +1,78 @@
+ ---
+ name: domain-modeling
+-description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a GLOSSARY.md, or recording or editing an ADR.
++description: "构建并完善项目的领域模型。在讨论代码库术语、编写或编辑 GLOSSARY.md 或记录或编辑 ADR 时使用。"
+ ---
+ 
+-# Domain Modeling
++> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
+ 
+-Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `GLOSSARY.md` for vocabulary is not this skill: that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
++# 领域建模
+ 
+-## File structure
++在设计时积极构建和完善项目的领域模型。这是“积极的”学科：挑战术语，发明边缘案例场景，并在术语表和决策具体化时将其写下来。 （仅仅 *阅读* `GLOSSARY.md` 词汇不是这项技能：这是任何技能都可以做到的单行习惯。这项技能适用于您更改模型时，而不仅仅是使用它。）
+ 
+-Most repos have a single context:
++## 文件结构
++
++大多数存储库都有一个上下文：
+ 
+ ```
+ /
+ ├── GLOSSARY.md
+-├── docs/
+-│   └── adr/
++├── 文档/
++│ └── 地址/
+ │       ├── 0001-event-sourced-orders.md
+ │       └── 0002-postgres-for-write-model.md
+-└── src/
++└── 源文件/
+ ```
+ 
+-If a `GLOSSARY-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
++如果根目录存在`GLOSSARY-MAP.md`，则该存储库具有多个上下文。地图指向每个人居住的地方：
+ 
+ ```
+ /
+ ├── GLOSSARY-MAP.md
+-├── docs/
+-│   └── adr/                          ← system-wide decisions
++├── 文档/
++│ └── adr/ ← 全系统决策
+ ├── src/
+-│   ├── ordering/
++│ ├── 订购/
+ │   │   ├── GLOSSARY.md
+-│   │   └── docs/adr/                 ← context-specific decisions
+-│   └── billing/
++│ │ └── docs/adr/ ← 因地制宜的决策
++│ └── 计费/
+ │       ├── GLOSSARY.md
+ │       └── docs/adr/
+ ```
+ 
+-Create files lazily: only when you have something to write. If no `GLOSSARY.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
++这些树是示例，不是必需的源布局。从项目的域说明和根映射中解析批准的域和ADR位置；路径可以与 CE 文档根不同。如果代码观察和已确定的定义不一致，请在编辑之前区分错误和模型更改。
++
++懒惰地创建文件：仅当您有东西要写时。如果不存在 `GLOSSARY.md` ，则在第一项解析后创建一个。如果不存在`docs/adr/`，则在需要第一个ADR时创建它。
+ 
+-## During the session
++## 会议期间
+ 
+-### Challenge against the glossary
++### 对词汇表的挑战
+ 
+-When the user uses a term that conflicts with the existing language in `GLOSSARY.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
++当用户使用与`GLOSSARY.md`中现有语言冲突的术语时，立即喊出。 “你的词汇表将‘取消’定义为X，但你的意思似乎是Y。是哪一个？”
+ 
+-### Sharpen fuzzy language
++### 锐化模糊语言
+ 
+-When the user uses vague or overloaded terms, propose a precise canonical term. "You're saying 'account': do you mean the Customer or the User? Those are different things."
++当用户使用模糊或过多的术语时，建议一个精确的规范术语。 “你说的‘账户’：你指的是客户还是用户？它们是不同的东西。”
+ 
+-### Discuss concrete scenarios
++### 讨论具体场景
+ 
+-When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe edge cases and force the user to be precise about the boundaries between concepts.
++当讨论域关系时，用特定的场景对它们进行压力测试。发明一些场景来探测边缘情况并迫使用户精确地了解概念之间的界限。
+ 
+-### Cross-reference with code
++### 与代码交叉引用
+ 
+-When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible. Which is right?"
++当用户陈述某事如何工作时，检查代码是否一致。如果您发现矛盾，请指出：“您的代码取消了整个订单，但您刚刚说可以部分取消。哪一个是正确的？”
+ 
+-### Update GLOSSARY.md inline
++### 内联更新GLOSSARY.md
+ 
+-When a term is resolved, update `GLOSSARY.md` right there. Don't batch these up: capture them as they happen. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md).
++当一个术语解决后，立即更新 `GLOSSARY.md`。不要将它们分批处理：在它们发生时捕获它们。使用[GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md)中的格式。
+ 
+-`GLOSSARY.md` should be totally devoid of implementation details. Do not treat `GLOSSARY.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
++`GLOSSARY.md` 应该完全没有实现细节。不要将`GLOSSARY.md`视为规范、草稿本或实施决策的存储库。它只是一个术语表，仅此而已。
+ 
+-### Offer ADRs sparingly
++### 谨慎提供 ADR
+ 
+-Only offer to create an ADR when all three are true:
++仅当所有三个都为真时才提供创建 ADR：
+ 
+-1. **Hard to reverse**: the cost of changing your mind later is meaningful
+-2. **Surprising without context**: a future reader will wonder "why did they do it this way?"
+-3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
++1. **难以逆转**：以后改变主意的成本是有意义的
++2. **没有上下文就令人惊讶**：未来的读者会想知道“他们为什么这样做？”
++3. **真正权衡的结果**：有真正的替代方案，而您出于特定原因选择了一个
+ 
+-If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
++如果缺少三者中的任何一个，请跳过ADR。使用[ADR-FORMAT.md](./ADR-FORMAT.md)中的格式。
+diff --git a/skills/domain-modeling/agents/openai.yaml b/skills/domain-modeling/agents/openai.yaml
+index 7f1522d2f11506ee205275ab7c282aa52366ecf6..76ffd6723dbea4bed5d1f1efe27a9a793c37d9b0 100644
+--- a/skills/domain-modeling/agents/openai.yaml
++++ b/skills/domain-modeling/agents/openai.yaml
+@@ -1,3 +1,3 @@
+ interface:
+-  display_name: "Domain Modeling"
+-  short_description: "Build and sharpen a domain model"
++  display_name: "领域建模"
++  short_description: "构建并完善领域模型"

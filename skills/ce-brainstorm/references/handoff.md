@@ -1,187 +1,141 @@
-# Handoff
+# 不可触摸
 
-This content is loaded when Phase 4 begins — after the requirements-only
-unified plan is written, or after a Lightweight run's chat paragraph is
-delivered with no file warranted. Options that need an artifact hide themselves
-below; the handoff itself is presented on both paths.
+此内容在第 4 阶段开始时加载 - 在编写仅需求的统一计划之后，或者在交付轻量级运行的聊天段落之后且没有任何文件保证。需要产物的选项隐藏在下面；切换本身出现在两条路径上。
 
 ---
 
-#### 4.0 Return to the caller instead of presenting options
+#### 4.0 返回呼叫者而不是呈现选项
 
-When the invocation carried `mode:return-to-caller`, a calling skill is
-waiting for the result and owns what happens next, so none of 4.1 through 4.3
-runs: no menu, no closing summary, and never an invocation of `lfg` or
-`ce-plan` from here. The dialogue that produced the result is unchanged; the
-caller is present precisely because a human was there to answer. Emit this
-return as the last thing this skill writes, with these exact field names. The
-return ends this skill, not the turn. The caller runs in this same session,
-and its next step follows the return.
+当调用携带`mode:return-to-caller`时，调用技能正在等待结果并拥有接下来发生的事情，因此4.1到4.3都不是
+运行：没有菜单，没有结束摘要，并且从不从这里调用 `lfg` 或 `ce-plan`。产生结果的对话没有改变；呼叫者之所以出现，正是因为有人在那里接听。将此返回值作为该技能写入的最后一个内容发出，并带有这些确切的字段名称。返回结束该技能，而不是回合。调用者在同一个会话中运行，返回后执行下一步。
 
-- `status`: `complete`, or `blocked` when `Resolve Before Planning` still
-  holds items the user chose not to resolve.
-- `result_kind`: `artifact` when a requirements-only unified plan was written
-  and passed the Ready for Planning Check; `brief` when Lightweight work ended
-  in chat with no file.
-- `artifact_path`: the absolute path returned by the write step, including
-  any collision suffix, or `null` for a brief.
-- `brief`: the chat paragraph, or `null` for an artifact.
-- `resolve_before_planning`: the remaining items, or an empty list.
-- `key_decisions`: every decision the dialogue settled that meets
-  `references/settled-decisions.md`, each with its provenance class,
-  whether the result is an artifact or a brief.
+- `status`：`complete`，或当 `Resolve Before Planning` 仍保留用户选择不解析的项目时，`blocked`。
+- `result_kind`: `artifact` 当编写了仅需求的统一计划并通过了准备计划检查时； `brief` 当轻量级工作在没有文件的聊天中结束时。
+- `artifact_path`：写入步骤返回的绝对路径，包括任何冲突后缀，或简单的`null`。
+- `brief`：聊天段落，或 `null` 表示产物。
+- `resolve_before_planning`：剩余的项目，或者一个空列表。
+- `key_decisions`：对话中满足`references/settled-decisions.md`的每个决定，每个决定都有其来源类别，无论结果是产物还是摘要。
 
-A `brief` is a feature description for the caller's planner, not a plan and
-not a work source. When the grounding scout produced a dossier that still
-exists, include its path as `grounding_path` so planning can start from it.
+`brief`是调用者计划者的功能描述，不是计划，也不是工作源。当接地侦察生成的档案仍然存在时，将其路径包含为`grounding_path`，以便可以从它开始规划。
 
-The rest of this file is the interactive path.
+该文件的其余部分是交互路径。
 
-#### 4.1 Present Next-Step Options
+#### 4.1 提出下一步选项
 
-The Phase 4 menu's visible option count varies by state: no unified plan
-artifact hides the review option, unresolved `Resolve Before Planning` hides
-both `Create the implementation plan` and `Ship it
-autonomously with lfg`, and the lfg option is also hidden for non-software
-brainstorms (`execution` other than `code`). Count the visible options for the
-current state and choose the rendering mode accordingly:
+第 4 阶段菜单的可见选项计数因州而异：没有统一的计划产物隐藏了审阅选项，未解决的 `Resolve Before Planning` 隐藏了 `Create the implementation plan` 和 `Ship it autonomously with lfg`，并且lfg 选项对于非软件头脑风暴也被隐藏（`execution` 除了 `code`）。计算当前状态的可见选项并相应地选择渲染模式：
 
-- **Visible count fits the current platform's option cap:** use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Claude Code `AskUserQuestion` supports up to 4 explicit options, and Codex `request_user_input` supports only 2-3 explicit options.
-- **Visible count exceeds the current platform's option cap:** render as a numbered list in chat. This is the narrow option-overflow fallback; trimming would hide legitimate choices (plan, ship, review or prototype, browser, refine are all distinct destinations). Include a hint that free-form input is accepted ("Pick a number or describe what you want.") so the numbered list retains the blocking tool's open-endedness.
+- **可见计数适合当前平台的选项上限：** 使用当前工具列表中已有的主机阻塞问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。 Claude Code `AskUserQuestion` 最多支持 4 个显式选项，Codex `request_user_input` 仅支持 2-3 个显式选项。
+- **可见计数超出当前平台的选项上限：** 在聊天中呈现为编号列表。这是狭窄的选项溢出后备；修剪会隐藏合法的选择（计划、交付、审查或原型、浏览器、改进都是不同的目的地）。包含接受自由格式输入的提示（“选择一个数字或描述您想要的内容。”），以便编号列表保留阻止工具的开放性。
 
-Never silently skip the question.
+永远不要默默地跳过这个问题。
 
-If `Resolve Before Planning` contains any items:
-- Ask the blocking questions now, one at a time, by default
-- If the user explicitly wants to proceed anyway, first convert each remaining item into an explicit decision, assumption, or `Deferred to Planning` question
-- If the user chooses to pause instead, present the handoff as paused or blocked rather than complete
-- Do not offer the `Create the implementation plan` or `Ship it autonomously with lfg` options while `Resolve Before Planning` remains non-empty
+如果`Resolve Before Planning`包含任何项目：
+- 默认情况下，立即询问阻塞问题，一次一个
+- 如果用户明确想要继续，请首先将每个剩余项目转换为明确的决策、假设或`Deferred to Planning`问题
+- 如果用户选择暂停，请将切换显示为暂停或阻止而不是完成
+- 当 `Resolve Before Planning` 保持非空时，不要提供 `Create the implementation plan` 或 `Ship it autonomously with lfg` 选项
 
-In both preambles below, the "Pick a number or describe what you want." hint applies only in numbered-list mode. When using the blocking tool, omit that line and pass the remaining stem as the question.
+在下面的两个序言中，“选择一个数字或描述您想要的内容”。提示仅适用于编号列表模式。使用阻止工具时，省略该行并将剩余的词干作为问题传递。
 
-**Path format:** Use absolute paths for chat-output file references — relative paths are not auto-linked as clickable in most terminals.
+**路径格式：** 使用聊天输出文件引用的绝对路径 - 在大多数终端中，相对路径不会自动链接为可单击的。
 
-**Preamble when no blocking questions remain:**
+**当没有阻塞问题时的序言：**
 
 ```
 Brainstorm complete.
 
-Plan artifact: <absolute path to requirements-only unified plan>  # omit line if no artifact was created
+计划产物：<仅需求统一计划的绝对路径> # 如果未创建产物，则省略行
 
-Planning and shipping will use this artifact as the definition of what to build.  # omit line if no artifact was created
+规划和运输将使用此产物作为构建内容的定义。 # 如果没有创建产物，则省略行
 
-What would you like to do next? (Pick a number or describe what you want.)
+接下来您想做什么？ （选择一个数字或描述您想要的内容。）
 ```
 
-**Preamble when blocking questions remain and user wants to pause:**
+**当阻塞问题仍然存在且用户想要暂停时的序言：**
 
 ```
-Brainstorm paused. I'm holding planning until the remaining questions are resolved — say the word and I'll proceed anyway, recording each open item as an explicit assumption or a question deferred to planning.
+头脑风暴暂停了。我会一直进行计划，直到剩下的问题得到解决——只要说出这个词，我就会继续进行，将每个未解决的项目记录为明确的假设或推迟到计划中的问题。
 
-Plan artifact: <absolute path to requirements-only unified plan>  # omit line if no artifact was created
+计划产物：<仅需求统一计划的绝对路径> # 如果未创建产物，则省略行
 
-What would you like to do next? (Pick a number or describe what you want.)
+接下来您想做什么？ （选择一个数字或描述您想要的内容。）
 ```
 
-The override sentence is required, not padding: the planning options are hidden while `Resolve Before Planning` is non-empty, so without it the user is told planning is blocked and is never told the block is theirs to lift. `Resolve Before Planning` is your own judgment call — an over-cautious read of it must not silently strand the user with no visible way forward. Hiding the option withholds the *recommendation*; it never withholds the *choice*.
+覆盖语句是必需的，而不是填充：当`Resolve Before Planning`非空时，规划选项是隐藏的，因此如果没有它，用户会被告知规划被阻止，并且永远不会被告知该块是他们要解除的。 `Resolve Before Planning` 是你自己的判断——过于谨慎的阅读不能让用户无声无息地陷入困境。隐藏该选项会保留*推荐*；它从不拒绝*选择*。
 
-Present only the options that apply. Renumber so visible options stay contiguous starting at 1.
+仅显示适用的选项。重新编号，以便可见选项从 1 开始保持连续。
 
-1. **Create the implementation plan** *(recommended)* - Hand off to `ce-plan` and sharpen the requirements into a complete, testable plan. Shown only when `Resolve Before Planning` is empty.
-2. **Ship it autonomously with `lfg`** - Hand the requirements to the full autonomous pipeline: `lfg` plans (`ce-plan`), implements, simplifies, runs independent code review and applies the fixes, opens a PR, and watches CI to green — hands-off, no check-ins. It plans before it implements. Best when you trust the requirements and want it built and shipped without steering. **Opens a PR and pushes a branch.** Shown only for software brainstorms (`execution: code`) with `Resolve Before Planning` empty **and a unified plan artifact was created** — `lfg` hands `ce-plan` that artifact path in pipeline mode and cannot prompt, so with no artifact (e.g. a brief-alignment brainstorm that skipped doc creation per the "Decide whether a doc is warranted" rule) there is nothing to enrich; offer option 1 instead, which can plan interactively from the conversation. For a quicker plan-then-decide flow, pick option 1.
-3. **Pressure-test the requirements** - Dispatch reviewer agents with `ce-doc-review` to find gaps, conflicts, weak premises, and scope issues in the requirements; auto-apply safe fixes in the artifact's native format; route the rest interactively. Shown only when a unified plan exists **and no remaining question meets Interaction Rule 7**. When **Prototype a remaining feel-question** is shown, omit this option from the same menu.
-3. **Prototype a remaining feel-question** - Invoke `ce-prototype` on a named remaining question that meets Interaction Rule 7. Shown only when such a question remains. A visual-probe question that already settled fails this predicate. The option description names the proposed slice. When this option is shown, omit **Pressure-test the requirements** from the same menu.
-4. **Open in browser** — open the HTML unified plan locally for review. Shown only when a unified plan exists. **Render only when `OUTPUT_FORMAT=html`**, unless `references/publishing.md` chooses a publisher (one the user named, or the host's artifact tool); then label this option with that destination, e.g. **Publish a copy to <destination>**, render it for any format the destination accepts, and publish a copy there instead of opening the file locally.
-5. **More clarifying questions to sharpen the scope** - Keep refining scope, edge cases, constraints, and preferences through further dialogue. Always shown — so the label names the scope rather than the doc, which stays true on a run that correctly skipped doc creation.
+1. **创建实施计划** *（推荐）* - 移交给 `ce-plan` 并将需求锐化为完整的、可测试的计划。仅当 `Resolve Before Planning` 为空时显示。
+2. **使用 `lfg`** 自主交付 - 将需求交给完整的自主管道：`lfg` 计划 (`ce-plan`)、实施、简化、运行独立代码审查并应用修复程序、打开 PR，并观察 CI 为绿色 — 放手，无需签入。它先计划后实施。当您信任这些要求并希望在没有转向的情况下建造和运输时，这是最好的选择。 **打开 PR 并推送分支。** 仅针对 `Resolve Before Planning` 空的软件头脑风暴 (`execution: code`) 显示，并创建了统一的计划产物** — `lfg` 在管道模式下将产物路径交给 `ce-plan`，因此无法提示，因此没有产物（例如，根据“确定文档是否为空”跳过了文档创建的简短对齐头脑风暴）保证”规则）没有什么可以充实的；相反，提供选项 1，它可以通过对话进行交互式计划。要实现更快的计划然后决定流程，请选择选项 1。
+3. **对需求进行压力测试** - 派遣`ce-doc-review`的评审代理来查找需求中的差距、冲突、薄弱前提和范围问题；以产物的本机格式自动应用安全修复；以交互方式路由其余部分。仅当存在统一计划**并且没有剩余问题符合交互规则 7** 时才显示。当显示 **原型剩余的感觉问题** 时，请从同一菜单中省略此选项。
+3. **原型剩余的感觉问题** - 对满足交互规则 7 的命名剩余问题调用 `ce-prototype`。仅当存在这样的问题时才显示。已经解决的视觉探测问题无法满足该谓词。选项描述命名建议的切片。显示此选项时，请从同一菜单中省略**对要求进行压力测试**。
+4. **在浏览器中打开** — 在本地打开 HTML 统一计划以供查看。仅当存在统一计划时才显示。 **仅在`OUTPUT_FORMAT=html`**时渲染，除非`references/publishing.md`选择发布者（用户指定的发布者，或主持人的产物工具）；然后用该目的地标记此选项，例如**将副本发布到 <destination>**，将其呈现为目标接受的任何格式，并在那里发布副本，而不是在本地打开文件。
+5. **更多澄清问题以扩大范围** - 通过进一步对话不断完善范围、边缘案例、约束和偏好。始终显示 - 因此标签命名范围而不是文档，这在正确跳过文档创建的运行中保持不变。
 
-There is no "done" / "pause" option — the blocking question already waits, and the user ends by dismissing it (Esc) or saying they're finished. When a file was written, the unified plan artifact is already saved; on the chat path there is no file and nothing to save.
+没有“完成”/“暂停”选项 - 阻塞问题已经等待，用户通过忽略它（Esc）或说他们已经完成来结束。当一个文件被写入时，统一计划产物已经被保存；聊天路径上没有文件，也没有任何可保存的内容。
 
-**Post-review nudge (subsequent rounds only):** If the user has already run `ce-doc-review` this session and residual P0/P1 findings remain unaddressed, add a one-line prose nudge adjacent to the menu (e.g., "Document review flagged 2 P1 findings you may want to address — pick \"Pressure-test the requirements\" to run another pass."). Reference the option by label, not number: the menu renumbers when `Resolve Before Planning` hides `Create the implementation plan` and the lfg option, so a hardcoded option number can point users at the wrong action. Do not add a separate menu option; reuse the existing `Pressure-test the requirements` option. Suppress this nudge whenever that option is not on the rendered menu — when **Prototype a remaining feel-question** displaced it — so the nudge never points users at an action they cannot pick.
+**审阅后微调（仅限后续轮次）：** 如果用户已运行 `ce-doc-review` 此会话，并且剩余 P0/P1 结果仍未解决，请在菜单旁边添加一行散文微调（例如，“文档审阅标记为您可能想要解决的 2 P1 结果 - 选择“对需求进行压力测试”以运行另一个通过。”）。通过标签而不是编号引用选项：当 `Resolve Before Planning` 隐藏 `Create the implementation plan` 和 lfg 选项时，菜单会重新编号，因此硬编码的选项编号可能会将用户指向错误的操作。不要添加单独的菜单选项；重用现有的`Pressure-test the requirements`选项。每当该选项不在渲染菜单上时（当 **原型剩余的感觉问题** 取代它时），请抑制此微移 - 因此微移永远不会将用户指向他们无法选择的操作。
 
-#### 4.2 Handle the Selected Option
+#### 4.2 处理所选选项
 
-Selections may be the literal option label (when the user types the label or a close paraphrase) or the option number. Match numbers against the currently-rendered (post-trim) list. Free-form input that doesn't match an option or describe an alternative action should be treated as clarification — ask a follow-up rather than guessing.
+选择可以是文字选项标签（当用户键入标签或紧密释义时）或选项编号。将数字与当前渲染（修剪后）列表进行匹配。与选项不匹配或描述替代操作的自由格式输入应被视为澄清 - 询问后续而不是猜测。
 
-**If user selects "Create the implementation plan":**
+**如果用户选择“创建实施计划”：**
 
-Immediately load the `ce-plan` skill in the current session. Pass the unified
-plan artifact path when one exists; otherwise pass a concise summary of the
-finalized brainstorm decisions. When the Phase 1.1 grounding scout produced a
-dossier and the file still exists, also pass its path
-(`<scratch-root>/ce-brainstorm/<run-id>/grounding.md`) — it gives
-planning verified quotes with `file:line` pointers to start from instead of
-re-scanning the repo. Do not print the closing summary first.
+立即加载当前会话中的`ce-plan`技能。当存在统一规划产物路径时，传递该路径；否则通过最终头脑风暴决策的简明摘要。当阶段 1.1 接地侦察生成档案并且文件仍然存在时，还传递其路径 (`<scratch-root>/ce-brainstorm/<run-id>/grounding.md`) — 它会提供计划验证的报价，并带有 `file:line` 指针作为起点，而不是重新扫描存储库。不要先打印结束摘要。
 
-**If user selects "Pressure-test the requirements":**
+**如果用户选择“对需求进行压力测试”：**
 
-Load the `ce-doc-review` skill, passing the unified plan path as the argument.
-When ce-doc-review returns "Review complete", return to the Phase 4 options
-and re-render the menu (the requirements may have changed, so re-evaluate
-`Resolve Before Planning`, the software-only condition on the lfg option, and residual findings). If
-residual P0/P1 findings remain unaddressed, include the post-review nudge
-above the menu. Do not show the closing summary yet.
+加载`ce-doc-review`技能，传递统一计划路径作为参数。当ce-doc-review返回“审核完成”时，返回到第4阶段选项并重新渲染菜单（要求可能已更改，因此重新评估`Resolve Before Planning`、lfg选项上的纯软件条件以及剩余结果）。如果剩余的 P0/P1 发现仍未得到解决，请在菜单上方添加审核后微调。暂不显示结束摘要。
 
-**If user selects "Ship it autonomously with `lfg`":**
+**如果用户选择“使用`lfg`自主交付”：**
 
-Immediately invoke the `lfg` skill in the current session via the platform's
-skill-invocation primitive, passing the unified plan artifact path as its
-argument so `lfg`'s `ce-plan` step enriches *this* requirements-only artifact in
-place rather than bootstrapping a new plan. `lfg` then runs the full pipeline
-autonomously — plan, implement (`ce-work` in `return-to-caller` mode), simplify,
-independent code review and applied fixes, commit/push/open PR, and CI watch to
-green. Do not also load `ce-work` directly; `lfg` orchestrates it. `lfg` is
-host-agnostic: it works wherever
-skills run (plus `git`/`gh` for the PR and CI steps, which it guards when absent).
+通过平台的技能调用原语立即调用当前会话中的`lfg`技能，将统一计划产物路径作为其参数传递，以便`lfg`的`ce-plan`步骤丰富*此*仅要求的产物，而不是引导新计划。然后`lfg`自主运行整个管道 - 计划、实施（`ce-work`在`return-to-caller`模式下）、简化、独立代码审查和应用修复，commit/push/openPR和CI观察到绿色。也不要直接加载`ce-work`； `lfg` 精心策划。 `lfg` 与主机无关：它在技能运行的任何地方都有效（加上 `git`/`gh` 用于 PR 和 CI 步骤，在缺席时它会进行保护）。
 
-Where the host exposes no skill-invocation primitive, print the `lfg <plan-path>`
-invocation for the user to run and note that it will plan, build, review, and
-open a PR from this artifact.
+如果主机未公开技能调用原语，则打印 `lfg <plan-path>` 调用以供用户运行，并注意它将计划、构建、审查并从此产物打开 PR。
 
-Do not print the closing summary first.
+不要先打印结束摘要。
 
-**If user selects "More clarifying questions to sharpen the scope":** Return to Phase 1.3 (Collaborative Dialogue) and continue asking the user clarifying questions one at a time to further refine scope, edge cases, constraints, and preferences. Continue until the user is satisfied, then return to Phase 4. Do not show the closing summary yet.
+**如果用户选择“更多澄清问题以扩大范围”：** 返回阶段 1.3（协作对话）并继续一次询问用户澄清问题，以进一步细化范围、边缘情况、约束和偏好。继续，直到用户满意，然后返回到阶段 4。暂时不要显示结束摘要。
 
-**If user selects "Prototype a remaining feel-question":**
+**如果用户选择“对剩余的感觉问题进行原型设计”：**
 
-Invoke the `ce-prototype` skill via the host's normal skill-invocation mechanism, passing the unified plan artifact path when one exists — the exact plan artifact path returned by the write step (including any collision suffix), never one rebuilt from the naming convention. Do not build a prototype in this skill. Do not substitute a generic Task, Agent, or subagent.
+通过主机的正常技能调用机制调用 `ce-prototype` 技能，当存在统一计划产物路径时传递该路径 - 写入步骤返回的确切计划产物路径（包括任何冲突后缀），绝不会根据命名约定重建。不要在此技能中构建原型。不要替换通用任务、代理或子代理。
 
-**If user selects "Open in browser" or "Publish a copy":** Read `references/publishing.md` and follow it for the saved unified plan; that file stays the record. Show the user the resulting URL or absolute path, then return to the Phase 4 options so the user can pick a follow-up action.
+**如果用户选择“在浏览器中打开”或“发布副本”：**阅读`references/publishing.md`并按照它保存统一计划；该文件保留记录。向用户显示生成的 URL 或绝对路径，然后返回到第 4 阶段选项，以便用户可以选择后续操作。
 
-**If the user indicates they're finished** (says "done"/"that's all", or dismisses the menu without picking an option): display the closing summary (see 4.3) and end the turn.
+**如果用户表示他们已经完成**（说“完成”/“就这样”，或者关闭菜单而不选择选项）：显示结束摘要（参见 4.3）并结束回合。
 
-#### 4.3 Closing Summary
+#### 4.3 结束总结
 
-Use the closing summary only when this run of the workflow is ending or handing off, not when returning to the Phase 4 options.
+仅当工作流运行结束或移交时才使用结束摘要，而不是返回到第 4 阶段选项时使用结束摘要。
 
-In both templates below, substitute `<absolute path to unified plan>` with the
-actual file path written this run — `.md` for `OUTPUT_FORMAT=md`, `.html` for
-`OUTPUT_FORMAT=html`. Do not emit a hardcoded `.md` path when the artifact is
-HTML, or the closing summary will point users at a file that was never written.
+在下面的两个模板中，将 `<统一计划的绝对路径>` 替换为本次运行写入的实际文件路径 - `.md` 替换 `OUTPUT_FORMAT=md`，`.html` 替换 `OUTPUT_FORMAT=html`。当产物是 HTML 时，不要发出硬编码的 `.md` 路径，否则结束摘要会将用户指向从未写入的文件。
 
-When complete and ready for planning, display:
+完成并准备好规划后，显示：
 
 ```text
 Brainstorm complete!
 
-Plan artifact: <absolute path to unified plan>  # omit line if no artifact was created
+计划产物：<统一计划的绝对路径> # 如果未创建产物，则省略行
 
 Key decisions:
-- [Decision 1]
-- [Decision 2]
+- [决定1]
+- [决定2]
 
-Recommended next step: `ce-plan <plan artifact path>`  # with no artifact: `ce-plan` with the key decisions above as its input
+建议的下一步：`ce-plan <plan artifact path>` # 无产物：`ce-plan` 将上述关键决策作为其输入
 ```
 
-If the user pauses with `Resolve Before Planning` still populated, display:
+如果用户暂停且 `Resolve Before Planning` 仍填充，则显示：
 
 ```text
 Brainstorm paused.
 
-Plan artifact: <absolute path to unified plan>  # omit line if no artifact was created
+计划产物：<统一计划的绝对路径> # 如果未创建产物，则省略行
 
-Planning is held on:
-- [Blocking question 1]
-- [Blocking question 2]
+规划举行于：
+- 【屏蔽问题1】
+- 【屏蔽问题2】
 
-Resume with `ce-brainstorm` to resolve these — or say to plan anyway, and I'll record each open item as an explicit assumption or a question deferred to planning.
+使用 `ce-brainstorm` 继续解决这些问题 — 或者说无论如何都要计划，我会将每个未解决的项目记录为明确的假设或推迟计划的问题。
 ```

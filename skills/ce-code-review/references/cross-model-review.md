@@ -1,21 +1,21 @@
-# Cross-Model Adversarial Pass
+# 跨模型对抗通行证
 
-Runs the **adversarial** review a second time through a different model (the "peer"), reached over one fixed route, in a read-only process. The peer gets the **same** `references/personas/adversarial-reviewer.md` brief the in-process reviewer uses, returns the same `findings-schema.json` shape, and joins Stage 5 (synthesis) as reviewer `adversarial-<provider>`. Its findings count as independent corroboration, and can promote a finding both reviewers agree on, only when its identity record (the "receipt") says `independence_verified: true`. Otherwise its findings stay in the review as attributed evidence with no promotion bonus.
+通过不同的模型（“同行”）第二次运行 **对抗性** 审查，通过一条固定路线，以只读过程进行。对等方获得与正在进行的审查者使用的 **相同* `references/personas/adversarial-reviewer.md` 简介，返回相同的 `findings-schema.json` 形状，并作为审查者 `adversarial-<provider>` 加入第 5 阶段（综合）。仅当其身份记录（“收据”）显示 `independence_verified: true` 时，其发现才算作独立佐证，并且可以促进两个评审员都同意的发现。否则，其调查结果将作为证据保留在审查中，而不会获得晋升奖金。
 
-This pass is **adversarial-only**. No other persona gets a cross-model twin, and there is no whole-diff generalist peer. The pass costs nothing unless Stage 3 (reviewer selection) already selected the adversarial reviewer.
+此通行证是**仅限对抗性**。没有其他角色拥有跨模型双胞胎，也没有完全不同的通才同行。除非第 3 阶段（审稿人选择）已经选择了对抗性审稿人，否则该通行证不需要任何费用。
 
-Before any reviewed content leaves the machine, the host picks one concrete route and approves it (this document calls that approval a "sanction"). `scripts/cross-model-adversarial-review.sh` holds to that fixed route, applies read-only controls, captures JSON in the findings-schema shape, and records identity receipts. Before dispatch it makes a conservative estimate of the diff's token count and file count. An oversized diff is not pasted whole into the prompt: the worker gives the peer the orchestrator's compact semantic review map and keeps the exact diff as a private file outside the repository. Every route gets that file's path and reads it selectively (`references/cross-model-recovery.md` records what each route can read). Every route runs through acpx, which needs Node 22.13 or newer with `npx`. A failed route writes no artifact and never switches recipients on its own.
+在任何审阅的内容离开机器之前，主机会选择一条具体路线并批准它（本文档将该批准称为“制裁”）。 `scripts/cross-model-adversarial-review.sh` 保留该固定路线，应用只读控件，在结果模式形状中捕获JSON，并记录身份收据。在分发之前，它会对 diff 的令牌计数和文件计数进行保守估计。过大的差异不会整个粘贴到提示中：工作人员向对等方提供编排器的紧凑语义审查图，并将确切的差异保留为存储库外部的私有文件。每个路由获取该文件的路径并有选择地读取它（`references/cross-model-recovery.md`记录每个路由可以读取的内容）。每条路由都经过 acpx，它需要 Node 22.13 或更高版本且`npx`。失败的路由不会写入任何产物，也不会自行切换收件人。
 
-## Run conditions — run only when all hold
+## 运行条件——仅当全部成立时才运行
 
-1. `adversarial-reviewer` was selected in Stage 3 (reviewer selection), or the Review depth gate chose the focused path, whose one independent read is this lens. Reuse that selection; do not run a costly external CLI on a trivial diff.
-2. The working tree is the reviewed head (standalone, `base:`, or `local-aligned` scope). Skip in `pr-remote` / `branch-remote`: the peer reviews the local tree, which is not the PR or branch head.
+1. `adversarial-reviewer`在第3阶段（审稿人选择）中被选中，或者审稿深度门选择了聚焦路径，其一个独立的读取就是这个镜头。重用该选择；不要在微不足道的差异上运行昂贵的外部CLI。
+2. 工作树是已审查的头（独立、`base:`或`local-aligned`范围）。跳过`pr-remote`/`branch-remote`：同行评审本地树，这不是PR或分支头。
 
-## Step 1 — Attest host identity, then sanction one fixed route
+## 步骤 1 — 证明主机身份，然后批准一条固定路由
 
-Keep requested **target**, CLI **harness/intermediary**, serving **family/provider**, and served model separate. `cursor` means `cursor-agent` with its configured default/Auto model and no `--model` flag. `composer` means an explicit Composer-family model through Cursor. `grok` prefers its native CLI; Grok through Cursor is a distinct route and recipient. `antigravity` means a Gemini model through Google's Antigravity ACP runtime; a request for a Gemini peer binds target `antigravity`. `pi` means the Pi coding agent on its own configured model unless a `provider/model` pin names one; Pi serves any provider, so a `pi` peer's serving family is unknown and its review is never independent.
+将请求的 **目标**、CLI **harness/intermediary**、服务 **family/provider** 和服务模型分开。 `cursor` 表示 `cursor-agent` 及其配置的 default/Auto 模型，并且没有 `--model` 标志。 `composer` 表示通过 Cursor 的显式 Composer 系列模型。 `grok`更喜欢它的原生CLI；通过 Cursor 的 Grok 是一条独特的路线和接收者。 `antigravity` 表示通过 Google 的 Antigravity ACP 运行时构建的 Gemini 模型；对 Gemini 对等点的请求绑定目标 `antigravity`。 `pi` 表示 Pi 编码代理在其自己配置的模型上，除非 `provider/model` 引脚指定了一个； Pi 为任何提供者提供服务，因此 `pi` 同级的服务家庭是未知的，并且其审查从来都不是独立的。
 
-Attest both the host harness and its serving family:
+证明宿主宿主及其服务家族：
 
 ```bash
 XHOST_SEEN=;
@@ -31,95 +31,90 @@ elif [ -n "${OPENCODE_TERMINAL:-}" ]; then XHOST_HARNESS=opencode; XHOST_FAMILY=
 else XHOST_HARNESS=unknown; XHOST_FAMILY=unknown; fi
 ```
 
-Pass `XHOST_HARNESS` as `CROSS_MODEL_HOST_HARNESS`; pass `XHOST_FAMILY` as the first worker argument. The snippet is evidence, not the verdict: it resolves the harnesses whose environment markers it already names, and where it yields `unknown` on a harness you can identify from your own runtime, attest what you know instead. A harness the snippet does not name needs no new branch here. Both tokens must be peer keys the worker accepts, never a provider's company name. Family is `codex`, `claude`, `grok`, `composer`, `gemini`, or `unknown`. Harness is `codex`, `claude`, `grok`, `cursor`, `opencode`, `antigravity`, `omp`, `pi`, or `unknown`. A company name such as `anthropic`, `openai`, or `xai` in either slot makes the worker refuse the job and write no artifact.
+将`XHOST_HARNESS`传递为`CROSS_MODEL_HOST_HARNESS`；传递 `XHOST_FAMILY` 作为第一个工作参数。该片段是证据，而不是结论：它解析了其环境标记已命名的宿主，并且在您可以从自己的运行时识别的宿主上产生`unknown`，证明您所知道的。代码片段未命名的宿主此处不需要新分支。两个令牌都必须是工作人员接受的对等密钥，而不是提供商的公司名称。家庭为 `codex`、`claude`、`grok`、`composer`、`gemini` 或 `unknown`。宿主为 `codex`、`claude`、`grok`、`cursor`、`opencode`、`antigravity`、`omp`、`pi` 或 `unknown`。任一槽中的公司名称（例如 `anthropic`、`openai` 或 `xai`）都会使工作人员拒绝该工作并且不会写入任何产物。
 
-Claude Code, Codex, and Grok each serve their own model family, so the snippet takes the family from that harness's marker when it is the only such marker present. Another harness can copy one of those markers (oh-my-pi sets `CLAUDECODE=1` whatever model serves it), and a session started from inside another harness inherits that harness's marker. So the snippet leaves family `unknown` on a harness that serves any model (oh-my-pi or Pi) or when more than one of those markers is present. Pass a family the snippet names. When the snippet yields harness `omp` or `pi`, still pass `unknown` and start the job: the worker reads the serving family from the model that harness's session records and skips when it names no first-party model. Elsewhere, where the snippet leaves family `unknown`, set it only from a model id the runtime publishes as the model serving this session, and only when that id maps to `codex`, `claude`, `grok`, `composer`, or `gemini`. A requested model, the model's own claim, and the product name are not that id. Never infer serving family from the Cursor brand. Otherwise an unknown host family cannot pass the automatic same-family check, so skip the automatic cross-model pass.
+Claude Code、Codex 和 Grok 各自服务于自己的模型系列，因此当该宿主的标记是唯一存在的此类标记时，该片段会从该系列中获取该系列。另一个宿主可以复制这些标记之一（oh-my-pi 设置 `CLAUDECODE=1` 无论模型为其提供服务），并且从另一个宿主内部启动的会话会继承该宿主的标记。因此，该片段将家庭 `unknown` 留在为任何模型（oh-my-pi 或 Pi）提供服务的宿主上，或者当存在多个标记时。将片段名称传递给家人。当代码片段产生harness `omp`或`pi`时，仍然传递`unknown`并开始工作：worker从harness会话记录的模型中读取服务族，并在没有指定第一方模型时跳过。在其他地方，当代码片段离开系列 `unknown` 时，仅从运行时发布的模型 ID 设置它作为服务于该会话的模型，并且仅当该 ID 映射到 `codex`、`claude`、`grok`、`composer` 或 `gemini` 时。请求的型号、该型号自己的声明以及产品名称都不是该 ID。切勿从 Cursor 品牌推断服务家庭。否则，未知的寄宿家庭无法通过自动同族检查，因此跳过自动跨模型检查。
 
 <!-- ce-config-layers:start -->
-**Resolve ordinary CE yaml keys from the two repo files.**
+**解析两个存储库文件中的普通 CE yaml 密钥。**
 
-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
+- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
+- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
 <!-- ce-config-layers:end -->
 
-**Checkout policy on sending content out — evaluate first.** Read `cross_model_review_mode:` from the same two repo CE config files under the ordinary-key rule. Valid values are `auto` (default) and `off`; anything else is invalid and continues to the next layer, then `auto`. When it resolves to `off`, skip the automatic cross-model pass here, before peer resolution, disclosure, or any job start. The one exception is when the user explicitly asked for a cross-model peer for this run in conversation; a `cross_model_peer` value or a project-instruction preference is not that opt-in. Record the skip reason as **disabled by checkout config**, which is a different reason from an un-attestable host or an unavailable or non-independent route. The in-process `adversarial-reviewer` keeps the lens exactly as it does for any peer that never started. A live user prohibition still overrides `auto`. This pass's skip and target-selection keys are `cross_model_review_mode` and `cross_model_peer`. Missing files or unset keys take the default auto route; they are not a skip. Another skill's engine preference is not this gate. Model and effort overrides stay with the bound target as the reference states.
+**检查发送内容的策略 - 首先评估。** 在普通密钥规则下从相同的两个存储库 CE 配置文件中读取 `cross_model_review_mode:`。有效值为`auto`（默认）和`off`；其他任何内容都无效并继续到下一层，然后是`auto`。当它解析为 `off` 时，在同行解析、披露或任何作业开始之前跳过此处的自动跨模型传递。一个例外是当用户在对话中明确请求跨模型对等方运行时； `cross_model_peer` 值或项目指令偏好不是选择加入。将跳过原因记录为**由签出配置禁用**，这与不可证明的主机或不可用或非独立路由的原因不同。进程中的 `adversarial-reviewer` 保持镜头与任何从未开始的同行完全相同。实时用户禁止仍然优先于 `auto`。此通道的跳过和目标选择键是`cross_model_review_mode`和`cross_model_peer`。丢失文件或未设置密钥采用默认自动路由；他们不是跳过者。另一个技能的引擎偏好不是这个门。模型和工作覆盖与参考状态的绑定目标保持一致。
 
-Resolve the preference in this order:
+按此顺序解决首选项：
 
-1. A preference the user **states in conversation** (e.g. "use grok for the cross-model pass").
-2. `cross_model_peer:` from the two repo CE config files (`config.local.yaml` then `config.yaml`). Apply the ordinary-key rule: first active supported target wins; an invalid value continues to the next layer, then step 3.
-3. A preference already in your **project instructions** (the active instructions in your context) — consumed from context, **never** read from a named file.
-4. **Default:** first available attested-different target in `codex → claude → grok → antigravity`. Cursor default and Composer run only when one of steps 1-3 names them.
+1. 用户**在对话中陈述**的偏好（例如“使用 grok 进行跨模型传递”）。
+2. `cross_model_peer:` 来自两个 repo CE 配置文件（`config.local.yaml` 然后`config.yaml`）。应用普通键规则：第一个主动支持的目标获胜；无效值继续到下一层，然后是步骤 3。
+3. 您的**项目说明**（上下文中的活动指令）中已有的首选项 - 从上下文中使用，**从不**从命名文件中读取。
+4. **默认值：** `codex → claude → grok → antigravity` 中第一个可用的已证明不同目标。 Cursor default 和 Composer 仅在步骤 1-3 之一命名时运行。
 
-Before any content is sent, resolve the target to one concrete installed route, announce it, and pass it as `CROSS_MODEL_FIXED_ROUTE`. `CROSS_MODEL_PEERS` is an optional egress restriction, not a required approval. When it is set, every recipient (target and intermediary) must be allowed by it under the alias rule below, and a recipient it does not allow is a named skip. Otherwise, when it is unset or empty, no recipient is filtered and the pass proceeds; invoking this skill plus the disclosure made before sending is the approval. Do not inspect the worker source to rediscover this; it implements exactly this contract. `CROSS_MODEL_FIXED_ROUTE` accepts exactly these tokens. The worker refuses anything else and writes no artifact, including route-shaped guesses like `codex-cli`:
+在发送任何内容之前，将目标解析为一个具体安装的路由，公布它，并将其作为`CROSS_MODEL_FIXED_ROUTE`传递。 `CROSS_MODEL_PEERS` 是可选的出口限制，而不是必需的批准。设置后，每个收件人（目标和中介）都必须在下面的别名规则下被它允许，并且它不允许的收件人是指定的跳过。否则，当它未设置或为空时，不会过滤任何收件人并继续传递；调用此技能加上发送前所做的披露即为批准。不要检查工人来源来重新发现这一点；它完全执行了这个合同。 `CROSS_MODEL_FIXED_ROUTE` 完全接受这些标记。工作人员拒绝任何其他内容，并且不编写任何产物，包括像 `codex-cli` 这样的路线形状的猜测：
 
-| Target | Route token(s) |
+| 目标 | 路由令牌 |
 |--------|----------------|
 | `codex` | `codex` |
 | `claude` | `claude` |
-| `grok` | `grok-cli` (native CLI) or `grok-cursor` (via Cursor intermediary) |
+| `grok` | `grok-cli`（原生CLI）或`grok-cursor`（通过 Cursor 中介） |
 | `cursor` | `cursor` |
 | `composer` | `composer` |
 | `opencode` | `opencode` |
 | `antigravity` | `antigravity` |
 | `pi` | `pi` |
 
-The host harness does not choose the Grok route. Target `grok` binds `grok-cli` when that CLI is installed. Bind `grok-cursor` only when the user asked for Grok through Cursor, or when the grok CLI is absent and Cursor is a sanctioned recipient.
+主机宿主不选择 Grok 路线。安装 CLI 后，目标 `grok` 会绑定 `grok-cli`。仅当用户通过 Cursor 请求 Grok 时，或者当 grok CLI 不存在且 Cursor 是受制裁的接收者时，才绑定 `grok-cursor`。
 
-A failed route returns no artifact and never changes provider or intermediary on its own. Retrying the same resolved route retains its existing sanction and disclosure; changing the route or any recipient requires a new resolution, sanction, and disclosure before dispatch. The worker may repeat that same route once only after the route's adapter reports a provider overload (HTTP 529) as the prompt's error kind `overloaded`; it keeps the recipient, model, scope, and shared peer deadline fixed. Today only the Claude adapter reports that form; the other adapters retry overloads internally, so an overload that reaches the worker from them ends as an ordinary failure. For backward compatibility, either `cursor` or `composer` in `CROSS_MODEL_PEERS` sanctions Cursor as an intermediary, but selecting Cursor-default requires target `cursor`; `grok` alone never sanctions Grok-via-Cursor. The Antigravity route is sanctioned only by the literal `antigravity`; `gemini` in `CROSS_MODEL_PEERS` admits nothing.
+失败的路由不会返回任何产物，也不会自行更改提供者或中介。重试同一已解决的路线将保留其现有的制裁和披露；更改路线或任何收件人需要新的决议、制裁和交付前的披露。只有在路由适配器报告提供者过载（HTTP 529）作为提示错误类型`overloaded`之后，工作人员才可以重复相同的路由一次；它使接收者、模型、范围和共享对等截止日期保持固定。今天只有克劳德适配器报告了这种形式；其他适配器在内部重试重载，因此从它们到达工作线程的过载会以普通故障结束。为了向后兼容，`CROSS_MODEL_PEERS`中的`cursor`或`composer`都认可Cursor作为中介，但选择Cursor-default需要目标`cursor`； `grok` 永远不会单独制裁 Grok-via-Cursor。反重力路线仅受字面`antigravity`认可； `CROSS_MODEL_PEERS`中的`gemini`什么也不承认。
 
-**Checkout-configured model and effort.** After the target is resolved, read `cross_model_model:` and `cross_model_effort:` from the same two repo CE config files under the ordinary-key rule. When `cross_model_model` is set, pass `CROSS_MODEL_MODEL_OVERRIDE_TARGET=<resolved-target>` and `CROSS_MODEL_MODEL_OVERRIDE=<value>`; when `cross_model_effort` is set, pass `CROSS_MODEL_EFFORT_OVERRIDE=<value>`. Both ride the `env` prefix of the start invocation below. The worker checks each value against the route it actually runs. A model must belong to the resolved target's own family: an alias such as `fable` or a full id such as `claude-opus-5-5` for `claude`; `gpt-*` for `codex`, optionally namespace-qualified such as `openai.gpt-6.1-sol` when that CLI routes through a non-default `model_provider`; `gemini-*` for `antigravity`; `provider/model` for `opencode` and `pi`. An effort must be a level the route's adapter offers; for `antigravity` that is its thinking level, `low`, `medium`, or `high`, and for `opencode` (2.x) it is `none` through `max` as the model lists them. cursor-agent and `pi` routes accept no effort override. An incompatible value stops the pass with a named skip reason; the worker never substitutes. Unset keys leave the script's editorial mapping unchanged. Announce the configured model and effort in the Step 3 (Announce) line exactly as requested. A model or effort the user states in conversation outranks the config keys.
+**签出配置的模型和工作。**解析目标后，在普通密钥规则下从相同的两个存储库CE配置文件中读取`cross_model_model:`和`cross_model_effort:`。当`cross_model_model`设置时，传递`CROSS_MODEL_MODEL_OVERRIDE_TARGET=<resolved-target>`和`CROSS_MODEL_MODEL_OVERRIDE=<value>`；当`cross_model_effort`设置时，传递`CROSS_MODEL_EFFORT_OVERRIDE=<value>`。两者都使用下面启动调用的 `env` 前缀。工作人员根据其实际运行的路线检查每个值。模型必须属于已解析目标自己的系列：别名（如 `fable`）或完整 ID（如 `claude-opus-5-5` 代表 `claude`）； `gpt-*` 代表 `codex`，可选择命名空间限定，例如 `openai.gpt-6.1-sol`，当 CLI 通过非默认 `model_provider` 路由时； `gemini-*` 为 `antigravity`； `provider/model`适用于`opencode`和`pi`。努力必须是路线适配器提供的级别；对于`antigravity`，这是它的思维水平，`low`，`medium`，或`high`，对于`opencode`（2.x），它是`none`到`max`，如模型列出的那样。光标代理和`pi`路线不接受任何努力覆盖。不兼容的值会以指定的跳过原因停止传递；工人永远不会替代。取消设置键会使脚本的编辑映射保持不变。完全按照要求在步骤 3（宣布）行中宣布配置的模型和工作量。用户在对话中陈述的模型或工作比配置键更重要。
 
-Preferred mappings run first. Only after an observed unavailable, obsolete, or incompatible model may the host choose the closest compatible same-target/same-family replacement. Bind it with `CROSS_MODEL_MODEL_OVERRIDE_TARGET=<target>` and `CROSS_MODEL_MODEL_OVERRIDE=<model-id>`. Never substitute across families, leak an override to another route, silently change an explicit model, or add a recipient.
+首先运行首选映射。只有在观察到不可用、过时或不兼容的模型后，主机才可以选择最接近的兼容same-target/same-family替代品。将其与`CROSS_MODEL_MODEL_OVERRIDE_TARGET=<target>`和`CROSS_MODEL_MODEL_OVERRIDE=<model-id>`绑定。切勿跨系列替换、将覆盖泄漏到另一条路线、悄悄更改显式模型或添加接收者。
 
-Target `antigravity` never takes a host-chosen replacement. Its worker requests Gemini 4 Argon and, when the account does not offer Argon, falls back once to Gemini Flash before any prompt is sent; the run log names the model used. A configured `antigravity` model runs exactly or the pass skips.
+目标`antigravity`从不接受主机选择的替换。其工作人员请求 Gemini 4 Argon，当账户不提供 Argon 时，会在发送任何提示之前退回到 Gemini Flash；运行日志命名所使用的模型。配置的 `antigravity` 模型完全运行，否则过程会跳过。
 
-The codex worker treats its own editorial request the same way. When the account does not offer the default model, it falls back once to its alternate before any prompt is sent. When the adapter refuses the editorial reasoning effort, it retries once without it and records `effort_requested: unverified`. A configured codex model or effort runs exactly or the pass skips.
+法典工作人员以同样的方式对待自己的编辑请求。当帐户不提供默认模型时，它会在发送任何提示之前回退到备用模型。当适配器拒绝编辑推理工作时，它会在没有编辑推理的情况下重试一次并记录`effort_requested: unverified`。配置的 Codex 模型或工作会完全运行，否则会跳过传递。
 
-## Step 2 — Provider model + reasoning tier (defined in the script)
+## 第 2 步 — 提供者模型 + 推理层（在脚本中定义）
 
-The peer runs on **one editorially selected model and reasoning tier per provider**. The concrete model IDs and route effort flags live in one mapping in `scripts/cross-model-adversarial-review.sh`; this reference does not repeat them. Codex, Claude Opus, and Antigravity currently use high; native Grok uses extra-high. The cursor-agent Grok route uses Cursor's high/fast preset, because Cursor offers one preset per model; composer's fast tier is its ceiling. Users choose the peer target, and may pin that target's model and effort through `cross_model_model` / `cross_model_effort` (Step 1); the script validates and never substitutes. Never inherit a harness-configured default model. A lower tier is adopted only after an eval shows it finds the same issues, never from cost alone.
+对等点在**每个提供者一个编辑选择的模型和推理层上运行**。具体模型 ID 和路线工作量标志位于 `scripts/cross-model-adversarial-review.sh` 的一个映射中；本文不再重复它们。 Codex、Claude Opus、Antigravity 目前使用率较高；原生 Grok 使用超高。光标代理 Grok 路线使用 Cursor 的 high/fast 预设，因为 Cursor 为每个模型提供一个预设；作曲家的快速层是它的天花板。用户选择对等目标，并可以通过`cross_model_model` / `cross_model_effort` 固定该目标的模型和努力（步骤1）；该脚本会验证并且不会替代。切勿继承宿主配置的默认模型。仅在评估显示发现相同问题后才采用较低层，而不仅仅是考虑成本。
 
-The script always uses the adversarial persona brief; fold-in forces `reviewer` to `adversarial-<provider>`.
+剧本总是使用对抗性人物简介；折叠力 `reviewer` 至 `adversarial-<provider>`。
 
-## Step 3 — Announce
+## 第 3 步 — 宣布
 
-Invoking ce-code-review is the authorization for the selected, configured, and allowlisted route once this disclosure is made. The announcement is a notice, not a second confirmation prompt. Skip only for an explicit user prohibition, a checkout `cross_model_review_mode: off` without a live opt-in, or an observed scope, allowlist, or route failure. Never skip solely because the user did not separately authorize the external pass in the same prompt.
+一旦进行此公开，调用 ce-code-review 是对所选、配置和列入白名单的路由的授权。该公告是通知，而不是第二次确认提示。仅在明确的用户禁止、没有实时选择加入的结帐 `cross_model_review_mode: off` 或观察到的范围、白名单或路由失败时跳过。切勿仅仅因为用户没有在同一提示中单独授权外部通行证而跳过。
 
-Pre-dispatch eligibility is based on installed route presence and sanction, not credential state. Do not run authentication probes before the provider-capable launch; authentication is authoritative only after provider-capable dispatch.
+预调度资格基于已安装的路线存在和制裁，而不是凭证状态。在提供程序支持的启动之前不要运行身份验证探测；只有在提供者能够调度之后，身份验证才是权威的。
 
-- **Interactive host, default mode:** print a **prominent standalone line** that frames it as an **independent cross-model adversarial review** (say "cross-model" / "independent model", not the internal "peer" jargon). The line names the requested **model and reasoning level** from the in-script mapping, and states that reviewed code/diff content is sent to that provider. For cursor-agent routes it names **the route as well as the model**, because two different models can arrive over the *same* `cursor-agent` CLI. **One disclosure condition governs the announce and every later mention of the peer:** name it by target and requested model and effort, as a request ("requested <model> at <effort>"), never as a claim that this model served. Add a serving caveat only when a receipt disagrees with the request, or when the route requested no model (Cursor default/Auto says "serving model unverified"). A receipt-less route with a requested model gets no caveat: `model_actual: unverified` means no receipt, not an unknown model. Place the line with the Stage 3 team announce, not buried after it.
-  - Call the pass **independent** only when host and target serving families are attestably different. For Cursor default/Auto or an unknown host family, call it a cross-harness review and state that independence is unverified; do not promise agreement promotion before the receipt exists.
-  - Announce the one fixed route and every recipient before dispatch. After a failure, apply Step 1's retry/disclosure condition. Reconcile target, harness, route, requested model, and actual model from the artifact.
-- **Interactive host, no peer resolved** (host serving family un-attestable, no different-provider route installed, or disabled by checkout config): one quiet line that the cross-model pass was skipped and why. Name the checkout policy when that is the reason. Never an error. Under harness `omp` or `pi` the family is not yet un-attestable: the worker resolves it from the session record, so start the job and report its skip, not this one.
-- **`mode:agent`:** emit no user-facing prose. The script still writes a one-line stderr audit log per send saying that review content was sent cross-model to the named provider, so the transfer to a third party is auditable. The JSON result still records the peer outcome as `references/modes-and-output.md` defines.
+- **交互式主机，默认模式：**打印一条**突出的独立行**，将其框架为**独立的跨模型对抗性审查**（说“跨模型”/“独立模型”，而不是内部“同行”行话）。该行从脚本内映射中命名请求的 **模型和推理级别**，并声明已审核的 code/diff 内容已发送到该提供者。对于光标代理路由，它命名**路由以及模型**，因为两个不同的模型可以通过*相同* `cursor-agent` CLI到达。 **一个披露条件控制着公告以及以后每次提及对等点：** 按目标和请求的模型和工作来命名它，作为请求（“在 <effort> 请求 <model>”），而不是作为该模型服务的声明。仅当收据与请求不一致或路线请求无模型时（光标default/Auto表示“服务模型未经验证”），才添加服务警告。具有所请求型号的无收据路线不会有任何警告：`model_actual: unverified` 表示没有收据，而不是未知型号。将线路与第 3 阶段团队公告一起放置，而不是埋在其后。
+  - 仅当寄宿家庭和目标服务家庭明显不同时，才将通行证称为“独立”。对于光标default/Auto或未知的寄宿家庭，称其为跨线审查，并声明独立性未经验证；在收据存在之前，请勿承诺协议促销。
+  - 交付前公布一条固定路线及每位收件人。失败后，应用步骤 1 的 retry/disclosure 条件。协调产物中的目标、宿主、路线、请求的模型和实际模型。
+- **交互式主机，没有对等点解析**（主机服务系列无法证明，没有安装不同的提供商路由，或通过结帐配置禁用）：跳过跨模型传递的一条安静线路以及原因。如果这是原因，请指定结账政策。从来没有错误。在 `omp` 或 `pi` 下，该族还不是不可证明的：工作人员从会话记录中解析它，因此开始作业并报告其跳过，而不是这个。
+- **`mode:agent`:** 不发出面向用户的散文。该脚本仍然在每次发送时写入一行 stderr 审核日志，表示审核内容已跨模型发送到指定的提供程序，因此向第三方的传输是可审核的。 JSON结果仍然记录`references/modes-and-output.md`定义的对等结果。
 
-## Step 4 — Start the detached peer job before local dispatch
+## 步骤 4 — 在本地调度之前启动分离的对等作业
 
-The script is a CLI shell-out, not a subagent, so it does not consume the subagent concurrency budget. **Never hold a tool call open for the peer's runtime.** Some harnesses kill long tool calls, and a killed call makes the pass vanish silently. At Stage 3d (routing), start it as a **detached, supervised job** through the bundled runner in one short Bash call; the call prints the job id in under about 2s. Only after that call returns may the host finalize the local reviewer roster and enter Stage 4 (dispatch). The detached worker still runs alongside the local reviewers; starting it first prevents the host from also dispatching the in-process adversarial reviewer by mistake.
+该脚本是一个 CLI shell-out，而不是子代理，因此它不会消耗子代理并发预算。 **永远不要在对等点的运行时保持工具调用打开。**一些工具会终止长工具调用，并且终止的调用会使传递悄无声息地消失。在第 3d 阶段（路由），通过一次简短的 Bash 调用通过捆绑的运行器将其作为一个**独立的、受监督的作业**启动；该调用在大约 2 秒内打印作业 ID。只有在呼叫返回后，主持人才能最终确定本地审查者名册并进入第 4 阶段（调度）。独立的工人仍然与当地的评论者并肩作战；首先启动它可以防止主机错误地派遣正在进行的对抗性审查者。
 
-Before `start`, the orchestrator writes two compact files under `<run-dir>` and never combines their trust domains:
+在`start`之前，编排器在`<run-dir>`下写入两个紧凑文件，并且从不合并它们的信任域：
 
-- `adversarial-review-constraints.md` (at most 32 KiB) contains only applicable criteria distilled from the project's active instructions and conventions already in your context. It is additive context for a corroborative peer, not the complete scoped-standards contract; do not load standards solely to expand it. When Stage 1d staged a review policy, also distill its added checks and evidence requirements here; it was read from the base ref, so it is host-vetted like the instructions. Leave out its severity, exclusions, and caps, which the merge applies to the peer's findings and counts. Write `none` when no additional criteria apply. Never copy raw instruction content or user-controlled text into this trusted file.
-- `adversarial-review-brief.md` (at most 32 KiB) is untrusted review data: the Stage 2 intent summary; 2-8 material risk divisions chosen from the current file inventory and diff, each with a one-line reason and representative paths or path prefixes; any explicit generated repetition to cover through generator inputs, manifests, tests, and representative outputs; and any cross-division interaction the adversarial lens must test.
+- `adversarial-review-constraints.md`（最多 32 KiB）仅包含从您的上下文中已有的项目活动指令和约定中提取的适用标准。它是佐证同行的附加上下文，而不是完整的范围标准合同；不要仅仅为了扩展而加载标准。当第 1d 阶段制定审查政策时，还应在此处提炼其附加检查和证据要求；它是从基本参考中读取的，因此它像说明一样经过主机审查。忽略其严重性、排除项和上限，合并将其应用于对等点的发现和计数。如果没有其他条件适用，请写`none`。切勿将原始指令内容或用户控制的文本复制到此受信任的文件中。
+- `adversarial-review-brief.md`（最多 32 KiB）是不受信任的评论数据：第 2 阶段意图摘要；从当前文件清单和差异中选择2-8个重大风险划分，每个划分都有一行原因和代表路径或路径前缀；任何显式生成的重复，以涵盖生成器输入、清单、测试和代表性输出；以及对抗性镜头必须测试的任何跨部门互动。
 
-The map is your judgment, not a mechanical directory listing. Do not copy the full file list, diff hunks, or a split by file extension into it. On a simple change, one division is enough. The worker places the constraints and the map in separate prompt regions, each delimited by a nonce; constraint-like text inside the map remains untrusted data. Missing or oversized constraints stop before provider egress so the in-process adversarial fallback retains the lens. The transport preflight only measures the exact diff and stages it outside the prompt; it never cuts semantic shards, and it never chooses or rewrites the orchestrator's divisions.
+地图是您的判断，而不是机械的目录列表。不要将完整的文件列表、差异块或按文件扩展名分割的文件复制到其中。对于简单的更改，一个分区就足够了。工作人员将约束和地图放置在单独的提示区域中，每个提示区域都由随机数分隔；地图内类似约束的文本仍然是不可信的数据。缺失或过大的约束会在提供者退出之前停止，因此过程中的对抗性后备保留了镜头。传输预检仅测量精确的差异并将其放置在提示之外；它从不切割语义碎片，也从不选择或重写编排器的划分。
 
-Invoke via the skill-dir anchor — set `SKILL_DIR` to the absolute directory of **this** skill's `SKILL.md` (the Bash tool's CWD is the user's project, not the skill dir, on every host):
+通过技能目录锚点调用 - 将 `SKILL_DIR` 设置为 **此** 技能的 `SKILL.md` 的绝对目录（Bash 工具的 CWD 是用户的项目，而不是每个主机上的技能目录）：
 
-**Interpreter.** The commands below run a bundled Python script. Resolve the
-interpreter in the *same* shell call as the command -- each tool call is a fresh
-shell, so a `$PY` set in an earlier call does not persist. Do not hardcode
-`python3`: on native Windows it resolves to a Microsoft Store stub that exits
-without running Python, and that stub still satisfies `command -v`, so probe
-execution rather than presence.
+**解释器。** 下面的命令运行捆绑的 Python 脚本。在与命令相同的 shell 调用中解析解释器——每个工具调用都是一个新的 shell，因此早期调用中设置的 `$PY` 不会持续存在。不要硬编码 `python3`：在本机 Windows 上，它解析为在不运行 Python 的情况下退出的 Microsoft Store 存根，并且该存根仍然满足 `command -v`，因此探测执行而不是存在。
 
 ```bash
 PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c '' >/dev/null 2>&1 && { echo "$c"; break; }; done)"; [ -n "$PY" ] || { echo "no working Python 3 interpreter on PATH" >&2; exit 1; };
 ```
 
-**Host command-sandbox boundary.** The detached worker inherits the permission context of the `start` call that launches it. Before executing that exact call, treat `CODEX_SANDBOX_NETWORK_DISABLED` as a positive signal that the current Codex command sandbox cannot reach the provider; unsetting it does not change the sandbox policy. A DNS or authentication failure alone is not proof of that condition. Use the narrowest host permission that restores the fixed route's provider connection. When Codex exposes only full command escalation, attach this request to the exact `peer-job-runner.py start ...` tool call after the existing disclosure that reviewed content leaves the machine:
+**主机命令沙箱边界。** 分离的工作线程继承启动它的 `start` 调用的权限上下文。在执行该确切调用之前，将 `CODEX_SANDBOX_NETWORK_DISABLED` 视为当前 Codex 命令沙箱无法到达提供者的肯定信号；取消设置不会更改沙箱策略。仅 DNS 或身份验证失败并不能证明该情况。使用最窄的主机权限来恢复固定路由的提供商连接。当 Codex 仅公开完整命令升级时，请在审核内容的现有披露离开机器后将此请求附加到确切的 `peer-job-runner.py start ...` 工具调用：
 
 ```json
 {
@@ -128,7 +123,7 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 }
 ```
 
-Disclose that this is not launcher-only isolation: the detached worker inherits that launch context for its lifetime, so the adapter's declared read-only/tool restrictions, not the Codex command sandbox, are what bound the peer while the reviewed material is sent out. If the grant is denied or unavailable, do not execute `start`; keep the in-process adversarial reviewer as the fallback and create no peer job. After `start` returns a job id, any network, authentication, or provider failure is a started-job outcome and follows the ordinary terminal/recovery rules; keep `status`, `wait`, `result`, and `reap` sandboxed because they need no provider connection.
+透露这不是仅启动器的隔离：分离的工作线程在其生命周期内继承该启动上下文，因此适配器声明的 read-only/tool 限制，而不是 Codex 命令沙箱，是在发送审阅材料时绑定对等点的内容。如果授权被拒绝或不可用，则不执行`start`；保留进程中的对抗性审查者作为后备，并且不创建同行工作。在 `start` 返回作业 ID 后，任何网络、身份验证或提供程序故障都是开始作业结果，并遵循普通的 terminal/recovery 规则；将 `status`、`wait`、`result` 和 `reap` 保留在沙箱中，因为它们不需要提供者连接。
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the ce-code-review SKILL.md you read>";
@@ -137,27 +132,27 @@ echo "peer-deadline-secs=$(( ${CROSS_MODEL_HARD_SECS:-1200} + 10 ))";
 CE_PEER_HARD_SECS= CROSS_MODEL_HOST_HARNESS="<host-harness>" CROSS_MODEL_FIXED_ROUTE="<fixed-route>" "$PY" "$SKILL_DIR/scripts/peer-job-runner.py" start --skill ce-code-review --run-id "<run-id>" --label adversarial -- env CROSS_MODEL_HOST_HARNESS="<host-harness>" CROSS_MODEL_FIXED_ROUTE="<fixed-route>" bash "$SKILL_DIR/scripts/cross-model-adversarial-review.sh" "<host-serving-family>" "<target>" "<base-ref>" "<run-dir>"
 ```
 
-When Step 1 resolved a configured model or effort, add `CROSS_MODEL_MODEL_OVERRIDE_TARGET="<target>" CROSS_MODEL_MODEL_OVERRIDE="<model>"` and/or `CROSS_MODEL_EFFORT_OVERRIDE="<effort>"` to the `env` prefix after `CROSS_MODEL_FIXED_ROUTE`; omit them when unset.
+当步骤 1 解析配置的模型或工作时，将 `CROSS_MODEL_MODEL_OVERRIDE_TARGET="<target>" CROSS_MODEL_MODEL_OVERRIDE="<model>"` and/or `CROSS_MODEL_EFFORT_OVERRIDE="<effort>"` 添加到 `CROSS_MODEL_FIXED_ROUTE` 之后的 `env` 前缀；未设置时忽略它们。
 
-The three nested time windows are one budget controlled by one setting (the "knob"), `CROSS_MODEL_HARD_SECS`. The runner derives its supervisor hard window from that ambient knob automatically (`max(1230, knob + 30)`). Clear `CE_PEER_HARD_SECS` on the start prefix (`CE_PEER_HARD_SECS=`) so a stale value left in the environment by an earlier session or a harness export cannot undercut that derivation. An explicit numeric `CE_PEER_HARD_SECS` still wins when a skill deliberately sets one (ce-work / elevation); this path must not set one. Print the orchestrator deadline as `knob + 10` in the same shell as `start` (as above) and use that printed `peer-deadline-secs=<n>` below. Never hardcode it: a literal survives a knob change and then reaps a healthy peer.
+三个嵌套时间窗口是由一项设置（“旋钮”）`CROSS_MODEL_HARD_SECS` 控制的一项预算。跑步者自动从环境旋钮（`max(1230, knob + 30)`）获取其监控硬窗口。清除起始前缀 (`CE_PEER_HARD_SECS=`) 上的 `CE_PEER_HARD_SECS`，以便早期会话或宿主导出在环境中留下的陈旧值不会削弱该派生。当技能故意设置 1（ce-work / 海拔）时，显式数字 `CE_PEER_HARD_SECS` 仍然获胜；该路径不得设置。在与 `start` （如上所述）相同的 shell 中将协调器截止日期打印为 `knob + 10`，并使用下面打印的 `peer-deadline-secs=<n>`。永远不要对其进行硬编码：文字在旋钮更改后仍然存在，然后获得健康的对等体。
 
-**Do not forward `CROSS_MODEL_HARD_SECS` to the worker.** The runner already passes the ambient environment through, so a knob the user actually set reaches the worker on its own. Re-exporting the orchestrator's *resolved* value would turn a fallback into an explicit override and strip the worker of its own default.
+**不要将`CROSS_MODEL_HARD_SECS`转发给worker。** runner已经通过了周围环境，因此用户实际设置的旋钮会自行到达worker。重新导出 Orchestrator 的“已解析”值会将回退转变为显式覆盖，并剥夺工作线程自身的默认值。
 
-- `<run-id>` = the Stage 1b run id (the same one that forms `<run-dir>`); job state lives under `<run-dir>/jobs/<job-id>/`.
-- `<host-serving-family>` is `codex`, `claude`, `grok`, `composer`, `gemini`, or `unknown`; `<host-harness>` is `codex`, `claude`, `grok`, `cursor`, `opencode`, `antigravity`, `omp`, `pi`, or `unknown`.
-- `<target>` is one of `codex`, `claude`, `grok`, `cursor`, `composer`, `opencode`, `antigravity`, or `pi`; `<fixed-route>` is its already-sanctioned concrete route token from the Step 1 table (`codex`, `claude`, `grok-cli`, `grok-cursor`, `cursor`, `composer`, `opencode`, `antigravity`, or `pi`).
-- `<base-ref>` = the Stage 1 `BASE` (the diff base the peer reviews via `git diff <base-ref>`).
-- `<run-dir>` = the absolute Stage 4 run dir. The script writes `adversarial-<provider>.json` there **only after** forcing `reviewer` to `adversarial-<provider>` and downgrading peer `safe_auto` → `gated_auto`.
+- `<run-id>` = 第 1b 阶段运行 ID（与形成 `<run-dir>` 的 ID 相同）；工作状态位于 `<run-dir>/jobs/<job-id>/` 之下。
+- `<host-serving-family>`是`codex`、`claude`、`grok`、`composer`、`gemini`或`unknown`； `<host-harness>` 为 `codex`、`claude`、`grok`、`cursor`、`opencode`、`antigravity`、`omp`、`pi` 或 `unknown`。
+- `<target>`是`codex`、`claude`、`grok`、`cursor`、`composer`、`opencode`、`antigravity`或`pi`之一； `<fixed-route>` 是步骤 1 表中已批准的具体路线标记（`codex`、`claude`、`grok-cli`、`grok-cursor`、`cursor`、`composer`、`opencode`、`antigravity` 或 `pi`）。
+- `<base-ref>` = 第 1 阶段 `BASE`（差异基于通过 `git diff <base-ref>` 进行的同行评审）。
+- `<run-dir>` = 第 4 阶段的绝对运行目录。该脚本**仅在**将 `reviewer` 强制为 `adversarial-<provider>` 并将对等点 `safe_auto` → `gated_auto` 降级之后才在此处写入 `adversarial-<provider>.json`。
 
-Every persisted job id remains a lifecycle obligation until its worker is terminal and its job directory is deleted before the skill returns. The normal review path meets that obligation through the single-reap finish and fold-in below. If the local workflow cannot continue to fold-in, reap the peer promptly, perform the final `wait --max-secs 10` because reap is asynchronous, and delete its job directory without reading or folding the result or attempting route recovery.
+每个持久的作业 ID 仍然是生命周期义务，直到其工作人员终止并且其作业目录在技能返回之前被删除。正常的审查路径通过单次收割完成和下面的折叠来满足该义务。如果本地工作流无法继续折叠，则立即收割对等点，执行最后的`wait --max-secs 10`，因为收割是异步的，并删除其作业目录，而不读取或折叠结果或尝试路由恢复。
 
-**Single-reap finish.** The runner detaches the worker into its own supervised session. Capture the epoch time right after `start` (`date +%s`) and do not poll while local reviewers are active. After local returns are collected, check status once. If the job is still running, issue bounded `wait` slices until the job is terminal **or** the shared deadline (`peer-deadline-secs` from the `start` call; 1210s by default) has elapsed since `start`. Compare `date +%s` against the captured start time before each slice, and never begin a slice that would cross the deadline. Size each slice at up to 480s (Luna xhigh runs can legitimately take up to ~419s, so a shorter slice can end before a healthy peer returns), and let the slices repeat: one slice is far shorter than the derived deadline, so capping the *total* wait would reap a healthy peer for exactly the reason this budget was widened. A slice is not a polling turn. Do not interleave status reads, shell no-ops, or "still waiting" turns between slices. Fold in the artifact when the job is terminal. At the deadline, `reap <job-id>` and perform one final `wait --max-secs 10` because reap is asynchronous. The script limits its own runtime (idle timeout 480s; hard backstop `CROSS_MODEL_HARD_SECS`, default 1200s) *inside* that deadline, so reaping at the deadline is the exception. Done is detected by the file's presence: the worker publishes `<run-dir>/adversarial-<provider>.json` only after normalization. The script reads the persona brief and schema from the skill dir and reviews the current work tree against `<base-ref>`. Its large-diff preflight is transport only: it measures the exact diff and stages it outside the prompt; the orchestrator chooses the semantic divisions, and the reviewer chooses representatives and evidence within them.
+**单次收割完成。** 跑步者将工作人员分离到其自己的监督会话中。 捕获 `start` (`date +%s`) 之后的纪元时间，并且在本地审查者处于活动状态时不要进行轮询。 收集本地退货后，检查一次状态。 如果作业仍在运行，则发出有界 `wait` 切片，直到作业终止 **或** 自 `start` 以来，共享截止日期（来自 `start` 调用的 `peer-deadline-secs`；默认为 1210 秒）已过去。 将 `date +%s` 与每个切片之前捕获的开始时间进行比较，并且永远不要开始超出截止时间的切片。 将每个切片的大小调整为最多 480 秒（Luna xhigh 运行可以合法地花费约 419 秒，因此较短的切片可以在健康对等点返回之前结束），并让切片重复：一个切片远短于派生的截止日期，因此限制*总*等待将收获一个健康的对等点，这正是扩大预算的原因。 切片不是轮询轮次。 不要在切片之间交错状态读取、shell 无操作或“仍在等待”轮次。 当工作结束时折叠产物。 在截止日期时，`reap <job-id>` 并执行最后一次`wait --max-secs 10`，因为收获是异步的。 该脚本限制了自己的运行时间（空闲超时 480 秒；硬逆止`CROSS_MODEL_HARD_SECS`，默认 1200 秒）*在*该截止日期内，因此在截止日期内收获是例外。 完成是通过文件的存在来检测的：工作人员仅在标准化后发布`<run-dir>/adversarial-<provider>.json`。 该脚本从技能目录中读取角色简介和模式，并根据 `<base-ref>` 检查当前工作树。 它的大差异预检仅用于传输：它测量精确的差异并将其放置在提示之外；编排者选择语义划分，审查者选择其中的代表和证据。
 
-The job ID that `start` returns is the proof that the start succeeded. Do not immediately call `status`, inspect `--help`, or otherwise verify it; persist it and continue to local dispatch. Status collection begins only after the local wave completes.
+`start`返回的作业ID就是启动成功的证明。不要立即致电`status`、检查`--help`或以其他方式进行验证；坚持下去，继续本地调度。状态收集仅在本地波形完成后开始。
 
-The commands in this reference are the executable contract. Do not inspect or grep the worker script for its model mapping or allowlist, run `CROSS_MODEL_DRY_RUN`, call `--emit-adapter`, or probe runner `--help` before dispatch. Those exploratory calls only replay host context and cannot strengthen the route the runner enforces.
+本参考中的命令是可执行合约。在调度之前，请勿检查或 grep 工作脚本的模型映射或白名单、运行 `CROSS_MODEL_DRY_RUN`、调用 `--emit-adapter` 或探测运行程序 `--help`。这些探索性呼叫只会重播主机上下文，无法加强跑步者执行的路线。
 
-After local reviewers complete, the one status read is exactly:
+本地审查者完成后，读取的状态如下：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -165,7 +160,7 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 "$PY" "$SKILL_DIR/scripts/peer-job-runner.py" status "<job-id>" --json
 ```
 
-If it is still running and time remains, each `wait` slice is exactly:
+如果它仍在运行并且时间剩余，则每个 `wait` 切片恰好是：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -173,11 +168,11 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 "$PY" "$SKILL_DIR/scripts/peer-job-runner.py" wait --max-secs <remaining-slice-secs> --json "<job-id>"
 ```
 
-Repeat that call until the job is terminal or the derived deadline is spent; do not invent alternate status flags or inspect help.
+重复该调用，直到作业结束或派生的截止日期已过；不要发明备用状态标志或检查帮助。
 
-## Step 5 — Fold into Stage 5
+## 第 5 步 — 折叠到第 5 阶段
 
-- Read the artifact through the runner's verified read (resolve `$PY` in the same tool call — shells do not persist):
+- 通过运行器的验证读取来读取产物（在同一工具调用中解析 `$PY` - shell 不会持久）：
 
   ```bash
   SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -185,11 +180,11 @@ Repeat that call until the job is terminal or the derived deadline is spent; do 
   "$PY" "$SKILL_DIR/scripts/peer-job-runner.py" result "<job-id>" --path <run-dir>/adversarial-<target>.json
   ```
 
-  The runner checks that it owns the file descriptor and bounds the read. Exit 0 emits the artifact. Exit 2 means the job is still running, so the deadline loop above was left early; return to it rather than classifying. Exit 3 is the only outcome that means the peer produced nothing; it names the job's state, and at that point read `references/cross-model-recovery.md` and follow the branch that matches that state, since it alone owns what happens when the peer yielded no usable artifact. Any other exit means the runner could not complete the read: a trust failure on the artifact or on the job's own state, or a job id that did not resolve. None of those has a recovery branch. Name the failure in Coverage as a degraded cross-model pass, and never fold it into the clean skip.
+  运行程序检查它是否拥有文件描述符并限制读取。出口 0 发出产物。 Exit 2表示作业仍在运行，因此上面的截止日期循环提前离开了；返回它而不是分类。 Exit 3 是唯一的结果，意味着对等点没有产生任何结果；它命名了作业的状态，然后读取 `references/cross-model-recovery.md` 并遵循与该状态匹配的分支，因为它独自拥有当对等点没有产生可用产物时发生的情况。任何其他退出都意味着运行程序无法完成读取：产物或作业自身状态的信任失败，或者作业 ID 无法解析。这些都没有恢复分支。将 Coverage 中的失败命名为降级的跨模型传递，并且切勿将其折叠到干净的跳过中。
 
-  Its findings enter ordinary dedup, but agreement promotion is allowed **only when `independence_verified` is `true`**. A false or absent value may contribute findings but never raises confidence. `independence_verified` attests a different serving family; it does not claim the exact served model was verified. `receipt_supported`, `model_actual`, and `effort_actual` carry that separate identity evidence. Peer findings never grant silent-apply authority.
-- In final Coverage, name `cross_model_route`, `model_requested`, `effort_requested`, `receipt_supported`, `model_actual`, `effort_actual`, and `independence_verified` from the artifact. Keep the literal `unverified`; never compress a request into a serving claim such as "via Codex high" when actual model or effort is unverified. The disclosure condition above decides how the peer is named in the report.
-- **Never started / not run** — the job was never started (run conditions not met, disabled by checkout config, host un-attestable, no different-provider route installed, or CLI missing): the pass simply didn't run. Note "cross-model pass: not run" in Coverage for human-facing markdown — or "cross-model pass: disabled by checkout config" when Step 1's checkout policy was the reason. In `mode:agent`, do not announce the skip; the JSON result records it as `references/modes-and-output.md` defines. Ignore any `*.raw.json` leftovers — they are not fold-in artifacts.
-- Empty `findings` → note "cross-model pass: no additional issues" in Coverage.
-- After fold-in (or after deadline reaping), delete the consumed job directory (`<run-dir>/jobs/<job-id>/`). Its log and result are review content and must not outlive their use.
-- A finding sharing a fingerprint with in-process `adversarial` promotes only when the artifact records `independence_verified: true`. Cursor-default artifacts default false; an unattested host skips automatic dispatch.
+  其结果进入普通重复数据删除，但仅当`independence_verified`为`true`**时才允许协议升级。错误或缺失的值可能有助于发现结果，但永远不会提高信心。 `independence_verified` 证明了一个不同的服务家庭；它没有声称确切的服务模型已得到验证。 `receipt_supported`、`model_actual`和`effort_actual`携带单独的身份证据。同行的研究结果永远不会授予默默应用的权力。
+- 在最终的 Coverage 中，命名产物中的 `cross_model_route`、`model_requested`、`effort_requested`、`receipt_supported`、`model_actual`、`effort_actual` 和 `independence_verified`。保留字面值`unverified`；当实际模型或工作未经验证时，切勿将请求压缩为服务声明，例如“via Codex high”。上述披露条件决定了同行在报告中的命名方式。
+- **从未启动/未运行** - 作业从未启动（未满足运行条件、被签出配置禁用、主机不可证明、未安装不同提供商路由或 CLI 缺失）：通行证根本没有运行。请注意面向人的Markdown覆盖范围中的“跨模型传递：未运行”，或者当步骤 1 的结帐策略是原因时，“跨模型传递：由结帐配置禁用”。在`mode:agent`中，不宣布跳过； JSON结果将其记录为`references/modes-and-output.md`定义。忽略任何 `*.raw.json` 剩下的东西——它们不是折叠式的文物。
+- 空`findings`→注意Coverage中的“cross-model pass: no extra issues”。
+- 折叠后（或截止时间收获后），删除消耗的作业目录（`<run-dir>/jobs/<job-id>/`）。其日志和结果是审查内容，不得超过其使用期限。
+- 仅当产物记录 `independence_verified: true` 时，与进程内 `adversarial` 共享指纹的发现才会升级。光标默认产物默认 false；未经认证的主机会跳过自动调度。

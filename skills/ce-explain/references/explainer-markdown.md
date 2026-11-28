@@ -1,24 +1,24 @@
-# Explainer Markdown Rendering
+# 解释器 Markdown 渲染
 
-How an explainer renders as markdown — the fallback format when intake resolved `output:md`. Load at compose time, not earlier. The skill body owns content and consumer adaptation; this reference owns markdown compatibility.
+解释器如何呈现为Markdown——摄入解决`output:md`时的后备格式。在撰写时加载，而不是更早加载。技能体拥有内容和消费者适应；该参考拥有 Markdown 兼容性。
 
-## Hard invariants
+## 硬不变量
 
-- **YAML frontmatter carries the metadata:** `title`, `date`, `input_shape` (concept / diff / idea / recap), `subject`, `unverified: true` when grounding fell back to model knowledge, and `rendered_for: <reader>` when the request identifies another reader (omitted entirely for a personal rendering). Keep these existing artifact field names stable across formats.
-- **Pure markdown.** No HTML elements, no `<details>`, no inline styles.
-- **Display-only.** No interactive exercise or quiz content. The check-in, when present, is the static `## Check yourself` section that `references/check-in.md` owns: questions first, then their answers, all visible text.
-- **Repo-relative paths** for any file reference; never absolute paths.
+- **YAML frontmatter 携带元数据：** `title`、`date`、`input_shape`（概念/差异/想法/回顾）、`subject`、`unverified: true`（当基础知识回落到模型知识时）以及`rendered_for: <reader>`（当请求识别另一个读者时）（为了个人渲染而完全省略）。保持这些现有产物字段名称在各种格式中保持稳定。
+- **纯 markdown。** 没有 HTML 元素，没有 `<details>`，没有内联样式。
+- **仅显示。**没有互动练习或测验内容。签入（如果存在）是 `references/check-in.md` 拥有的静态 `## Check yourself` 部分：首先是问题，然后是答案，所有可见文本。
+- **任何文件引用的存储库相对路径**；从来没有绝对路径。
 
-## Presentation
+## 推介会
 
-The skill body's consumer contract governs depth, voice, and layout. Give the reader enough project context to follow the explanation without the original conversation. Adapt that context to what the reader already knows.
+技能主体的消费者契约控制深度、声音和布局。为读者提供足够的项目背景，让他们能够在没有原始对话的情况下理解解释。使上下文适应读者已经知道的内容。
 
-Use visuals when they clarify the explanation. The Markdown rendering rules still apply:
+当他们澄清解释时使用视觉效果。 Markdown 渲染规则仍然适用：
 
-- Use fenced `mermaid` blocks for diagrams. Never hand-draw box-drawing or ASCII diagrams.
-- Use pipe-delimited Markdown tables for tabular material.
-- Label every fenced code block with its language. Put source locations in repo-relative links outside the fence; a host-specific file-and-line citation is not a language label.
+- 使用围栏 `mermaid` 块来绘制图表。切勿手绘方框图或 ASCII 图表。
+- 对于表格材料，使用竖线分隔的 Markdown 表格。
+- 用其语言标记每个受隔离的代码块。将源位置放在栅栏外的存储库相关链接中；特定于主机的文件和行引用不是语言标签。
 
-Diagrams complement prose; a reader who skips them still gets the full explanation in text. Preserve source citations. Use real code when explaining project behavior, and identify invented examples as examples.
+图表补充散文；跳过它们的读者仍然可以获得文本中的完整解释。保留来源引用。在解释项目行为时使用真实的代码，并识别发明的示例作为示例。
 
-When the evidence exceeds the requested scope or depth, select the relevant threads and disclose what was left out. Never silently drop the tail of a recap and present it as the full window.
+当证据超出所要求的范围或深度时，选择相关主题并披露遗漏的内容。永远不要默默地放弃回顾的尾部并将其呈现为完整的窗口。

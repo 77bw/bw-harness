@@ -1,133 +1,133 @@
-# Bulk Action Preview
+# 批量操作预览
 
-This reference defines the compact plan preview shown when the user picks `Auto-resolve with best judgment on the rest` partway through the per-finding walk-through. The preview gives the user a single-screen view of what the agent is about to do with the findings they have not yet seen one at a time, with exactly two options to Proceed or Cancel.
+此参考定义了当用户在每次查找的演练中选择 `其余项按最佳判断自动处理` 时显示的紧凑计划预览。预览为用户提供了一个单屏视图，显示代理将如何处理他们尚未一次看到的结果，并提供“继续”或“取消”两个选项。
 
-The top-level routing choices do not use this preview. Their report, rendered in the same turn as the routing question, already shows every pending finding and its recommended action (`references/walkthrough.md`).
+顶级路由选择不使用此预览。他们的报告与路由问题同时呈现，已经显示了每个待处理的发现及其建议的操作（`references/walkthrough.md`）。
 
-Interactive mode only.
-
----
-
-## When the preview is shown
-
-After the user picks `Auto-resolve with best judgment on the rest` from a per-finding question, and before the remaining findings are resolved. Scope: the current finding and everything the walk-through has not yet presented. Already-decided findings are not included; their count appears in the header.
-
-The user confirms with `Proceed` or backs out with `Cancel`. There are no per-item decisions inside the preview; per-item decisions are the walk-through's job.
+仅交互模式。
 
 ---
 
-## Withdrawal revalidation (before composing the plan)
+## 当预览显示时
 
-The walk-through's withdrawal rule (`references/walkthrough.md`, "Withdrawing findings the user's earlier answers resolved") is not confined to the one-by-one loop; it applies to every finding this preview is about to act on. Before sorting findings into Applying / Appending / Skipping buckets, judge each in-scope finding against the decisions already settled. Those are the earlier walk-through answers the user already gave, including a finding resolved by another finding's Apply in the same plan. A finding those decisions already resolve or contradict does not belong in an action bucket: it is withdrawn, not applied, deferred, or skipped.
+在用户从每个发现的问题中选择`其余项按最佳判断自动处理`之后，在解决剩余的发现之前。范围：当前的发现以及演练尚未呈现的所有内容。已经决定的调查结果不包括在内；他们的计数出现在标题中。
 
-Put each such finding in the `Withdrawing (N):` bucket instead. A withdrawal triggered by a staged Apply remains provisional here too: if that Apply is in this same plan and later fails at execution, revert the withdrawal per the walk-through's provisional rule. Do not silently drop a withdrawn finding. The bucket shows the user what earlier answers retired, so they can Cancel if the agent misread them.
+用户用`Proceed`确认或用`Cancel`退出。预览中没有针对每个项目的决策；每个项目的决策是演练的工作。
 
 ---
 
-## Preview structure
+## 提款重新验证（制定计划之前）
 
-The preview is grouped by the action the agent intends to take. Bucket headers appear only when their bucket is non-empty.
+演练的撤回规则（`references/walkthrough.md`，“撤回用户之前已解决的答案的发现”）并不局限于一对一的循环；它适用于本预览即将采取行动的每一项发现。在将结果分类到应用/追加/跳过存储桶之前，根据已解决的决策判断每个范围内的结果。这些是用户已经给出的早期演练答案，包括由同一计划中的另一个发现的“应用”解决的发现。那些已经解决或矛盾的决定的发现不属于行动桶：它被撤回、不应用、推迟或跳过。
+
+将每个此类发现放入 `Withdrawing (N):` 桶中。由分阶段应用触发的撤回在这里也仍然是临时的：如果该应用位于同一个计划中并且后来在执行时失败，则根据演练的临时规则恢复撤回。不要默默地放弃撤回的发现。该存储桶向用户显示哪些较早的答案已失效，因此如果客服人员误读了它们，他们可以取消。
+
+---
+
+## 预览结构
+
+预览按代理打算采取的操作进行分组。仅当存储桶非空时才会显示存储桶标头。
 
 ```
-<Path label> — <scope summary>:
+<路径标签> - <范围摘要>：
 
-Applying (N):
-  [P0] <section> — <one-line plain-English summary>
-  [P1] <section> — <one-line plain-English summary>
+申请（N）：
+  [P0] <section> — <一行简单的英语摘要>
+  [P1] <section> — <一行简单的英语摘要>
 
-Appending to Open Questions (N):
-  [P2] <section> — <one-line plain-English summary>
+附加到未决问题 (N)：
+  [P2] <section> — <一行简单的英语摘要>
 
-Skipping (N):
-  [P2] <section> — <one-line plain-English summary>
+跳绳（N）：
+  [P2] <section> — <一行简单的英语摘要>
 
-Withdrawing (N):
-  [P2] <section> — resolved by <earlier decision>
+提款（N）：
+  [P2] <section> — 由<先前的决定>解决
 ```
 
-Worked example:
+工作示例：
 
 ```
-Auto-resolve plan — 8 remaining findings (3 already decided):
+自动解决计划 — 8 个剩余发现（3 个已决定）：
 
-Applying (4):
-  [P0] Requirements Trace — Renumber R4 (the auth-token requirement) to match unit reference
-  [P1] Unit 3 Files — Add read-fallback for renamed report file
-  [P2] Key Technical Decisions — Use framework's Deprecated field rather than hand-rolling
-  [P3] Overview — Correct wrong count (says 6, list has 5)
+申请（4）：
+  [P0] 需求跟踪 — 重新编号 R4（身份验证令牌要求）以匹配单元引用
+  [P1] 第 3 单元文件 — 为重命名的报告文件添加读取回退
+  [P2] 关键技术决策 - 使用框架的 Deprecated 字段而不是手动滚动
+  [P3] 概述 — 纠正错误计数（说 6，列表有 5）
 
-Appending to Open Questions (2):
-  [P2] Scope Boundaries — Unit 2/3 merge judgment call
-  [P2] Risks — Alias compatibility-theater concern
+附加到未决问题 (2)：
+  [P2] 范围边界 — 单元 2/3 合并判断调用
+  [P2] 风险 — 别名兼容性 - 剧院问题
 
-Skipping (2):
-  [P2] Miscellaneous Notes — Low-confidence style preference
-  [P3] Abstraction Commentary — Speculative, subjective
+跳过（2）：
+  [P2]杂项笔记——低置信度风格偏好
+  [P3] 抽象评论 — 推测性、主观性
 ```
 
 ---
 
-## Header wording
+## 标题措辞
 
-The header reads `Auto-resolve plan — N remaining findings (K already decided):`. The `K already decided` counter tells the user the walk-through was partially completed.
-
----
-
-## Per-finding line format
-
-Each line uses the compressed form of the framing guidance from the subagent template: observable consequence first, no internal section numbering unless needed to locate the issue. The one-line summary is drawn from the persona-produced `why_it_matters` by taking the first sentence (and, when the first sentence is too long for the preview width, paraphrasing it tightly to fit).
-
-- **Shape:** `[<severity>] <section> — <one-line summary>`
-- **Width target:** keep lines near 80 columns so the preview renders cleanly in narrow terminals. Truncate with ellipsis when necessary.
-- **No section numbering** unless the reader needs it to locate the issue (when multiple findings hit the same named section).
-- **Self-contained identifiers** — the one-line summary obeys the shared rendering floor (`references/rendering-floor.md`): it is consequence-first and applies the opaque-token policy to all three classes (navigation anchors like `R4`/`U3` keep the ID and gloss at first mention; provenance anchors like tickets/PRs appear only when the event drives the decision; mechanism symbols like functions/files translate to their role). A summary whose only description of a referenced item is a bare identifier of any class is not acceptable. The floor is the single source of these rules.
-
-When no `why_it_matters` is available for a finding (rare — only if persona output was malformed), fall back to the finding's title directly. Note the gap in the completion report if it affects more than a few findings in the same run.
+标头读取为`Auto-resolve plan — N remaining findings (K already decided):`。 `K already decided` 计数器告诉用户演练已部分完成。
 
 ---
 
-## Question and options
+## 每个结果行格式
 
-Treat the preview and its confirmation as two ordered user-facing events:
+每行都使用来自子代理模板的框架指南的压缩形式：首先是可观察的结果，除非需要定位问题，否则没有内部部分编号。单行摘要是从角色生成的 `why_it_matters` 中提取第一句（并且，当第一句对于预览宽度来说太长时，将其紧密地转述以适应）。
 
-1. **Preview event** — emit the complete preview body as user-visible assistant text in the conversation. Content composed only in hidden thinking or reasoning does not count. Do not place the preview only inside the question interface's input.
-2. **Decision event** — after the preview event is visible, invoke the harness's agent-callable blocking-question capability and wait for the answer. Success means the user can see the preview while choosing `Proceed` or `Cancel`, and the workflow does not continue until they answer.
+- **形状：** `[<severity>] <section> — <one-line summary>`
+- **宽度目标：** 将行保持在 80 列附近，以便预览在狭窄的终端中清晰地呈现。必要时用省略号截断。
+- **没有章节编号**除非读者需要它来定位问题（当多个发现击中同一个命名的章节时）。
+- **自包含标识符** - 单行摘要遵循共享渲染层 (`references/rendering-floor.md`)：它是结果优先并将不透明令牌策略应用于所有三个类（像`R4`/`U3`这样的导航锚点在第一次提及时保留ID和光泽；像tickets/PRs这样的出处锚点仅在事件驱动决策时出现；像functions/files翻译这样的机制符号到他们的角色）。所引用项目的唯一描述是任何类的裸标识符的摘要是不可接受的。下限是这些规则的唯一来源。
 
-If the preview event has not occurred, do not invoke the blocking-question capability. If the harness exposes no such capability or a real question call errors, preserve the same interaction as visible chat: put the numbered `Proceed` / `Cancel` options immediately below the visible preview and wait for the user's reply. Never omit the preview or continue silently.
-
-Match the host's blocking question tool already in the current tool list. Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability; do not search for another host's tool name.
-
-Stem: `The agent is about to resolve the remaining findings above. Proceed?`
-
-Options (exactly two):
-
-- `Proceed` — execute the plan as shown
-- `Cancel` — do nothing, return to the current finding's question
+当没有 `why_it_matters` 可用于发现时（罕见 - 仅当角色输出格式错误时），直接回退到发现的标题。如果完成报告中的差距影响同一运行中的多个结果，请注意。
 
 ---
 
-## Cancel semantics
+## 问题和选项
 
-Return the user to the current finding's per-finding question. The walk-through continues from where it was, with prior decisions intact. `Cancel` changes no on-disk or in-memory state.
+将预览及其确认视为两个有序的面向用户的事件：
+
+1. **预览事件** — 将完整的预览正文作为对话中用户可见的助理文本发出。仅以隐藏的思维或推理所组成的内容不算数。不要将预览仅放置在问题界面的输入中。
+2. **决策事件** - 预览事件可见后，调用宿主的代理可调用阻塞问题功能并等待答案。成功意味着用户在选择`Proceed`或`Cancel`时可以看到预览，并且在他们回答之前工作流程不会继续。
+
+如果预览事件尚未发生，则不调用阻塞问题能力。如果该工具没有公开此类功能或真正的问题调用错误，请保留与可见聊天相同的交互：将编号的 `Proceed` / `Cancel` 选项放在可见预览的正下方，然后等待用户的回复。切勿忽略预览或静默继续。
+
+匹配当前工具列表中已有的主持人拦截提问工具。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配工具但未加载，请使用主机的工具发现原语来加载该功能；不要搜索其他主机的工具名称。
+
+茎：`即将处理上面尚未解决的发现。继续吗？`
+
+选项（正好两个）：
+
+- `Proceed` — 执行如图所示的计划
+- `Cancel` — 不执行任何操作，返回当前发现的问题
 
 ---
 
-## Proceed semantics
+## 取消语义
 
-When the user picks `Proceed`:
-
-- For each finding in the plan, execute the recommended action. Apply findings join the in-memory Apply set with the ones the user already picked during the walk-through; all dispatch together in the single end-of-walk-through Apply pass (see `walkthrough.md`). Defer findings go through `references/open-questions-defer.md`. Skip findings are recorded as no-action. Then emit the unified completion report (see `walkthrough.md`).
-- **Recorded items:** when an Apply or Skip in this batch completes for a finding the document already records under `Deferred / Open Questions`, follow the removal rule in `references/open-questions-defer.md`.
-- **Withdrawing bucket:** each finding in this bucket is recorded `withdrawn` in the decision list, annotated with the decision that retired it. No document edit, no Open Questions append. It carries into the completion report's Withdrawn bucket and follows the same durability rule as a walk-through withdrawal (provisional when retired by a staged Apply that has not yet landed).
-
-Failure during `Proceed` (e.g., an Open Questions append fails for one finding during a batch Defer) follows the failure path defined in `references/open-questions-defer.md`: show the failure right away with Retry / Fall back / Convert to Skip, continue with the rest of the plan, and record the failure in the completion report's failure section.
+让用户返回到当前发现的每个发现的问题。演练从原来的地方继续，之前的决定保持不变。 `Cancel` 不改变磁盘上或内存中的状态。
 
 ---
 
-## Edge cases
+## 继续语义
 
-- **Zero findings in a bucket:** omit the bucket header. A preview with only Apply and Skip does not show an empty `Appending to Open Questions (0):` line. The same holds for `Withdrawing (0):`, which is the common case when no earlier decision settled a remaining finding.
-- **All findings in one bucket:** preview still shows the bucket header; Proceed / Cancel still offered.
-- **N=1 preview (only one finding in scope):** the preview still uses the grouped format, just with a single-line bucket. `Proceed` / `Cancel` still apply.
-- **Open Questions append unavailable** (document is read-only, or the append flow reports it cannot run): the plan may still contain per-finding Defer recommendations from synthesis. Before rendering the preview, downgrade every Defer recommendation to Skip when the session's cached append-availability is false, and show the downgrade on the preview itself (e.g., a `Skipping — append unavailable (N):` bucket, or a note in the header: `N Defer recommendations downgraded to Skip — document is read-only.`).
-- **Walk-through `Auto-resolve with best judgment on the rest` with zero remaining findings:** the walk-through's own logic suppresses `Auto-resolve with best judgment on the rest` as an option when N=1 and otherwise, so the preview should never be invoked with zero remaining findings. If it is, render `Auto-resolve plan — 0 remaining findings` and fall through to Proceed with no-op.
+当用户选择`Proceed`时：
+
+- 对于计划中的每个发现，执行建议的操作。应用结果将内存中的应用集与用户在演练期间已选择的结果结合起来；所有的调度都在单个演练结束应用通道中一起发送（参见`walkthrough.md`）。推迟调查结果通过`references/open-questions-defer.md`。跳过结果记录为无操作。然后发出统一的完成报告（参见`walkthrough.md`）。
+- **记录事项：**当本批次的Apply或Skip完成后，发现`Deferred / Open Questions`下已记录的文档，按照`references/open-questions-defer.md`中的删除规则进行。
+- **撤销存储桶：**此存储桶中的每个发现都记录在决策列表中`withdrawn`，并注释有撤销它的决策。没有文档编辑，没有附加开放问题。它会进入完成报告的“撤回”存储桶中，并遵循与演练撤回相同的持久性规则（当由尚未落地的分阶段应用撤回时，这是临时的）。
+
+`Proceed` 期间的失败（例如，在批量延迟期间，未决问题追加因一个发现而失败）遵循`references/open-questions-defer.md` 中定义的失败路径：立即通过重试/回退/转换为跳过显示失败，继续执行计划的其余部分，并将失败记录在完成报告的失败部分中。
+
+---
+
+## 边缘情况
+
+- **存储桶中的零结果：** 省略存储桶标头。仅使用“应用”和“跳过”的预览不会显示空的 `Appending to Open Questions (0):` 行。这同样适用于`Withdrawing (0):`，这是当先前的决定没有解决剩余发现时的常见情况。
+- **所有结果集中在一个存储桶中：** 预览仍然显示存储桶标题；仍提供继续/取消。
+- **N=1 预览（范围内只有一个发现）：** 预览仍然使用分组格式，只是使用单行存储桶。 `Proceed` / `Cancel` 仍然适用。
+- **开放问题附加不可用**（文档是只读的，或者附加流程报告它无法运行）：该计划可能仍包含每个发现的延迟综合建议。在渲染预览之前，当会话的缓存附加可用性为 false 时，将每个“延迟”建议降级为“跳过”，并在预览本身上显示降级（例如，`Skipping — append unavailable (N):` 存储桶，或标头中的注释：`文档只读，N 项延后建议转为跳过。`）。
+- **演练 `其余项按最佳判断自动处理` 且剩余结果为零：** 当 N=1 或其他情况时，演练自身的逻辑会抑制 `其余项按最佳判断自动处理` 作为选项，因此决不应该在剩余结果为零的情况下调用预览。如果是，则渲染 `自动处理方案——没有待处理发现` 并进入无操作继续。

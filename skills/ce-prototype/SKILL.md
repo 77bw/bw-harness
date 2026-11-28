@@ -1,59 +1,58 @@
 ---
 name: ce-prototype
-description: Build a throwaway prototype to answer how something should work, feel, or read. Use when committing the wrong answer would be expensive to unravel and a cheap sketch cannot settle it. Not a rough visual probe during brainstorming, not for deciding what to build, not polishing a feature that already works, not implementing the real thing.
-argument-hint: "[prompt, brainstorm path, or plan path]"
+description: "构建一个一次性原型来回答某些东西应该如何工作、感觉或阅读。当犯了错误的答案时使用它会花费昂贵的成本，而廉价的草图无法解决它。不是在头脑风暴期间进行粗略的视觉探索，不是为了决定要构建什么，不是为了完善已经可用的功能，不是为了实现真正的东西。"
+argument-hint: "[提示、头脑风暴路径或计划路径]"
 ---
 
-# Prototype
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Build a throwaway prototype at the fidelity that can answer this question, before committing an approach later work will treat as given. Then apply the decisions or hand off.
+# 原型
 
-**Do not fake the dimension being tested.** Modality, fidelity, and medium all follow from that one rule. A question about how a flow or state model behaves is settled by driving it, so a screen that only looks like the product does not answer it. A question about how a layout or a mark reads is settled by seeing it at real finish, so a thin sketch does not answer it either. The user's own perception settles the question, never your judgment of the artifact.
+在提交方法之前，以可以回答这个问题的保真度构建一个一次性原型，稍后的工作将视为给定。然后应用决定或移交。
 
-**Result:** the user decided how the product should work or feel against a prototype that did not fake what they were deciding.
-**Next consumer:** an existing markdown Product Contract, or `ce-brainstorm` / `ce-plan` with this session as the seed.
-**Done:** the user settled the questions that needed an artifact, or they apply and continue into brainstorm or plan. Their choice is the settlement, not a direction you inferred.
-**Not:** a decision a cheap sketch settles, polish, or shipping the prototype as a final product.
+**不要伪造正在测试的维度。** 模态、保真度和媒介都遵循这一规则。有关流程或状态模型如何行为的问题可以通过驱动它来解决，因此仅看起来像产品的屏幕无法回答该问题。关于布局或标记如何读取的问题可以通过查看实际完成情况来解决，因此薄草图也无法回答这个问题。用户自己的感知解决了这个问题，而不是你对产物的判断。
 
-If there is no person to experience the prototype — `mode:pipeline`, a headless run, or a calling skill that reports no human is present — stop. Do not start a preview or invent how it should feel. Return that this skill needs a human. A calling skill that has a human present (an interactive `lfg` run, for example) is an ordinary attended run.
+**结果：** 用户决定产品应该如何工作或感觉如何，而原型不会伪造他们的决定。 **下一个消费者：**现有的Markdown产品合约，或以该会话作为种子的 `ce-brainstorm` / `ce-plan`。 **完成：**用户解决了需要产物的问题，或者他们应用并继续进行头脑风暴或计划。他们的选择是解决方案，而不是你推断的方向。 **不是：** 廉价草图决定、完善或将原型作为最终产品运输。
 
-**User-runnable invocation rendering.** The attended re-run in that refusal and the next-skill recommendation when the user applies print invocation syntax. Default to `/ce-prototype`, `/ce-brainstorm`, and `/ce-plan`; use `$ce-prototype`, `$ce-brainstorm`, and `$ce-plan` only on Codex or a host that documents dollar-prefixed skill invocation. Render only the invocation as inline code; output one form only.
+如果没有人体验原型 - `mode:pipeline`、无头奔跑或报告无人在场的呼叫技能 - 停止。不要开始预览或发明它应该是什么样的感觉。返回该技能需要人类。有人在场的呼叫技能（例如，交互式 `lfg` 跑步）是普通有人值守的跑步。
 
-## Scope the question
+**用户可运行的调用渲染。** 当用户应用打印调用语法时，拒绝中的有人参与的重新运行和下一个技能推荐。默认为`/ce-prototype`、`/ce-brainstorm`、`/ce-plan`；仅在 Codex 或记录美元前缀技能调用的主机上使用 `$ce-prototype`、`$ce-brainstorm` 和 `$ce-plan`。仅将调用呈现为内联代码；只输出一种形式。
 
-Read `references/scoping.md` before you ask the user anything or touch the repo. That read is not optional. It defines how the question arrives and the scoped repo read of what the question touches — do not scan the tree. It also defines narrow vs wide, sizing, the go-ahead message, and how the remaining questions change after each decision. Do not build until authorized. A request that already is to prototype a named thing is that authorization after scoping.
+## 确定问题范围
 
-## Build it
+在向用户询问任何内容或触摸存储库之前，请先阅读`references/scoping.md`。该阅读不是可选的。它定义了问题如何到达以及范围存储库读取问题所涉及的内容 - 不要扫描树。它还定义了窄与宽、尺寸、继续消息以及每次决定后剩余问题如何变化。未经授权不得建造。已经对命名事物进行原型设计的请求是范围界定后的授权。
 
-Read `references/build.md` and `references/preview.md` before writing anything. Once an isolated web preview is up, load `references/annotation-loop.md`. Overlay runs and non-web runs stay on chat.
+## 建造它
 
-After they proceed, speak only when they can act on something new, in one short line naming what happened: a screen is up, the helper URL is live, or a blocker only they can lift. That annotation loop defines the line after an applied revision and silence while a wait is parked.
+在写任何东西之前先阅读`references/build.md`和`references/preview.md`。独立 Web 预览启动后，加载 `references/annotation-loop.md`。覆盖运行和非网络运行保留在聊天中。
 
-A question is settled by seeing when the judgment lands on the rendered result: how a layout reads, what a palette does, how dense a screen feels. It is settled by driving when the judgment lands on what happens as the user moves through it: a flow, a state model, how a control answers. Load `references/craft-floor.md` for a seeing question. It carries the quality floor and the avenue-difference rule; neither lives here. A question settled by driving does not load it and gains no finish from it.
+在他们继续进行之后，只有当他们可以采取新的行动时才说话，用简短的一行描述发生的事情：屏幕已打开，帮助程序 URL 已启用，或者只有他们可以解除的阻塞项。该注释循环定义了应用修订后的行以及等待暂停时的静默。
 
-Default substrate: the web, whatever the product is written in — a native app's navigation feel gets a web approximation, not SwiftUI. `references/build.md` defines yields and artifacts.
+通过查看判断何时落在渲染结果上来解决问题：布局如何读取、调色板做什么、屏幕感觉有多密集。当判断落在用户移动时发生的事情上时，它是通过驾驶来解决的：流程、状态模型、控件如何回答。加载 `references/craft-floor.md` 来解决视觉问题。它承载着品质底线和大道差异法则；两人都住在这里。通过驾驶解决的问题不会加载它，也不会从中获得结果。
 
-Build under `.context/compound-engineering/ce-prototype/<date>-<slug>/`, so the prototype survives for the implementation that follows. Fall back to `/tmp/compound-engineering-<uid>/ce-prototype/<date>-<slug>/`, where survival is best-effort. `references/build.md` names every case that forces the fallback root.
+默认基底：网络，无论产品是用什么编写的 - 原生应用程序的导航感觉都是网络近似，而不是 SwiftUI。 `references/build.md` 定义产量和产物。
 
-The `.context` path has to be gitignored first. Probe it from the repo root with `git -C <repo root> check-ignore -q .context/compound-engineering/`; the trailing slash is required. When it is not covered, the offer to add that line comes before the root is resolved, or accepting it cannot help this run.
+在 `.context/compound-engineering/ce-prototype/<date>-<slug>/` 下构建，因此原型可以用于后续的实现。回到`/tmp/compound-engineering-<uid>/ce-prototype/<date>-<slug>/`，尽最大努力生存。 `references/build.md` 命名了强制后备根的每种情况。
 
-`references/preview.md` defines that offer and the resolution that follows it. Do not create the run directory yourself; a second claim splits the screens from the capsule.
+`.context` 路径必须首先被 gitignored。使用 `git -C <repo root> check-ignore -q .context/compound-engineering/` 从 repo 根目录探测它；尾部斜杠是必需的。如果未覆盖它，则在解决根之前会提出添加该行的提议，或者接受它无法帮助此运行。
 
-Scale into the existing app as a throwaway overlay when the user asks, or when the question is density or chrome on an existing page — an isolated page hides that. It is the one path that touches the product tree. Never commit it. When the try ends, restore only the files you changed. If you cannot undo them cleanly, name the files you left modified rather than handing off a dirty tree. Never delete a kept prototype: throwaway describes the code, not a request to remove it.
+`references/preview.md` 定义该要约以及随后的解决方案。不要自己创建运行目录；第二个主张是将屏幕与胶囊分开。
 
-## Keep the decisions
+当用户询问时，或者当问题是现有页面上的密度或镶边时，可以将其作为一次性覆盖扩展到现有应用程序中 - 孤立的页面会将其隐藏起来。这是接触产品树的唯一路径。永远不要犯它。尝试结束后，仅恢复您更改的文件。如果您无法彻底撤消它们，请命名您保留修改的文件，而不是交出一棵脏树。永远不要删除保留的原型：一次性描述的是代码，而不是删除它的请求。
 
-Keep a run capsule at `decisions.md` in this run's directory, so the next skill does not need this session. `references/build.md` lists what it carries. Point at the prototype; do not reproduce it. Include only what changes later planning. Do not treat `decisions.md` as a plan: applying writes the Product Contract or the recap, and the capsule is only continuity.
+## 保留决定
 
-Update the capsule when you are confident a choice has settled — the user judged the artifact and chose, including any adjustments they attached. If you are not confident, do not write. Do not pause to confirm every write. Keep the winner and those adjustments in the prototype.
+在本次运行目录中的`decisions.md`处保留一个运行胶囊，因此下一个技能不需要此会话。 `references/build.md` 列出了它所携带的内容。指向原型；不要复制它。仅包括稍后计划发生变化的内容。不要将`decisions.md`视为计划：应用编写产品合同或概要，而胶囊只是连续性。
 
-Read `decisions.md` before building for the next related question, and work out which questions are still worth building for. `references/scoping.md` defines how that list changes. If what they decided changed what they want to build rather than answering the question you asked, stop and hand back what you learned instead of building for a question they have moved past. Otherwise stay in this skill for it. Do not bounce to brainstorm or plan while a related question still needs an artifact, do not start an unrelated campaign, and do not keep prototyping once they apply.
+当您确信选择已确定时更新胶囊 - 用户判断产物并选择，包括他们附加的任何调整。如果你没有信心，就不要写。不要停下来确认每次写入。将获胜者和那些调整保留在原型中。
 
-## Apply or continue
+在构建下一个相关问题之前阅读`decisions.md`，并找出哪些问题仍然值得构建。 `references/scoping.md` 定义该列表如何更改。如果他们的决定改变了他们想要构建的内容，而不是回答你提出的问题，请停下来并交回你学到的东西，而不是为他们已经过去的问题构建。否则就留在这个技能吧。当相关问题仍然需要产物时，不要急于进行头脑风暴或计划，不要开始不相关的活动，并且在应用后不要继续进行原型设计。
 
-When the user applies:
+## 申请或继续
 
-- If this run has a directly related brainstorm or plan — passed on invoke, passed by the calling skill, or named in this session as the file this prototype is for — load `references/write-back.md` and follow it. Markdown and HTML both. Use `decisions.md` when present. Do not pick a plan because one exists in the repo.
-- If there is no such file or relatedness is unclear: do not mint a plan or a third note. Recap from `decisions.md` when present, carrying the decisions and, when the run left one behind, the prototype path — an overlay run has none, so say that rather than pointing at something you undid. That recap is a complete outcome, not a degraded one.
+当用户申请时：
 
-Then continue. If a calling skill invoked this, return the choices in `decisions.md` and let it continue. Otherwise recommend a next skill and pass this session as the seed. After a write-back, recommend `ce-plan` to regenerate implementation planning for the changed requirements. After a file-free run, recommend `ce-brainstorm` when product-level questions remain, or `ce-plan` when the session is enough to plan. Print that recommendation per the rendering rule above.
+- 如果此运行有直接相关的头脑风暴或计划 - 通过调用传递、通过调用技能传递或在此会话中命名为该原型所用的文件 - 加载 `references/write-back.md` 并遵循它。 Markdown 和 HTML 都有。当存在时使用`decisions.md`。不要选择一个计划，因为存储库中存在该计划。
+- 如果没有此类文件或相关性不清楚：请勿制作计划或第三张笔记。回顾 `decisions.md` 当存在时，携带决策，当运行留下一个时，原型路径 - 覆盖运行没有，所以说，而不是指向你取消的东西。这一回顾是一个完整的结果，而不是一个退化的结果。
+
+然后继续。如果调用技能调用了此功能，则返回`decisions.md`中的选择并让它继续。否则推荐下一个技能并通过此会话作为种子。回写后，建议`ce-plan`重新生成变更需求的实施计划。无文件运行后，当产品级问题仍然存在时，推荐`ce-brainstorm`，或者当会话足以规划时推荐`ce-plan`。根据上面的渲染规则打印该建议。

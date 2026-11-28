@@ -1,462 +1,187 @@
-# Brainstorm Sections
+# 头脑风暴部分
 
-This reference describes what makes a great requirements-only unified plan
-artifact produced by `ce-brainstorm`.
-It does NOT prescribe how the doc looks on the page — rendering is handled by
-the format-specific references (`markdown-rendering.md`, `html-rendering.md`).
+该参考描述了 `ce-brainstorm` 生成的优秀的仅需求统一计划产物的组成部分。它没有规定文档在页面上的外观 - 渲染由特定于格式的引用（`markdown-rendering.md`，`html-rendering.md`）处理。
 
-## The outcome
+## 结果
 
-A great brainstorm produces the first version of the same plan artifact that
-`ce-plan` later enriches. It enables three audiences to act:
+一场伟大的头脑风暴产生了同一个计划产物的第一个版本，`ce-plan`后来又对其进行了丰富。它使三个观众能够采取行动：
 
-- **The planning agent** (`ce-plan` or a human) produces an implementation
-  plan without inventing user behavior, scope boundaries, or success
-  criteria — the brainstorm answered those.
-- **The reviewer** sees the framing choices, distinguishes settled decisions
-  from open ones, and catches scope gaps before planning.
-- **The future reader** traces why the proposed thing matters, who it's for,
-  and what success looks like.
+- **规划代理**（`ce-plan`或人）在不发明用户行为、范围边界或成功标准的情况下制定实施计划 - 头脑风暴回答了这些问题。
+- **审查者**查看框架选择，区分已确定的决策和开放的决策，并在规划之前发现范围差距。
+- **未来的读者**追踪所提议的事情为何重要、它的对象是谁以及成功是什么样子。
 
-A section is included only when it serves one of these audiences. Omit padding.
+仅当某个部分为这些受众之一提供服务时，才会包含该部分。省略填充。
 
-## Unified plan skeleton contract
+## 统一计划骨架合约
 
-New `ce-brainstorm` outputs live under `<root>/plans/` and use the unified plan
-artifact contract:
+新的`ce-brainstorm`输出位于`<root>/plans/`下并使用统一计划产物合约：
 
-- **Path:** `<root>/plans/YYYY-MM-DD-HHMM-<type>-<topic>-plan.<md|html>` (local wall-clock write time; no daily sequence number). Reserve the path atomically; on collision, retry with the smallest available numeric suffix before the extension rather than overwriting.
+- **路径：** `<root>/plans/YYYY-MM-DD-HHMM-<type>-<topic>-plan.<md|html>`（本地挂钟写入时间；无每日序列号）。原子保留路径；发生冲突时，在扩展名之前使用最小的可用数字后缀重试，而不是覆盖。
 - **`artifact_contract: ce-unified-plan/v1`**.
 - **`product_contract_source: ce-brainstorm`**.
-- **`execution`** only when the brainstorm has enough signal to classify the
-  eventual execution domain. For software features, use `execution: code`.
-  For non-code deliverables, follow the universal-brainstorming route instead
-  of pretending the artifact is executable code.
+- **`execution`** 仅当头脑风暴有足够的信号对最终执行域进行分类时。对于软件功能，请使用`execution: code`。对于非代码可交付成果，请遵循通用头脑风暴路线，而不是假装产物是可执行代码。
 
-A requirements-only unified plan is kept **light and standalone-readable**. It
-includes:
+仅满足需求的统一计划保持**轻便且独立可读**。它
+包括：
 
-- `## Goal Capsule` with objective, product authority, and open blockers. The
-  objective is the goal a reader who has not read the rest of the plan can
-  hold. Constraints that must remain true live on their owning R-IDs (the
-  R-IDs that state them), not as extra objective clauses — user-checkable is not a license to pack them onto the
-  objective. The objective is always the outcome — what is true for users or operators
-  afterwards, phrased so it would still read as the goal under a different
-  implementation. It sits outside the component being changed: if a reader
-  who does not know that component's internals could not tell whether the
-  objective was met, it is stated at the component's level and the real
-  objective is whatever depended on it. When the seed supplies an approach ("move X to Y"), that is
-  the **Means** (its own line) and the objective is the outcome it serves,
-  taken from the dialogue or the project's stated problem rather than
-  assumed. When the coherent-work gate (Phase 0.3's check that the request
-  holds one plannable outcome) split a broader request, the objective names
-  the current area and product authority says the surrounding areas are not
-  active scope.
-- `## Product Contract` containing the brainstorm sections below.
+- `## Goal Capsule` 具有目标、产品权威和开放的拦截器。目标是尚未阅读计划其余部分的读者可以达到的目标。必须在其拥有的 R-ID（声明它们的 R-ID）上保持真实的约束，而不是作为额外的目标条款 — 用户可检查并不是将它们打包到目标中的许可证。目标始终是结果——事后对用户或操作员来说是正确的，措辞如此，在不同的实现下它仍然会被解读为目标。它位于正在更改的组件之外：如果不知道组件内部结构的读者无法判断目标是否得到满足，则它是在组件级别上声明的，而真正的目标是依赖于它的任何东西。当种子提供一种方法（“将 X 移动到 Y”）时，这就是**手段**（它自己的路线），目标是它所服务的结果，取自对话或项目的陈述问题而不是假设。当连贯工作门（第 0.3 阶段检查请求是否包含一个可计划结果）拆分更广泛的请求时，目标会命名当前区域，而产品权威机构会表示周边区域不是活动范围。
+- `## Product Contract` 包含下面的头脑风暴部分。
 
-Do **not** emit a `## Goal Launch Block` or `## Reader Index`: the launch prompt
-is skill-emitted at handoff, not a doc section, and the contract carries no
-Reader Index — consumers wayfind by scanning headings. It also omits empty
-`Planning Contract`, `Implementation Units`, `Verification Contract`, and
-`Definition of Done` sections — empty placeholders make requirements-only docs
-look executable and waste downstream tokens. `ce-plan` adds those sections when
-it enriches the same file in place. The next step (planning) is conveyed by the
-Phase 4 handoff menu, not by a section in the doc.
+不要**发出`## Goal Launch Block`或`## Reader Index`：启动提示是在交接时由技能发出的，而不是文档部分，并且合同不包含读者索引——消费者通过扫描标题进行寻路。它还省略了空的 `Planning Contract`、`Implementation Units`、`Verification Contract` 和 `Definition of Done` 部分 - 空的占位符使仅需求文档看起来可执行并浪费下游令牌。 `ce-plan` 在适当地丰富同一文件时添加这些部分。下一步（计划）由第 4 阶段交接菜单传达，而不是由文档中的某个部分传达。
 
-Historical `docs/brainstorms/*-requirements.*` files remain valid legacy
-inputs. Do not migrate or rewrite them when creating new artifacts.
+历史 `docs/brainstorms/*-requirements.*` 文件仍然有效的遗留输入。创建新产物时不要迁移或重写它们。
 
-## Decide whether a doc is warranted at all
+## 确定文档是否有必要
 
-A brainstorm ends in chat unless a file is earned. A file is earned when the
-dialogue produced structural decisions, scope boundaries, or acceptance
-criteria that downstream consumers (planner, reviewer, future reader) need
-recorded under stable IDs, or when the user asks for one. Decisions that flow naturally to
-downstream artifacts (`ce-plan`'s prompt, the commit message,
-`<root>/solutions/`) do not warrant a file; `phase-0.md` 0.3 (Assess Scope) states the
-Lightweight case.
+除非获得文件，否则头脑风暴就会以聊天结束。当对话产生下游消费者（规划者、审查者、未来读者）需要记录在稳定 ID 下的结构决策、范围边界或接受标准时，或者当用户要求提供这些文件时，就会获得一个文件。自然流向下游产物的决策（`ce-plan`的提示、提交消息、`<root>/solutions/`）不保证文件； `phase-0.md` 0.3（评估范围）说明轻量级情况。
 
-**Stress test:** a brainstorm about a tiny bug fix where the user asks "fix
-this with a null check or with upstream validation?" and the agent confirms
-"upstream validation, here's why" doesn't need a brainstorm doc. The
-decision flows to `ce-plan` (or directly to commit message, or to
-`<root>/solutions/` if it's a pattern worth carrying) without a brainstorm
-artifact in the middle.
+**压力测试：**关于一个小错误修复的集体讨论，其中用户询问“通过空检查或上游验证修复此问题？”并且代理人确认
+“上游验证，这就是原因”不需要头脑风暴文档。决策流向`ce-plan`（或者直接提交消息，或者如果它是值得携带的模式，则流向`<root>/solutions/`），中间没有头脑风暴产物。
 
-Conversely, a brainstorm about a multi-actor feature with contested scope
-and several behavioral conditions probably does need a doc — the planning
-agent needs the structured content the dialogue produced.
+相反，关于具有争议范围和多种行为条件的多演员特征的头脑风暴可能确实需要文档——规划代理需要对话产生的结构化内容。
 
-## Match depth to content
+## 深度与内容相匹配
 
-When a doc IS warranted, depth matches what the dialogue produced. A
-brainstorm with sparse content produces a sparse doc; one with rich content
-produces a rich doc. Don't add ceremony to make a slim brainstorm look
-substantial.
+当文档有保证时，深度与对话产生的内容相匹配。内容稀疏的头脑风暴会产生稀疏的文档；内容丰富的文档会产生丰富的文档。不要为了使一场细小的头脑风暴看起来很充实而添加一些仪式。
 
-## Prose economy
+## 散文经济
 
-Match-depth-to-content sizes *which* sections appear and how deep each goes.
-This sizes *how the kept prose reads*. A section can be material and still be
-written loosely — the failure mode is a material section padded into a wall of
-text where contradictions hide and a downstream agent loses the thread. Length
-that carries content is fine; wordiness around that length is not.
+将深度与内容大小相匹配*哪些*部分出现以及每个部分的深度。这决定了*保存的散文如何阅读*。一个部分可以是实质性的，但仍然可以松散地编写——失败模式是一个实质性部分被填充到文本墙上，其中矛盾隐藏起来，下游代理失去了线索。承载内容的长度即可；围绕这个长度的冗长不是。
 
-Write every kept section through the `ce-noslop` skill.
+通过`ce-noslop`技能写出每个保留的部分。
 
-Hold every kept section to these:
+将每个保留的部分保存到这些：
 
-- **Lead with the decision or outcome.** Put the conclusion first, then the
-  reason, then background; keep one claim plus its support per paragraph. Don't
-  bury the chosen scope, an open blocker, or a Key Decision beneath its
-  rationale. This does not override section roles — Summary stays proposal-only,
-  Problem Frame stays motivation-only and never restates the remedy.
-- **A Summary is a handful of sentences**, not one sentence with five
-  semicolons and four parentheticals. If a sentence needs a second
-  parenthetical to stay true, split it.
-- **A requirement is one sentence of intent plus at most one qualifier.** When
-  a requirement would specify two outcomes ("either A or B, planning decides"),
-  state the intent and send the fork to Outstanding Questions — don't write both
-  arms in full inside the requirement.
+- **以决定或结果为主导。** 首先提出结论，然后是原因，最后是背景；每段保留一项主张及其支持。不要将选定的范围、开放的阻塞项或关键决策隐藏在其基本原理之下。这不会覆盖部分角色 - 摘要仅保留建议，问题框架仅保留动机并且从不重述补救措施。
+- **摘要是几个句子**，而不是一个带有五个分号和四个括号的句子。如果一个句子需要第二个括号才能保持正确，请将其拆分。
+- **一项需求是一句意图加上至多一个限定词。**当一项需求指定两个结果（“A 或 B，计划决定”）时，请陈述意图并将叉子发送到未决问题 - 不要在需求中完整地写出两个分支。
 
-Precision is not padding: keep IDs, dates, actor names, domain terms,
-conditionals, and exact thresholds verbatim; when a concrete anchor is knowable
-from the work already done, use it instead of a vague abstraction. Economy
-targets the connective tissue around precision, never the precision itself.
+精确性不是填充：逐字保留 ID、日期、演员姓名、领域术语、条件和精确阈值；当从已经完成的工作中可以得知具体的锚点时，请使用它而不是模糊的抽象。经济的目标是围绕精度的结缔组织，而不是精度本身。
 
-**Resolve in place; don't stratify.** When a later decision answers a parked
-question or supersedes earlier text, rewrite or remove the original entry —
-don't append a separate "resolutions" layer that leaves the superseded text
-standing, and don't keep superseded prose as strikethrough. Version control
-holds the history. Stacked question/resolution layers double what a reader must
-read and hide which text is live.
+**解决到位；不要分层。** 当后来的决定回答了一个悬而未决的问题或取代了之前的文本时，重写或删除原始条目 - 不要附加一个单独的“决议”层，使被取代的文本保持不变，并且不要将被取代的散文保留为删除线。版本控制保存历史。堆叠的question/resolution层使读者必须阅读的内容加倍，并隐藏哪些文本是实时的。
 
-**One owner per rule; cite, don't restate.** A normative rule — a check, cap,
-threshold, or output contract — is stated in full at exactly one
-entry: the R-ID that carries it. Every other section that needs the rule
-cites that ID (`Covers R4`, `Governs R5, R7`, "per R6") and adds only
-what is local to that section. A restatement that links back to the ID is
-allowed — an AE restating behavior under a `Covers R…` marker, a Flow citing
-the Rs it sequences. **Unlinked sibling restatement** — the same rule written out again
-in a Key Decision, Flow, or Scope bullet with no ID link — is the defect:
-each copy drifts independently and the doc has no rule for which one wins.
+**每条规则一名所有者；引用，不要重述。** 规范性规则——检查、上限、阈值或输出合同——在恰好的一个处进行了完整说明
+条目：携带它的R-ID。需要该规则的每个其他部分都会引用该 ID（`Covers R4`、`Governs R5, R7`、“per R6”）并仅添加该部分本地的内容。允许链接回 ID 的重述——在 `Covers R…` 标记下的 AE 重述行为，引用 Rs 序列的 Flow。 **未链接的同级重述**——在关键决策、流程或范围项目符号中再次写出相同的规则，没有 ID 链接——是缺陷：每个副本独立漂移，并且文档没有关于哪个副本获胜的规则。
 
-**Bind external authorities; don't summarize them.** When a requirement or
-decision adopts an external document (a field guide, spec, standard), state
-the commitment, cite the path, and record only this work's deltas. A
-multi-sentence summary of the cited document restates a source that
-lives outside the doc.
+**约束外部权威；不要总结它们。** 当需求或决定采用外部文档（现场指南、规范、标准）时，说明承诺、引用路径并仅记录该工作的增量。所引用文档的多句摘要重申了文档之外的来源。
 
-## Ready for Planning Check
+## 准备进行规划检查
 
-Run this against the written artifact before declaring it written or presenting
-the Phase 4 handoff:
+在声明已写入的产物或呈现第 4 阶段移交之前，针对已写入的产物运行此命令：
 
-1. **Complete** — no placeholders, `TBD`s, or half-written sections remain;
-   every Outstanding Question is classified as `Resolve Before Planning` or
-   `Deferred to Planning`. When the coherent-work gate split a broader request,
-   the `work-relationships` section is present and carries the marker for the
-   resolved output format: `<!-- ce-section: work-relationships -->` in Markdown
-   or `data-ce-section="work-relationships"` on its wrapping `<section>` in HTML.
-2. **Consistent** — Goal Capsule, Requirements, Key Flows, Acceptance Examples,
-   Scope Boundaries, and the `work-relationships` section do not contradict one
-   another. Could a reader find a contradiction in each section in one pass?
-   Could a colleague who was not in the session say what this work is after the
-   Objective alone? A sentence with more than one parenthetical or a requirement
-   that specifies two outcomes, or a rule stated in full in more than one section,
-   fails this check — split it, defer the fork, or replace the duplicate with
-   a citation of the ID that carries the rule.
-3. **Focused** — the Product Contract covers one coherent work unit. Surrounding
-   work appears only as context, deferred work, or an explicit non-goal; it does
-   not leak into active Requirements, Flows, or Acceptance Examples.
-4. **Usable by planning** — `ce-plan` can decide how to build the current work
-   without inventing product behavior, scope, actors, or success criteria.
+1. **完整** — 没有占位符、`TBD`s 或未写完的部分；每个未解决的问题都被分类为`Resolve Before Planning`或`Deferred to Planning`。当相干工作门分割更广泛的请求时，`work-relationships`部分会出现，并带有解析输出格式的标记：Markdown中的`<!-- ce-section: work-relationships -->`或HTML中其包装`<section>`上的`data-ce-section="work-relationships"`。
+2. **一致** — 目标胶囊、要求、关键流程、验收示例、范围边界和 `work-relationships` 部分彼此不矛盾。读者能否一次性找到每个部分的矛盾之处？没有参加会议的同事能否仅在目标之后说说这项工作是什么？包含多个括号的句子或指定两种结果的要求，或者在多个部分中完整说明的规则，都无法通过此检查 - 将其拆分、推迟分叉或用携带该规则的 ID 的引用替换重复项。
+3. **专注** — 产品合同涵盖一个连贯的工作单元。周围的工作仅作为背景、推迟的工作或明确的非目标出现；它不会泄漏到活动的需求、流程或验收示例中。
+4. **可通过规划使用** — `ce-plan` 可以决定如何构建当前的工作，而无需发明产品行为、范围、参与者或成功标准。
 
-Fix a failed check in place when the correction preserves settled intent, then
-rerun the failed checks. When a fix would choose or change product behavior or
-scope, ask one targeted question and update the artifact after the answer. If
-the user is unavailable, keep the artifact blocked rather than letting planning
-invent the answer. Do not emit this checklist into the Product Contract; the
-corrected artifact is the output.
+当更正保留既定意图时，修复失败的检查，然后重新运行失败的检查。当修复选择或更改产品行为或范围时，提出一个有针对性的问题并在回答后更新产物。如果用户不可用，请阻止产物，而不是让计划发明答案。请勿将此清单写入产品合同中；校正后的产物是输出。
 
-## Product Contract hard floor
+## 产品合同硬地板
 
-When a requirements-only unified plan is warranted, these are present inside
-`## Product Contract`.
+当需要一个仅需求的统一计划时，这些都存在于`## Product Contract`内。
 
-- **Summary** — what is being proposed, in 1-3 lines. Forward-looking.
-  Orients the reader before they invest in detail.
-- **Requirements** (with stable R-IDs) — what must be true about the
-  proposed thing. For very sparse brainstorms (≤3 simple items where the
-  bullets ARE the summary), plain bullets without IDs are acceptable; the
-  trigger for R-IDs is whether downstream consumers will reference them.
-  When requirements span distinct concerns (e.g., "Packaging" /
-  "Migration and compatibility" / "Contributor workflow"), group them
-  under bold inline headers within the Requirements section — group by
-  capability or concern, not by the order requirements were discussed.
-  The trigger is distinct concerns, not item count — even four
-  requirements benefit if they cover three different topics. Skip
-  grouping only when all requirements are genuinely about the same thing;
-  a long flat list is a smell that subgroups were missed. R-IDs stay
-  continuous across groups (R1, R2 in the first group; R3, R4 in the
-  second; never restart at R1 per group).
-  A requirement, key decision, or success criterion commits only what
-  the user asked for or chose, what those need in order to work, or what
-  passes Interaction Rule 9's test. Something you would add beyond that,
-  such as an audit trail, an operator switch, an alert, or another
-  safeguard nobody raised, goes in Scope Boundaries as deferred or in
-  Outstanding Questions, not into a committed section.
+- **摘要** — 提议的内容，共 1-3 行。具有前瞻性。在读者投入细节之前引导他们。
+- **要求**（具有稳定的 R-ID）——所提议的事物必须是真实的。对于非常稀疏的头脑风暴（≤3 个简单项目，其中项目符号是摘要），没有 ID 的普通项目符号是可以接受的； R-ID 的触发因素是下游消费者是否会引用它们。当需求跨越不同的关注点时（例如，“包装”/
+  “迁移和兼容性”/“贡献者工作流程”），将它们分组在“需求”部分中的粗体内联标题下 - 按功能或关注点分组，而不是按讨论的订单需求分组。触发因素是不同的关注点，而不是项目数量——如果涵盖三个不同的主题，即使是四个需求也会受益。仅当所有需求真正涉及同一事物时才跳过分组；长长的单调列表是一种被忽略的子组的味道。 R-ID 在各组之间保持连续（第一组中为 R1、R2；第二组中为 R3、R4；每组绝不在 R1 处重新启动）。需求、关键决策或成功标准仅提交用户要求或选择的内容、工作所需的内容或通过交互规则 9 测试的内容。除此之外，您还可以添加一些内容，例如审计跟踪、操作员切换、警报或其他无人提出的保障措施，这些内容将作为延迟或未决问题放入范围边界中，而不是放入已提交的部分中。
 
-## Include when material
+## 包括材料时
 
-The agent decides per brainstorm whether each section carries information
-that isn't covered elsewhere. Filling a section with placeholder prose is
-worse than omitting it.
+代理根据头脑风暴决定每个部分是否包含其他地方未涵盖的信息。用占位符散文填充一个部分比省略它更糟糕。
 
-- **Problem Frame** — include when motivation isn't obvious from Summary
-  alone (the *why* needs paragraphs, not a sentence). Backward-looking /
-  situational. Does NOT restate the proposal; the remedy lives in Summary.
+- **问题框架** — 包括仅从摘要中看动机并不明显的情况（*为什么*需要段落，而不是句子）。向后看/情境。不重述提案；补救措施就在摘要中。
 
-- **Key Decisions** — include when the brainstorm produced opinionated
-  framing choices (defaults, scope narrowings, foundational technical picks)
-  that constrain Requirements / Flows / Scope below. Sits high in the
-  rendered doc so readers encounter the framing choices before descending
-  into detail. Each entry is a **provenance index entry, not a second
-  statement of the rule**: the decision in bold, at most one line of
-  rationale, and — when the decision constrains specific requirements —
-  exact `Governs R5, R7` links naming them. The full normative rule text
-  lives on the governed Rs; an entry that would write the rule out again
-  cites them instead. A pure framing decision with no governed R carries
-  its rationale and no links.
-  An entry recording a decision settled in the invoking conversation may
-  carry the inline annotation
-  `(session-settled: <class> — chosen over <alternative>: <reason>)`, with
-  exactly two classes — `user-directed` (the user chose against or between
-  presented options) and `user-approved` (the agent proposed with the
-  tradeoff surfaced; the user assented). An agent never labels its own
-  unexamined proposal. Preserve the label on the Product Contract Key
-  Decision and its exact `Governs R…` links. `ce-plan` may inherit the label
-  into a KTD only when the KTD makes a distinct how-level choice and cites
-  the governed R-IDs; it must not create a KTD that merely mirrors the
-  product decision.
+- **关键决策** - 包括头脑风暴何时产生限制下面的要求/流程/范围的固执己见的框架选择（默认、范围缩小、基础技术选择）。位于渲染文档的较高位置，以便读者在深入细节之前先了解框架选择。每个条目都是**出处索引条目，而不是规则的第二个陈述**：粗体的决定，最多一行理由，并且 - 当决定限制特定要求时 - 精确的 `Governs R5, R7` 链接命名它们。完整的规范性规则文本以受管制的卢比为基础；一个会再次写出规则的条目会引用它们。没有受控 R 的纯粹框架决策具有其基本原理并且没有任何链接。记录调用对话中解决的决策的条目可能带有内联注释`(session-settled: <class> — chosen over <alternative>: <reason>)`，恰好有两个类 - `user-directed`（用户选择反对或在呈现的选项之间选择）和`user-approved`（代理提出权衡浮出水面；用户同意）。代理人永远不会给自己未经审查的提案贴上标签。保留产品合同关键决策上的标签及其确切的 `Governs R…` 链接。仅当 KTD 做出不同的级别选择并引用受管理的 R-ID 时，`ce-plan` 才可以将标签继承到 KTD 中；它不能创建一个仅仅反映
+  产品决定。
 
-- **How This Work Fits Together** — required when the coherent-work gate split
-  a broader request; otherwise include when this plan is one part of a larger
-  body of separately planned work and the relationship materially orients a
-  cold reader. Give this section the semantic role `work-relationships`, which
-  remains stable even if its visible heading is renamed: in Markdown, place
-  `<!-- ce-section: work-relationships -->` immediately before the heading; in
-  HTML, put `data-ce-section="work-relationships"` on the wrapping `<section>`.
-  The role identifies meaning, not wording, and is the downstream discovery
-  contract. Lead with the one area this plan covers and state that the broader
-  breakdown is the current understanding, not a committed roadmap. Then use a
-  shallow indented bullet list for later areas, with explicit relationship
-  phrases such as `Depends on`, `Enables`, `Shares`, `Can proceed independently
-  of`, and `Still to decide`; indentation groups the prose but never carries the
-  relationship by itself. Future areas are contextual candidates, never
-  Requirements or implied Implementation Units. A later plan may revise, split,
-  merge, or discard them and cite the earlier plan with a repo-relative path;
-  do not create or synchronize a separate master map. Keep Scope Boundaries as
-  the authority for what this plan excludes rather than duplicating the full
-  relationship list there. Use no diagram by default. Add one only when
-  non-linear cross-links, fan-in, or fan-out would make the nested list
-  misleading, and keep the bullet text complete without it.
+- **这项工作如何结合在一起**——当连贯工作门分割更广泛的请求时需要；否则，包括何时该计划是一大堆单独计划的工作的一部分，并且这种关系实质上是面向冷漠的读者。赋予该部分语义角色 `work-relationships`，即使其可见标题被重命名，它仍然保持稳定：在 Markdown 中，将 `<!-- ce-section: work-relationships -->` 紧接在标题之前；在 HTML 中，将 `data-ce-section="work-relationships"` 放在包装纸 `<section>` 上。该角色标识含义，而不是措辞，并且是下游发现合同。以该计划涵盖的一个领域为主导，并指出更广泛的细分是当前的理解，而不是承诺的路线图。然后对后面的区域使用浅缩进项目符号列表，并使用明确的关系短语，例如`Depends on`、`Enables`、`Shares`、`Can proceed independently of`和`Still to decide`；缩进将散文分组，但本身并不承载关系。未来的领域是上下文候选者，而不是需求或隐含的实施单元。稍后的计划可能会修改、拆分、合并或丢弃它们，并使用存储库相对路径引用较早的计划；不要创建或同步单独的主地图。保留范围边界作为该计划排除的内容的权威，而不是复制完整的内容
+  那里的关系列表。默认情况下不使用图表。仅当非线性交叉链接、扇入或扇出会使嵌套列表产生误导时才添加一个，并在没有它的情况下保持项目符号文本完整。
 
-- **Actors** — include when the proposed thing has multi-party behavior
-  (multiple humans, agents, or systems meaningfully involved). Skip for
-  non-behavioral brainstorms (naming briefs, data-shape briefs, pure
-  research, decision frameworks).
+- **参与者** - 包括提议的事物具有多方行为（有意义地涉及多个人、代理或系统）的情况。跳过非行为头脑风暴（命名摘要、数据形状摘要、纯粹研究、决策框架）。
 
-- **Key Flows** — include when the proposed thing has multi-step behavior.
-  Expected by default for behavioral brainstorms unless the proposed thing
-  is genuinely non-flow-shaped (pure API surface, policy, artifact output)
-  and Actors / Requirements / Scope Boundaries / Acceptance Examples
-  together prevent downstream invention of paths. When omitting from a
-  behavioral brainstorm, note the reason in the doc.
+- **关键流程** — 包括提议的事物具有多步骤行为的情况。默认情况下，行为头脑风暴是预期的，除非所提议的事物确实是非流形的（纯API表面、策略、产物输出）并且参与者/需求/范围边界/验收示例一起阻止了下游路径的发明。当从行为头脑风暴中省略时，请注意文档中的原因。
 
-- **Visualizations** — a brainstorm gets a visual when a concept has a
-  **structure worth showing**, and that decision turns on whether the
-  structure exists, *not* on whether your own prose reads clearly. Calling
-  your prose "clear enough" is the trap that quietly under-produces the
-  visuals a reader actually uses — decide on the shape, not the wording.
-  Shapes that warrant one: a data-shape transformation (before/after schema
-  or field mapping), a source-of-truth fan-out (one authority feeding many
-  derived surfaces), state-or-lifecycle logic, a multi-step flow, an
-  entity/relationship structure, a decision boundary, a quantitative
-  comparison — and, for any requirement that changes a UI, screen layout,
-  component placement, or screen flow, a **wireframe**. This applies to
-  backend and conceptual work, not only visual products: a data model, sync
-  protocol, or agent workflow gets a conceptual diagram exactly as a UI
-  requirement gets a wireframe. Match the visual to the shape — a UI/layout
-  shape takes a wireframe in HTML (a mermaid layout diagram or prose in
-  markdown; there is no inline-SVG wireframe in markdown), any other structure
-  takes a conceptual diagram. A visual is cross-cutting, not a section of its
-  own — it sits next to the Key Decision, Requirements group, or Flow it
-  illustrates. **A point with nothing structural to show gets no visual** — a
-  single-field add, a rename, or a one-line change has no structure, and a
-  before/after of one changed line is decoration. One visual per concept the plan
-  depends on, never decoration or ceremony.
+- **可视化**——当一个概念具有**值得展示的结构**时，头脑风暴就会得到视觉效果，并且该决定取决于该结构是否存在，*而不是*你自己的散文是否清晰可读。称你的散文“足够清晰”是一个陷阱，它悄悄地降低了读者实际使用的视觉效果——决定形状，而不是措辞。需要满足以下条件的形状：数据形状转换（before/after模式或字段映射）、真相来源扇出（一个权威提供许多派生表面）、状态或生命周期逻辑、多步骤流程、entity/relationship结构、决策边界、定量比较 - 并且，对于任何更改 UI、屏幕布局、组件放置或屏幕流程的要求，还有 **线框**。这适用于后端和概念工作，而不仅仅是视觉产品：数据模型、同步协议或代理工作流获取概念图，就像 UI 需求获取线框图一样。将视觉与形状相匹配 - UI/layout 形状采用 HTML 中的线框（美人鱼布局图或 Markdown 中的散文；Markdown 中没有内联 SVG 线框），任何其他结构都采用概念图。视觉效果是横切的，而不是它自己的一部分——它位于它所说明的关键决策、需求组或流程旁边。 **没有任何结构可显示的点没有视觉效果** —
+  单字段添加、重命名或一行更改没有结构，并且更改行的 before/after 是装饰。计划所依赖的每个概念都有一个视觉效果，而不是装饰或仪式。
 
-  **Diagrams complement prose; they never replace it.** A diagram is an
-  on-ramp to the prose it illustrates, not a substitute. The IDed prose
-  (Requirements, Key Decisions, Acceptance Examples) stays complete and
-  standalone — a reader who ignores every diagram still gets the full
-  content in text, and a downstream agent that reads the artifact as linear
-  text is never left with a relationship that exists only in an SVG. Adding
-  a before/after diagram is not license to thin the requirement or decision
-  prose it depicts.
+  **图表补充散文；他们永远不会取代它。**图表是它所说明的散文的入口，而不是替代品。 IDed 散文（要求、关键决策、验收示例）保持完整和独立 - 忽略每个图表的读者仍然可以获得文本中的完整内容，而将产物读取为线性文本的下游代理永远不会留下仅存在于 SVG 中的关系。添加 before/after 图并不意味着可以精简它所描述的需求或决策散文。
 
-- **Acceptance Examples** — include when any requirement has a
-  state-dependent or conditional shape ("When X, Y") where prose alone leaves
-  ambiguity about edge cases. **Always include AEs covering
-  behavioral-conditional requirements** — that's where the ambiguity bites
-  hardest. Skip when all requirements are unconditional and unambiguous.
+- **验收示例** - 包括任何需求具有依赖于状态或条件的形状（“当 X，Y 时”），其中单独的散文留下了关于边缘情况的模糊性。 **始终包含涵盖行为条件要求的 AE**——这就是最容易产生歧义的地方。当所有要求都是无条件且明确的时，请跳过。
 
-- **Success Criteria** — include when there are quality / metric / handoff
-  signals that Requirements don't already carry: quantitative metrics ("p95
-  latency under 200ms"), qualitative criteria ("the agent's output reads as
-  one voice"), process / handoff quality ("ce-doc-review can act on this
-  without follow-ups"). Skip when Requirements ARE the success criteria
-  (every R is "done when the R is true").
+- **成功标准** — 包括需求尚未包含的质量/指标/切换信号：定量指标（“p95 延迟低于 200 毫秒”）、定性标准（“代理的输出读取为一个声音”）、流程/切换质量（“ce-doc-review 可以对此采取行动，无需后续行动”）。当需求是成功标准时跳过（每个 R 都是“当 R 为真时完成”）。
 
-- **Scope Boundaries** — include when scope is contested or there are
-  tempting non-goals worth naming explicitly. When the brainstorm is about
-  positioning a product against adjacent ones the team could have built but
-  is rejecting, split into "Deferred for later" (eventually but not v1) and
-  "Outside this product's identity" (positioning decision). Otherwise, a
-  single list is fine.
+- **范围边界** — 包括范围存在争议或存在值得明确命名的诱人非目标的情况。当集思广益是关于将产品与相邻产品进行定位时，团队本可以构建但拒绝，分为“推迟到以后”（最终但不是 v1）和
+  “在该产品的身份之外”（定位决定）。否则，一个列表就可以了。
 
-- **Dependencies / Assumptions** — include when material upstream
-  dependencies exist or when assumptions the plan depends on need to be stated.
+- **依赖性/假设** - 包括何时存在重大上游依赖性或何时需要说明计划所依赖的假设。
 
-- **Outstanding Questions** — include when there are unresolved items.
-  Distinguish "Resolve Before Planning" (blocks planning) from "Deferred to
-  Planning" (answered during planning or codebase exploration).
+- **未解决的问题** — 包括未解决的问题。区分“规划前解决”（阻止规划）和“推迟到规划”（在规划或代码库探索期间回答）。
 
-- **Sources / Research** — include research that orients the planner or
-  justifies framing choices. The test: *"if I were the planner reading this
-  cold, would this breadcrumb help me make better choices?"* Yes → include
-  (code locations, external docs, RFCs, constraints, prior plans — the
-  category is inclusive, not enumerated). Process exhaust (reading the
-  user's prompt, glancing at obvious files) → omit.
-  A constraint adopted from a Compound Pack file is cited inline as
-  `(pack: <id>, <path within the pack>)` after the requirement or decision it
-  shaped. The path is relative to the pack's own directory, so it is stable
-  for path- and git-sourced packs alike. Cite the pack text; do not restate
-  it. That marker is reserved for pack files; `<root>/solutions/` learnings
-  keep the ordinary path citation.
+- **来源/研究** — 包括为规划者提供指导或证明框架选择合理性的研究。测试：*“如果我是计划者，阅读这篇冷文，这个面包屑会帮助我做出更好的选择吗？”*是→包括（代码位置、外部文档、RFC、约束、先前计划 - 该类别是包容性的，而不是枚举）。流程耗尽（阅读用户的提示，浏览明显的文件）→ 省略。从Compound Pack文件采用的约束在其形成的需求或决策之后被内联引用为`(pack: <id>, <包内的路径>)`。该路径是相对于包自己的目录的，因此对于路径和 git 来源的包来说它都是稳定的。引用包文本；不要重述。该标记是为包文件保留的； `<root>/solutions/`学习保持普通路径引用。
 
-## Prototype sources
+## 原型来源
 
-When a kept prototype informed this artifact, record its absolute run-directory path in Sources and identify `decisions.md` and the selected screens or states relevant to the requirements. Label the citation machine-local and best effort while the original checkout or temporary directory exists. State in the citation that a missing prototype is not a blocker and the artifact's requirements govern any disagreement. Do not copy the prototype or capsule into the repository. An undone overlay has no surviving prototype to cite.
+当保存的原型通知此产物时，在源中记录其绝对运行目录路径并识别`decisions.md`以及与需求相关的所选屏幕或状态。当原始签出目录或临时目录存在时，将引文机标记为本地和尽力而为。在引文中指出，丢失的原型并不构成阻碍，任何分歧均由产物的要求决定。不要将原型或胶囊复制到存储库中。未完成的覆盖层没有幸存的原型可供引用。
 
-## Agent agency
+## 代理机构
 
-The catalog is a floor, not a ceiling. When the brainstorm's content doesn't
-fit any catalog section, introduce a new one — don't force the content into
-a section it doesn't belong in. Content drives section choices, not vice
-versa.
+目录是地板，而不是天花板。当头脑风暴的内容不适合任何目录部分时，引入一个新的内容 - 不要强迫内容进入不属于的部分。内容驱动部分选择，反之亦然。
 
-The agent also picks per artifact:
+代理还选择每个产物：
 
-- Whether Acceptance Examples render as a separate section or embed in each
-  requirement
-- How much depth each present section gets
+- 验收示例是作为单独的部分呈现还是嵌入到每个需求中
+- 当前每个部分的深度有多少
 
-(Requirements grouping is covered above in the Hard Floor item — group by
-concern by default, rendering a flat list only when all requirements are
-about the same thing, with continuous R-IDs across groups.)
+（需求分组在上面的 Hard Floor 项目中进行了介绍 - 默认情况下按关注点分组，仅当所有需求都关于相同的事情时才呈现平面列表，并且跨组具有连续的 R-ID。）
 
-## Brainstorm metadata fields
+## 集思广益元数据字段
 
-Every requirements-only unified plan carries a small set of stable metadata fields that
-downstream tooling depends on. The contract is format-independent: in
-markdown these fields appear as YAML frontmatter at the top of the file; in
-HTML they appear as visible text placed as `references/html-rendering.md`
-describes. Field names and semantics are the same across both
-formats so consumers can locate them without knowing which format produced the
-artifact.
+每个仅满足需求的统一计划都带有下游工具所依赖的一小组稳定的元数据字段。合约与格式无关：在 Markdown 中，这些字段在文件顶部显示为 YAML frontmatter；在 HTML 中，它们显示为可见文本，如 `references/html-rendering.md` 所描述的那样放置。两种格式的字段名称和语义都是相同的，因此消费者可以在不知道哪种格式生成产物的情况下找到它们。
 
-### Required
+### 必需的
 
-- **`title`** — the artifact's descriptive name with a ` - Plan` suffix
-  (e.g., `Highlighter Tool - Plan`), matching the H1 (markdown) or document
-  `<h1>` (HTML). It is a unified plan at every readiness state, so the title
-  stays stable when `ce-plan` enriches it. Do not put a conventional-commit
-  prefix (`feat:`/`fix:`) in the title — the `type` field carries that.
-- **`type`** — conventional-commit-prefix-aligned classification (`feat`,
-  `fix`, `refactor`, `docs`, etc.).
-- **`date`** — creation date in ISO 8601 (`YYYY-MM-DD`), ASCII digits only.
-  Matches the calendar date in the filename
-  (`<root>/plans/YYYY-MM-DD-HHMM-<type>-<topic>-plan.<md|html>`), which adds the
-  local wall-clock time at write.
-- **`topic`** — kebab-case slug identifying the brainstorm subject (e.g.,
-  `surface-scope-earlier`, `demo-reel-local-save`). Used in the filename and
-  as the resume-detection key when `ce-brainstorm` scans for an existing
-  artifact to continue.
-- **`artifact_contract`** — always `ce-unified-plan/v1` for new outputs.
-- **`product_contract_source`** — always `ce-brainstorm`.
+- **`title`** — 产物的描述性名称，带有 ` - Plan` 后缀（例如，`Highlighter Tool - Plan`），与 H1（markdown）或文档 `<h1>` (HTML) 匹配。这是每个准备状态下的统一计划，因此当 `ce-plan` 丰富它时，标题保持稳定。不要在标题中放置常规提交前缀 (`feat:`/`fix:`) — `type` 字段携带该前缀。
+- **`type`** — 常规提交前缀对齐分类（`feat`、`fix`、`refactor`、`docs` 等）。
+- **`date`** — ISO 8601 (`YYYY-MM-DD`) 格式的创建日期，仅限 ASCII 数字。匹配文件名中的日历日期 (`<root>/plans/YYYY-MM-DD-HHMM-<type>-<topic>-plan.<md|html>`)，这会在写入时添加本地挂钟时间。
+- **`topic`** — 识别头脑风暴主题的 kebab-case slug（例如，`surface-scope-earlier`、`demo-reel-local-save`）。在文件名中使用，并在 `ce-brainstorm` 扫描现有产物以继续时用作恢复检测键。
+- **`artifact_contract`** — 对于新输出始终为 `ce-unified-plan/v1`。
+- **`product_contract_source`** — 始终为`ce-brainstorm`。
 
-### No status field
+### 无状态字段
 
-Unified plan artifacts have no `status` field and no `active → completed`
-lifecycle or readiness flag. Readers assess the contents and unresolved questions. No CE artifact carries mutable progress state; whether work shipped
-is derived from git, not stored in the doc. Do not introduce one.
+统一计划产物没有 `status` 字段，也没有 `active → completed` 生命周期或就绪标志。读者评估内容和未解决的问题。没有 CE 产物带有可变的进度状态；交付的工作是否源自 git，而不是存储在文档中。就不一一介绍了。
 
-### Field-name stability
+### 字段名称稳定性
 
-Field names are stable across brainstorm revisions — never rename a field
-or repurpose its semantics. Agents composing new brainstorms MUST use these
-exact names; adding new fields is fine, but renaming `topic` to `subject`
-or `date` to `created` breaks filename construction and resume detection.
+字段名称在集体讨论修订中保持稳定 - 切勿重命名字段或重新调整其语义。撰写新头脑风暴的特工必须使用这些确切的名称；添加新字段很好，但将 `topic` 重命名为 `subject` 或 `date` 为 `created` 会破坏文件名构造并恢复检测。
 
-## ID and content rules
+## ID和内容规则
 
-Same shape as plan rules.
+形状与计划规则相同。
 
-- **Stable IDs.** R-IDs (Requirements), A-IDs (if Actors is included), F-IDs (if
-  Key Flows is included), AE-IDs (if Acceptance Examples is included). No other ID namespaces.
-- **Plain prefix.** `R1.`, `A1.`, `F1.`, `AE1.` as bullet prefixes. Do not
-  bold; the prefix is visually distinctive on its own.
-- **Bold leader labels** inside Flows and Acceptance Examples
-  (`**Trigger:**`, `**Covers R4, R8.**`) provide structure without deeper
-  heading levels.
-- **Repository file references are repo-relative.** Kept local prototype citations follow the Prototype sources contract above.
-- **No process exhaust.** No "captured at Phase X" notes, no `## Next Steps`
-  pointing to ce-plan, no italic provenance lines. Engineering process
-  metadata belongs in commit messages and tool output, not the artifact.
-- **No implementation details by default.** Libraries, schemas, endpoints,
-  file layouts, code structure stay out unless the brainstorm itself is
-  inherently about a technical or architectural change and those details are
-  the subject of the decision.
+- **稳定 ID。** R-ID（要求）、A-ID（如果包括参与者）、F-ID（如果包括关键流程）、AE-ID（如果包括验收示例）。没有其他 ID 命名空间。
+- **普通前缀。** `R1.`、`A1.`、`F1.`、`AE1.` 作为项目符号前缀。不要大胆；前缀本身在视觉上就很独特。
+- 流程和接受示例（`**Trigger:**`、`**Covers R4, R8.**`）内的 **粗体前导标签** 提供结构，无需更深层次的标题级别。
+- **存储库文件引用是相对于存储库的。**保留本地原型引用遵循上面的原型源合同。
+- **没有进程排气。**没有“在 X 阶段捕获”注释，没有 `## Next Steps` 指向 ce-plan，没有斜体出处线。工程流程元数据属于提交消息和工具输出，而不是产物。
+- **默认情况下没有实现细节。** 库、模式、端点、文件布局、代码结构不包括在内，除非头脑风暴本身本质上是关于技术或架构变更，并且这些细节是决策的主题。
 
-## Discipline: Summary vs Problem Frame
+## 学科：总结与问题框架
 
-When both sections are present, they earn separate sections only by holding
-to different purposes:
+当两个部分都存在时，它们仅通过持有不同的目的来获得单独的部分：
 
-| Section | Question it answers | Time direction | Length |
+| 部分 | 提问它回答 | 时间方向 | 长度 |
 |---|---|---|---|
-| `## Summary` | What is this doc proposing? | Forward-looking | 1-3 lines |
-| `## Problem Frame` | Why does this proposal exist? | Backward-looking / situational | Paragraphs |
+| `## Summary` | 该文档有何建议？ | 前瞻性 | 1-3行 |
+| `## Problem Frame` | 为什么会有这个提案？ | 向后看/情境 | 段落 |
 
-- **Summary doesn't need problem context.** A reader scanning Summary gets
-  the proposal at a glance.
-- **Problem Frame doesn't restate the proposal.** It establishes the
-  situation, the specific moment of pain, and the cost shape — then stops.
-  The remedy lives in Summary; restating it in Problem Frame is the
-  duplication that makes the two sections feel redundant.
+- **摘要不需要问题背景。** 读者扫描摘要即可一目了然地了解提案。
+- **问题框架不会重述建议。** 它确定了情况、具体的痛苦时刻和成本形状 - 然后停止。补救措施存在于摘要中；在问题框架中重述它是重复的，这使得这两个部分感觉多余。
 
-## Rendering
+## 渲染
 
-The format-specific references describe how to render these sections in each
-output format:
+特定于格式的参考描述了如何以每种输出格式呈现这些部分：
 
-- **Markdown rendering:** `references/markdown-rendering.md`
-- **HTML rendering:** `references/html-rendering.md`
+- **Markdown 渲染：** `references/markdown-rendering.md`
+- **HTML渲染：** `references/html-rendering.md`
 
-This reference (`brainstorm-sections.md`) is about WHAT the brainstorm
-contains; rendering references are about HOW each format presents it. The
-brainstorm is written in one format — markdown OR HTML, never both — based
-on the resolved output mode. The section catalog is the same regardless of
-format.
+该引用文档 (`brainstorm-sections.md`) 是关于头脑风暴的内容；渲染参考是关于每种格式如何呈现它的。根据解析的输出模式，头脑风暴以一种格式编写 - markdown 或 HTML，而不是两者兼而有之。无论格式如何，节目录都是相同的。

@@ -1,128 +1,132 @@
 ---
 name: ce-debug
-description: "Diagnosis loop for bugs and failing behavior. Use when asked to debug or fix failing or slow behavior."
-argument-hint: "[issue reference, error message, test path, or description of broken behavior]"
+description: "错误和失败行为的诊断循环。当被要求调试或修复失败或缓慢的行为时使用。"
+argument-hint: "[问题参考、错误消息、测试路径或损坏行为的描述]"
 ---
 
-# Debug and Fix
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Find the root cause of a failure, then — when the user chooses to — fix it with test-first discipline.
+# 调试和修复
 
-**Done when:** the causal chain from trigger to symptom is stated with no gaps and file:line evidence, and either a verified fix has been handed off (PR, commit, or the user's chosen stop) or a diagnosis-only summary has been delivered. **Escalate rather than persist:** 2-3 hypotheses exhausted without confirmation, or 3 failed fix attempts, means diagnose *why* instead of trying again — that is the smart escalation `references/investigate.md` describes. One hypothesis, one change at a time; changing several to see what helps is shotgun debugging.
+找到失败的根本原因，然后——当用户选择时——用测试优先的原则来修复它。
 
-`<bug_description>` is whatever this skill was invoked with — a failure description, a `mode:` token, or an issue reference (`#123`, `org/repo#123`, an issue URL) — from the user or from a calling skill (`ce-babysit-pr` / `lfg` in `mode:pipeline` pass the failing jobs and log tails; `lfg`'s defect route passes `mode:return-to-caller` and the user's own reference). Blank if nothing was provided.
+**完成时间：** 从触发到症状的因果链被明确地陈述，并且没有 file:line 证据，并且已验证的修复已被移交（PR、提交或用户选择的停止）或已交付仅诊断摘要。 **升级而不是坚持：** 2-3 个假设在未经确认的情况下耗尽，或者 3 次失败的修复尝试，意味着诊断*原因*而不是再次尝试 - 这就是智能升级`references/investigate.md`描述的。一种假设，一次改变一种；更改几个以查看霰弹枪调试有何帮助。
+
+`<bug_description>` 是调用此技能的任何内容 — 失败描述、`mode:` 令牌或问题引用（`#123`、`org/repo#123`、问题 URL）— 来自用户或调用技能（`mode:pipeline` 中的`ce-babysit-pr` / `lfg` 传递失败作业和日志尾部；`lfg` 的缺陷路由传递） `mode:return-to-caller`以及用户自己的参考）。如果未提供任何内容，则为空白。
 
 
-## Mode
+## 模式
 
-Default is **interactive**: investigate, run the Phase 2 fix-choice gate, then the Phase 4 handoff.
+默认为**交互式**：调查，运行第 2 阶段修复选择门，然后运行第 4 阶段切换。
 
-**`mode:pipeline`** (set by an orchestrator such as `ce-babysit-pr` or `lfg`): run fully non-interactively and never call the blocking-question tool. Strip the token from `<bug_description>`, then **read `references/pipeline-mode.md` and follow it** — it overrides every "ask the user" point with a conservative default, replaces the Phase 2 fix-gate with "fix convergent bugs, defer divergent ones", and replaces the Phase 4 handoff with a structured return whose `status` is exactly one of `fixed-and-pushed | fixed-not-pushed | diagnosed-no-fix | flaky-infra | needs-human`. The caller branches on those exact spellings, so never rename, abbreviate, or add to them.
+**`mode:pipeline`**（由`ce-babysit-pr`或`lfg`等编排器设置）：完全非交互式运行，并且从不调用阻塞问题工具。从`<bug_description>`中剥离令牌，然后**读取`references/pipeline-mode.md`并遵循它** - 它用保守的默认值覆盖每个“询问用户”点，用“修复收敛错误，推迟发散错误”替换第2阶段修复门，并用结构化返回替换第4阶段交接，其`status`恰好是`fixed-and-pushed | fixed-not-pushed | diagnosed-no-fix | flaky-infra | needs-human`之一。调用者会根据这些准确的拼写进行分支，因此切勿重命名、缩写或添加它们。
 
-**`mode:return-to-caller`** (set by `lfg` on its defect route): run non-interactively, but the caller owns everything after the fix. Strip the token, then **read `references/return-to-caller.md` and follow it** — it keeps Phases 0-3 and the convergent-or-defer fix boundary, applies the Phase 3 branch rule so the fix lands on a feature branch, commits the fix-owned files without pushing, skips the post-fix polish and review steps, and returns a structured result whose `status` is exactly one of `fixed | diagnosed-no-fix | needs-human | blocked`. The same spelling rule applies.
+**`mode:return-to-caller`**（由`lfg`在其缺陷路由上设置）：非交互式运行，但调用者拥有修复后的所有内容。剥离令牌，然后**读取`references/return-to-caller.md`并遵循它** - 它保留阶段0-3和收敛或延迟修复边界，应用阶段3分支规则，以便修复落在功能分支上，提交修复拥有的文件而不推送，跳过修复后完善和审查步骤，并返回一个结构化结果，其`status`恰好是`fixed | diagnosed-no-fix | needs-human | blocked`之一。适用相同的拼写规则。
 
-## Blocking questions
+## 屏蔽问题
 
-Wherever this skill asks the user something, use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question, and never end a phase without a response.
+无论何时此技能向用户询问某些内容，请使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人聊天界面上的编号选项。永远不要默默地跳过问题，也永远不要在没有回应的情况下结束一个阶段。
 
-## Secrets in evidence
+## 证据中的秘密
 
-Debugging surfaces raw output constantly — command results, captured payloads, log excerpts — and the harness may render a command's output the moment it runs, so check secrets when you construct the command, not afterward. Keep credentials in env vars rather than on the command line; when a command's output may carry a secret (verbose HTTP traces, dumped headers, config or environment prints), capture it to a file and surface only sanitized excerpts, writing `<REDACTED>` in place of each secret. No secret (credential, token, auth header, connection string) appears in anything shown, written, or committed. If sanitizing removes what the diagnosis needs, say so and ask the user rather than un-redacting.
+调试不断地显示原始输出——命令结果、捕获的有效负载、日志摘录——并且工具可能会在命令运行时呈现命令的输出，因此在构建命令时检查机密，而不是之后。将凭据保存在环境变量中而不是命令行上；当命令的输出可能携带秘密（详细的 HTTP 跟踪、转储标头、配置或环境打印）时，将其捕获到文件中并仅显示经过清理的摘录，并在每个秘密的位置写入 `<REDACTED>`。任何显示、写入或提交的内容中都不会出现任何秘密（凭据、令牌、身份验证标头、连接字符串）。如果清理删除了诊断所需的内容，请说出来并询问用户，而不是取消编辑。
 
-## Artifact Root
+## 神器根
 
-Resolve `<root>` only when you first compose a `<root>/` path — a run that composes none skips this entirely.
+仅当您第一次组成 `<root>/` 路径时才解析 `<root>` — 不组成任何路径的运行会完全跳过此过程。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Execution Flow
+## 执行流程
 
-Five phases in order: **0 Triage -> 1 Investigate -> 2 Root Cause -> 3 Fix -> 4 Handoff.** Beyond Phase 0's trivial-bug fast-path there is no skipping and no complexity tiers. A hard bug spends longer in each phase; it does not enter fewer.
+在对入职项目中反复出现的故障进行分类时，仅检查当前状态和链接的计划、相关ADR或主题研究（仅在它们与此症状相关的情况下）。使用配置的产物根和实际域指针。验证针对此版本的早期证据、输入和观察；过去的假设并不是诊断。仅在具体改变的条件或新证据的情况下重新测试被驳斥的路线。将本地复制、因果链和固定门保留在下面。
 
-Give each file you read its own tool call, so its output comes back on its own, never several files in one command or one script. A read counts only when the whole file came back. Some hosts cut the middle out of a long tool output and leave a truncation marker in its place, so when a read comes back shortened, read the missing lines in smaller ranges before you act on that file.
+按顺序分为五个阶段：**0 分类 -> 1 调查 -> 2 根本原因 -> 3 修复 -> 4 移交。** 除了第 0 阶段的小错误快速路径之外，没有跳过，也没有复杂性层。硬 bug 在每个阶段花费的时间更长；它不输入更少。
 
-**Read `references/investigate.md` now and follow it for Phases 0-2** — issue fetching, reproduction, environment sanity and the dirty-tree stash experiment, backward tracing, the tracker/PR-history search, hypothesis grounding, and the escalation table. Only the gates below are stated here.
+为您读取的每个文件提供自己的工具调用，以便其输出自行返回，而不是在一个命令或一个脚本中返回多个文件。仅当整个文件返回时，读取才算数。某些主机会从长工具输出中切掉中间部分，并在其位置留下截断标记，因此当读取返回时缩短，请在对该文件进行操作之前读取较小范围内的缺失行。
 
-**The issue of record.** If the user handed you a ticket or issue, that is where this bug already lives, whichever system it is in; a Sentry issue counts as much as a Linear ticket. Carry its identifier and URL through to Phase 4. State its title, as the record gives it, before Phase 1 starts; if the fetch could not get one, say that rather than composing a title. If the input is only a stack trace, test path, or description, this run has **no issue of record**. That is an ordinary state, not a gap to fill: ship the fix without one, never open a ticket to manufacture a record, and never ask the user whether to. Phase 1's tracker search reads prior work and **never establishes a new home for the bug**. An existing ticket for this bug is one to *link* in Phase 4, never one to create.
+**现在阅读`references/investigate.md`并按照它进行阶段0-2** - 问题获取、复制、环境健全性和脏树隐藏实验、向后追踪、tracker/PR-history搜索、假设基础和升级表。这里只说明下面的门。
 
-**The trivial-bug fast-path** (cause readable from the input, one-line fix, no deep tracing) still runs Phase 2's fix-choice gate before editing: it saves investigation ceremony, not the user's choice over whether to apply a fix.
+**记录问题。** 如果用户向您提交了票证或问题，则该错误已经存在于此，无论它位于哪个系统中； Sentry 问题与 Linear 票证一样重要。将其标识符和 URL 带到第 4 阶段。在第 1 阶段开始之前，根据记录给出其标题；如果获取不到，就直接说出来，而不是写一个标题。如果输入只是堆栈跟踪、测试路径或描述，则此运行**没有记录问题**。这是一种普通状态，而不是需要填补的空白：在没有修复的情况下发送修复程序，永远不要开票来创建记录，也永远不要询问用户是否这样做。第一阶段的跟踪器搜索会读取之前的工作，并且**永远不会为错误建立新的家**。此错误的现有票证是在第 4 阶段“链接”一张，而不是创建一张。
 
-**Choosing the regression test.** The regression test for a *confirmed defect* belongs wherever existing coverage already owns that behavior: start from the tests that exist rather than from a new file. Before recommending a test in Phase 2, inspect the existing tests and follow the project's testing rules; `references/fix.md` holds the test homes and the naming rule for Phase 3. Wherever you name where the regression test should live, say in one line what that seam catches and what it misses. A test that fails because the change deliberately reverses the behavior it asserts does not have a wrong expectation — that is the divergent case below, deferred rather than updated.
+**琐碎错误快速路径**（原因可从输入读取，一行修复，无深度跟踪）在编辑之前仍然运行第 2 阶段的修复选择门：它保存了调查仪式，而不是用户对是否应用修复的选择。
 
-### Phase 2 gate: present, then ask
+**选择回归测试。** *已确认的缺陷*的回归测试属于现有覆盖范围已经拥有该行为的地方：从现有的测试开始，而不是从新文件开始。在建议第二阶段进行测试之前，检查现有测试并遵循项目的测试规则； `references/fix.md` 包含测试所在位置和第 3 阶段的命名规则。无论您在哪里命名回归测试应该进行的位置，请用一行说出该接缝捕捉到了什么和错过了什么。由于更改故意逆转其断言的行为而失败的测试并没有错误的期望 - 这就是下面的不同情况，推迟而不是更新。
 
-**Causal chain gate:** do not proceed to Phase 3 until you can explain the full chain — trigger through every step to the observed symptom — with no gaps. "Somehow X leads to Y" is a gap. Only the user can authorize proceeding on a best-available hypothesis when investigation is stuck.
+### 第二阶段门：呈现，然后询问
 
-**Repair selection:** after confirming the cause and before recommending a fix, read `references/bakeoff.md` to decide whether the repair needs competing approaches.
+**因果链门：**不要进入第三阶段，直到您能够解释完整的链条（通过每一步触发观察到的症状），没有任何间隙。 “不知何故X导致Y”是一个差距。当调查陷入困境时，只有用户可以授权根据最佳可用假设继续进行。
 
-Once the root cause is confirmed, write the findings as a user-visible block: the causal chain with file:line references; the proposed fix and the files it changes; which tests to use, add, modify, or strengthen, and whether existing tests should have caught this; and any related ticket or PR and how it shapes the recommendation — if an open PR already fixes this, lead with that link instead of a fresh fix. When the deciding fact was not visible at first look and took a deep dig to surface, because the existing logs, metrics, and errors did not show it, also propose the cheap always-on signal that would have shown it immediately: a log field, a metric, or an assertion. This is a proposal only; adding the signal is not part of the minimal fix.
+**修复选择：**在确认原因后并在建议修复之前，请阅读`references/bakeoff.md`以决定修复是否需要竞争方法。
 
-**Same-turn presentation before the gate:** do not open the fix-choice question until that findings block has been written in full — in this turn or the immediately preceding assistant message. The blocking question tool renders only its own stem on modal harnesses, so a question fired on "root cause confirmed" alone leaves the user choosing with none of the causal chain in front of them. Naming the options is not presenting the findings, and a promise to explain after the choice is too late.
+一旦确认根本原因，将结果写入用户可见的块：具有file:line引用的因果链；提议的修复及其更改的文件；要使用、添加、修改或加强哪些测试，以及现有测试是否应该发现这一点；以及任何相关的票证或 PR 以及它如何形成推荐 - 如果开放的 PR 已经修复了此问题，请使用该链接而不是新的修复。当决定性的事实乍一看不可见并通过深入挖掘浮出水面时，因为现有的日志、指标和错误没有显示它，还提出了可以立即显示它的廉价的始终开启的信号：日志字段、指标或断言。这只是一个建议；添加信号不是最小修复的一部分。
 
-When the request has not already authorized the next action, ask (per **Blocking questions**) which path to take. An explicit fix request is Phase 3. An explicit diagnosis-only request skips to Phase 4. `mode:pipeline` and `mode:return-to-caller` never ask. The test recommendations are part of the diagnosis either way. Offer only the options the findings support, and recommend one:
+**在门前的同回合演示：**不要打开修复选择问题，直到该结果块已完整写入 - 在本轮或紧接在前面的助理消息中。阻塞问题工具仅在模态宿主上呈现其自己的主干，因此仅针对“已确认根本原因”触发的问题会让用户在没有任何因果链的情况下进行选择。列出选项的名称并不表示研究结果，承诺在选择后进行解释为时已晚。
 
-1. **Fix it now** — proceed to Phase 3
-2. **Diagnosis only — I'll take it from here** — skip the fix, write Phase 4's summary, end the skill
-3. **Rethink the design** (`ce-brainstorm`) — only when the bug cannot be fixed within the current design: the root cause is a wrong responsibility or interface rather than wrong logic, the requirements themselves are wrong, or every candidate fix is a workaround around an assumption that no longer holds. Size alone is not a design problem. Recommend it over a fix when no fix within the current design corrects the mechanism that produced the bug, only this occurrence of it.
+当请求尚未授权下一步操作时，询问（根据 **阻止问题**）采取哪条路径。显式修复请求是第 3 阶段。显式仅诊断请求会跳到第 4 阶段。`mode:pipeline` 和 `mode:return-to-caller` 从不询问。无论哪种方式，测试建议都是诊断的一部分。仅提供调查结果支持的选项，并推荐一个：
 
-When the findings leave nothing for this run to fix (the behavior is correct, the bug is already fixed, or an open PR already does the work), offer the next step they support in place of a fix, such as replying on the issue of record or finishing that PR. Replying on the issue, closing it, or changing an existing PR waits for the user's choice.
+1. **立即修复** — 进入第 3 阶段
+2. **仅诊断 - 我将从这里开始** - 跳过修复，编写第 4 阶段的摘要，结束技能
+3. **重新思考设计** (`ce-brainstorm`) - 仅当错误无法在当前设计中修复时：根本原因是错误的职责或接口而不是错误的逻辑，需求本身是错误的，或者每个候选修复都是围绕不再成立的假设的解决方法。尺寸本身并不是设计问题。当当前设计中没有任何修复可以纠正产生错误的机制（仅出现这种情况）时，建议使用它而不是修复。
 
-**`mode:pipeline` and `mode:return-to-caller`:** do not ask. Proceed to Phase 3 and apply a **convergent** fix; a **divergent** fix — one that would reverse a deliberate contract/behavior/product decision, including a "failing" test that asserts intended behavior — is deferred, not applied, per `references/pipeline-mode.md` or `references/return-to-caller.md`. Never route to `ce-brainstorm` here; a design problem becomes a `needs-human` residual.
+当结果没有留下任何需要此运行修复的内容时（行为正确、错误已修复，或者打开的 PR 已完成工作），请提供他们支持的下一步来代替修复，例如回复记录问题或完成该 PR。回复问题、关闭问题或更改现有的PR等待用户的选择。
 
-### Phase 3: Fix
+**`mode:pipeline`和`mode:return-to-caller`：**不要问。进入第 3 阶段并应用 **收敛** 修复；一个 **不同的** 修复 - 一个会逆转故意的 contract/behavior/product 决定的修复，包括断言预期行为的“失败”测试 - 根据 `references/pipeline-mode.md` 或 `references/return-to-caller.md` 被推迟，而不是应用。切勿在此路由至 `ce-brainstorm`；设计问题变成了`needs-human`残差。
 
-If the user chose "Diagnosis only," skip to Phase 4's summary. If they chose "Rethink the design," control has transferred to `ce-brainstorm` and this skill ends.
+### 第三阶段：修复
 
-**Read `references/fix.md` before editing any file** — the test-first sequence, the failed-fix rule, the check of other places the fix affects, and the post-mortem trigger. Two rules decide whether the fix may start at all, so they stay here:
+如果用户选择“仅诊断”，则跳至第 4 阶段的摘要。如果他们选择“重新思考设计”，控制权将转移到`ce-brainstorm`，并且该技能结束。
 
-- **Branch.** Check `git status`; if the user has unstaged work in files that need modification, confirm before editing. If the current branch is the default branch, create a feature branch without asking — derive a name from the bug, `git checkout -b <name>`, and say which branch you moved to. Detect the default by comparing against `main`, `master`, or `git rev-parse --abbrev-ref origin/HEAD` **with its `origin/` prefix stripped** — the raw output is `origin/<name>`, so an unstripped comparison never matches.
-- **Record the pre-fix scope:** current `HEAD`, whether `git status --short` is clean, and any pre-existing changed files. Then keep a list of **fix-owned files** (the tests and implementation changed for this bug) as you work. Phase 4 answers both of its questions from this record and cannot reconstruct it afterwards.
+**在编辑任何文件之前阅读`references/fix.md`** - 测试优先序列、失败修复规则、修复影响的其他位置的检查以及事后分析触发器。有两条规则决定修复是否可以开始，因此它们留在这里：
 
-### Phase 4: Handoff
+- **分支。** 检查`git status`；如果用户在需要修改的文件中存在未暂存的工作，请在编辑前确认。如果当前分支是默认分支，则无需询问即可创建一个功能分支 - 从错误中派生一个名称，`git checkout -b <name>`，并说出您移至哪个分支。通过与 `main`、`master` 或 `git rev-parse --abbrev-ref origin/HEAD` **及其 `origin/` 前缀剥离**进行比较来检测默认值 - 原始输出为 `origin/<name>`，因此未剥离的比较永远不会匹配。
+- **记录前缀范围：**当前`HEAD`，`git status --short`是否干净，以及任何预先存在的更改文件。然后在工作时保留一份**修复拥有的文件**（针对此错误的测试和实现已更改）的列表。第四阶段根据该记录回答了两个问题，并且之后无法重建它。
 
-**`mode:pipeline` — skip this entire interactive handoff.** No polish or review steps, no residual questions, no preview, no learning-capture offer. Commit and push the convergent fix per `references/pipeline-mode.md`, then emit that reference's **structured return**. Divergent / needs-human items are deferred there (open thread or the caller's run-report comment — never a PR-body section). **`mode:return-to-caller` — skip it too:** commit the fix-owned files on the feature branch, push nothing, and emit the structured return `references/return-to-caller.md` defines. In both modes the return is the last thing this skill writes. It ends this skill, not the turn. The caller runs in this same session, and its next step follows the return; do not announce a handoff to it. The rest of this section is the interactive path only.
+### 第四阶段：交接
 
-**Structured summary** — write it before the routing below. When the findings block is already on screen, do not repeat it: give the root cause in a line and spend the summary on what changed since, how the fix was verified, and its limits. A diagnosis-only summary stands on its own.
+**`mode:pipeline` — 跳过整个交互式交接。** 没有润色或复习步骤，没有残留问题，没有预览，没有学习捕获优惠。提交并推送每个`references/pipeline-mode.md`的收敛修复，然后发出该引用的**结构化返回**。发散的/人类需求的项目被推迟在那里（开放线程或调用者的运行报告评论 - 从来没有 PR-body 部分）。 **`mode:return-to-caller` — 也跳过它：** 在功能分支上提交修复拥有的文件，不推送任何内容，并发出`references/return-to-caller.md`定义的结构化返回。在这两种模式下，返回都是该技能最后写入的内容。它结束了该技能，而不是回合。调用者在同一个会话中运行，返回后执行下一步；不要宣布向其移交。本节的其余部分仅是交互路径。
+
+**结构化摘要**——写在下面的路由之前。当结果块已经出现在屏幕上时，不要重复它：在一行中给出根本原因，并总结自此以来发生的变化、如何验证修复及其限制。仅用于诊断的摘要是独立的。
 
 ```
 ## Debug Summary
-**Problem**: [What was broken]
-**Root Cause**: [Full causal chain, with file:line references — or one line pointing back to the findings block when it is already on screen]
-**Recommended Tests**: [Diagnosis only: tests to add or modify to prevent recurrence, with file, assertion guidance, and one line on what that seam catches and misses. Omit when Phase 3 ran]
-**Fix**: [What was changed, including every other site of the same mistake, and how it was verified — or "diagnosis only" if Phase 3 was skipped]
-**Prevention**: [Test coverage added; structural fix or operation guard if applicable, or the structural fix left as follow-up; the always-on signal the findings block proposed, when it proposed one]
-**Confidence**: [High/Medium/Low]
+**问题**：[什么坏了]
+**根本原因**：[完整的因果链，带有 file:line 引用 — 或当结果块已在屏幕上时指向回的一行]
+**推荐的测试**：[仅诊断：添加或修改测试以防止再次发生，包括文件、断言指导以及一行关于该接缝捕获和遗漏的内容。当第 3 阶段运行时省略]
+**修复**：[更改了什么，包括出现相同错误的所有其他站点，以及如何验证它——或者如果跳过第 3 阶段，则“仅诊断”]
+**预防**：[添加测试覆盖范围；结构修复或操作防护（如果适用），或结构修复留作后续；当发现块提出一个永远在线的信号时，它提出了一个]
+**信心**：[High/Medium/Low]
 ```
 
-**If Phase 3 was skipped**, stop after the summary — the user already said they were taking it from here. Do not prompt.
+**如果跳过第 3 阶段**，请在摘要之后停止 - 用户已经说过他们将从这里开始。不提示。
 
-**If Phase 3 ran, read `references/post-fix-handoff.md` now and follow it before routing below.** It defines the quality steps after a fix: the contextual-override checks, the rule for when review may be skipped, the scoping that keeps `ce-simplify-code` and `ce-code-review` off unrelated branch work, what to do with leftover findings, the `## Post-Fix Quality` block, and the criteria for offering to capture a learning. None of that appears in this body. The routing below names *which* action runs, never the scope rules that make it safe, so it cannot be improvised from. Skipping the read ships an unreviewed fix, lets review reach into unrelated branch work, and strands accepted findings in the session.
+**如果第 3 阶段运行，请立即阅读`references/post-fix-handoff.md`并在下面的路由之前遵循它。**它定义了修复后的质量步骤：上下文覆盖检查、何时可以跳过审查的规则、使`ce-simplify-code`和`ce-code-review`远离不相关分支工作的范围、如何处理剩余的发现、`## Post-Fix Quality`块以及提供捕获学习的标准。这些都没有出现在这个身体里。下面的路由命名了*哪个*操作运行，而不是使其安全的范围规则，因此不能即兴发挥。跳过阅读会带来未经审查的修复，让审查深入到不相关的分支工作，并将会议中已接受的发现搁置起来。
 
-#### Routing
+#### 路由
 
-**Land the fix without carrying along anything the user did not offer up** — not into a commit, not into a push, not into a PR. Do not ask whether to open a PR; permission is not the gate. Two questions decide the handoff. Answer them from the pre-fix scope Phase 3 recorded, not from how the branch came to exist. **Fire the action itself** via the platform's skill-invocation primitive — never merely tell the user to type a command.
+**在不携带用户未提供的任何内容的情况下进行修复** - 不进行提交，不进行推送，不进行PR。不要问是否开PR；许可不是门。两个问题决定交接。从第三阶段记录的前缀范围回答它们，而不是从分支是如何存在的。 **通过平台的技能调用原语来触发操作本身** - 绝不只是告诉用户输入命令。
 
-**Settle learning capture before anything commits.** Apply the reference's learning-capture criteria. Only when they call for it, offer capture; if the user accepts, invoke the `ce-compound` skill and add only the artifacts it actually wrote or updated to the fix-owned files, so they ship in the same commit as the fix. If it writes nothing, no artifact joins the commit.
+**在提交任何内容之前解决学习捕获问题。**应用引用文档的学习捕获标准。只有当他们要求时，才提供捕获；如果用户接受，则调用 `ce-compound` 技能，并仅将其实际写入或更新的产物添加到修复拥有的文件中，以便它们与修复在同一提交中提供。如果它什么也不写，则没有产物加入提交。
 
-**1. What may go into the commit — the fix-owned files and nothing else.** This is a constraint on whichever skill commits in question 2, never an action of its own. It holds on every route, remote or not. Do not commit here.
+**1.提交中可能包含的内容 — 修复所拥有的文件，仅此而已。** 这是对问题 2 中提交的任何技能的限制，而不是其本身的操作。它适用于每条路线，无论是否远程。不要在这里承诺。
 
-- If no fix-owned file carried pre-existing edits, those files are the commit scope. Pass them to whichever skill commits.
-- If a fix-owned file already carried the user's edits, no commit can separate them: `ce-commit` groups at file level and never splits a file. Ask (per **Blocking questions**) *before* anything commits whether to commit that file including their edits, leave the fix uncommitted, or stop. Only the first answer continues. The other two end the handoff, so question 2 never runs and nothing commits; say what was left and why. Every option loses something the agent cannot choose on the user's behalf, which is why this question survives. Phase 3's confirmation covered *editing* the file, never committing the user's edits with the fix.
+- 如果没有修复拥有的文件包含预先存在的编辑，则这些文件是提交范围。将它们传递给任何需要技能的人。
+- 如果修复拥有的文件已经包含用户的编辑，则任何提交都无法将它们分开：`ce-commit` 在文件级别进行分组，并且永远不会拆分文件。在任何提交之前*询问（根据 **阻止问题**）是否提交该文件（包括其编辑）、保留未提交的修复或停止。只有第一个答案继续。另外两个结束了切换，因此问题 2 永远不会运行，也不会提交任何内容；说出还剩下什么以及为什么。每个选项都会失去代理无法代表用户选择的东西，这就是这个问题存在的原因。第 3 阶段的确认涵盖“编辑”文件，但从未通过修复提交用户的编辑。
 
-**2. Who commits, and whether it ships.** Exactly one of these runs.
+**2.谁提交，以及是否发布。** 正是这些运行之一。
 
-- **Ships** when all three hold: the pre-fix tree was clean, nothing on the branch is work the user has not already offered, and `origin` is **PR-capable**: somewhere `gh` can actually open a PR. Establish those however fits the repo in front of you. Two facts make it less obvious than it looks.
-  - `ce-commit-push-pr` pushes the **whole branch**, and its PR spans every commit on it, not just your fix. So the question is about the branch, not your diff. It also pushes *before* creating the PR, so a remote `gh` cannot open a PR against leaves the branch published with no PR.
-  - Already pushed is not already **offered**. Commits in an open PR are under review, so they are offered, and this run updates that PR rather than opening a second one. Commits pushed for backup or to trigger CI are not offered, and a first PR would publish them. Compare against the remote rather than a local ref: a local branch, including the default branch Phase 3 may have branched off, can itself be ahead of what was pushed.
+- **当这三个都成立时**交付**：前缀树是干净的，分支上没有用户尚未提供的工作，并且`origin`具有**PR功能**：`gh`实际上可以在某个地方打开PR。创建那些但适合您面前的存储库的内容。有两个事实使它不像看起来那么明显。
+  - `ce-commit-push-pr` 推送 **整个分支**，并且它的 PR 跨越其上的每个提交，而不仅仅是您的修复。所以问题是关于分支，而不是你的差异。它还会在创建 PR 之前推送，因此远程 `gh` 无法打开 PR 来对抗没有发布 PR 的分支。
+  - 已推送尚未**提供**。开放 PR 中的提交正在接受审查，因此会提供它们，并且此运行会更新PR，而不是打开第二个。不提供为备份或触发CI推送的提交，第一个PR将发布它们。与远程引用而不是本地引用进行比较：本地分支（包括默认分支第 3 阶段可能已分支）本身可以领先于推送的内容。
 
-  If you cannot establish all three, take the local route instead; that is the safe direction, and the preview is not a substitute for it. Otherwise preview what will be committed, on what branch, and whether a PR opens or updates, then **invoke the `ce-commit-push-pr` skill with `branding:on`.** It commits under question 1's scope, so do not commit first. The preview is a statement, not a question. Surface the resulting PR URL.
-- **Stays local** when any of those three fails. Invoke the `ce-commit` skill under question 1's scope and push nothing. Say in one line what stayed local and why, and that you will push and open the PR on request. Do not ask first; a local commit is reversible.
-- **Not a git repo**: nothing commits. Stop after the summary and the quality block.
+  如果您无法同时满足这三个条件，请改用本地路由；这是安全的方向，预览不能替代它。否则预览将要提交的内容、在哪个分支上以及 PR 是否打开或更新，然后 **使用 `branding:on` 调用 `ce-commit-push-pr` 技能。** 它在问题 1 的范围内提交，因此不要先提交。预览是一个陈述，而不是一个问题。显示生成的 PR URL。
+- 当这三个中的任何一个失败时，**保持本地**。在问题1的范围内调用`ce-commit`技能并且不推动任何东西。在一行中说出哪些内容留在本地以及为什么，然后您将根据要求按下并打开 PR。先不要问；本地提交是可逆的。
+- **不是 git 存储库**：没有任何提交。在摘要和质量块之后停止。
 
-**Contextual override** ("don't open PRs from skills", "commit only", "stop after the fix") — follow what the user said, and **Stop here** without committing when that is what they asked for. When an override stops the handoff, say which instruction stopped it and that you will commit, push, or open the PR on request. A vague tonal cue is not an override.
+**上下文覆盖**（“不要从技能中打开 PRs”、“仅提交”、“修复后停止”）- 按照用户所说的进行操作，并且当他们要求时**在此处停止**而不提交。当覆盖停止切换时，请说明哪条指令停止了它，并且您将根据请求提交、推送或打开 PR。模糊的音调提示不是覆盖。

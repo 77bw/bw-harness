@@ -1,41 +1,41 @@
-# Selecting the review team
+# 选择评审小组
 
-The team is `coherence-reviewer` and `feasibility-reviewer` always, plus each conditional persona whose signals the document shows.
+团队始终是`coherence-reviewer`和`feasibility-reviewer`，加上文档显示其信号的每个条件角色。
 
-**Later rounds in the same session.** Rerun only the reviewers whose lens covers something that changed since their last return, whether the change came from applied fixes or from the user's own edits. Coherence reruns whenever anything changed, because edits are where new contradictions appear. Every other reviewer's previous return carries forward: its findings were already applied, deferred, or rejected, and its scope has not moved. Rerun the whole team when the user asks for a fresh full review, or when the changes reach most of the document. Name the carried-over reviewers in the announcement. The cross-model pass runs only when a lens that triggers it reruns.
+**同一会话中的后续轮次。** 仅重新运行其镜头涵盖自上次返回以来发生更改的内容的审查者，无论更改来自应用的修复还是来自用户自己的编辑。每当发生任何变化时，一致性都会重新运行，因为编辑是出现新矛盾的地方。其他每个审稿人之前的回报都会延续：其调查结果已被应用、推迟或拒绝，并且其范围没有改变。当用户要求重新进行全面审查时，或者当更改到达文档的大部分内容时，请重新运行整个团队。在公告中列出保留的审稿人的姓名。跨模型传递仅在触发它的镜头重新运行时运行。
 
-Activate a conditional persona when the document shows its signals. For a plan, `references/depth.md` decides from this selection whether the review runs lite or full, and owns the lite pass and its later rounds.
+当文档显示其信号时激活条件角色。对于计划，`references/depth.md` 根据此选择决定审核是运行精简版还是完整版，并拥有精简版通行证及其后续轮次。
 
-**product-lens** — the document stakes a product position — what to build, why, or what comes first — that a knowledgeable stakeholder could reasonably challenge and that no upstream Product Contract settled, or the work carries strategic weight beyond the immediate problem. Users may be end users, developers, operators, maintainers, or any other audience; the criteria are domain-agnostic. Either leg qualifies:
+**产品镜头** — 该文档提出了一个产品定位 — 构建什么、为什么构建或先做什么 — 知识渊博的利益相关者可以合理地质疑该定位，并且没有解决上游产品合同，或者该工作具有超出当前问题的战略重要性。用户可能是最终用户、开发者、运营者、维护者或任何其他受众；这些标准与领域无关。任一赛段均有资格：
 
-- *Unsettled product position* — a problem framing, a goal predicting a specific user outcome, or a prioritization that ranks what gets built against what is deferred, which the document's origin did not already settle. A choice among mechanisms for an agreed outcome is an implementation decision, not a product position; describing a task or restating known requirements stakes nothing.
-- *Strategic weight* — the work could affect trajectory, perception, or positioning even with a sound premise: it shapes what the system becomes known for; it is a complexity or simplicity bet affecting adoption, onboarding, or cognitive load; it opens or closes future directions (path dependencies, architectural commitments); it carries opportunity cost — building this means not building something else.
+- *未确定的产品定位*——问题框架、预测特定用户结果的目标，或者根据推迟的内容对已构建的内容进行排名的优先级，而文档的起源尚未解决这些问题。为达成一致结果而选择的机制是实施决策，而不是产品定位；描述任务或重述已知需求没有任何意义。
+- *战略权重*——即使有合理的前提，这项工作也可能影响轨迹、感知或定位：它塑造了系统的知名度；这是影响采用、入职或认知负荷的复杂性或简单性赌注；它打开或关闭未来的方向（路径依赖、架构承诺）；它带有机会成本——构建这个意味着不构建其他东西。
 
-**design-lens** — UI/UX references, frontend components, or visual design language; user flows, wireframes, screen/page/view mentions; interaction descriptions (forms, buttons, navigation, modals); responsive behavior or accessibility.
+**设计镜头** — UI/UX 参考资料、前端组件或视觉设计语言；用户流程、线框图、screen/page/view提及；交互描述（表单、按钮、导航、模式）；响应行为或可访问性。
 
-**security-lens** — auth/authorization, login flows, session management; API endpoints exposed to external clients; handling of **sensitive** data — PII, payments, tokens, credentials, secrets, encryption; third-party integrations with trust-boundary implications. Ordinary data handling is not a trigger, and neither is storage-layer churn on its own: an internal schema migration, field rename, or data-store move activates this lens only when the data is sensitive or the change alters who can read or write it. Deployment-ordering risk is a feasibility concern, not a security signal.
+**安全镜头** — auth/authorization，登录流程，会话管理； API 暴露给外部客户端的端点；处理**敏感**数据——PII、支付、令牌、凭证、秘密、加密；具有信任边界影响的第三方集成。普通数据处理不是触发器，存储层改动本身也不是触发器：仅当数据敏感或更改改变了谁可以读取或写入数据时，内部模式迁移、字段重命名或数据存储移动才会激活此透镜。部署排序风险是一个可行性问题，而不是安全信号。
 
-**scope-guardian** — every plan document, because its mechanism-sizing check applies to all plans. For other documents: multiple priority tiers (P0/P1/P2, must/should/nice-to-have); >8 distinct requirements or implementation units; stretch goals, nice-to-haves, or "future work" sections; scope boundary language misaligned with stated goals; goals that don't clearly connect to requirements.
+**范围守护者** - 每个计划文档，因为其机制大小检查适用于所有计划。对于其他文档：多个优先级（P0/P1/P2、must/should/nice-to-have）； >8个不同的要求或实施单位；延伸目标、必备品或“未来工作”部分；范围边界语言与既定目标不一致；与需求没有明确联系的目标。
 
-**adversarial** — a high-value challenge surface, not merely structural complexity. Activate when ANY holds:
+**对抗性**——高价值的挑战面，而不仅仅是结构的复杂性。当 ANY 持有时激活：
 
-- A **requirements document** with 2+ challengeable claims (problem framing, solution selection, prioritization, predicted outcomes) — premise scrutiny is core to the brainstorm phase
-- A **high-stakes domain** — auth, payments, billing, data migrations, privacy/compliance, external integrations, cryptography — regardless of doc type or size
-- A **change to a public contract** that an outside consumer already relies on: an API, CLI output or flag, file format, or published schema that the plan renames, removes, or changes the meaning of, even when the requester asked for it. A purely additive change that leaves existing consumers working is not one
-- A **new abstraction, framework, or significant architectural pattern**, regardless of doc type
-- A **plan that explicitly extends scope** beyond its origin requirements doc (new actors, new flows, deferred-then-restored features)
-- An **explicit alternatives section** or unresolved tradeoffs — adversarial helps stress-test the chosen direction
+- **需求文件**包含 2 个以上有争议的主张（问题框架、解决方案选择、优先顺序、预测结果）——前提审查是头脑风暴阶段的核心
+- **高风险领域** — 身份验证、支付、计费、数据迁移、privacy/compliance、外部集成、加密 — 无论文档类型或大小如何
+- **对外部消费者已经依赖的公共合同的更改**：计划重命名、删除或更改其含义的API、CLI输出或标志、文件格式或已发布模式，即使请求者提出要求也是如此。让现有消费者继续工作的纯粹附加变化并不是一个
+- **新的抽象、框架或重要的架构模式**，无论文档类型如何
+- 一个明确地将范围扩展到其原始需求文档之外的计划（新参与者、新流程、延迟然后恢复的功能）
+- **明确的替代方案部分**或未解决的权衡 - 对抗性有助于对所选方向进行压力测试
 
-Do NOT activate adversarial on a routine plan that stays in scope and introduces no high-stakes domain or new abstraction. A well-structured plan with stated rationale is the plan doing its job, not adversarial signal — activating on that alone re-litigates settled questions.
+不要在范围内且不引入高风险领域或新抽象的例行计划上激活对抗性。一个结构良好且有明确理由的计划是该计划履行其职责，而不是敌对信号——仅在此基础上激活就可以重新解决已解决的问题。
 
-## Announce the review team
+## 公布评审组
 
-Before dispatch, tell the user in one or two sentences which reviewers will run, giving each conditional one a reason of a few words. When the cross-model pass runs, its disclosure from `references/cross-model-review.md` goes in the same message. For example:
+在发送之前，用一两句话告诉用户哪些审查者将运行，并为每个条件审查者提供几个单词的原因。当跨模型传递运行时，它从 `references/cross-model-review.md` 的披露会出现在同一条消息中。例如：
 
 ```
-Reviewing with coherence, feasibility, scope-guardian (12 requirements across 3 priorities), and security-lens (new public API with auth).
+以连贯性、可行性、范围守护者（跨 3 个优先级的 12 项要求）和安全镜头（带有身份验证的新公共API）进行审查。
 ```
 
-While reviewers run, do not post an update as each one returns or narrate which reference you are reading next. Speak again when the results are ready, or earlier only when a reviewer fails or a wait runs unusually long.
+当审查者运行时，不要在每个审查者返回时发布更新或叙述您接下来要阅读的引用文档。当结果准备好时再次发言，或者仅在审查者失败或等待时间异常长时才提前发言。
 
-The team is `coherence-reviewer` and `feasibility-reviewer` always, plus each activated conditional persona (`product-lens-reviewer`, `design-lens-reviewer`, `security-lens-reviewer`, `scope-guardian-reviewer`, `adversarial-document-reviewer`).
+团队始终为`coherence-reviewer`和`feasibility-reviewer`，加上每个激活的条件角色（`product-lens-reviewer`、`design-lens-reviewer`、`security-lens-reviewer`、`scope-guardian-reviewer`、`adversarial-document-reviewer`）。

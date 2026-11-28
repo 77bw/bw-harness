@@ -1,39 +1,39 @@
-# Choosing the review depth
+# 选择审核深度
 
-A wrong plan can ship silently, so depth follows what a wrong plan would cost, not how long or detailed it is. Depth is `lite` or `full`. Decide it after classification and before the team announcement.
+错误的计划可能会悄无声息地发布，因此深度取决于错误计划的成本，而不是计划的长度或详细程度。深度为 `lite` 或 `full`。在分类之后、团队公布之前决定。
 
-## When a review runs lite
+## 当审核运行精简版时
 
-Only a plan document (`plan` or `unified-plan`) can run lite. Every other document type runs `full` with today's team selection.
+只有计划文档（`plan` 或 `unified-plan`）可以运行精简版。所有其他文档类型在今天的团队选择中都运行 `full`。
 
-A plan runs `full` when any of these holds:
+当满足以下任一条件时，计划将运行 `full`：
 
-- The caller passed the `depth:full` token. Callers can force full; no caller can request lite.
-- A saved review state for this document records `full`. A later round or resume keeps or raises the recorded depth, never lowers it.
-- A conditional persona other than `scope-guardian-reviewer` activates under `references/persona-selection.md`.
+- 调用者传递了 `depth:full` 令牌。来电者可强制满；呼叫者无法请求精简版。
+- 该文档的已保存审阅状态记录`full`。后面的回合或恢复会保留或提高记录的深度，而不会降低它。
+- `scope-guardian-reviewer` 以外的条件角色在 `references/persona-selection.md` 下激活。
 
-Otherwise the plan runs `lite`.
+否则计划运行`lite`。
 
-Judge activation from the plan text and from what the files and code paths it names actually do. Open those paths and read enough to see what they touch; do not scan the rest of the repository. A plan that never says "payment" or "session" still crosses that boundary when the handler it names marks a booking paid or issues a session token. The security-lens bound in persona-selection applies to this read unchanged: reading or displaying ordinary, non-sensitive user data, storage churn, or touching a non-sensitive endpoint does not activate it.
+根据计划文本以及它所命名的文件和代码路径实际执行的操作来判断激活。打开这些路径并阅读足够的内容以了解它们所涉及的内容；不要扫描存储库的其余部分。当它指定的处理程序将预订标记为已付款或发出会话令牌时，从未说过“付款”或“会话”的计划仍然会跨越该边界。角色选择中绑定的安全透镜不变地应用于此读取：读取或显示普通的非敏感用户数据、存储搅动或触摸非敏感端点不会激活它。
 
-## The lite review
+## 精简版评论
 
-Lite is one independent reviewer, not a smaller version of the team. Dispatch a single generic subagent at the lite reviewer's tier, as `references/dispatch.md` describes for any reviewer, with three persona files instead of one: `coherence-reviewer`, `feasibility-reviewer`, and `scope-guardian-reviewer`. It reads the template and schema as usual, applies all three lenses, and returns one schema-shaped result with `reviewer: lite`. Tell it one more thing: if the plan, or a file it names, shows a consequence the three lenses are not meant to judge, it adds one `residual_risks` entry beginning `ESCALATE:` that names the consequence and where it shows. Those consequences are money moved, access granted, or sensitive data exposed wrongly, or a broken promise to an outside consumer of an API, CLI, file format, or other public contract.
+Lite 是一位独立审查者，而不是团队的较小版本。在精简审查者层调度单个通用子代理，如 `references/dispatch.md` 对任何审查者所描述的那样，使用三个角色文件而不是一个：`coherence-reviewer`、`feasibility-reviewer` 和 `scope-guardian-reviewer`。它像往常一样读取模板和模式，应用所有三个镜头，并返回一个具有 `reviewer: lite` 的模式形状结果。再告诉它一件事：如果计划或其命名的文件显示了三个镜头不打算判断的结果，它会在 `ESCALATE:` 开始添加一个 `residual_risks` 条目，用于命名结果及其显示位置。这些后果包括资金转移、授予访问权限或敏感数据被错误暴露，或者违反对外部消费者对 API、CLI、文件格式或其他公共合同的承诺。
 
-Lite never runs the cross-model pass.
+Lite 从不运行跨模型传递。
 
-If the host cannot dispatch a subagent, run the lite review inline. The author of the plan is then reviewing its own work, so Coverage must say the lite review was not independent.
+如果主机无法调度子代理，请内联运行精简版审核。该计划的作者随后正在审查自己的工作，因此 Coverage 必须说精简版审查不是独立的。
 
-## Escalation
+## 升级
 
-When the lite result carries an `ESCALATE:` entry, or synthesis finds such a consequence in any lite finding, switch to `full` in the same invocation before any synthesis output. Reselect the team under persona-selection with the escalated consequence as evidence, announce the full team as usual, and dispatch it. The lite result's findings join the full team's returns in synthesis as one more reviewer. The `ESCALATE:` entry has done its job once the team is dispatched, so it does not appear among the result's residual risks. Severity alone never escalates: a routine plan can carry a P1 coherence error and still be lite.
+当精简结果带有 `ESCALATE:` 条目，或者综合在任何精简结果中找到这样的结果时，在任何综合输出之前在同一调用中切换到`full`。以升级后的结果为证据，重新选择人物选择下的队伍，照常公布完整队伍，并派遣。精简版结果的发现将作为另一位审查者加入到整个团队的综合回报中。一旦团队被派遣，`ESCALATE:`条目就完成了它的工作，因此它不会出现在结果的剩余风险中。严重性永远不会升级：例行计划可能会出现 P1 连贯性错误，但仍然很精简。
 
-## Recording the depth
+## 记录深度
 
-Record the depth that ran in the result's Coverage, in both modes. Lite always produces a Coverage line, even when everything else ran as planned. Write it as a sentence that does not begin with the word "depth", for example `Coverage: lite review (one combined coherence, feasibility, and scope reviewer).` After an escalation, say the review started lite and escalated to full, and name the consequence that caused it. Full needs no Coverage mention unless something else limited it.
+记录两种模式下结果覆盖范围内运行的深度。即使其他一切都按计划进行，Lite 始终会生成 Coverage 线。将其写成一个不以“深度”一词开头的句子，例如 `Coverage: lite review (one combined coherence, feasibility, and scope reviewer).` 升级后，说评论开始为精简版并升级为完整版，并指出导致该结果的后果。除非有其他限制，否则完全不需要提及覆盖范围。
 
-Save the depth with the saved review state in the run directory (`$SCRATCH_ROOT/ce-doc-review/<run-id>`), together with the lite reviewer's raw return, so a resume or later round can read both.
+将深度与已保存的审阅状态一起保存在运行目录 (`$SCRATCH_ROOT/ce-doc-review/<run-id>`) 中，以及精简版审查者的原始返回，以便简历或后续轮次可以读取两者。
 
-## Later rounds and resume
+## 稍后的回合和恢复
 
-A later round on a lite review reruns the lite pass on the changed document instead of the per-reviewer carry-forward that persona-selection describes for the full team. Before it does, recheck the full conditions above against the document as it now stands; an edit that crosses a boundary raises the depth to `full`. A valid resume of a completed lite review reuses its result like any other completed review, unless the caller passed `depth:full`: that runs the full team now, and the lite result joins synthesis as it does after an escalation.
+稍后一轮的精简审核将对更改的文档重新运行精简版，而不是角色选择为整个团队描述的每个审核者结转。在此之前，请根据现有文件重新检查上述完整条件；跨越边界的编辑会将深度提高到 `full`。已完成的精简版审核的有效简历会像任何其他已完成的审核一样重用其结果，除非调用者通过了`depth:full`：现在运行整个团队，并且精简版结果会像升级后一样加入综合。

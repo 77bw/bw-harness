@@ -1,50 +1,50 @@
-# Intake
+# 摄入量
 
-Classify the request into exactly one input shape — concept, diff, idea, or work-recap window — before any grounding runs, and resolve its audience. Parse by reasoning over the user's prompt; do not depend on argument-token substitution mechanics, which vary by harness.
+在任何基础运行之前，将请求准确地分类为一种输入形式——概念、差异、想法或工作回顾窗口，并解决其受众问题。根据用户的提示进行推理解析；不依赖于参数标记替换机制，该机制因工具而异。
 
-## Flag tokens
+## 标记标记
 
-Tokens exist so automation and chained calls can force a decision. Plain language is the ordinary way a person invokes this skill and is not a lesser path — most requests carry no token at all and must classify just as reliably.
+令牌的存在使得自动化和链式调用可以强制做出决定。简单语言是一个人调用此技能的普通方式，并不是一条较小的路径——大多数请求根本不携带任何标记，并且必须同样可靠地进行分类。
 
-| Token | Example | Effect |
+| 代币 | 例子 | 影响 |
 |-------|---------|--------|
-| `diff:<ref-or-range>` | `diff:abc1234`, `diff:main..HEAD`, `diff:PR#42` | Forces diff mode on that change |
-| `since:<window-or-ref>` | `since:monday`, `since:7d`, `since:v2.1.0` | Forces recap mode over that window |
-| `output:<md\|html>` | `output:md` | Overrides the artifact format (default `html`) |
-| `audience:<who>` | `audience:team`, `audience:"the design review"` | Renders for that reader instead of the user personally |
+| `diff:<ref-or-range>` | `diff:abc1234`, `diff:main..HEAD`, `diff:PR#42` | 强制执行该更改的 diff 模式 |
+| `since:<window-or-ref>` | `since:monday`, `since:7d`, `since:v2.1.0` | 在该窗口上强制重述模式 |
+| `output:<md\|html>` | `output:md` | 覆盖产物格式（默认`html`） |
+| `audience:<who>` | `audience:team`, `audience:"the design review"` | 为该读者而不是用户个人呈现 |
 
-**A `word:value` pair is a flag only when it reads as one.** It leads the request or stands alone, carries no space after the colon, and — the decisive test — **the request still makes sense with it removed. If stripping it would garble the sentence, it was never a flag.** Leave it in the request text and classify by meaning. Ordinary technical prose is full of colons, and a flag parser that eats them silently changes what the user asked for:
+**仅当它读作一个时，`word:value`对才是一个标志。**它引导请求或独立，在冒号后不带空格，并且 - 决定性的测试 - **请求在删除后仍然有意义。如果剥离它会使句子乱码，那么它就不是一个标志。 ** 将其保留在请求文本中并按含义进行分类。普通的技术散文充满了冒号，而一个标志解析器默默地吃掉它们，改变了用户的要求：
 
-- "walk me through the diff: why did we split the parser" — stripping `diff:why` leaves "walk me through the did we split the parser". Garbled, so this is prose. Classify by meaning (a diff request about the parser split), and never let the bogus ref `why` outrank that.
-- "explain how we pick the audience: engineers vs designers" — a concept request about audience selection, rendered personally. Not an `audience:` flag naming "engineers".
-- "teach me how our renderer decides output: html or terminal escape codes" — prose. Note this one fails quietly if mis-parsed, because `html` is already the default format, so nothing visible contradicts it.
-- `diff:main..HEAD`, or `audience:team` leading a request — genuine flags: nothing is left to garble.
+- “带我了解差异：为什么我们拆分解析器” - 剥离 `diff:why` 留下“带我了解我们是否拆分了解析器”。乱码，所以这是散文。按含义分类（关于解析器拆分的差异请求），并且永远不要让虚假引用 `why` 超越它。
+- “解释一下我们如何选择受众：工程师与设计师”——关于受众选择的概念请求，亲自呈现。不是命名“工程师”的`audience:`标志。
+- “教我渲染器如何决定输出：html 或终端转义码” — 散文。请注意，如果解析错误，此格式会悄悄失败，因为 `html` 已经是默认格式，因此没有任何可见的内容与它相矛盾。
+- `diff:main..HEAD` 或 `audience:team` 引导请求 — 真正的标志：没有留下任何乱码。
 
-- A token in flag position beats inference. A colon inside prose does not.
-- `diff:` and `since:` together conflict — resolve the intended subject under the skill body's interaction rule.
-- An unrecognized `<word>:<word>` token (including conventional-commit prefixes like `feat:` appearing inside a topic) is not a flag — it passes through verbatim as request text. The same holds for a *recognized* token that fails the reads-as-a-flag test above.
-- A token with an empty or missing value is not a flag — treat it as prose.
-- `output:` with an unknown value: drop the token, note `Ignored unknown output: value '<value>' — using html`, and continue.
+- 处于标志位置的标记胜过推理。散文中的冒号则不然。
+- `diff:`和`since:`一起冲突——在技能体交互规则下解决预期主题。
+- 无法识别的 `<word>:<word>` 标记（包括出现在主题内的常规提交前缀，如 `feat:`）不是标志 - 它作为请求文本逐字传递。这同样适用于未通过上述读取作为标志测试的“已识别”令牌。
+- 具有空值或缺失值的标记不是标志——将其视为散文。
+- `output:` 具有未知值：删除令牌，记下 `Ignored unknown output: value '<value>' — using html`，然后继续。
 
-## Inference (no forcing token)
+## 推理（无强制令牌）
 
-Classify the remaining text by shape:
+按形状对剩余文本进行分类：
 
-- **Diff** — the request names a resolvable change: a sha, branch, PR, "the last commit", "what you just did", "this change".
-- **Recap** — the request asks what happened over time ("what did I do this week", "catch me up", "prep me for standup"), **or names a time window and little else** ("since last Monday", "last week", "the past 3 days", "this sprint"). A bare window is a recap request, not a topic to be explained — do not read "since last Monday" as a concept called "since last Monday".
-- **Idea** — the request presents a proposal or notion of the user's to be understood: "explain my idea of X", "what would Y imply". The idea is a fixed given (see SKILL.md Boundaries).
-- **Concept** — everything else: a topic, pattern, subsystem, or external subject to learn.
+- **差异** — 请求命名可解析的更改：sha、分支、PR、“最后一次提交”、“您刚刚做了什么”、“此更改”。
+- **回顾** - 请求询问一段时间内发生的事情（“这周我做了什么”，“让我做点什么”，“让我为站立做准备”），**或指定一个时间窗口和其他什么**（“自上周一以来”，“上周”，“过去 3 天”，“本次冲刺”）。裸窗口是一个重述请求，而不是一个需要解释的主题——不要将“自上周一以来”理解为一个名为“自上周一以来”的概念。
+- **想法** — 请求提出了用户需要理解的建议或概念：“解释一下我对 X 的想法”、“Y 意味着什么”。这个想法是一个固定的给定（参见SKILL.md边界）。
+- **概念** — 其他一切：主题、模式、子系统或需要学习的外部主题。
 
-**Resolving the window (recap mode).** A window arrives either as a token value (`since:monday`) or as prose ("since last Monday", "the past 3 days") — resolve both the same way, to a concrete date range, and name that resolved range in the artifact's `Subject`. `since last Monday` and `since:monday` mean the same thing; a colon must not change the answer. Fall back to the last 7 days only when the request names no window at all, and never silently substitute that default for a window the user did name — if a named window can't be resolved confidently, say what you used.
+**解析窗口（回顾模式）。** 窗口以标记值 (`since:monday`) 或散文（“自上周一以来”、“过去 3 天”）的形式到达 - 以相同的方式解析为具体的日期范围，并在产物的 `Subject` 中命名解析范围。 `since last Monday` 和 `since:monday` 意思相同；冒号不能改变答案。仅当请求根本没有命名任何窗口时，才回退到过去 7 天，并且永远不要默默地用用户命名的窗口替换默认值 - 如果无法自信地解析命名窗口，请说出您使用的窗口。
 
-**Tiebreak — concept vs diff:** when the request is plausibly both (a repo topic that also names an identifiable recent change, e.g. "explain the retry logic we just added"), a concretely resolvable change wins: diff mode, with the concept as framing context. A topic with no resolvable change is a concept.
+**决胜局 — 概念与 diff：** 当请求似乎两者兼而有之（一个存储库主题，也命名了可识别的最近更改，例如“解释我们刚刚添加的重试逻辑”）时，具体可解决的更改获胜：diff 模式，概念作为框架上下文。没有可解决的变化的主题是一个概念。
 
-**Repo footprint check (concept mode):** a concept grounds in the repo only when it actually touches it. An external subject (a language feature, an interview topic, a paper) gets no repo grounding — do not force it.
+**回购足迹检查（概念模式）：**只有当概念真正触及回购时，它才在回购中落地。外部主题（语言特征、采访主题、论文）没有回购基础——不要强迫它。
 
-## Reader and delivery
+## 读者及交付
 
-Resolve who will use the explanation and for what purpose from the request and context. The user is the default reader. Someone preparing to speak from the explanation is still its reader. When someone requests content for others, those people are the intended readers. Adapt terminology, orientation, depth, and presentation to that use without changing the evidence or attributing others' work to the user.
+根据请求和上下文确定谁将使用该解释以及出于什么目的。用户是默认读者。准备从解释中发言的人仍然是它的读者。当有人为他人请求内容时，这些人就是目标读者。调整术语、方向、深度和表示以适应该用途，而不改变证据或将其他人的工作归因于用户。
 
-Return an answer or text for another document when that satisfies the request. A request to learn deeply, keep an explainer, or produce a standalone document warrants an artifact; use HTML by default for that artifact and markdown when requested. A named `diff:` or `since:` selects the subject, not whether a document must be created. An explicit `output:` selects the artifact format. Honor requests for a shorter explanation or a shareable excerpt without requiring a full teaching document.
+当满足请求时，返回另一个文档的答案或文本。深入学习、保留解释器或生成独立文档的请求需要一个产物；默认情况下，该产物使用 HTML，并在请求时使用 Markdown。命名的`diff:`或`since:`选择主题，而不是是否必须创建文档。显式的 `output:` 选择产物格式。荣誉要求更简短的解释或可共享的摘录，而不需要完整的教学文件。
 
-Select delivery before creating a run directory or loading rendering instructions. No extra mode or confirmation is needed when the intended use is clear. Missing subject or material ambiguity follows the skill body's interaction rule.
+在创建运行目录或加载渲染指令之前选择交付。当预期用途明确时，不需要额外的模式或确认。缺少主题或材料模糊性遵循技能体的交互规则。

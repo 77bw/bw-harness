@@ -1,230 +1,93 @@
-# HTML Rendering
+# HTML 渲染
 
-This reference covers how to render an artifact as HTML, whichever skill
-produces it. The section contract (`plan-sections.md`,
-`brainstorm-sections.md`, `ideation-sections.md`) says what the artifact
-contains; this file says how HTML presents it.
+本参考介绍了如何将产物呈现为 HTML，无论使用哪种技能来生成它。部分契约 (`plan-sections.md`, `brainstorm-sections.md`, `ideation-sections.md`) 说明了产物包含的内容；该文件说明了 HTML 如何呈现它。
 
-The HTML file is the only artifact the run produces. Output is exclusive:
-markdown or HTML, never both.
-Downstream consumers that read HTML today (`ce-doc-review`, `ce-work`, a
-skill resuming its own earlier artifact) read and edit the file as source
-text, the way they read markdown. They do not
-render it or parse the DOM. `ce-work` builds its section map from the `<h1>`
-to `<h3>` headings and their anchor ids. `ce-doc-review` and a resume run edit
-the file in place and keep its structure. Every rule below that concerns
-structure exists so those consumers can find and change one item from source
-alone.
+HTML 文件是运行生成的唯一产物。输出是排他性的：markdown 或 HTML，不能两者兼而有之。如今阅读 HTML 的下游消费者（`ce-doc-review`、`ce-work`，一种恢复其早期产物的技能）将文件作为源文本进行阅读和编辑，就像他们阅读 Markdown 的方式一样。他们不渲染它或解析 DOM。 `ce-work` 从 `<h1>` 到 `<h3>` 标题及其锚点 id 构建其剖面图。 `ce-doc-review` 和恢复运行编辑文件并保持其结构。下面涉及结构的每条规则都存在，以便这些消费者可以仅从源头查找和更改一件商品。
 
-## Hard invariants
+## 硬不变量
 
-- **Single self-contained HTML5 file.** No companion `.css`, `.js`, or
-  `.svg` files. CSS goes in `<style>`, SVG is inline, and images are inline
-  SVG or base64 data URIs. The one exception is a `<link rel="stylesheet">`
-  to a CDN webfont CSS endpoint, paired with a fallback font stack so the
-  doc still reads offline.
-- **Metadata is visible text, with one copy of each value.** Every field
-  the section contract defines renders as text in the page.
-  There is no hidden machine-readable copy: no
-  `<script type="application/json">` frontmatter block, no `data-*`
-  attribute mirror, and no `<meta name="created">` or `<meta name="origin">`
-  tag in `<head>`. Two copies drift. A `datetime` attribute on a `<time>`
-  element that shows the same date is a parser hint, not a second copy.
-- **Readers meet the title, not the tool fields.** The header shows the
-  `<h1>` title, the date, and any field written for a person, such as an
-  ideation focus. Every other field exists for tools, for example
-  `artifact_contract`, `product_contract_source`, `execution`, `origin`, or
-  `mode`. Put those in a `<details>` element right after the header, closed
-  by default, with the `<summary>` text "Document metadata". Each field
-  there shows its exact key name next to its value, for example
-  `<dt>artifact_contract</dt><dd>ce-unified-plan/v1</dd>`, so a text search
-  for the key finds it. Older documents show these fields in the header
-  instead. They stay valid, because consumers find a field by its key name
-  rather than its position.
-- **Stable IDs as anchor IDs AND visible text.** Every ID-bearing item
-  (R-, U-, A-, F-, AE-, KTD-, and idea IDs) has `id="r1"`-style anchors on its element
-  and shows the ID ("R1.") as visible text in its heading or cell.
-- **Section headings use the section-contract names.** If the contract says
-  "Implementation Units", the heading says "Implementation Units", because
-  downstream agents grep for those names. An editorial title can appear as an
-  eyebrow label or sub-heading, never in place of the contract name.
-- **Unified plan navigation.** A unified plan has a visible navigation
-  region near the top linking the stable section anchors below.
-  Requirements-only artifacts omit links to absent implementation sections.
-- **Source and composition footer.** A visible footer at the end names the
-  composition timestamp and the source: the upstream document when there is
-  one, otherwise the user's request and the composing skill. Example shape:
-  `<footer class="composition-signal">Composed 2026-05-17T14:23Z by ce-plan from <code>docs/brainstorms/...-requirements.md</code></footer>`.
-  Output is exclusive, so this footer is how a reader judges staleness.
-- **ASCII identifiers.** Class names, element IDs, and attribute names are
-  ASCII.
-- **No JS framework runtimes.** React, Vue, Svelte, or any bundled runtime is
-  out. A small inline `<script>` for active-section tracking or anchor
-  permalinks is acceptable.
+- **单个独立的 HTML5 文件。** 无配套 `.css`、`.js` 或 `.svg` 文件。 CSS 位于 `<style>` 中，SVG 是内联的，图像是内联 SVG 或 base64 数据 URI。唯一的例外是 CDN webfont CSS 端点的 `<link rel="stylesheet">`，它与后备字体堆栈配对，因此文档仍然可以离线阅读。
+- **元数据是可见文本，每个值都有一个副本。** 部分契约定义的每个字段都会在页面中呈现为文本。没有隐藏的机器可读副本：没有 `<script type="application/json">` frontmatter 块，没有 `data-*` 属性镜像，`<head>` 中没有 `<meta name="created">` 或 `<meta name="origin">` 标签。两个副本漂移。显示相同日期的 `<time>` 元素上的 `datetime` 属性是解析器提示，而不是第二个副本。
+- **读者看到的是标题，而不是工具字段。** 标题显示 `<h1>` 标题、日期以及为某个人编写的任何字段，例如构思焦点。工具还存在其他所有字段，例如 `artifact_contract`、`product_contract_source`、`execution`、`origin` 或 `mode`。将它们放在标题后面的 `<details>` 元素中，默认情况下关闭，并带有 `<summary>` 文本“文档元数据”。那里的每个字段都会在其值旁边显示其确切的键名称，例如 `<dt>artifact_contract</dt><dd>ce-unified-plan/v1</dd>`，因此对键的文本搜索可以找到它。较旧的文档在标题中显示这些字段。它们仍然有效，因为消费者通过键名而不是位置来查找字段。
+- **稳定的 ID 作为锚点 ID 和可见文本。** 每个包含 ID 的项目（R-、U-、A-、F-、AE-、KTD- 和创意 ID）在其元素上都有 `id="r1"` 样式锚点，并在其标题或单元格中将 ID (“R1.”) 显示为可见文本。
+- **章节标题使用章节合同名称。**如果合同规定
+  “实施单元”，标题说“实施单元”，因为下游代理 grep 查找这些名称。编辑标题可以显示为眉毛标签或副标题，但不能代替合同名称。
+- **统一计划导航。** 统一计划在顶部附近有一个可见的导航区域，链接下面的稳定部分锚点。仅限需求的产物省略了指向缺少的实现部分的链接。
+- **来源和合成页脚。** 末尾可见的页脚命名了合成时间戳和来源：有上游文档时，否则是用户的请求和合成技巧。示例形状：`<footer class="composition-signal">Composed 2026-05-17T14:23Z by ce-plan from <code>docs/brainstorms/...-requirements.md</code></footer>`。输出是排他性的，因此该页脚是读者判断是否过时的方式。
+- **ASCII 标识符。** 类名称、元素 ID 和属性名称都是 ASCII。
+- **没有 JS 框架运行时。** React、Vue、Svelte 或任何捆绑的运行时均已退出。用于活动部分跟踪或锚定永久链接的小内联 `<script>` 是可以接受的。
 
-### Stable section anchors for unified plans
+### 统一规划的稳定截面锚杆
 
-| Logical section | Required id |
+| 逻辑部分 | 必填 ID |
 |---|---|
-| Goal Capsule | `goal-capsule` |
-| Product Contract | `product-contract` |
-| Product Requirements | `product-requirements` |
-| Planning Contract | `planning-contract` |
-| Implementation Units | `implementation-units` |
-| Verification Contract | `verification-contract` |
-| Definition of Done | `definition-of-done` |
-| Appendix | `appendix` |
+| 目标胶囊 | `goal-capsule` |
+| 产品合同 | `product-contract` |
+| 产品要求 | `product-requirements` |
+| 规划合同 | `planning-contract` |
+| 实施单位 | `implementation-units` |
+| 验证合同 | `verification-contract` |
+| 完成的定义 | `definition-of-done` |
+| 附录 | `appendix` |
 
-Keep each visible heading next to its `id`; a nav link alone does not carry
-the section name. An optional section with a contract-defined semantic role
-carries that role on its `<section>`, for example
-`data-ce-section="work-relationships"`. The role is
-stable even when the visible heading changes, and it supplements the visible
-heading rather than replacing it. This role attribute is a contract marker,
-not a hidden copy of a visible value.
+将每个可见标题保留在其 `id` 旁边；单独的导航链接不带有部分名称。具有合同定义的语义角色的可选部分在其 `<section>` 上承载该角色，例如 `data-ce-section="work-relationships"`。即使可见标题发生变化，该角色也是稳定的，它补充而不是取代可见标题。此角色属性是合同标记，而不是可见值的隐藏副本。
 
-## Agent-consumability rules
+## 代理消耗规则
 
-The semantic structure is the extraction contract. It is what lets a
-consumer reason over one requirement, unit, or idea, including its title and
-every labeled field, without a hidden metadata copy to fall back on. A page
-can look identical in a browser and still break this, so compose for the
-source:
+语义结构就是抽取契约。它让消费者能够推理一个需求、单元或想法，包括其标题和每个标记字段，而无需依赖隐藏的元数据副本。页面在浏览器中看起来可能相同，但仍然会破坏这一点，因此请为
+来源：
 
-- Use semantic elements: `<section>` per top-level section, `<article>` per
-  repeating item, `<dl>` for metadata pairs, `<table>` for tabular content,
-  `<details>`/`<summary>` for collapsibles. Keep one item's content together
-  inside its element.
-- Field labels are visible text (`<dt>Goal</dt><dd>...</dd>`), never only an
-  attribute such as `data-field="goal"`.
-- Meaning lives in HTML text. CSS `content:`, background images, or
-  render-only tricks carry no meaning.
-- A field that tells the implementer to do something (an `Execution note`
-  such as "start with a failing integration test") renders as a visible
-  callout, not as a quiet pair in the unit's metadata strip, where it gets
-  skimmed past.
-- A `session-settled:` annotation renders as visible text with the stem
-  verbatim, so grep finds it.
-- Element types, the ID scheme, and the field-label vocabulary stay stable
-  across versions. Visual styling can change freely.
+- 使用语义元素：`<section>`每个顶级部分，`<article>`每个重复项，`<dl>`用于元数据对，`<table>`用于表格内容，`<details>`/`<summary>`用于可折叠内容。将一项的内容放在其元素内。
+- 字段标签是可见文本 (`<dt>Goal</dt><dd>...</dd>`)，而不仅仅是诸如`data-field="goal"`之类的属性。
+- 意义存在于 HTML 文本中。 CSS `content:`、背景图像或仅渲染技巧没有任何意义。
+- 告诉实现者做某事的字段（`Execution note`，例如“从失败的集成测试开始”）呈现为可见的标注，而不是单元元数据条中的安静对，在那里它会被略过。
+- `session-settled:` 注释会逐字呈现为可见文本，因此 grep 会找到它。
+- 元素类型、ID 方案和字段标签词汇在各个版本中保持稳定。视觉风格可以自由改变。
 
-## Reading the page
+## 阅读页面
 
-- **Readable line length.** Running prose sits in a centered column and
-  stays within roughly 65-80 characters per line even at wide window widths;
-  narrow windows simply wrap. Tables and diagrams may use more width than
-  prose. At a phone width, a wide table, diagram, or code block scrolls
-  inside its own container instead of widening the page.
-- **Distinct heading levels.** Each heading level looks distinct from the
-  others and from inline bold text.
-- **Repeating cards collapsed by default.** When a section repeats three or
-  more item cards that carry secondary content (Implementation Units are the
-  usual case), each card shows its ID, title, and short descriptive metadata;
-  the secondary content (approach, test scenarios, verification, patterns)
-  sits in `<details>` with no `open` attribute. The reader should see the
-  unit list at a glance, not one long scroll. Secondary content is what a
-  reader opens on demand. A card whose body is the point stays expanded:
-  a Key Technical Decision's rationale, or an ideation idea card, which its
-  section contract says is read in full. When the work ships as several PRs,
-  each PR group is a heading at the unit cards' heading level, starting
-  with its `PR<N>` label, with its
-  `Waits on:` line visible beneath it, and its units keep their own cards.
-- **Within-section sub-nav.** A section with 6+ repeating cards starts with a
-  short list of anchor links to its cards.
-- **Uniform marks, no one-edge accent.** Chips in a row share one shape.
-  Differentiate a chip, pill, or callout card by a full tint and a colored
-  label, never by a colored stripe on one edge, which reads as broken.
-- **Text contrast is local.** Each text-on-fill pairing must read on its own
-  fill; muted text calibrated for the page background often washes out on a
-  tinted card.
-- **Markdown input is content, not design.** When the input includes
-  markdown, take its facts and sections, not its bullet-or-table choices.
-  Pick the HTML shape the content needs, and keep any concern grouping the
-  section contract asks for.
+- **可读的行长度。** 运行的散文位于居中的列中，即使在宽窗口宽度下，每行也保持在大约 65-80 个字符内；狭窄的窗户简单地包裹起来。表格和图表可能比散文使用更多的宽度。在手机宽度下，宽表、图表或代码块会在其自己的容器内滚动，而不是加宽页面。
+- **不同的标题级别。** 每个标题级别看起来都与其他标题级别以及内嵌粗体文本不同。
+- **重复卡默认折叠。** 当一个部分重复三个或更多包含次要内容的项目卡（通常是实施单元）时，每张卡都会显示其 ID、标题和简短的描述性元数据；次要内容（方法、测试场景、验证、模式）位于 `<details>` 中，没有 `open` 属性。读者应该一目了然地看到单位列表，而不是一长卷。次要内容是读者按需打开的内容。以主体为重点的卡片保持扩展状态：关键技术决策的基本原理，或构想卡片，其部分合同称已完整阅读。当作品作为多个PRs交付时，每个PR组都是单位卡标题级别的标题，从其`PR<N>`标签开始，其`Waits on:`线在其下方可见，并且其单位保留自己的卡。
+- **部分内的子导航。** 包含 6 个以上重复卡片的部分以指向其卡片的锚链接的简短列表开始。
+- **标记均匀，无单边重音。** 一行中的切屑共享一个形状。通过全色调和彩色标签来区分芯片、药丸或标注卡，而不是通过一侧边缘的彩色条纹来区分，因为它看起来像是破损的。
+- **文本对比度是本地的。** 每个填充文本配对必须在其自己的填充上读取；针对页面背景校准的静音文本通常会在有色卡片上被洗掉。
+- **Markdown 输入是内容，而不是设计。** 当输入包含 Markdown 时，请采用其事实和部分，而不是其项目符号或表格选择。选择内容所需的 HTML 格式，并保留对合同要求的部分进行分组的任何关注。
 
-## Diagrams and wireframes
+## 图表和线框图
 
-Diagrams are inline SVG in whatever shape conveys the content fastest.
+图表是内联 SVG，无论其形状如何，都能最快地传达内容。
 
-- **Prose is authoritative and complete.** A diagram or wireframe sits next
-  to the prose it illustrates and never holds a relationship, step, or spec
-  the prose lacks. A text-reading agent does not parse SVG geometry. When a
-  picture and the prose disagree, the prose governs.
-- **Labels clear of strokes.** No arrow, connector, or shape edge passes
-  through a text label, including the slanted edge of a skewed or rotated
-  shape, and a connector does not run across unrelated shapes. Each label
-  sits inside or beside the thing it names. Coordinates are written
-  without seeing them render, so trace every label against every stroke
-  before emitting.
-- **Geometry before tint.** Distinguish shape roles by geometry (diamond,
-  rectangle, oval) before adding extra neutral tint tiers; small tint
-  differences flatten or invert under dark-mode extensions and printing.
-- **Plan diagrams carry no hedging caption.** A plan diagram, and the
-  technical-design section around it, renders the same authoritative content
-  as its prose, with no "directional only" caption or preamble. That caption
-  belongs only to wireframes.
-- **Wireframes are for UI-shaped requirements in requirements docs.** Only
-  the requirements-only unified plan that `ce-brainstorm` writes carries
-  wireframes, not an implementation-ready plan from `ce-plan`. Within it, a
-  requirement that describes a user-facing screen, layout, or flow may carry
-  one. A non-visual
-  requirement takes a conceptual diagram instead, and the wireframe scope
-  never suppresses one. A wireframe is a wireframe, not a mockup: gray layout
-  regions, placeholder copy, static, one per distinct visual concept. Each
-  carries a visible caption such as "Directional only. Illustrates the
-  intended user-facing shape; colors, spacing, copy, and components are
-  placeholders, not requirements."
+- **散文是权威和完整的。** 图表或线框位于它所说明的散文旁边，并且永远不会包含散文所缺乏的关系、步骤或规范。文本读取代理不解析 SVG 几何图形。当图片和散文不一致时，以散文为准。
+- **标签没有笔划。** 没有箭头、连接器或形状边缘穿过文本标签，包括倾斜或旋转形状的倾斜边缘，并且连接器不会跨越不相关的形状。每个标签都位于它所命名的事物的内部或旁边。坐标是在没有看到它们渲染的情况下写入的，因此在发出之前根据每个笔画跟踪每个标签。
+- **着色前的几何形状。** 在添加额外的中性色调层之前，通过几何形状（菱形、矩形、椭圆形）区分形状角色；在暗模式扩展和打印下，微小的色调差异会变平或反转。
+- **平面图没有任何对冲标题。**平面图及其周围的技术设计部分呈现与其散文相同的权威内容，没有“仅限方向”的标题或序言。该标题仅属于线框。
+- **线框图适用于需求文档中 UI 形状的需求。** 只有 `ce-brainstorm` 编写的仅需求统一计划才带有线框图，而不是 `ce-plan` 的可实施计划。其中，描述面向用户的屏幕、布局或流程的需求可能包含其中之一。非视觉需求需要一张概念图，而线框范围永远不会抑制它。线框是线框，而不是模型：灰色布局区域、占位符副本、静态、每个不同的视觉概念。每个都带有可见的标题，例如“仅限方向。说明预期的面向用户的形状；颜色、间距、副本和组件是占位符，而不是要求。”
 
-## Reference links
+## 参考链接
 
-Hyperlink each entry in a Sources & References section to its canonical
-destination when that destination is established. For a GitHub `origin`
-(`git remote get-url origin`), a repo path links to
-`<repo-url>/blob/main/<path>` and `PR #636` links to `<repo-url>/pull/636`.
-An external tracker ID links only when its workspace URL already appears in
-context. Do not invent URLs; a guessed link is worse than plain `<code>`
-text. Inline mentions in prose stay unlinked.
+当建立目标时，将“来源和参考”部分中的每个条目超链接到其规范目标。对于 GitHub `origin` (`git remote get-url origin`)，存储库路径链接到 `<repo-url>/blob/main/<path>`，`PR #636` 链接到 `<repo-url>/pull/636`。仅当其工作区 URL 已出现在上下文中时，外部跟踪器 ID 才会链接。不要发明 URL；猜测的链接比纯文本 `<code>` 更糟糕。散文中的内联提及保持未链接。
 
-## Styling
+## 造型
 
-Take visual style from the user's direction in this session, their
-project instructions, a design skill they invoke, or a DESIGN.md at the
-repository root, `docs/DESIGN.md`, or `.compound-engineering/DESIGN.md`;
-with none of those, choose a quiet, readable style yourself. Most DESIGN.md
-files describe a product or marketing surface, so it contributes the
-brand's identity, not its scale:
+从用户在此会话中的指示、他们的项目说明、他们调用的设计技能或存储库根目录中的 DESIGN.md、`docs/DESIGN.md` 或 `.compound-engineering/DESIGN.md` 获取视觉样式；如果没有这些，请自己选择一种安静、可读的风格。大多数 DESIGN.md 文件描述产品或营销表面，因此它贡献了品牌的身份，而不是其规模：
 
-- Take its palette, font weights and roles, and corner character.
-- Keep reading sizes and spacing doc-scaled even when its tokens are sized
-  for product UI or marketing heroes. Do not apply a hero or product-UI
-  surface color as the page background; extract the principle rather than
-  the literal value. Skip decoration with nothing to attach to in a doc.
-- Load a font only when it is a known open webfont. Never attempt a
-  proprietary brand face; use the DESIGN.md's fallback chain or a
-  family-matched system stack, and never promote a display face to body
-  text.
+- 以它的调色板、字体粗细和角色以及角字符为例。
+- 即使其标记的大小适合产品 UI 或营销英雄，也要保持阅读大小和间距文档缩放。不要应用英雄或产品 UI 表面颜色作为页面背景；提取原理而不是字面值。跳过文档中没有任何内容可附加的装饰。
+- 仅当字体是已知的开放网络字体时才加载字体。切勿尝试专有品牌形象；使用 DESIGN.md 的后备链或系列匹配的系统堆栈，并且切勿将显示面提升为正文文本。
 
-## Post-compose audit
+## 撰写后审核
 
-Before returning the artifact, check it against the conditions above:
+在退回产物之前，请检查其是否符合上述条件：
 
-- One self-contained file; webfont CSS is the only external resource the
-  page loads.
-- No hidden metadata copy: no JSON `<script>`, `data-*` mirror, or
-  `<meta name="created">`/`<meta name="origin">` tag.
-- Tool-facing fields sit in the closed "Document metadata" block under
-  their exact key names, and the header does not repeat them.
-- Every stable ID appears as both `id=""` and visible text.
-- Section headings match the section-contract names; a unified plan has its
-  navigation region and stable anchors.
-- The composition footer is present.
-- Repeating cards with secondary content are collapsed by default, with no
-  `open` attribute; sections with 6+ cards have a sub-nav.
-- No one-edge colored accent on chips, pills, or cards.
-- Prose stays within a readable line length at wide widths, nothing widens
-  the page at a phone width, and heading levels are distinct.
-- Every diagram relationship and wireframe detail is also in the prose, and
-  no stroke crosses a label.
-- No JS framework runtime, no invented reference URLs, no leaked template
-  placeholders (`{skill}`, `[plan title]`), and no process notes in the
-  artifact.
+- 一份独立的文件； webfont CSS 是页面加载的唯一外部资源。
+- 无隐藏元数据副本：无 JSON `<script>`、`data-*` 镜像或 `<meta name="created">`/`<meta name="origin">` 标签。
+- 面向工具的字段位于封闭的“文档元数据”块中，位于其确切的键名称下，并且标题不会重复它们。
+- 每个稳定 ID 都显示为 `id=""` 和可见文本。
+- 章节标题与章节合同名称相匹配；统一的规划有它的航行区域和稳定的锚点。
+- 存在构图页脚。
+- 具有次要内容的重复卡片默认折叠，没有 `open` 属性；包含 6 张以上卡片的部分有一个子导航。
+- 筹码、药丸或卡片上不得有单边彩色强调。
+- 散文在宽度上保持在可读的行长度内，没有任何东西可以在手机宽度上加宽页面，并且标题级别是不同的。
+- 每个图表关系和线框细节也都在散文中，并且没有笔划跨越标签。
+- 没有 JS 框架运行时，没有发明的参考 URL，没有泄漏的模板占位符（`{skill}`，`[plan title]`），并且产物中没有流程注释。

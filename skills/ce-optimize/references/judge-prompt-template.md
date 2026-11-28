@@ -1,22 +1,22 @@
-# Judge Evaluation Prompt Template
+# 法官评价提示模板
 
-This template is used by the orchestrator to dispatch batched LLM-as-judge evaluation calls. Each judge sub-agent evaluates a batch of sampled output items and returns structured JSON scores.
+协调器使用此模板来分批批处理法学硕士作为评委的评估调用。每个法官子代理评估一批采样输出项并返回结构化的JSON分数。
 
-The orchestrator:
-1. Reads the experiment's output
-2. Selects samples per the stratification config (using fixed seed)
-3. Groups samples into batches of `judge.batch_size`
-4. Dispatches `ceil(sample_size / batch_size)` parallel sub-agents using this template
-5. Aggregates returned JSON scores
+协调者：
+1. 读取实验的输出
+2. 根据分层配置选择样本（使用固定种子）
+3. 将样本分为 `judge.batch_size` 批次
+4. 使用此模板调度 `ceil(sample_size / batch_size)` 并行子代理
+5. 聚合返回 JSON 分数
 
 ---
 
-## Item Evaluation Template
+## 项目评估模板
 
 ```
-You are a quality judge evaluating output items for an optimization experiment.
+您是一名质量评委，评估优化实验的输出项目。
 
-Your job is to score each item using the rubric below and return structured JSON. Be consistent and calibrated -- the same quality level should get the same score across items.
+您的工作是使用下面的评分标准对每个项目进行评分，并返回结构化的JSON。保持一致和校准——相同的质量水平应该在各个项目上获得相同的分数。
 
 <rubric>
 {rubric}
@@ -27,38 +27,38 @@ Your job is to score each item using the rubric below and return structured JSON
 </items>
 
 <output-contract>
-Return ONLY a valid JSON array. No prose, no markdown, no explanation outside the JSON.
+仅返回有效的 JSON 数组。没有散文，没有Markdown，没有JSON之外的解释。
 
-Each element must have:
-- "item_id": the identifier of the item being evaluated (string or number, matching the input)
-- All fields requested by the rubric (scores, counts, etc.)
-- "reason": one short sentence naming what most held this item's score down, or what earned it the score when nothing did
-- "feedback": one or two sentences naming what is wrong with this item and what change would fix it. For an item at the top of the scale, name what keeps it there. This text drives the next round of hypotheses, so name the defect, not the score.
-- "ambiguous": true if you cannot confidently score this item (e.g., insufficient context, borderline case). When ambiguous, still provide your best-guess score but flag it.
+每个元素必须具有：
+- “item_id”：正在评估的项目的标识符（字符串或数字，与输入匹配）
+- 标题要求的所有字段（分数、计数等）
+- “原因”：一个简短的句子，指出是什么最导致该项目的分数下降，或者是什么在没有任何作用的情况下赢得了分数
+- “反馈”：用一两句话指出该项目的问题所在以及可以进行哪些更改来解决该问题。对于位于天平顶部的项目，请说出是什么让它保持在该位置。这篇文章推动了下一轮的假设，所以命名缺陷，而不是分数。
+- “ambigious”：如果您不能自信地为该项目评分（例如，上下文不足、边界情况），则为 true。当不明确时，仍然提供您的最佳猜测分数，但对其进行标记。
 
-Example output format (adapt field names to match the rubric):
+示例输出格式（调整字段名称以匹配标题）：
 [
-  {"item_id": "cluster-42", "score": 4, "distinct_topics": 1, "outlier_count": 0, "reason": "One coherent topic; the title undersells it.", "ambiguous": false, "feedback": "The topic is coherent but the title is vague; name the shared login issue in the title."},
-  {"item_id": "cluster-17", "score": 2, "distinct_topics": 3, "outlier_count": 2, "reason": "Three unrelated topics merged because all mention 'timeout'.", "ambiguous": false, "feedback": "Three unrelated topics grouped on the shared word 'timeout'; splitting on the affected component would fix it."},
-  {"item_id": "cluster-99", "score": 3, "distinct_topics": 2, "outlier_count": 1, "reason": "Two related topics; unclear whether the rubric wants them split.", "ambiguous": true, "feedback": "Two sub-topics (import and export failures) that could reasonably be one or two clusters."}
+  {"item_id": "cluster-42", "score": 4, "distinct_topics": 1, "outlier_count": 0, "reason": "同一主题，但标题没有准确指出它。", "ambiguous": false, "feedback": "在标题中点明共同的登录问题。"},
+  {"item_id": "cluster-17", "score": 2, "distinct_topics": 3, "outlier_count": 2, "reason": "三个无关主题因都出现 timeout 而被错误合并。", "ambiguous": false, "feedback": "按根因分组，不要只看相同关键词。"},
+  {"item_id": "cluster-99", "score": 3, "distinct_topics": 2, "outlier_count": 1, "reason": "两个子主题相关，评分准则未明确要求拆分。", "ambiguous": true, "feedback": "导入失败和导出失败可以分开，也可以同组；先说明依据。"}
 ]
 
 Rules:
-- Evaluate each item independently
-- Score the same content the same way every time: the same item must receive the same score and the same fields on a repeat call
-- Score based on the rubric, not on how other items in this batch scored
-- If an item is empty or has only 1 element when it should have more, score it based on what is present
-- For very large items (many elements), focus on a representative subset and note if quality varies across the item
-- Every item in the batch MUST appear in your output
+- 独立评估每个项目
+- 每次都以相同的方式对相同的内容进行评分：同一项目在重复调用时必须获得相同的分数和相同的字段
+- 根据评分标准评分，而不是根据该批次中其他项目的评分
+- 如果某个项目为空或只有 1 个元素（而它应该有更多元素），则根据存在的内容对其进行评分
+- 对于非常大的项目（许多元素），重点关注代表性子集并注意项目之间的质量是否存在差异
+- 批次中的每个项目都必须出现在您的输出中
 </output-contract>
 ```
 
-## Singleton Evaluation Template
+## 单例评估模板
 
 ```
-You are a quality judge evaluating singleton items -- items that are currently NOT in any group/cluster.
+您是评估单个项目的质量法官 - 当前不在任何 group/cluster 中的项目。
 
-Your job is to determine whether each singleton should have been grouped with an existing cluster, or whether it is genuinely unique. Return structured JSON.
+您的工作是确定每个单例是否应该与现有集群分组，或者它是否确实是唯一的。返回结构化JSON。
 
 <rubric>
 {singleton_rubric}
@@ -69,49 +69,49 @@ Your job is to determine whether each singleton should have been grouped with an
 </singletons>
 
 <existing-clusters>
-A summary of existing clusters for reference (titles/themes only, not full contents):
+现有集群总结供参考（仅titles/themes，并非全部内容）：
 {cluster_summaries}
 </existing-clusters>
 
 <output-contract>
-Return ONLY a valid JSON array. No prose, no markdown, no explanation outside the JSON.
+仅返回有效的 JSON 数组。没有散文，没有Markdown，没有JSON之外的解释。
 
-Each element must have:
-- "item_id": the identifier of the singleton
-- All fields requested by the singleton rubric (should_cluster, best_cluster_id, confidence, etc.)
+每个元素必须具有：
+- “item_id”：单例的标识符
+- 单例标题要求的所有字段（should_cluster、best_cluster_id、置信度等）
 
-Example output format (adapt field names to match the rubric):
+示例输出格式（调整字段名称以匹配标题）：
 [
   {"item_id": "issue-1234", "should_cluster": true, "best_cluster_id": "cluster-42", "confidence": 4},
   {"item_id": "issue-5678", "should_cluster": false, "best_cluster_id": null, "confidence": 5}
 ]
 
 Rules:
-- A singleton that genuinely has no match in existing clusters should get should_cluster: false
-- A singleton that clearly belongs in an existing cluster should get should_cluster: true with the cluster ID
-- High confidence (4-5) means you are very sure. Low confidence (1-2) means the item is borderline.
-- Every singleton in the batch MUST appear in your output
+- 在现有集群中真正没有匹配的单例应该得到 should_cluster: false
+- 明确属于现有集群的单例应该通过集群 ID 获得 should_cluster: true
+- 高置信度 (4-5) 表示您非常确定。低置信度 (1-2) 表示该项目处于边缘状态。
+- 批次中的每个单例都必须出现在您的输出中
 </output-contract>
 ```
 
-## Variable Reference
+## 变量引用
 
-| Variable | Source | Description |
+| 多变的 | 来源 | 描述 |
 |----------|--------|-------------|
-| `{rubric}` | Spec `metric.judge.rubric` | User-defined scoring rubric |
-| `{items_json}` | Sampled output items | JSON array of items to evaluate (one batch worth) |
-| `{singleton_rubric}` | Spec `metric.judge.singleton_rubric` | User-defined rubric for singleton evaluation |
-| `{singletons_json}` | Sampled singleton items | JSON array of singleton items to evaluate |
-| `{cluster_summaries}` | Experiment output | Summary of existing clusters (titles/themes) for singleton reference |
+| `{rubric}` | 规格`metric.judge.rubric` | 用户定义的评分标准 |
+| `{items_json}` | 采样输出项 | JSON 要评估的项目数组（一批） |
+| `{singleton_rubric}` | 规格`metric.judge.singleton_rubric` | 用户定义的单例评估标准 |
+| `{singletons_json}` | 采样单项 | JSON 要评估的单项数组 |
+| `{cluster_summaries}` | 实验输出 | 现有集群总结（titles/themes）供单例参考 |
 
-## Notes
+## 笔记
 
-- Written for the `cheap` judge tier by default (`metric.judge.model`) -- prompts are concise and well-structured for smaller models; the harness resolves the tier to a concrete model
-- Where the dispatch surface exposes sampling controls, use the most deterministic setting available; the same item must score the same on a repeat call, which is what makes the run's judge cache and the calibration check valid
-- The rubric is part of the immutable measurement harness -- the experiment agent cannot modify it
-- The `reason` field does not change the score. The orchestrator keeps the reasons for the worst-scoring items so later hypotheses and workers can see why items failed, not just how much
-- The `feedback` field is required on every item. The orchestrator persists it under `judge.items[]`, groups it into the digest's failure themes, and generates hypotheses from those themes; a batch without feedback gives the loop nothing to act on
-- The `ambiguous` flag on items helps the orchestrator identify noisy evaluations without forcing bad scores
-- For singleton evaluation, the orchestrator provides cluster summaries (not full contents) to keep judge context lean
-- Each sub-agent evaluates one batch independently -- sub-agents do not see each other's results
-- **That independence is required, not merely preferred.** These scores decide accept or revert, so a judge must be a separate context from the one that authored the hypothesis and ran the experiment. Where no dispatch is available, block the judge pass rather than scoring inline. An orchestrator grading its own experiment is not a measurement.
+- 默认为`cheap`判断层（`metric.judge.model`）编写——对于较小的模型，提示简洁且结构良好；宿主将层解析为具体模型
+- 如果调度表面公开采样控制，请使用可用的最具确定性的设置；同一项目在重复调用时必须得分相同，这使得运行的判断缓存和校准检查有效
+- 该标题是不可变测量工具的一部分——实验代理无法修改它
+- `reason`字段不会改变分数。编排器保留得分最差项目的原因，以便以后的假设和工作人员可以看到项目失败的原因，而不仅仅是失败的程度
+- 每个项目都需要 `feedback` 字段。编排器将其保留在`judge.items[]`下，将其分组到摘要的失败主题中，并根据这些主题生成假设；没有反馈的批次不会给循环带来任何影响
+- 项目上的 `ambiguous` 标志可帮助编排器识别嘈杂的评估，而不会强制获得不良分数
+- 对于单例评估，协调器提供集群摘要（不是完整内容）以保持判断上下文精简
+- 每个子代理独立评估一批——子代理看不到彼此的结果
+- **这种独立性是必需的，而不仅仅是首选。** 这些分数决定接受或恢复，因此法官必须与提出假设和运行实验的人处于不同的环境中。如果无法调度，则阻止裁判传球，而不是在内线得分。协调者对自己的实验进行评分并不是一种衡量标准。

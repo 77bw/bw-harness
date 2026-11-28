@@ -1,43 +1,43 @@
-# Worth audit
+# 值得审核
 
-This adds one test to classification, plus changes to `CODING_STANDARDS.md`. The five outcomes and the investigation roles are unchanged. This audit adds no confirmation in either mode, because each change carries its evidence and version control can restore it.
+这为分类添加了一项测试，并对 `CODING_STANDARDS.md` 进行了更改。五种结果和调查角色不变。此审计在任何一种模式下都不会添加确认，因为每个更改都带有其证据，并且版本控制可以恢复它。
 
-## The bar
+## 酒吧
 
-The bar is the `ce-durable-bar` paragraph under Preconditions in `SKILL.md`, the same one a capture applies before writing a learning. This audit applies it to learnings that were written before the bar existed, or that accreted past it.
+该栏是 `SKILL.md` 中先决条件下的 `ce-durable-bar` 段落，与编写学习之前捕获应用的段落相同。此审核将其应用于在标准存在之前或在标准之后积累的知识。
 
-## Recoverability needs positive evidence
+## 可恢复性需要积极的证据
 
-A doc's reasoning is recoverable only when a named in-repo artifact states it in its own text: a test or lint rule whose assertion, comment, or failure message carries the rule, a condition in `CODING_STANDARDS.md`, a code comment beside the mechanism, the project's always-loaded instructions, a skill reference, or another surviving learning. Topical overlap is not coverage; verify the specific reasoning is present and quote it. The unverifiable-is-not-false rule in `references/refresh/classify.md` still holds: a claim no artifact corroborates is kept, never treated as recoverable. A doc describing a mechanism that no longer exists is judged by the ordinary Delete gate, not by this audit.
+仅当命名的存储库内产物在其自己的文本中声明它时，文档的推理才可恢复：测试或 lint 规则，其断言、注释或失败消息携带规则、`CODING_STANDARDS.md` 中的条件、机制旁边的代码注释、项目始终加载的指令、技能参考或其他幸存的学习内容。主题重叠不是覆盖；验证具体推理是否存在并引用。 `references/refresh/classify.md` 中不可验证的“非假”规则仍然成立：没有文物证实的声明将被保留，永远不会被视为可恢复。描述不再存在的机制的文档是通过普通的删除门来判断的，而不是通过此审核来判断。
 
-Add this clause to every investigation subagent prompt, verbatim:
+将此子句逐字添加到每个调查子代理提示中：
 
-> For each claim the learning makes that a reader would need in order to avoid repeating a mistake or redoing an investigation, search the repository for an in-repo artifact whose own text states that reasoning (a test or lint rule, a `CODING_STANDARDS.md` condition, a code comment, the root agent-instructions file, a skill reference, another learning). Return, per claim: recoverable with the artifact path and the quoted sentence, or not recoverable. Do not infer coverage from a related file name or topic.
+> 对于学习中提出的每个声明，读者需要为了避免重复错误或重做调查而在存储库中搜索存储库内产物，其自己的文本说明了推理（测试或 lint 规则、`CODING_STANDARDS.md` 条件、代码注释、根代理指令文件、技能参考、其他学习）。根据声明返回：可通过产物路径和引用的句子恢复，或不可恢复。不要从相关文件名或主题推断覆盖范围。
 
-## Routing
+## 路由
 
-Apply the accuracy classification first, then the worth test to docs that survived it:
+首先应用准确性分类，然后对幸存下来的文档进行价值测试：
 
-- **Every claim recoverable, citations absent or decorative:** Delete, with the citation cleanup the Delete flow already owns. The quoted artifacts are the doc's evidence bullets.
-- **Some claims recoverable:** Update. Cut the recoverable content and keep the measured facts, cross-file invariants, and rejected alternatives nothing else records. Point at the artifact in one line where a reader would otherwise look for the cut material. Narrow the frontmatter to match.
-- **Nothing recoverable:** Keep.
+- **每项声明均可恢复，引用缺失或装饰：** 删除，并使用删除流程已拥有的引用清理功能。引用的产物是文档的证据要点。
+- **一些索赔可恢复：**更新。删除可恢复的内容并保留测量的事实、跨文件不变量和拒绝的替代方案，不记录任何其他内容。指向一行中的产物，否则读者会在其中寻找被剪切的材料。缩小 frontmatter 以匹配。
+- **没有可恢复的：** 保留。
 
-A doc whose only remaining content is a session narrative, a list of what was changed, or a restatement of a contract another file owns has no non-recoverable claim and routes to Delete.
+如果文档的唯一剩余内容是会话叙述、更改内容列表或另一个文件所拥有的合同的重述，则该文档没有不可恢复的声明并路由至“删除”。
 
-Apply these in both modes. Batch broad interactive sweeps as `references/refresh/classify.md` already directs. Inbound links still gate a Delete: when another doc substantively cites this one, keep it and report that.
+在两种模式下应用这些。按照 `references/refresh/classify.md` 的指示进行批量广泛的交互式扫描。入站链接仍然会删除：当另一文档实质性引用此链接时，保留它并报告该情况。
 
-## Standards
+## 标准
 
-Read the `CODING_STANDARDS.md` files that govern the scope. A rule is not a doc, so it gets no Keep or Update outcome; it appears in the report with its evidence.
+阅读控制范围的 `CODING_STANDARDS.md` 文件。规则不是文档，因此它不会得到“保留”或“更新”结果；它及其证据出现在报告中。
 
-- **A check now covers the rule's whole class:** remove the rule. Quote the rule and the check.
-- **A check covers part of the class:** narrow the rule to what remains, and quote both.
-- **A doc is really an unenforced rule:** it is a standing always-or-never about a defect a reviewer can see in a diff, it carries no reasoning beyond the rule, and no check covers it. When a check could hold it, leave the doc and record the check under **Recommended**, because a refresh writes no checks. When no check could hold it and the bar below is met, add one condition to the `CODING_STANDARDS.md` nearest the code, in that file's style, then route the doc as recoverable. When the repo has no standards file, leave the doc as it is and record no finding: a repo without coding standards has made a valid choice, and `ce-setup` drafts rules from these docs whenever someone runs it. Nothing a refresh writes names `ce-setup` or a missing standards file. Only an attended report carries the one line `references/refresh/report.md` defines.
+- **检查现在涵盖规则的整个类：**删除规则。引用规则和检查。
+- **检查涵盖了该类的一部分：**将规则缩小到剩下的部分，并引用两者。
+- **文档实际上是一个未强制执行的规则：**它是关于审查者在差异中可以看到的缺陷的永远或永远的常设规则，它没有超出规则的推理，并且没有检查涵盖它。当检查可以容纳它时，保留文档并将检查记录在**推荐**下，因为刷新不会写入任何检查。当没有检查可以容纳它并且满足下面的条时，以该文件的样式向最接近代码的 `CODING_STANDARDS.md` 添加一个条件，然后将文档路由为可恢复。当存储库没有标准文件时，保留文档原样并记录任何发现：没有编码标准的存储库已做出有效选择，并且每当有人运行它时，`ce-setup`都会从这些文档中起草规则。刷新不会写入名称 `ce-setup` 或丢失的标准文件。只有出席报告才包含`references/refresh/report.md` 定义的一行。
 
 <!-- ce-standards-bar:start -->
-A defect class enters `CODING_STANDARDS.md` only when it appeared in a review finding the author fixed, a fix commit, a cleanup that removed it across the codebase, or a solution record, and no check covers it. State the class as a condition in a few sentences that stay true without naming volatile numbers or symbols, and group rules by area.
+仅当缺陷类出现在发现作者修复的评论、修复提交、在代码库中删除它的清理或解决方案记录中，并且没有检查覆盖它时，才会进入`CODING_STANDARDS.md`。用几句话将类别陈述为条件，无需命名易变的数字或符号，并按区域对规则进行分组。
 <!-- ce-standards-bar:end -->
 
-## Report
+## 报告
 
-The summary block carries one line, `Worth: N shortened, N deleted; standards: N removed, N narrowed, N added`, or `Worth: off (drift fixes only)`, and each verdict lists the artifacts it rests on.
+摘要块包含一行`Worth: N shortened, N deleted; standards: N removed, N narrowed, N added`或`Worth: off (drift fixes only)`，每个判决都列出了它所依赖的产物。

@@ -1,0 +1,1112 @@
+diff --git a/skills/ce-commit-push-pr/SKILL.md b/skills/ce-commit-push-pr/SKILL.md
+index 120f8cdf45b59fd861c30a96c8d403d0498fc015..3d65c719e43775ad0adf469c92cd143c1e8b6e57 100644
+--- a/skills/ce-commit-push-pr/SKILL.md
++++ b/skills/ce-commit-push-pr/SKILL.md
+@@ -1,59 +1,61 @@
+ ---
+ name: ce-commit-push-pr
+-description: Commit, push, and open a PR. Use when asked to ship/open a PR, or for PR-description-only flows like writing, rewriting, or describing a PR body.
+-argument-hint: "[PR ref] [mode:pipeline] [archive:on|off] [branding:on|off] [babysit:off|continuous|checkpoint]"
++description: "提交、推送并打开 PR。当要求 ship/open PR 或PR 仅描述流程（例如编写、重写或描述 PR 主体）时使用。"
++argument-hint: "[PR参考] [mode:pipeline] [archive:on|关闭] [branding:on|关闭] [babysit:off|连续|检查点]"
+ ---
+ 
+-# Git Commit, Push, and PR
++> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
+ 
+-**Asking the user:** use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to asking in chat only when no such tool is in the list or a real question call errors, and never silently skip the question.
++# Git 提交、推送和 PR
+ 
+-## Mode
++**询问用户：**使用当前工具列表中已有的主机阻塞问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时才回退到聊天中提问，并且永远不要默默地跳过问题。
+ 
+-- **Description-only** — the user wants *just* a description ("write/draft a PR description", "describe this PR", a pasted PR URL or number). Run Step 4 only and print it. Apply it only if asked. Pass any pasted PR ref so Pre-A resolves the range.
+-- **Description update** — refresh or rewrite an existing PR's description, with no commit or push intent. Resolve PR presence by the Context rule below: an exit-0 `[]` is "no open PR" (report it and stop), and a non-zero exit is **unknown** (resolve auth or connectivity, then stop until presence is known). **With an open PR**, run Step 4 in PR mode on that URL, then Step 5 to preview, confirm, and apply via `gh pr edit`.
+-- **Full workflow** — otherwise: Steps 1-5. Enter **Stack mode** instead when intent or preference wants a stack.
++## 模式
+ 
+-**`mode:pipeline` modifier**, set by orchestrated callers such as `lfg`. Run the resolved mode non-interactively and suppress every blocking ask. Each suppressed ask takes the conservative default: no existing-PR rewrite, the branch kept, an unresolvable base stopping rather than guessed, and a description-update preview applied directly, since that invocation is the apply intent. Pipeline stack mode uses only the intent and scope on the invocation and passes posture into the handoff.
++- **仅描述** — 用户只需要*一个描述（“write/draft一个PR描述”、“描述这个PR”、粘贴的PR URL或数字）。仅运行步骤 4 并打印它。仅在要求时应用。传递任何粘贴的 PR 参考，以便 Pre-A 解析范围。
++- **描述更新** — 刷新或重写现有 PR 的描述，无提交或推送意图。通过以下上下文规则解析 PR 存在：退出 0 `[]` 是“无打开 PR”（报告并停止），非零退出是 **未知**（解析身份验证或连接，然后停止，直到知道存在）。 **打开 PR** 后，在该 URL 上以 PR 模式运行步骤 4，然后通过 `gh pr edit` 预览、确认和应用步骤 5。
++- **完整工作流程** — 否则：步骤 1-5。当意图或偏好需要堆栈时，请输入 **堆栈模式**。
+ 
+-## Stack mode (opt-in)
++**`mode:pipeline`修饰符**，由精心策划的调用者设置，例如`lfg`。以非交互方式运行已解决的模式并抑制每个阻塞询问。每个抑制的询问都采用保守的默认值：没有现有的-PR重写，保留分支，无法解析的基础停止而不是猜测，并且直接应用描述更新预览，因为该调用是应用意图。管道堆栈模式仅使用调用的意图和范围，并将状态传递到切换中。
+ 
+-**Opt-in only.** Enter it when intent or standing preference wants a multi-PR stack. An explicit stack request is **required intent** — do not re-read it as a single PR with a custom `--base`. **Do not** proactively suggest PR stacks. When the user did **not** ask for one, **refuse** nonsense stacks (one logical change, artificial slices) and stay single-PR.
++## 堆栈模式（选择加入）
+ 
+-In stack mode, load `references/stack-submit.md` **before Step 3** and follow only its probing, topology, and retrospective construction; that layer-by-layer commit flow replaces ordinary Step 3. **Do not submit there.** Step 5 handles submission, the `gh stack` CLI dependency and residuals, and the handoff posture: `posture:stack-ready` by default, `posture:stack-land` only on explicit land intent, from the **bottom open non-draft** PR. Do not add `posture:` to this skill's argument-hint.
++**仅选择加入。** 当意图或长期偏好需要多个PR堆栈时输入它。显式堆栈请求是**必需的意图** - 不要将其作为具有自定义 `--base` 的单个 PR 重新读取。 **不要**主动建议 PR 堆栈。当用户**不**要求一个时，**拒绝**无意义的堆栈（一个逻辑更改，人为切片）并保持单一PR。
+ 
+-## Context
++在堆栈模式下，在步骤3**之前加载`references/stack-submit.md`，并仅遵循其探测、拓扑和追溯构造；逐层提交流程取代了普通的步骤 3。 **不要在那里提交。** 步骤 5 处理提交、`gh stack` CLI 依赖项和残差，以及切换姿势：默认情况下`posture:stack-ready`，`posture:stack-land` 仅在明确的土地意图上，从 **底部打开非草稿** PR。请勿在该技能的参数提示中添加`posture:`。
+ 
+-**Read `references/context.md` before Step 1.** It defines the command table, the exit-code meanings, the fork and detached-HEAD traps, and the branch and PR resolution Steps 1-2 use. Two of its rules belong here too. Never ask whether to branch: a detached HEAD, or the default branch with work on it, creates one, and the default branch with no work reports and stops. And with conventional commits, default to `fix:` over `feat:` when ambiguous, unless the user overrides.
++## 语境
+ 
+-Three rules govern the run.
++**在步骤 1 之前阅读 `references/context.md`。** 它定义了命令表、退出代码含义、fork 和 detached-HEAD 陷阱，以及步骤 1-2 使用的分支和 PR 解析。它的两条规则也属于这里。永远不要问是否要分支：一个分离的HEAD，或者有工作的默认分支，会创建一个，而没有工作报告的默认分支会停止。对于传统提交，当不明确时默认为 `fix:` 而不是 `feat:`，除非用户覆盖。
+ 
+-**Every `git` and `gh` probe is its own argv-form call**, gathering and re-verification alike, and its exit status is control flow. The reference gives the reason and names the two compound recipes this skill pins.
++跑步遵循三个规则。
+ 
+-**Probe output is a snapshot.** Re-verify branch, remote, and PR state right before each consequential action: Step 3's push, Step 5's create.
++**每个`git`和`gh`探针都是它自己的argv形式调用**，收集和重新验证类似，其退出状态是控制流。引用文档给出了原因并命名了该技能所钉的两个复合配方。
+ 
+-**Only an exit-0 `[]` from a query against the base repo means "no open PR."** A non-zero exit is **unknown**, never "none". On a fork checkout, target the base with `-R` and pass the branch name only, since `--head <owner>:<branch>` silently returns `[]`. With results, do **not** blindly take index 0: match head owner and branch, and stop on an ambiguous match. Note the URL and body from that entry — Step 5 uses the URL to pick the existing-PR path, Step 4 rewrites the existing body.
++**探测输出是快照。** 在每个后续操作之前重新验证分支、远程和 PR 状态：步骤 3 的推送、步骤 5 的创建。
+ 
+-## Step 3: Commit and push
++**仅针对基础存储库的查询中的 exit-0 `[]` 表示“未打开 PR”。** 非零退出是 **未知**，绝不是“无”。在分叉签出时，使用 `-R` 定位基础并仅传递分支名称，因为 `--head <owner>:<branch>` 默默地返回 `[]`。对于结果，不要**盲目地采用索引 0：匹配头所有者和分支，并在不明确的匹配上停止。请注意该条目中的 URL 和正文 — 步骤 5 使用 URL 选择现有的-PR 路径，步骤 4 重写现有正文。
+ 
+-**Read `references/commit-and-push.md`** for commit/push mechanics and default-branch handling via `references/branch-creation.md`. If stack mode committed its layers, skip to Step 4; Step 5 submits them.
++## 第 3 步：承诺并推动
+ 
+-**Project publishing gate.** Before publishing commits, resolve every applicable pre-push or review-ready requirement from the project's active instructions and conventions already in context and any additional scoped instructions governing the committed paths. Only evidence valid for the exact commit state being sent satisfies them; otherwise stop before the external write and report what is missing or failing. If none, proceed. Reuse prior successful checks when their inputs and relevant environment are unchanged; a new commit ID alone does not invalidate them. Preserve each check’s actual exit status when capturing output, and finish evaluating the gate before issuing the publish call.
++**阅读 `references/commit-and-push.md`** 了解 commit/push 机制以及通过 `references/branch-creation.md` 进行的默认分支处理。如果堆栈模式提交了其层，则跳至步骤 4；第 5 步提交它们。
+ 
+-Never use `git add -A` or `git add .`. Name files in both add and commit so unrelated staged files stay out. Honor `exclude:<paths>`: leave and report them.
++**项目发布门。** 在发布提交之前，从项目的活动指令和上下文中已有的约定以及管理提交路径的任何其他范围指令中解决每个适用的预推送或审查就绪要求。只有对所发送的确切提交状态有效的证据才能满足他们的要求；否则在外部写入之前停止并报告丢失或失败的内容。如果没有，请继续。当输入和相关环境不变时，重用先前成功的检查；单独的新提交 ID 并不会使它们失效。捕获输出时保留每个检查的实际退出状态，并在发出发布调用之前完成对门的评估。
+ 
+-## Step 4: Compose the PR title and body
++切勿使用 `git add -A` 或 `git add .`。在添加和提交中命名文件，以便排除不相关的暂存文件。荣誉`exclude:<paths>`：离开并举报。
+ 
+-**You MUST read `references/pr-description-writing.md`** in full — it defines the title and body content rules, including the rule to preserve an existing `Related:` / `Fixes` on rewrite. Then read **`references/compose.md`** for the three decisions to make before composing: the evidence decision, which decides screenshots when the diff changes rendered UI; the teaching decision, where `pr_teaching_section` defaults **on**, `pr_teaching_archive` defaults **off**, and only an **active (non-commented)** key changes either; and the branding decision, where branding is **off unless** this invocation carries `branding:on` or the user asks for Compound Engineering branding in this prompt.
++## 步骤 4：撰写 PR 标题和正文
+ 
+-Read both references on every run, even when this session already read them. Skipping `compose.md` skips the evidence decision.
++**您必须完整阅读`references/pr-description-writing.md`** - 它定义了标题和正文内容规则，包括在重写时保留现有`Related:` / `Fixes` 的规则。然后阅读 **`references/compose.md`** 了解在撰写之前要做出的三个决定：证据决定，当 diff 更改渲染 UI 时决定屏幕截图；教学决策，其中`pr_teaching_section`默认**打开**，`pr_teaching_archive`默认**关闭**，并且只有**活动（未注释）**键发生变化；以及品牌决定，其中品牌**关闭，除非**此调用携带`branding:on`或用户在此提示中要求Compound Engineering品牌。
+ 
+-If Step 1 found an existing PR, pass its URL to Step 4 so PR mode fetches the existing body.
++每次运行时都要阅读这两个引用文档，即使本次会话已经阅读了它们。跳过 `compose.md` 会跳过证据决策。
+ 
+-## Step 5: Apply and report
++如果步骤 1 找到现有的 PR，请将其 URL 传递给步骤 4，以便 PR 模式获取现有的正文。
+ 
+-**Read `references/apply-and-handoff.md`** for apply, preview, archival, and handoff. Before `gh pr create`, re-check PR presence: a matching PR takes the existing-PR path, exit-0 `[]` creates, non-zero blocks. Pass the body via `--body-file <path>`, never stdin — `gh` exits 0 with an empty body.
++## 第5步：申请并报告
+ 
+-**Completion is decided here.** An interactive full workflow or pipeline stack submit is **not done** until `ce-babysit-pr` owns follow-on for the published PR. Reporting the PR URL alone is not success. Load the callee to choose the monitoring mode. If running it in this session, continue until its stop condition permits a final report, ending the turn only while its armed wake source will bring this agent back.
++**阅读 `references/apply-and-handoff.md`** 了解应用、预览、存档和移交。在`gh pr create`之前，重新检查PR是否存在：匹配的PR采用现有的-PR路径，exit-0`[]`创建非零块。通过 `--body-file <path>` 传递主体，绝不是 stdin — `gh` 以空主体退出 0。
+ 
+-Only `babysit:off`, CE config's `auto_babysit: false`, or a "Do not fire" case in `references/apply-and-handoff.md` skips it. Asking for the PR link, a report back, or no merge is not a skip. No other watch substitutes for this handoff: not `ci-watcher`, not `gh pr checks --watch`, not a host's PR-watch tool on its own, not a hand-rolled poll, not "later". `ce-babysit-pr` decides how it gets woken. If `ce-babysit-pr` cannot be loaded or started, stop and report it blocked.
++**此处决定完成。**交互式完整工作流程或管道堆栈提交**未完成**，直到 `ce-babysit-pr` 拥有已发布的 PR 的后续内容。仅报告 PR URL 并不成功。加载被叫方选择监听模式。如果在此会话中运行它，则继续，直到其停止条件允许最终报告，仅当其武装唤醒源将该代理带回来时才结束转弯。
++
++只有 `babysit:off`、CE 配置的 `auto_babysit: false` 或 `references/apply-and-handoff.md` 中的“不触发”情况会跳过它。请求 PR 链接、返回报告或不合并都不是跳过。没有其他手表可以替代这种交接：不是`ci-watcher`，不是`gh pr checks --watch`，不是主持人本身的PR手表工具，不是手动投票，不是“稍后”。 `ce-babysit-pr` 决定它如何被唤醒。如果`ce-babysit-pr`无法加载或启动，则停止并报告其阻塞。
+diff --git a/skills/ce-commit-push-pr/references/apply-and-handoff.md b/skills/ce-commit-push-pr/references/apply-and-handoff.md
+index a98e53b3d4286a0b2fae5b24f162a705bceffaae..ded32f272e34c61ba8037934bc1b250fbefe1718 100644
+--- a/skills/ce-commit-push-pr/references/apply-and-handoff.md
++++ b/skills/ce-commit-push-pr/references/apply-and-handoff.md
+@@ -1,77 +1,77 @@
+-# Applying the PR, reporting, and the babysit handoff
++# 应用 PR、报告和PR 看护交接
+ 
+-**Description-only mode** — print the title and body. Stop unless the user asks to apply.
++**仅描述模式** — 打印标题和正文。除非用户要求申请，否则停止。
+ 
+-**New PR** (full workflow, no existing PR from Step 1, resolve branch and PR state) — if **Stack mode** is active, follow the Submit section of `references/stack-submit.md` instead of `gh pr create`; then report the bottom open non-draft PR URL and continue to the babysit handoff. Otherwise, immediately before creating, **always** re-run `gh pr list --head <branch> --state open --json number,url,isDraft,headRefName,headRepositoryOwner` (branch name only; target the base repo on a fork, per Context). This catches a PR that appeared since Step 1, or one the Step 1 check missed because it came back **unknown**, so you do not open a duplicate. If the list now shows a PR whose `headRepositoryOwner` and `headRefName` match the current head, switch to the existing-PR path. When several forks match, pick by head owner as in Step 1 rather than assuming index 0. If this re-check itself exits non-zero, resolve `gh auth status` or connectivity before creating; do not assume no PR exists. Otherwise apply per "Applying via gh" below using `gh pr create`. Open it as a draft only when the user or the project asks for one; verification this run could not do belongs in the body, not in draft status. Report the URL.
++**新PR**（完整工作流程，步骤 1 中没有现有的PR，解析分支和PR状态）—如果**堆栈模式**处于活动状态，请按照`references/stack-submit.md`而不是`gh pr create`的提交部分进行操作；然后报告底部打开的非草稿PR URL并继续PR 看护交接。否则，在创建之前，**总是**重新运行 `gh pr list --head <branch> --state open --json number,url,isDraft,headRefName,headRepositoryOwner` （仅分支名称；针对每个上下文的分叉上的基本存储库）。这会捕获自第 1 步以来出现的 PR，或者第 1 步检查中由于返回**未知**而错过的一个，因此您不会打开重复项。如果列表现在显示一个 PR，其 `headRepositoryOwner` 和 `headRefName` 与当前头匹配，则切换到现有的-PR 路径。当多个分叉匹配时，按照步骤 1 中的方式按头所有者进行选择，而不是假设索引为 0。如果此重新检查本身退出非零，则在创建之前解析 `gh auth status` 或连接；不要假设 PR 不存在。否则，请使用`gh pr create`按照下面的“通过 gh 申请”进行申请。仅当用户或项目需要时将其作为草稿打开；此运行无法进行验证，属于正文，不处于草稿状态。报告网址。
+ 
+-**Existing PR** (full workflow, found in Step 1) — if **Stack mode** is active, still follow the Submit section of `references/stack-submit.md` so the remaining stack layers submit or sync (shipping from the middle of a stack is normal); then report the bottom open non-draft PR URL and continue to the babysit handoff with the posture derived below. Otherwise the new commits are already on the PR from Step 3 (commit and push). Report the PR URL, then ask whether to rewrite the description.
++**现有PR**（完整工作流程，在步骤1中找到）-如果**堆栈模式**处于活动状态，仍然遵循`references/stack-submit.md`的提交部分，以便其余堆栈层提交或同步（从堆栈中间传送是正常的）；然后报告底部打开的非草稿PR URL，并继续以下面导出的姿势进行PR 看护切换。否则，新提交已经位于步骤 3 中的 PR 上（提交和推送）。报告PR URL，然后询问是否重写描述。
+ 
+-- **No** — skip the description rewrite and continue to the babysit handoff rule below.
+-- **Yes** — run Step 4 (compose the PR title and body) if not already done, then preview and apply (see below).
++- **否** — 跳过描述重写并继续下面的PR 看护交接规则。
++- **是** — 如果尚未完成，请运行步骤 4（组成 PR 标题和正文），然后预览并应用（见下文）。
+ 
+-**Description update mode, or existing-PR rewrite confirmed** — preview before applying. First compare the proposed title and body with the existing PR. If they are identical, keep the existing title and body and do not call `gh pr edit`. If the only difference is a branding-only delta and the user did not explicitly request that exact branding change, also keep the existing title and body; branding alone never creates apply intent. Otherwise ask: "New title: `<title>` (`<N>` chars). Summary leads with: `<first two sentences>`. Total body: `<L>` lines. Apply?" If declined, the user may pass focus text back for a regenerate; do not apply. If confirmed, apply per "Applying via gh" below using `gh pr edit` and report the URL.
++**描述更新模式，或现有-PR重写确认** — 应用前预览。首先将提议的标题和正文与现有的PR进行比较。如果相同，则保留现有的标题和正文，并且不调用`gh pr edit`。如果唯一的区别是仅品牌的增量，并且用户没有明确请求确切的品牌更改，则还保留现有的标题和正文；品牌本身永远不会产生应用意图。否则询问：“新标题：`<title>`（`<N>`字符）。摘要开头为：`<first two sentences>`。正文：`<L>`行。申请吗？”如果拒绝，用户可以将焦点文本传回以重新生成；不适用。如果确认，请按照下面的“通过 gh 申请”使用 `gh pr edit` 进行申请并报告 URL。
+ 
+-**Explainer archival** — runs only in the full workflow, when all of these hold: `pr_teaching_archive` is on, the composed body has a `## New concepts` section, and the apply was confirmed (a new-PR create, or an existing-PR rewrite the user accepted). A declined rewrite skips archival entirely, so no unlinked doc commit is left behind. Resolve every path from the repo root gathered in Context, never from the CWD. With two taught concepts, write one file per concept and stage both in the single commit. Resolve `<root>` first:
++**解释器归档** - 仅在完整工作流程中运行，当所有这些都满足时：`pr_teaching_archive`打开，组合体具有`## New concepts`部分，并且应用已确认（新的-PR创建，或现有的-PR重写用户接受）。拒绝重写会完全跳过存档，因此不会留下未链接的文档提交。解析来自 Context 中收集的存储库根的每一条路径，而不是来自 CWD 的路径。通过两个教授的概念，为每个概念编写一个文件，并在一次提交中进行阶段。首先解决`<root>`：
+ 
+ <!-- ce-docs-root:start -->
+-**Resolve the CE artifact root `<root>` before composing any artifact path.**
++**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
+ 
+-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
+-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
+-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
++- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
++- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
++- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
+ <!-- ce-docs-root:end -->
+ 
+-Then run these steps, in order, immediately before the `gh` call:
++然后在 `gh` 调用之前按顺序运行这些步骤：
+ 
+-1. `git check-ignore -q <root>/explainers/YYYY-MM-DD-<concept-slug>.md` (from the repo root) — the check works on paths that do not exist yet. If the path is ignored, print a one-line warning and skip archival entirely, writing nothing (never `git add -f`).
+-2. Write the file (create the directory if needed) with YAML frontmatter `title`, `date`, `input_shape: concept`, `subject`, and the teaching content. If the file already exists from a prior run, overwrite it.
+-3. `git add` those file(s) only (never `-A`) and commit with `docs(explainer): teach <concept>[, <concept>]`. Re-apply the **Project publishing gate** to the resulting commit state, then push. If the commit reports nothing to commit, the doc is already committed from a prior run — keep the link and continue.
+-4. Add a head-branch blob URL for each doc into the `## New concepts` section before applying. Build the URL for the repo's actual host — for example `gh browse -n -b <head-branch> -- <path>` prints the link on whatever host `gh` targets, GitHub Enterprise included. Do not hardcode `github.com`, or the link 404s on GHE.
++1. `git check-ignore -q <root>/explainers/YYYY-MM-DD-<concept-slug>.md`（来自存储库根）——检查适用于尚不存在的路径。如果路径被忽略，则打印一行警告并完全跳过归档，不写入任何内容（从不`git add -f`）。
++2. 将YAML frontmatter `title`、`date`、`input_shape: concept`、`subject`以及教学内容写入文件（需要时创建目录）。如果该文件在之前的运行中已存在，则覆盖它。
++3. 仅`git add`那些文件（从不`-A`）并使用`docs(explainer): teach <concept>[, <concept>]`提交。将**项目发布门**重新应用到生成的提交状态，然后推送。如果提交报告没有任何要提交的内容，则该文档已经从之前的运行中提交 - 保留链接并继续。
++4. 在应用之前，将每个文档的头分支 blob URL 添加到 `## New concepts` 部分。构建存储库实际主机的 URL — 例如，`gh browse -n -b <head-branch> -- <path>` 在任何主机 `gh` 目标（包括 GitHub Enterprise）上打印链接。不要对 `github.com` 或 GHE 上的链接 404 进行硬编码。
+ 
+-If the doc write, commit, or push fails, warn and continue to PR creation without the link. Never leave the flow stopped between the commit and the PR.
++如果文档写入、提交或推送失败，则发出警告并继续创建PR，无需链接。切勿让提交和 PR 之间的流程停止。
+ 
+-**User-runnable invocation rendering.** For the output handoffs below, default to `/ce-explain <name>`. Use `$ce-explain <name>` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
++**用户可运行的调用渲染。** 对于下面的输出切换，默认为 `/ce-explain <name>`。仅当活动主机为 Codex 或明确记录以美元为前缀的技能调用时，才使用 `$ce-explain <name>`。仅将调用呈现为内联代码并仅输出一种形式。
+ 
+-**Concept trailer** — when a body applied by this run contains a `## New concepts` section, print one line after the PR URL in every mode: `New concepts: <name>[, <name>]`. In interactive full-workflow runs follow it with one line per taught concept telling the user to invoke `ce-explain <name>` using the rendering rule above. Print no trailer when this run applied no body — including a rewrite that was declined or that pipeline mode defaulted to no — or when no PR exists.
++**概念预告片** — 当此运行应用的主体包含 `## New concepts` 部分时，在每种模式下在 PR URL 后打印一行：`New concepts: <name>[, <name>]`。在交互式完整工作流程运行中，每个教授的概念用一行来告诉用户使用上面的渲染规则调用`ce-explain <name>`。当此运行未应用正文时（包括被拒绝的重写或管道模式默认为否）或不存在 PR 时，不打印预告片。
+ 
+-**Resolve the standing opt-out before applying the handoff rule below.** Read `auto_babysit` by the rule here, at the handoff. A config read from an earlier step does not carry over: a run that reaches the handoff without having read the key hands off against the user's standing choice, and a compacted run is the ordinary way that happens.
++**在应用下面的移交规则之前解决常设选择退出问题。** 在移交时按照此处的规则阅读`auto_babysit`。从先前步骤读取的配置不会延续：在没有读取密钥的情况下到达切换的运行会根据用户的站立选择进行切换，并且压缩运行是发生的常见方式。
+ 
+ <!-- ce-config-layers:start -->
+-**Resolve ordinary CE yaml keys from the two repo files.**
++**解析两个存储库文件中的普通 CE yaml 密钥。**
+ 
+-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
+-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
+-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
++- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
++- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
++- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
+ <!-- ce-config-layers:end -->
+ 
+-Babysit is off only when the winning active value is exactly `false`; a missing key or any other value leaves the default **on**. A handoff the user opted out of is a **successful terminal for this run**, not a blocked one — report the PR URL, say in one line that babysit was skipped by standing config, and stop.
++仅当获胜活跃值恰好为 `false` 时，Babysit 才会关闭；缺少的键或任何其他值都会保留默认**打开**。用户选择退出的交接是**此运行的成功终端**，而不是被阻止的终端 - 报告 PR URL，在一行中说婴儿看护被站立配置跳过，然后停止。
+ 
+-**Babysit handoff — default on; completion gate.** After a newly-created PR, a successful stack submit, or new commits on an existing open PR, this run is not done until `ce-babysit-pr` owns follow-on or an explicit skip below applies. Reporting the PR URL alone is not success. Announce the automatic handoff in one non-blocking line, then invoke the skill through the host's normal skill-invocation mechanism; never ask yes/no. A request for the PR link, a report back, or no merge is not a skip: `ce-babysit-pr` never merges unless asked to land a stack.
++**PR 看护切换 — 默认开启；完成门。** 在新创建的 PR、成功的堆栈提交或现有打开的 PR 上的新提交之后，直到 `ce-babysit-pr` 拥有后续操作或应用下面的显式跳过时，才会完成此运行。仅报告 PR URL 并不成功。在一条无阻塞线路中宣布自动切换，然后通过主机正常的技能调用机制调用技能；永远不要问yes/no。对 PR 链接的请求、返回报告或不合并都不是跳过：`ce-babysit-pr` 永远不会合并，除非要求登陆堆栈。
+ 
+-After a stack submit, hand off the bottom open non-draft PR with the derived `posture:stack-ready`, or `posture:stack-land` when the user explicitly asked to land, plus stack-wide scope when a pipeline submitted the stack. Report that ownership transfer so an outer orchestrator does not start a second bare babysit on the current branch.
++堆栈提交后，当用户明确要求登陆时，将底部打开的非草稿 PR 与派生的 `posture:stack-ready` 或 `posture:stack-land` 一起移交，以及当管道提交堆栈时的堆栈范围范围。报告所有权转移，以便外部协调器不会在当前分支上启动第二个裸照管者。
+ 
+-**Success** = `ce-babysit-pr` owns the monitoring lifecycle. Load and follow its instructions before choosing the monitoring mode. If you are running it in this session, continue until its stop condition permits a final report, ending the turn only while its armed wake source will bring this agent back. In `mode:pipeline`, wait for its pipeline stop and return the structured result. Before reporting success, render every returned typed `needs-human` residual unchanged under `## Needs your decision` and pass the same objects up to the top-level coordinator. `babysit:off` disables only new monitoring; it does not suppress a typed residual already known to this run or supplied by its caller.
++**成功** = `ce-babysit-pr` 拥有监控生命周期。在选择监控模式之前加载并遵循其说明。如果您在此会话中运行它，请继续，直到其停止条件允许最终报告，仅当其武装唤醒源将该代理带回来时才结束转弯。在`mode:pipeline`中，等待其管道停止并返回结构化结果。在报告成功之前，在 `## Needs your decision` 下渲染每个返回的类型化 `needs-human` 残差不变，并将相同的对象传递给顶级协调器。 `babysit:off` 仅禁用新监控；它不会抑制本次运行已知的或由其调用者提供的类型残差。
+ 
+-In `mode:pipeline`, the last thing this skill writes is its return to the caller. It ends this skill, not the turn. The caller runs in this same session, and its next step follows the return. That return is the structured result after this run waited for `ce-babysit-pr`, or the report already written when the handoff does not fire.
++在`mode:pipeline`中，该技能写入的最后一件事是返回给调用者。它结束了该技能，而不是回合。调用者在同一个会话中运行，返回后执行下一步。该返回是本次运行等待`ce-babysit-pr`后的结构化结果，或者是切换未触发时已写入的报告。
+ 
+-Never start babysit mechanics yourself: do not run `pr-snapshot`, arm a watcher, or reconstruct the loop. Never substitute `ci-watcher`, `gh pr checks --watch`, a host's own PR-watch tool on its own, ad-hoc polls, or a promise to babysit later. `ce-babysit-pr` decides how it gets woken, including through a host's tool when host instructions dictate PR waits. **Handoff blocked:** if the skill cannot be loaded or started, stop and report the failure. Do not invent a parallel or narrower watch.
++切勿自己启动PR 看护机制：不要运行 `pr-snapshot`、武装观察者或重建循环。切勿单独替换`ci-watcher`、`gh pr checks --watch`、主持人自己的PR观看工具、临时民意调查或稍后照顾的承诺。 `ce-babysit-pr` 决定如何唤醒，包括当主机指令指示 PR 等待时通过主机工具唤醒。 **切换被阻止：**如果技能无法加载或启动，则停止并报告故障。不要发明平行或更窄的手表。
+ 
+-A `babysit:` token on this invocation decides this run whatever the config says — `off` skips, `continuous` and `checkpoint` force that mode and run even under a standing opt-out. With no such token, the resolved `auto_babysit` above decides.
++无论配置如何规定，此调用上的 `babysit:` 令牌决定此运行 - `off` 跳过，`continuous` 和 `checkpoint` 强制该模式并即使在长期选择退出的情况下运行。如果没有这样的令牌，则由上面解析的`auto_babysit`决定。
+ 
+-A draft-only stack submit is a hard residual before babysit when babysit is on.
++当PR 看护开启时，仅草稿堆栈提交是PR 看护之前的硬残留。
+ 
+-**Do not fire (auto-detected, no flag needed):** the automatic handoff does not start in any of these cases.
+-- `mode:pipeline` **except** when this run completed a stack-mode submit (then hand off with the derived posture as above).
+-- Description-only or description-update mode.
+-- No PR created or updated this run.
+-- A non-GitHub host.
+-- A **draft PR** this run created or updated. A draft is the author's not-ready signal: announce the skip, and say `ce-babysit-pr` can start once the PR is ready. An explicit `babysit:continuous` or `babysit:checkpoint` still forces the watch — pass `watch` or `checkpoint` into the invocation so its draft boundary arms.
+-- **A head branch you cannot push to.** **Fork PRs are drivable — not a hard-off** when you can push the head (common for a branch this skill just pushed): babysit reads state on the **base** repo and pushes fixes to the **head** repo. Hard-off only when the head is not pushable.
+-**Soft-degrade (after successful handoff only):** `ce-babysit-pr` decides whether checkpoint mode applies and owns its report and resume invocation. Checkpoint is not a substitute for a failed handoff.
++**不触发（自动检测，无需标记）：**在任何这些情况下都不会启动自动切换。
++- `mode:pipeline` **除了**当此运行完成堆栈模式提交时（然后按照上面的派生姿势进行切换）。
++- 仅描述或描述更新模式。
++- 没有 PR 创建或更新此运行。
++- 非GitHub主机。
++- 本次运行创建或更新了 **草稿 PR**。草稿是作者未准备好的信号：宣布跳过，并说一旦PR准备好就可以开始`ce-babysit-pr`。显式的 `babysit:continuous` 或 `babysit:checkpoint` 仍然会强制监视 — 将 `watch` 或 `checkpoint` 传递到调用中，以便其草拟边界臂。
++- **您无法推送到的头部分支。** **当您可以推送头部时，分叉 PRs 是可驱动的 - 不是硬性**（对于此技能刚刚推送的分支来说很常见）：babysit 读取 **base** 存储库上的状态并将修复推送到 **head** 存储库。仅当头部不可推动时才硬关闭。
++**软降级（仅在成功切换后）：** `ce-babysit-pr` 决定是否应用检查点模式并拥有其报告和恢复调用。检查点并不能替代失败的切换。
+ 
+-## Applying via gh
++## 通过gh申请
+ 
+-The body **must** be written to a temp file and passed via `--body-file <path>`. Never use `--body-file -`, stdin pipes, heredoc-to-stdin, or `--body "$(cat ...)"` — wrappers and stdin handling can silently produce an empty PR body while `gh` still exits 0 and returns a URL.
++正文**必须**写入临时文件并通过 `--body-file <path>` 传递。切勿使用 `--body-file -`、stdin 管道、heredoc-to-stdin 或 `--body "$(cat ...)"` — 包装器和 stdin 处理可以默默地生成一个空的 PR 主体，而 `gh` 仍然退出 0 并返回 URL。
+ 
+ ```bash
+ BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/ce-pr-body.XXXXXX") && cat >> "$BODY_FILE" <<'__CE_PR_BODY_END__'
+@@ -79,15 +79,15 @@ BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/ce-pr-body.XXXXXX") && cat >> "$BODY_FILE" <
+ __CE_PR_BODY_END__
+ ```
+ 
+-The quoted sentinel keeps `$VAR`, backticks, and any literal `EOF` inside the body from being expanded.
++带引号的哨兵可以防止 `$VAR`、反引号和正文中的任何文字 `EOF` 被扩展。
+ 
+-For `<TITLE>`: substitute verbatim. If it contains `"`, `` ` ``, `$`, or `\`, escape them or switch to single quotes.
++对于`<TITLE>`：逐字替换。如果它包含 `"`, `` ` ``, `$`, or `\`，转义它们或切换到单引号。
+ 
+ ```bash
+ gh pr create --title "<TITLE>" --body-file "$BODY_FILE"   # new PR
+ gh pr edit   --title "<TITLE>" --body-file "$BODY_FILE"   # existing PR
+ ```
+ 
+-**Screenshots.** When the body references local images from `references/visual-evidence.md`, create the body file in the images' directory so each `./<name>.png` reference resolves: `BODY_FILE=$(mktemp "<images-dir>/ce-pr-body.XXXXXX")`. Add one `--attach "<images-dir>/<name>.png#<alt text>"` per image to the create or edit command. `gh` uploads each file and rewrites the matching reference to its GitHub URL.
++**屏幕截图。** 当正文引用 `references/visual-evidence.md` 中的本地图像时，在图像目录中创建正文文件，以便每个 `./<name>.png` 引用解析为：`BODY_FILE=$(mktemp "<images-dir>/ce-pr-body.XXXXXX")`。在创建或编辑命令中为每个图像添加一个 `--attach "<images-dir>/<name>.png#<alt text>"`。 `gh` 上传每个文件并将匹配的引用重写到其 GitHub URL。
+ 
+-A file `gh` rejects before uploading, such as a missing file or an image over 10 MB, makes it exit non-zero without creating or editing the PR; stderr names the file. An upload that fails after others succeeded can still leave the PR created or updated, and `gh` then still prints its URL. So whatever the exit status, do not run `gh pr create` a second time. Find the PR from the printed URL, or the way the new-PR re-check above does when none was printed, and read its body with `gh pr view "<pr-url>" --json body`. If any image reference there still points at a local path, edit that PR's body on GitHub to remove those references and keep everything else. If the create or edit did not apply, apply the body again without the images that failed. Either way, report which images did not upload.
++文件`gh`在上传前被拒绝，例如丢失文件或超过10 MB的图像，使其以非零值退出，而无需创建或编辑PR； stderr 命名该文件。在其他人成功后失败的上传仍然可以保留创建或更新的PR，并且`gh`仍然打印其URL。因此，无论退出状态如何，都不要再次运行 `gh pr create`。从打印的 URL 中找到 PR，或者按照上面 new-PR 在没有打印任何内容时重新检查的方式，并使用 `gh pr view "<pr-url>" --json body` 读取其正文。如果那里的任何图像引用仍然指向本地路径，请编辑 GitHub 上的 PR 主体以删除这些引用并保留其他所有内容。如果创建或编辑不适用，请再次应用正文，不包含失败的图像。无论哪种方式，请报告哪些图像未上传。
+diff --git a/skills/ce-commit-push-pr/references/branch-creation.md b/skills/ce-commit-push-pr/references/branch-creation.md
+index 364303965591946310fe0eb163d7ecc3b30db8bd..95bd7cfd6c2143b8d6136ef6c7f91e27428c1bab 100644
+--- a/skills/ce-commit-push-pr/references/branch-creation.md
++++ b/skills/ce-commit-push-pr/references/branch-creation.md
+@@ -1,47 +1,47 @@
+-# Branch creation from default branch
++# 从默认分支创建分支
+ 
+-Local `<base>` may have stale commits (another session/worktree advanced it) or commits the user authored intending to branch from later. Local git can't distinguish these — ask when unpushed commits are present.
++本地`<base>`可能有过时的提交（另一个session/worktree推进了它）或提交了打算从以后分支的用户。本地 git 无法区分这些 - 询问何时存在未推送的提交。
+ 
+-## Decision flow
++## 决策流程
+ 
+-### 1. Fetch fresh remote base
++### 1. 获取新的远程基地
+ 
+ ```bash
+ git fetch --no-tags origin <base>
+ ```
+ 
+-If fetch fails (network, auth, no remote), use the fallback at the bottom.
++如果获取失败（网络、身份验证、无远程），请使用底部的后备。
+ 
+-### 2. Check for unpushed local commits on `<base>`
++### 2. 检查 `<base>` 上未推送的本地提交
+ 
+ ```bash
+ git log origin/<base>..HEAD --oneline
+ ```
+ 
+-- **Empty output:** set `BASE_REF=origin/<base>` and proceed to step 3.
+-- **Non-empty output:** show the commit list and ask (per the "Asking the user" convention in `SKILL.md`):
++- **空输出：** 设置 `BASE_REF=origin/<base>` 并继续步骤 3。
++- **非空输出：** 显示提交列表并询问（根据 `SKILL.md` 中的“询问用户”约定）：
+ 
+-  > "Local `<base>` has N unpushed commits not on `origin/<base>`. Carry them onto the new feature branch, or leave them on local `<base>`?"
++  > “本地`<base>`有N个未推送的提交不在`origin/<base>`上。将它们带到新的功能分支上，还是将它们留在本地`<base>`？”
+ 
+-  - **Carry forward** → `BASE_REF=HEAD`. The new branch starts from local HEAD, preserving the commits.
+-  - **Leave on `<base>`** → `BASE_REF=origin/<base>`. The new branch starts clean; commits remain on local `<base>`.
++  - **结转** → `BASE_REF=HEAD`。新分支从本地HEAD开始，保留提交。
++  - **沿 `<base>`** → `BASE_REF=origin/<base>` 出发。新的分支开始干净；提交保留在本地 `<base>` 上。
+ 
+-  Never default silently — carrying foreign commits into a PR is worse than asking again.
++  永远不要默默默认——将外部提交带入 PR 比再次询问更糟糕。
+ 
+-### 3. Create the feature branch
++### 3. 创建功能分支
+ 
+ ```bash
+ git checkout --no-overwrite-ignore -b <branch-name> "$BASE_REF"
+ ```
+ 
+-If checkout fails because uncommitted or ignored files would be overwritten, stop and ask the user to handle the colliding paths. In `mode:pipeline`, report the blocker without asking. Do not stash or remove the colliding paths.
++如果由于未提交或忽略的文件将被覆盖而检出失败，请停止并要求用户处理冲突路径。在`mode:pipeline`中，无需询问即可举报拦截者。不要隐藏或删除冲突路径。
+ 
+-## Fetch failure fallback
++## 获取失败后备
+ 
+-If `git fetch` fails, branch from current local HEAD:
++如果`git fetch`失败，则从当前本地HEAD分支：
+ 
+ ```bash
+ git checkout -b <branch-name>
+ ```
+ 
+-Note in the user-facing summary that base freshness was not verified. Skip the unpushed-commits check — without a fresh `origin/<base>`, the answer is unreliable.
++请注意，在面向用户的摘要中，未验证基础新鲜度。跳过未推送的提交检查 - 如果没有新的 `origin/<base>`，答案是不可靠的。
+diff --git a/skills/ce-commit-push-pr/references/commit-and-push.md b/skills/ce-commit-push-pr/references/commit-and-push.md
+index e176104813d90f72d480a5eb83209ea7aa1d4d2c..f803c5be0ee02c2472be6924b2e25e881c060f5b 100644
+--- a/skills/ce-commit-push-pr/references/commit-and-push.md
++++ b/skills/ce-commit-push-pr/references/commit-and-push.md
+@@ -1,14 +1,14 @@
+-# Committing and pushing
++# 承诺和推动
+ 
+-If `references/stack-submit.md` already built and committed the stack layers before this step, skip the ordinary single-branch commit and push and continue to Step 4 (compose the PR title and body); `gh stack submit` in Step 5 (apply and report) pushes the stack.
++如果`references/stack-submit.md`在此步骤之前已经构建并提交了堆栈层，则跳过普通的单分支提交和推送，继续执行步骤4（组合PR标题和正文）；第5步（应用和报告）中的`gh stack submit`压入堆栈。
+ 
+-If you are on the default branch, creating the feature branch has to handle three things: a stale local `<base>`, unpushed commits on local `<base>`, and uncommitted changes that collide with the fresh remote base. Read `references/branch-creation.md` and follow its decision flow before continuing.
++如果您位于默认分支上，则创建功能分支必须处理三件事：过时的本地 `<base>`、本地 `<base>` 上未推送的提交以及与新远程库冲突的未提交更改。在继续之前，请阅读`references/branch-creation.md`并遵循其决策流程。
+ 
+-Scan changed files for naturally distinct concerns. If they clearly group into separate logical changes, create separate commits (2-3 max). Group at file level only — no `git add -p`. When ambiguous, one commit is fine.
++扫描已更改的文件以找出明显不同的问题。如果它们明确分组为单独的逻辑更改，请创建单独的提交（最多 2-3 个）。仅在文件级别进行分组 — 无 `git add -p`。当模棱两可时，一次提交就可以了。
+ 
+-Stage and commit each group. **Avoid `git add -A` and `git add .`** — they sweep in `.env`, build artifacts, and generated files. **Honor `exclude:<paths>` when the invocation carries it.** The caller names files that must stay uncommitted, typically the user's own in-progress edits it could not separate from its work. Never stage or commit them, and say in the report that they were left out. When a plan Implementation Unit ID is already in hand for this commit (conversation, caller, or the files belong to one unit), append that unit's U-ID in parentheses — `(U3)` means unit 3. Do not hunt for a plan. Omit when the commit spans units, the unit is unclear, or no plan is in hand.
++暂存并提交每个组。 **避免 `git add -A` 和 `git add .`** — 它们扫荡 `.env`，构建产物并生成文件。 **当调用携带它时，尊重 `exclude:<paths>`。** 调用者命名必须保持未提交的文件，通常是用户自己正在进行的编辑，它无法与其工作分开。切勿上演或实施它们，并在报告中说它们被排除在外。当此提交的计划实施单元 ID 已在手（对话、调用者或属于一个单元的文件）时，请在括号中附加该单元的 U-ID — `(U3)` 表示单元 3。不要寻找计划。当提交跨越多个单元、单元不清楚或手中没有计划时，请省略。
+ 
+-Add your commits on top of other people's commits on this branch; never rewrite theirs in a way that drops their author or trailers, such as squashing them into yours. When a commit you create carries someone else's work that will not otherwise land under their name (ported from their branch or PR, or applied from their patch), end its message with a `Co-authored-by: Name <email>` trailer for each person that work credits: its commit authors and anyone their `Co-authored-by` trailers name. Copy each identity exactly from those commits or the patch. Never guess an email: when none is recorded, name them in the message body instead.
++将您的提交添加到此分支上其他人的提交之上；永远不要以放弃作者或预告片的方式重写他们的内容，例如将它们压入你的。当您创建的提交包含其他人的作品，而这些作品不会以其他方式登陆他们的名字（从他们的分支或 PR 移植，或从他们的补丁应用）时，请以 `Co-authored-by: Name <email>` 预告片结束其消息，为每个工作人员鸣谢：其提交作者和任何人的 `Co-authored-by` 预告片名称。从这些提交或补丁中准确复制每个身份。切勿猜测电子邮件：如果没有记录任何电子邮件，请在邮件正文中命名它们。
+ 
+ ```bash
+ git add file1 file2 file3 && git commit -m "$(cat <<'EOF'
+@@ -17,12 +17,12 @@ EOF
+ )" -- file1 file2 file3
+ ```
+ 
+-The trailing path list on `git commit` matters. A bare `git commit` takes the whole index, so anything already staged before this run (a caller's `exclude:` paths, or work the user staged and did not name) would end up in the commit. Naming the paths commits exactly the group and leaves other index entries alone.
++`git commit` 上的尾随路径列表很重要。裸露的 `git commit` 占用整个索引，因此在此运行之前已经暂存的任何内容（调用者的 `exclude:` 路径，或用户暂存但未命名的工作）都将最终出现在提交中。命名路径会准确提交组，而不会影响其他索引条目。
+ 
+-Then apply the **Project publishing gate**. Immediately before pushing, re-confirm you are on the intended feature branch with `git branch --show-current`. The branch gathered in Context is a hint, and Step 1 (resolve branch and PR state) may have created or switched branches since. Push the live `HEAD` so it reflects the current checkout, never a stale branch name:
++然后应用**项目发布门**。在推送之前，使用 `git branch --show-current` 重新确认您位于预期的功能分支上。 Context 中聚集的分支是一个提示，步骤 1（解析分支和 PR 状态）可能已经创建或切换了分支。推送实时 `HEAD` 以便它反映当前结账，而不是过时的分支名称：
+ 
+ ```bash
+ git push -u origin HEAD
+ ```
+ 
+-If the working tree is clean and all commits are already pushed, this step is a no-op.
++如果工作树是干净的并且所有提交都已推送，则此步骤是无操作的。
+diff --git a/skills/ce-commit-push-pr/references/compose.md b/skills/ce-commit-push-pr/references/compose.md
+index 38d41310303c5a794e68d8cb16a0ae553f09107e..33a1cfc46ee8a8f35a579767bc44bc24706590c7 100644
+--- a/skills/ce-commit-push-pr/references/compose.md
++++ b/skills/ce-commit-push-pr/references/compose.md
+@@ -1,30 +1,30 @@
+-# Composing the title and body: evidence, teaching, and branding gates
++# 撰写标题和正文：证据、教学和品牌门
+ 
+-**You MUST read `references/pr-description-writing.md`** in full. It defines value-first framing, sizing, program altitude (where this PR sits in a multi-PR series), related-work references (preserve existing `Related:` / `Fixes` on rewrite), the branding body rules, and the pre-apply audit. The only input it needs from this skill is the PR ref, if the mode selection identified one (description-only with a pasted URL, description update, or a confirmed existing-PR rewrite in the full workflow). If Step 1 (resolve branch and PR state) found an existing PR, pass its URL to Step 4 when rewriting so PR mode fetches the existing body. In Stack mode, Step 5 (apply and report) follows the post-submit description steps in `references/stack-submit.md` instead of composing one default-base body here.
++**您必须完整阅读`references/pr-description-writing.md`**。它定义了价值优先的框架、规模、程序高度（其中PR位于多个PR系列中）、相关工作参考（在重写时保留现有的`Related:`/`Fixes`）、品牌主体规则和预申请审核。如果模式选择识别了一个（仅描述，带有粘贴的 URL、描述更新或在完整工作流程中确认的现有 - PR 重写），则此技能所需的唯一输入是 PR 参考。如果步骤 1（解析分支和 PR 状态）找到现有的 PR，则在重写时将其 URL 传递给步骤 4，以便 PR 模式获取现有主体。在 Stack 模式下，第 5 步（应用和报告）遵循`references/stack-submit.md`中的提交后描述步骤，而不是在此处组成一个默认基础正文。
+ 
+-**Evidence decision** before composition. Use artifacts the user or caller supplied, and take screenshots yourself only as `references/visual-evidence.md` describes. Never invent evidence, and never launch another CE skill to capture it.
++**构图前的证据决定**。使用用户或调用者提供的产物，并仅按照 `references/visual-evidence.md` 的描述自行截取屏幕截图。永远不要发明证据，也永远不要启动另一个 CE 技能来捕获它。
+ 
+-1. **User or caller supplied** (URL, markdown image/embed, local path) — incorporate as `## Demo`, `## Screenshots`, or `## Evidence`, and take no screenshots of what it already shows. A supplied screenshot of the UI without this change is different: it is the before image for item 4, not finished evidence.
+-2. **User asked for evidence but supplied none** — for screenshots of UI, go to item 4. For anything else (a recording, a demo), ask for the artifact or tell them to capture it with the harness and return.
+-3. **No material observable claim** (internal plumbing, type-only, pure refactor, inert docs) — skip without asking. Classify by runtime purpose, not extension (runtime agent instructions / config / product content / policy YAML is not auto-skippable as "docs").
+-4. **Material visual claim** (rendered UI a reviewer would judge faster or more correctly by seeing it), or the user asked for screenshots — read `references/visual-evidence.md` now and follow it. When it cannot capture, it falls back to item 5's note.
+-5. **Otherwise** (CLI, API, workflow, ranking, deploy/config behavior) — write a concise validation note of what was exercised. If a real run was impossible (credentials, paid services, deploy-only, hardware, missing setup), say so. Do not block PR creation for missing visuals; test or manual-check notes are fine. Never label test output "Demo" or "Screenshots."
++1. **用户或调用者提供**（URL、markdown image/embed、本地路径）- 合并为 `## Demo`、`## Screenshots` 或 `## Evidence`，并且不要对已显示的内容进行屏幕截图。提供的未进行此更改的 UI 屏幕截图有所不同：它是第 4 项的之前图像，而不是完成的证据。
++2. **用户要求提供证据，但没有提供** - 要获取 UI 屏幕截图，请转到第 4 项。对于其他任何内容（录音、演示），请索要产物或告诉他们用宿主捕获它并返回。
++3. **没有重大可观察的声明**（内部管道、仅类型、纯重构、惰性文档）- 无需询问即可跳过。按运行时目的而不是扩展进行分类（运行时代理说明/配置/产品内容/策略YAML不能像“文档”一样自动跳过）。
++4. **实质性视觉声明**（审查者通过查看呈现的 UI 可以更快或更正确地判断），或者用户要求屏幕截图 - 立即阅读 `references/visual-evidence.md` 并遵循它。当它无法捕获时，它会退回到第 5 项的注释。
++5. **否则**（CLI、API、工作流程、排名、deploy/config行为）——写一份关于所执行内容的简明验证说明。如果真正的运行是不可能的（凭证、付费服务、仅部署、硬件、缺少设置），请说出来。不要因为缺少视觉效果而阻止PR创作；测试或手动检查注释都可以。切勿将测试输出标记为“演示”或“屏幕截图”。
+ 
+-**Concept teaching gate** before composition. Use the repo root gathered in Context, resolving it with `git rev-parse --show-toplevel` if you don't already have it (description-only and description-update modes can skip the Context snapshot). Then apply the ordinary-key rule below.
++**构图前的概念教学门**。使用在 Context 中收集的存储库根，如果您还没有它，则使用 `git rev-parse --show-toplevel` 解析它（仅描述和描述更新模式可以跳过上下文快照）。然后应用下面的普通密钥规则。
+ 
+ <!-- ce-config-layers:start -->
+-**Resolve ordinary CE yaml keys from the two repo files.**
++**解析两个存储库文件中的普通 CE yaml 密钥。**
+ 
+-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
+-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
+-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
++- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
++- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
++- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
+ <!-- ce-config-layers:end -->
+ 
+-Only an **active (non-commented)** `pr_teaching_section:` key counts. Lines starting with `#` are YAML comments, and matching a commented template key would silently flip the decision. Teaching is off only when the winning active value is exactly `false`; a missing key or any other value → default **on**. The same layer order resolves `pr_teaching_archive:`: on only when the winning active value is exactly `true`, else **off**. A per-run `archive:on|off` token overrides it for this invocation.
++只有 **活动（未注释）** `pr_teaching_section:` 键才有效。以 `#` 开头的行是 YAML 注释，匹配注释的模板键将默默地翻转决策。仅当获胜活跃值恰好为`false`时才关闭教学；缺少的键或任何其他值 → 默认**打开**。同一层顺序解析`pr_teaching_archive:`：仅当获胜活动值恰好为`true`时才打开，否则**关闭**。每次运行的 `archive:on|off` 令牌会覆盖此调用。
+ 
+-- Gate **on** — judge novelty and compose per **Step B2** of the reference.
+-- Gate **off** — compose without concept handling: skip the novelty judgment, the `## New concepts` section, the Step 5 concept trailer and `ce-explain` offer, and archival entirely.
++- 门**开启** — 判断新颖性并根据引用文档的**步骤 B2** 进行创作。
++- Gate **off** — 无需概念处理即可撰写：跳过新颖性判断、`## New concepts` 部分、第 5 步概念预告片和 `ce-explain` 优惠以及完全归档。
+ 
+-**PR branding gate** before composition. Branding is **off unless this invocation includes `branding:on` or the user explicitly asks in the current prompt to add Compound Engineering branding**; normalize that natural-language request to `branding:on`. `branding:off` forces off when `branding:on` is absent. If both tokens are present, stop and report the conflict rather than guessing. Pass the resolved branding decision, and whether the PR is new or existing, into Step D of the reference, which defines the body rules.
++**PR 品牌门** 在合成之前。除非此调用包含 `branding:on` 或用户在当前提示中明确要求添加 Compound Engineering 品牌，否则品牌**关闭；将自然语言请求标准化为 `branding:on`。当 `branding:on` 不存在时，`branding:off` 强制关闭。如果两个标记都存在，请停止并报告冲突，而不是猜测。将已解决的品牌决策以及 PR 是新的还是现有的传递到参考的步骤 D，该步骤定义了正文规则。
+ 
+-Then continue with the reference (Steps A–E, including Step B2 when the teaching gate is on). Step E must run before the body is returned.
++然后继续参考（步骤 A-E，包括示教门打开时的步骤 B2）。步骤 E 必须在尸体返回之前运行。
+diff --git a/skills/ce-commit-push-pr/references/context.md b/skills/ce-commit-push-pr/references/context.md
+index fc383b83935a8dc95feab9c05a876fc0c66b8332..1ba5e3261f26d7d6593356ce5c68aaa6b9460c50 100644
+--- a/skills/ce-commit-push-pr/references/context.md
++++ b/skills/ce-commit-push-pr/references/context.md
+@@ -1,42 +1,41 @@
+-# Repository context, branch, and PR state
++# 存储库上下文、分支和 PR 状态
+ 
+-Gather this before Step 1 (resolve branch and PR state), and re-verify branch, remote, and PR state immediately before each
+-consequential step (the push in Step 3, `gh pr create` in Step 5).
++在步骤 1 之前收集此信息（解析分支和PR状态），并在每个后续步骤之前重新验证分支、远程和PR状态（步骤 3 中的推送、步骤 5 中的`gh pr create`）。
+ 
+-Gather the repository context by running each command below as its **own** shell tool call — a single argv-style invocation (just the program and its arguments). Do **not** join them with `;`, `&&`, `||`, pipes, `$(...)`, or redirects like `2>/dev/null`: that syntax parses only under POSIX shells and aborts under Windows PowerShell. Read each command's exit status directly. A non-zero exit is a normal state to interpret (no PR yet, no `origin/HEAD`, detached HEAD), not a failure to suppress.
++通过运行下面的每个命令作为其**自己的** shell 工具调用来收集存储库上下文 - 单个 argv 样式调用（仅是程序及其参数）。 **不要**使用 `;`、`&&`、`||`、管道、`$(...)` 或像 `2>/dev/null` 这样的重定向：该语法仅在 POSIX shell 下解析，并在 Windows PowerShell 下中止。直接读取每个命令的退出状态。非零退出是解释的正常状态（还没有PR，没有`origin/HEAD`，分离HEAD），而不是抑制失败。
+ 
+-Run them in order — the existing-PR check needs the branch name from `git branch --show-current`:
++按顺序运行它们 - 现有的-PR检查需要来自`git branch --show-current`的分支名称：
+ 
+-| Command | Purpose | Non-zero exit / empty output means |
++| 命令 | 目的 | 非零退出/空输出意味着 |
+ | --- | --- | --- |
+-| `git rev-parse --show-toplevel` | Repo root | Not a git repository — report and stop |
+-| `git status` | Working-tree state | (fails only outside a repo) |
+-| `git diff HEAD` | Uncommitted changes | Unborn repo with no commits yet |
+-| `git branch --show-current` | Current branch (`<branch>`) | Empty output = detached HEAD (Step 1 handles it) |
+-| `git log --oneline -10` | Recent commit / PR-title style | Unborn repo — no history yet |
+-| `git rev-parse --abbrev-ref origin/HEAD` | Remote default branch | No `origin/HEAD` set — resolve per Step 1 |
+-| `gh pr list --head <branch> --state open --json number,url,title,body,state,isDraft,headRefName,headRepositoryOwner` | Open PR for this branch (run only once `<branch>` is non-empty) | Exit 0 with `[]` = no open PR. Non-zero = `gh` missing, unauthenticated, or offline — PR state is **unknown**, not "none"; never treat a non-zero check as "no PR"; re-check before creating (Step 5) |
++| `git rev-parse --show-toplevel` | 回购根 | 不是 git 存储库 — 报告并停止 |
++| `git status` | 工作树状态 | （仅在回购之外失败） |
++| `git diff HEAD` | 未提交的更改 | 未诞生的存储库，尚未提交 |
++| `git branch --show-current` | 当前分支 (`<branch>`) | 空输出=分离HEAD（步骤1处理它） |
++| `git log --oneline -10` | 最近提交 / PR-标题样式 | Unborn repo——还没有历史 |
++| `git rev-parse --abbrev-ref origin/HEAD` | 远程默认分支 | 未设置 `origin/HEAD` — 按步骤 1 解决 |
++| `gh pr list --head <branch> --state open --json number,url,title,body,state,isDraft,headRefName,headRepositoryOwner` | 为此分支打开PR（仅运行一次`<branch>`非空） | 退出 0，`[]` = 未打开 PR。非零 = `gh` 缺失、未经身份验证或离线 — PR 状态是**未知**，而不是“无”；永远不要将非零检查视为“no PR”；创建前重新检查（步骤5） |
+ 
+-Substitute `<branch>` with the current branch from `git branch --show-current`, and pass the branch **name only**. Two traps:
++将 `<branch>` 替换为 `git branch --show-current` 中的当前分支，并仅传递分支**名称**。两个陷阱：
+ 
+-- **Empty branch (detached HEAD):** skip the PR check entirely — `gh pr list` with an empty `--head` drops the filter and lists unrelated PRs. Resolve it after Step 1 creates a branch.
+-- **Fork checkout:** do **not** pass `<owner>:<branch>` — `gh pr list --head` does not accept that syntax and silently returns `[]` for it, which reads as "no PR" and opens a duplicate. The PR lives on the base repo, so make `gh` target the base: rely on its default-repo resolution, or pass `-R <base-owner>/<repo>` explicitly when the default is the fork.
++- **空分支（分离HEAD）：**完全跳过PR检查 - 带有空`--head`的`gh pr list`会删除过滤器并列出不相关的PRs。在第1步创建分支后解决它。
++- **分叉签出：**不**传递 `<owner>:<branch>` — `gh pr list --head` 不接受该语法并默默返回 `[]`，读作“无 PR”并打开副本。 PR 存在于基础存储库上，因此使 `gh` 以基础存储库为目标：依赖其默认存储库分辨率，或者当默认值是分叉时显式传递 `-R <base-owner>/<repo>`。
+ 
+-Everything gathered here is a snapshot taken before any action — treat it as a hint, not ground truth. Re-verify the branch, remote, and existing-PR state immediately before each consequential step (the push in Step 3, `gh pr create` in Step 5), since they can change between gathering and acting.
++这里收集的所有内容都是在采取任何行动之前拍摄的快照 - 将其视为提示，而不是基本事实。在每个后续步骤（步骤 3 中的推送，步骤 5 中的 `gh pr create`）之前重新验证分支、远程和现有PR 状态，因为它们可以在收集和执行之间发生变化。
+ 
+-## Step 1 detail: resolve branch and PR state
++## 第 1 步细节：解析分支和 PR 状态
+ 
+-The remote default branch returns something like `origin/main`; strip the `origin/` prefix. If that command exited non-zero (no `origin/HEAD` set) or returned bare `HEAD`, try `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`. If both fail, fall back to `main`. For the existing-PR check: an empty `[]` array means no open PR for this branch; a non-zero exit means `gh` is missing, unauthenticated, or offline — treat PR state as **unknown** (not "no PR") and re-run the check, or `gh auth status`, before creating a new PR in Step 5 rather than assuming none exists.
++远程默认分支返回类似 `origin/main` 的内容；去掉 `origin/` 前缀。如果该命令以非零值退出（未设置`origin/HEAD`）或返回裸`HEAD`，请尝试`gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`。如果两者都失败，则退回到`main`。对于现有的-PR检查：空的`[]`数组意味着该分支没有打开的PR；非零退出意味着`gh`丢失、未经身份验证或离线——将PR状态视为**未知**（而不是“无PR”）并重新运行检查或`gh auth status`，然后在步骤5中创建新的PR，而不是假设不存在。
+ 
+-Which branch path to take:
++选择哪条分支路径：
+ 
+-- **Detached HEAD** — automatically create a feature branch from the current `HEAD` before continuing. Derive the branch name from the change content, run `git checkout -b <branch-name>`, re-read `git branch --show-current`, and use that result for the rest of the workflow. Do not ask whether to create the branch — invoking the full commit/push/PR workflow is already confirmation that the work should become branch-backed. If the derived branch name already exists, choose a non-conflicting suffix or ask only if the conflict cannot be resolved safely.
+-- **On default branch with work to do** (uncommitted, unpushed, or no upstream) — automatically create a feature branch (pushing the default directly is not supported). Derive a name from the change content and continue at Step 3, which handles branch creation safely. Do not ask whether to branch — committing on the default is not an option here.
+-- **On default branch with no work** — report no feature branch work and stop.
+-- **Feature branch** — continue.
++- **分离 HEAD** — 在继续之前自动从当前 `HEAD` 创建一个功能分支。从更改内容中派生分支名称，运行`git checkout -b <branch-name>`，重新读取`git branch --show-current`，并将该结果用于工作流程的其余部分。不要询问是否创建分支 - 调用完整的 commit/push/PR 工作流程已经确认工作应该由分支支持。如果派生分支名称已存在，请选择不冲突的后缀或仅在无法安全解决冲突时询问。
++- **在有工作要做的默认分支上**（未提交、未推送或无上游）- 自动创建功能分支（不支持直接推送默认分支）。从更改内容中派生名称并继续执行步骤 3，这将安全地处理分支创建。不要询问是否分支——这里不能选择默认提交。
++- **在没有工作的默认分支上** - 报告没有功能分支工作并停止。
++- **功能分支** — 继续。
+ 
+-If the PR check returned a non-empty array, do **not** blindly take index 0. In a base repo with multiple forks, another contributor's PR can share the same branch name (`--head` filters by branch only, not `<owner>:<branch>`). Select the entry whose `headRepositoryOwner` and `headRefName` match the current head — the branch and fork this workflow is pushing. Note the URL and body from that entry (all entries are open — the check filtered `--state open`). If exactly one entry matches, use it. If multiple entries share the branch name from different owners and none can be confirmed as the current head's, treat it as ambiguous: stop and show the candidates to the user rather than acting on the wrong PR. Step 5 uses the URL to choose between creating a new PR and updating the existing one. Step 4 uses the existing body as context for what to preserve when rewriting.
++若查询 PR 返回非空数组，不盲取第 0 项。多个 fork 可有同名分支；`--head` 只过滤分支名而非 `<owner>:<branch>`。用 `headRepositoryOwner` 与 `headRefName` 精确匹配本次推送的仓库所有者和分支。记录匹配 PR 的 URL 和正文（`--state open` 已限定为开放）。唯一匹配即可使用；若同名而无法确认归属，先报告候选项，不操作错误 PR。第 5 步以 URL 决定创建还是更新，第 4 步按已有正文保留必要内容。
+ 
+-## Step 2 detail: conventions
++## 第 2 步细节：约定
+ 
+-Match repo style for commit messages and PR titles (project instructions in context > recent commits > conventional commits as default). With conventional commits, default to `fix:` over `feat:` when ambiguous — adding code to remedy broken or missing behavior is `fix:`. Reserve `feat:` for capabilities the user could not previously accomplish. The user may override. The description reference's title step uses this same type default.
++匹配提交消息和 PR 标题的存储库样式（默认情况下，上下文中的项目说明 > 最近提交 > 常规提交）。对于传统提交，当不明确时默认为 `fix:` 而不是 `feat:` — 添加代码来修复损坏或缺失的行为是 `fix:`。为用户以前无法完成的功能保留`feat:`。用户可以覆盖。描述引用的标题步骤使用相同的类型默认值。
+diff --git a/skills/ce-commit-push-pr/references/gh-stack-cli.md b/skills/ce-commit-push-pr/references/gh-stack-cli.md
+index 4d4f94460cda55ef88207baeb41a097b819147b4..dee2b0de8b323d2323d34772ac3a07a186d75785 100644
+--- a/skills/ce-commit-push-pr/references/gh-stack-cli.md
++++ b/skills/ce-commit-push-pr/references/gh-stack-cli.md
+@@ -1,31 +1,27 @@
+-# `gh stack` semantics this skill relies on
++# `gh stack` 该技能依赖的语义
+ 
+-Verified against `gh stack version 0.1.0`. `gh stack <command> --help` is authoritative — if it
+-disagrees with anything here, follow `--help` and say so in your report. (`gh stack help <command>`
+-does not work; it prints top-level help.)
++已验证`gh stack version 0.1.0`。 `gh stack <command> --help` 具有权威性 — 如果它与此处的任何内容不同意，请遵循 `--help` 并在报告中说明。 （`gh stack help <command>` 不起作用；它打印顶级帮助。）
+ 
+-Only the behavior that changes a decision in stack mode is listed. This file is self-contained on
+-purpose: do not depend on the user having a separate `gh-stack` skill installed.
++仅列出在堆栈模式下更改决策的行为。该文件是独立的
++目的：不依赖于用户安装了单独的`gh-stack`技能。
+ 
+-## Classifying a parent
++## 对父级进行分类
+ 
+ ```bash
+ gh stack checkout "<parent-pr-number>"
+ ```
+ 
+-Resolve a parent by **PR number** whenever one exists — that is what pulls a stack down from
+-GitHub. A bare branch name resolves against **local** stacks only, so a branch-only parent can be
+-classified locally and no further.
++只要存在一个父级，就通过 **PR 数字** 解析父级 - 这就是从 GitHub 下拉堆栈的原因。裸分支名称仅针对**本地**堆栈进行解析，因此仅分支父级可以在本地进行分类，而无需进一步分类。
+ 
+-Branch on the exit code; status text goes to stderr and must not be parsed.
++退出代码上的分支；状态文本将发送到 stderr 并且不能被解析。
+ 
+-| Exit | Meaning | What it means here |
++| 出口 | 意义 | 这里的意思是什么 |
+ |---|---|---|
+-| 0 | Success | Parent is in a stack, and `HEAD` has moved to it |
+-| 2 | Not in a stack | Parent is standalone; nothing was checked out or fetched |
+-| 5 | Invalid arguments | Fix the invocation; see `--help` |
+-| 6 | Disambiguation required | Branch is in several stacks — check out a non-shared branch |
+-| 9 | Stacked PRs unavailable | Not enabled on this repository; tell the user and stop |
++| 0 | 成功 | 父级在堆栈中，并且 `HEAD` 已移至其中 |
++| 2 | 不在堆栈中 | 父级是独立的；没有检查或获取任何内容 |
++| 5 | 无效参数 | 修复调用；见`--help` |
++| 6 | 需要消除歧义 | 分支位于多个堆栈中 — 检查非共享分支 |
++| 9 | 堆叠PRs不可用 | 在此存储库上未启用；告诉用户并停止 |
+ 
+ ```bash
+ gh stack view --json    # JSON on stdout: trunk, currentBranch,
+@@ -33,51 +29,34 @@ gh stack view --json    # JSON on stdout: trunk, currentBranch,
+                         #              pr { number, url, state } }
+ ```
+ 
+-`base` is the parent SHA the branch was last known to contain, not the parent's current tip;
+-`needsRebase` is true when that tip is no longer an ancestor. There is no field naming the top of
+-the stack and no documented branch ordering, so do not derive position from this payload — use
+-`add`'s exit 5 instead.
++`base` 是分支最后已知包含的父 SHA，而不是父当前的提示；当该尖端不再是祖先时，`needsRebase`为真。没有命名堆栈顶部的字段，也没有记录的分支顺序，因此不要从此有效负载派生位置 - 使用 `add` 的出口 5 代替。
+ 
+-## Resolving a PR head
++## 解决PR头
+ 
+-`gh pr view "<n>" --json headRefName,headRefOid,author` identifies the head; `headRefName` alone
+-does not, because a same-repo name can be absent or stale locally and can collide with an unrelated
+-branch. Create a local branch at `headRefOid`, fetching `refs/pull/<n>/head` when that commit is not
+-reachable — reachability leaves the commit with no branch to name.
++`gh pr view "<n>" --json headRefName,headRefOid,author` 识别头部； `headRefName` 单独不会，因为相同的存储库名称可能在本地不存在或过时，并且可能与不相关的分支发生冲突。在 `headRefOid` 创建本地分支，当该提交无法访问时获取 `refs/pull/<n>/head` — 可访问性使该提交没有可命名的分支。
+ 
+-## Building
++## 建筑
+ 
+ ```bash
+ gh stack init [--base "<trunk>"] "<branch>"...
+ ```
+ 
+-Processes branches bottom to top and checks out the **last** one. **Existing branches are adopted;
+-missing ones are created** — the first from the trunk, each later one from the branch before it.
+-There is no separate adopt mode: existence decides. `--base` selects a non-default trunk, so a
+-parent branch can serve as the trunk without joining the stack.
++从下到上处理分支并检查**最后**一个。 **采用现有分支机构；创建丢失的**——第一个来自主干，后面的每个来自它之前的分支。没有单独的采用模式：存在决定。 `--base` 选择非默认主干，因此父分支可以作为主干而无需加入堆栈。
+ 
+ ```bash
+ gh stack add "<branch>"
+ ```
+ 
+-Must run from the **top** branch of the stack (or the trunk while it is still empty); anywhere else
+-exits **5**. Exit 5 here means "you are not on the top", and moving there with `gh stack top` is a
+-decision, not a fix: it changes which layer the new branch is parented to. Whether that is correct
+-belongs to the caller — when a specific parent was named, it is not. Without `-Am`, `add` does not
+-touch the working tree, so staged and unstaged changes follow onto the new branch.
++必须从堆栈的 **top** 分支运行（或在主干仍为空时）；其他任何地方都有 **5** 出口。这里的 Exit 5 意味着“你不在顶部”，用 `gh stack top` 移动到那里是一个决定，而不是修复：它改变了新分支的父级。这是否正确取决于调用者——当指定一个特定的父对象时，情况就不是这样了。如果没有 `-Am`，`add` 不会触及工作树，因此暂存和未暂存的更改会跟随到新分支上。
+ 
+ ```bash
+ gh stack submit --auto [--open]
+ ```
+ 
+-`--auto` avoids a title prompt per new PR. `--open` creates PRs ready for review instead of drafts,
+-and also marks pre-existing drafts ready.
++`--auto` 避免了每个新PR 出现标题提示。 `--open` 创建可供审核的PRs（而不是草稿），并且还将预先存在的草稿标记为就绪。
+ 
+-## Never
++## 绝不
+ 
+-- **`gh stack link`** — GitHub-only by design, creates no local tracking, so a later
+-  `gh stack submit`, `gh stack view`, or `gh stack merge` will not see the layer. It exists for
+-  branches managed by external tools (jj, Sapling, git-town).
+-- **`gh pr merge`** on a stack member — it cannot merge a stack. Landing uses `gh stack merge`.
+-- **Bare `view` / `submit` / `init` / `add` / `checkout`** — each prompts or opens a TUI that
+-  blocks under a PTY. Always pass the arguments and flags shown above.
++- **`gh stack link`** — GitHub - 仅根据设计，不创建本地跟踪，因此稍后的 `gh stack submit`、`gh stack view` 或 `gh stack merge` 将看不到该图层。它适用于由外部工具（jj、Sapling、git-town）管理的分支。
++- **`gh pr merge`** 在堆栈成员上 - 它无法合并堆栈。着陆使用`gh stack merge`。
++- **裸 `view` / `submit` / `init` / `add` / `checkout`** — 每个都会提示或打开在 PTY 下阻塞的 TUI。始终传递上面显示的参数和标志。
+diff --git a/skills/ce-commit-push-pr/references/pr-description-writing.md b/skills/ce-commit-push-pr/references/pr-description-writing.md
+index afe9199a81f36bba6082e24b0a65d9e945640382..f2358ebe7eab8305a7ac38343f2952dbc602ce45 100644
+--- a/skills/ce-commit-push-pr/references/pr-description-writing.md
++++ b/skills/ce-commit-push-pr/references/pr-description-writing.md
+@@ -1,42 +1,42 @@
+-# PR Description Writing
++# PR 描述写作
+ 
+-## The core principle
++## 核心原则
+ 
+-The diff is already visible on GitHub. The description exists to explain what the diff cannot show: what was impossible before and is now possible, what was broken and is now fixed, what shape changed. Cut any sentence a reader could reconstruct from the diff itself.
++差异已在 GitHub 上可见。描述的存在是为了解释差异无法显示的内容：以前不可能的内容现在可以实现，什么内容被破坏而现在已修复，什么形状发生了变化。删除读者可以从差异本身重建的任何句子。
+ 
+-- Bad (lists what was edited): "Adds `evidence-decider.ts`, modifies `ce-commit-push-pr/SKILL.md` to call it, and updates two test files."
+-- Good: "Evidence capture now decides automatically whether a change has observable behavior. CLI tools and libraries are now eligible alongside web UIs."
+-- Bad (states how the work was done): "`ce-code-review`'s reviewer personas now anchor their checks to named canonical frameworks."
+-- Good: "`ce-code-review` now finds nine defect shapes it used to miss, and stops blocking on findings whose only claim is 'could be better.'"
++- 错误（列出已编辑的内容）：“添加 `evidence-decider.ts`，修改 `ce-commit-push-pr/SKILL.md` 来调用它，并更新两个测试文件。”
++- 好：“证据捕获现在可以自动决定更改是否具有可观察的行为。CLI 工具和库现在与 Web UI 一起符合资格。”
++- 不好（说明工作是如何完成的）：“`ce-code-review` 的审查者角色现在将他们的检查锚定到指定的规范框架。”
++- 好：“`ce-code-review` 现在发现了过去错过的九个缺陷形状，并且不再阻止那些唯一声称‘可以更好’的发现。”
+ 
+-If the lead describes what was edited rather than what is now different for someone using this, rewrite it — restating the diff is the failure mode this skill exists to prevent. A mechanism written in an outcome's grammar is judged by the same condition: "now anchors its checks to named frameworks" is how the work was done, while a mechanism that *is* what the reader gets stays — the prose rule below decides where that line falls. For user-facing bugs, name the visible before/after first; mention the technical cause only if it helps assess risk.
++如果领导者描述了编辑过的内容，而不是使用此功能的人现在有什么不同，请重写它 - 重申差异是该技能旨在防止的故障模式。用结果语法编写的机制是通过相同的条件来判断的：“现在将其检查锚定到命名框架”是工作的完成方式，而“是”读者得到的机制仍然存在 - 下面的散文规则决定了该线的位置。对于面向用户的错误，首先将可见的 before/after 命名；仅当有助于评估风险时才提及技术原因。
+ 
+-**Prose.** Write the title and body through the `ce-noslop` skill. Identifiers, paths, protocols, and error text stay where they *are* the claim or the review target — do not dilute mechanism language into vague plain English.
++**散文。** 通过`ce-noslop`技能写出标题和正文。标识符、路径、协议和错误文本保留在它们“是”声明或审查目标的地方——不要将机制语言淡化为模糊的简单英语。
+ 
+-## Project PR-body contract
++## 项目PR-本体合约
+ 
+-Before composing, resolve PR-body requirements from the project's active instructions and conventions already in context, then check standard PR-template locations (repo root, `docs/`, `.github/`, `.github/PULL_REQUEST_TEMPLATE/`) and any contribution guidance they reference. Required headings, fields, order, checklists, and boilerplate define the structural contract. Treat a template as a minimum unless the project explicitly requires an exact/template-only body or forbids additions; only then add no sections beyond those the project permits. Within every permitted section, apply this reference's value-first, decision-cost, evidence, and editing rules. When those defaults conflict with the project's PR-body contract, the project contract wins.
++在编写之前，从上下文中已有的项目活动指令和约定中解决PR主体要求，然后检查标准PR模板位置（存储库根、`docs/`、`.github/`、`.github/PULL_REQUEST_TEMPLATE/`）以及它们引用的任何贡献指南。必需的标题、字段、顺序、清单和样板定义了结构合同。将模板视为最低限度，除非项目明确需要 exact/template-only 主体或禁止添加；然后才可以添加超出项目允许的部分。在每个允许的部分中，应用该引用文档的价值优先、决策成本、证据和编辑规则。当这些默认值与项目的 PR-body 合约发生冲突时，项目合约获胜。
+ 
+ ---
+ 
+-## Step Pre-A: Resolve the range and base
++## 步骤 Pre-A：解析范围和基数
+ 
+-Two modes:
++两种模式：
+ 
+-- **Current-branch mode** (default) — describe HEAD vs the repo's default base.
+-- **PR mode** — describe a specific PR when the caller passes a PR ref.
++- **当前分支模式**（默认）- 描述 HEAD 与存储库的默认基础。
++- **PR 模式** — 当调用者传递 PR 引用时描述特定的 PR。
+ 
+-For PR mode, fetch metadata first:
++对于PR模式，首先获取元数据：
+ 
+ ```bash
+ gh pr view <ref> --json baseRefName,headRefOid,url,body,state,isCrossRepository,headRepositoryOwner
+ ```
+ 
+-If `state` is not `OPEN`, report and stop. Use `baseRefName` as `<base>` and `headRefOid` as `<head>`.
++如果`state`不是`OPEN`，报告并停止。将`baseRefName`用作`<base>`，将`headRefOid`用作`<head>`。
+ 
+-For current-branch mode, resolve `<base>` in priority order: `git rev-parse --abbrev-ref origin/HEAD` (strip `origin/`) → `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'` → try `main`/`master`/`develop` via `git rev-parse --verify origin/<candidate>`. If none resolve, ask the user. `<head>` is `HEAD`.
++对于当前分支模式，按优先级顺序解析`<base>`：`git rev-parse --abbrev-ref origin/HEAD`（剥离`origin/`）→`gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`→通过`git rev-parse --verify origin/<candidate>`尝试`main`/`master`/`develop`。如果没有解决，请询问用户。 `<head>` 是 `HEAD`。
+ 
+-**Base remote:** `origin` for current-branch mode and same-repo PRs. For fork PRs, match the PR's base owner/repo against `git remote -v`. If no local remote matches, skip to the `gh` fallback — do not diff against `origin` (wrong base).
++**基本远程：** `origin` 适用于当前分支模式和相同仓库 PRs。对于叉子 PRs，将 PR 的基部 owner/repo 与 `git remote -v` 进行匹配。如果没有本地远程匹配，请跳到 `gh` 后备 — 不要与 `origin` 进行比较（错误的基数）。
+ 
+ ```bash
+ git fetch --no-tags <base-remote> <base>
+@@ -46,145 +46,145 @@ git log  --format=fuller "<base-remote>/<base>..<head>"   # full commit messages
+ git diff           "<base-remote>/<base>...<head>"
+ ```
+ 
+-If the commit list is empty, report "No commits to describe" and stop.
++如果提交列表为空，则报告“没有要描述的提交”并停止。
+ 
+-**Fallback** — use `gh pr diff <ref>` and `gh pr view <ref> --json commits` when local git can't reach the refs (fork PR with no matching remote, shallow clone, offline, merge-base on unrelated histories). For GHES that reject SHA fetch but allow `refs/pull/`:
++**后备** — 当本地 git 无法到达引用时使用 `gh pr diff <ref>` 和 `gh pr view <ref> --json commits`（分叉 PR 没有匹配的远程、浅克隆、离线、基于不相关历史的合并）。对于拒绝 SHA 获取但允许 `refs/pull/` 的 GHES：
+ 
+ ```bash
+ git fetch --no-tags <base-remote> "refs/pull/<number>/head"
+ PR_HEAD_SHA=$(awk '/refs\/pull\/[0-9]+\/head/ {print $1; exit}' "$(git rev-parse --git-dir)/FETCH_HEAD")
+ ```
+ 
+-Note in the user-facing summary when the API fallback was used.
++请注意在面向用户的摘要中何时使用 API 后备。
+ 
+ ---
+ 
+-## Step A: Size the description
++## 步骤 A：调整描述大小
+ 
+-**Size by decision cost, not diff shape.** Decision cost is how much a reviewer still has to work out before they can approve; it is not changed-line count, file extension, or visual surface. A 5-line ranking or deploy change can carry more reviewer uncertainty than a 500-line mechanical rename.
++**大小取决于决策成本，而不是差异形状。**决策成本是审查者在批准之前仍需要计算出的量；它没有改变行数、文件扩展名或视觉表面。与 500 行机械重命名相比，5 行排名或部署更改可能会给审查者带来更多不确定性。
+ 
+-Build a compact internal **scope map** from the **complete oneline commit list and final three-dot diff**. Use oneline subjects for full-range coverage; use the final diff to merge overlaps, discard fix-up-only work, and correct stale subjects; consult the fuller messages only when a subject remains opaque or conflicts with the diff. Group into material outcome clusters (one is fine), name one umbrella outcome that covers them, and identify each cluster's **material claims** — what became possible, fixed, riskier, or which design decision the reviewer must assess.
++从**完整的单行提交列表和最终的三点差异**构建紧凑的内部**范围图**。使用oneline科目进行全方位覆盖；使用最终的差异来合并重叠，放弃仅修复的工作，并纠正陈旧的主题；仅当主题仍然不透明或与差异冲突时才查阅更完整的消息。将其分为实质性成果集群（一个即可），命名涵盖它们的一个总括成果，并确定每个集群的**实质性声明**——什么是可能的、固定的、风险较大的，或者审查者必须评估哪些设计决策。
+ 
+-State the umbrella as what is now different for someone using this, never as the mechanism that produced it. The title and the opening both inherit the map's level of description, so a mechanism-shaped umbrella is not something a later step can correct — every later check compares against it and agrees with it. Derive the umbrella from the full range, never from the latest commit, tracker title, branch name, original request, or the story of how the work started — the incident, bug report, or ask that opened the branch is one cluster's origin, not the umbrella, and a description that leads with it while the range delivers peer outcomes has misread the map.
++将雨伞表述为对于使用它的人来说现在是不同的，而不是表述为产生它的机制。标题和开头都继承了地图的描述级别，因此机械形状的伞不是后续步骤可以纠正的东西 - 每次后续检查都会与它进行比较并同意它。从整个范围中得出保护伞，而不是从最新的提交、跟踪器标题、分支名称、原始请求或工作如何开始的故事中得出保护伞 - 打开分支的事件、错误报告或请求是一个集群的起源，而不是保护伞，并且在范围提供对等结果时引导它的描述误读了地图。
+ 
+-The map is not body content: do not expand the body to enumerate clusters the umbrella already covers. **Classify each changed file by runtime purpose, not extension** (markdown/YAML may be inert docs or runtime agent instructions, config, product content, or deploy behavior). State the claims the diff alone cannot establish; leave the rest implicit.
++地图不是主体内容：不要扩展主体来枚举伞已经覆盖的集群。 **按运行时用途而不是扩展名对每个更改的文件进行分类**（markdown/YAML可能是惰性文档或运行时代理指令、配置、产品内容或部署行为）。陈述差异本身无法证实的主张；其余的保持隐式。
+ 
+-**Program altitude (multi-PR / series).** Program altitude means where this PR sits in a larger piece of work. After the PR-local map, check whether this PR sits inside a larger program (multi-PR project, stack, series, multi-unit plan). Use only signals already in hand: user prompt/conversation, a known plan path, existing PR body, commit messages, or sibling/series language in context. Do **not** invent a series, and do **not** run a repo-wide open-PR scan solely for this step.
++**程序高度（多PR/系列）。**程序高度是指该PR位于较大作品中的位置。在PR-本地映射之后，检查此PR是否位于更大的程序内（多PR项目、堆栈、系列、多单元计划）。仅使用现有的信号：用户prompt/conversation、已知的计划路径、现有的PR正文、提交消息或上下文中的sibling/series语言。不要**发明一个系列，也**不要**仅为此步骤运行存储库范围内的 open-PR 扫描。
+ 
+-When program context is present, extend the map with: (1) **Program outcome** — end-to-end delivery in one sentence; (2) **This PR's contribution** — the local umbrella; (3) **Neighbors** — prior work (**lead-in**) and/or residual work (**lead-out**), each only when known. The map's order is **program → lead-in (if any) → this contribution → lead-out (if any)**; Step C decides how much of it the opening carries. Early PRs need lead-out; middle need both; late need lead-in (and say the arc completes when true). Omit prior or next when unknown — never invent either. Program placement the reviewer cannot get from this PR's diff alone is decision cost. When program context is absent, keep the single-PR umbrella only.
++当存在项目上下文时，将图扩展为： (1) **项目结果** — 用一句话来实现端到端交付； (2) **这个PR的贡献**——当地的保护伞； (3) **邻居** — 先前工作（**导入**）and/or 剩余工作（**导出**），每个仅在已知时进行。地图的顺序是**程序→导入（如果有）→此贡献→导出（如果有）**；步骤 C 决定开口携带多少。早期PRs需要引出；中间需要两者；后期需要导入（并说当 true 时弧完成）。当未知时省略前一个或下一个——两者都不要发明。审查者无法从这个 PR 的差异中获得程序安排，这本身就是决策成本。当程序上下文不存在时，仅保留 single-PR 保护伞。
+ 
+-- Bad (too local for a middle PR): the opening "Issue-close now revokes the active session on the server." with no placement anywhere in the body.
+-- Good: that same opening, then a block: "Continues the session-revocation rewrite after refresh-path rejection; multi-device revocation remains follow-on." — the outcome stands on its own, so the block adds the program and its neighbors, not a second copy of the outcome.
+-- Good (outcome does not stand on its own): "Sessions now carry a revocation epoch — the field that makes server-side revocation possible at all. Nothing reads it yet." Here the program is what gives the change its point, so the connection is part of the opening's one idea rather than a block after it.
+-- Early/late: name first-slice + residual, or complete-the-arc + what already landed — same three fields, omit the unknown neighbor.
++- 不好（对于中间PR来说太本地化）：开头“问题关闭现在撤销服务器上的活动会话”。没有放置在身体的任何地方。
++- 好：同样的开头，然后是一个块：“在刷新路径拒绝后继续会话撤销重写；多设备撤销仍然是后续的。” - 结果是独立的，因此该块添加了程序及其邻居，而不是结果的第二个副本。
++- 好（结果并不独立）：“会话现在带有一个撤销纪元 - 该字段使服务器端撤销成为可能。还没有任何东西读取它。”在这里，程序是赋予变化其意义的部分，因此连接是开场一个想法的一部分，而不是其后的一个块。
++- Early/late：命名第一个切片 + 残差，或完整弧 + 已经落地的内容 - 相同的三个字段，省略未知邻居。
+ 
+-**Write the finished map down before composing** — after the program-altitude check, so it carries both halves: umbrella; clusters with their claims; program placement or "none" (three or four lines). Step E audits the opening against this written map, not against memory.
++**在编写之前写下完成的地图** - 在程序高度检查之后，因此它带有两半：雨伞；集群及其主张；程序放置或“无”（三行或四行）。步骤E根据这张书面地图而不是记忆来审核开口。
+ 
+-> Prefer the shortest description that still lets a reviewer decide — context (including program placement when present), evidence, and residual uncertainty they can't get from the diff, and nothing they can.
++> 更喜欢仍然让审查者决定的最短描述 - 上下文（包括存在的程序放置）、证据和他们无法从差异中获得的剩余不确定性，以及他们无法获得的东西。
+ 
+-Decision cost raises the content floor, not the length ceiling (high-uncertainty *small* diffs get a sharper lead, not an essay). Uncertainty moves a change at most one row down the table below. Fold risk into the narrative unless the PR is already large. Include evidence only when it changes confidence in a material claim. A measured number placed in the body names what bounds it, such as its sample count and spread, its workload, or the threshold it cleared. A number with no bound is not claimed as a result: label it inconclusive or leave it out. Subtract fix-up commits when sizing. Large PRs need more selectivity, not more content.
++决策成本提高了内容底线，而不是长度上限（高不确定性*小*差异会获得更明显的领先优势，而不是论文）。不确定性最多会在下表中移动一行。除非PR已经很大，否则将风险纳入叙述中。仅当证据改变对重大主张的信心时才包含证据。放置在身体中的测量数字命名了它的界限，例如它的样本计数和分布、它的工作负载或它清除的阈值。结果，不会声明没有界限的数字：将其标记为不确定或将其忽略。调整大小时减去修复提交。大PRs需要更多选择性，而不是更多内容。
+ 
+-| Change profile | Description approach |
++| 更改个人资料 | 描述方式 |
+ |---|---|
+-| Small + simple (typo, config, dep bump) | 1-2 sentences, no headers. Under ~300 characters. |
+-| Small + non-trivial (bug fix, behavioral change) | 3-5 sentences. No headers unless two distinct concerns. User-visible before/after when the bug was observable. |
+-| Medium feature or refactor | Opening (one or two sentences), then only sections that each answer one remaining reviewer question; call out design decisions. |
+-| Large or architecturally significant | Same, plus 3-5 design-decision callouts and a brief test summary. Target ~100 lines, cap ~150. Many mechanisms → Summary table, not an H3 per mechanism. |
+-| Performance improvement | Before/after measurements as a markdown table. |
++| 小 + 简单（打字错误、配置、dep 凹凸） | 1-2 句话，无标题。大约 300 个字符以下。 |
++| 小+不平凡（错误修复、行为改变） | 3-5句话。除非有两个不同的问题，否则没有标题。当错误可观察到时，用户可见before/after。 |
++| 中等功能或重构 | 开头（一两个句子），然后只有每个部分回答一个剩余的审稿人问题；提出设计决策。 |
++| 大型或具有建筑意义的 | 同样，加上 3-5 个设计决策标注和一个简短的测试摘要。目标 ~100 行，上限 ~150 行。许多机制→汇总表，而不是每个机制的 H3。 |
++| 性能提升 | Before/after 测量值作为Markdown表。 |
+ 
+-A project PR-body contract sets the structural floor; this table sizes the content within it, never against it. Small + simple: the value-led sentence is the whole description.
++项目PR-主体合同设置了结构楼层；该表调整了其中的内容，而不是与之相反。小+简单：价值主导的句子就是整个描述。
+ 
+-**Medium and large: a reader can stop anywhere.** The opening is one or two sentences carrying one idea — what is now different and the gap or failure it replaces — so a reviewer who stops there knows what the PR does. Step C decides what that one idea must include and what goes in the block after it. Each further section exists to answer one remaining reviewer question; a bullet is one clause, with reasoning under design decisions rather than inside the bullet. Deliberately deferred scope is stated once. Which sections and devices appear is decided by what the reviewer still cannot get from the diff (Visual aids, Step C) — this is not a section list.
++**中号和大号：读者可以在任何地方停下来。**开头是一两个句子，承载一个想法——现在不同了，它取代了差距或失败——所以停在那里的审稿人知道PR的作用。步骤 C 决定该想法必须包含哪些内容以及该想法之后的块中应包含哪些内容。每个进一步的部分都是为了回答审稿人剩下的一个问题；项目符号是一个子句，其推理是根据设计决策而不是在项目符号内部进行的。故意推迟的范围已声明一次。显示哪些部分和设备取决于审查者仍然无法从差异中获得的内容（视觉辅助工具，步骤 C）——这不是部分列表。
+ 
+ ---
+ 
+-## Step B: Compose the title
++## 步骤 B：撰写标题
+ 
+-`type: description` or `type(scope): description`. Type by intent using the same `fix:`/`feat:` default as the skill's Step 2. Scope (optional): narrowest useful label. Description: from the scope map's umbrella outcome, not one cluster or mechanism; with program context, the title may name this PR's contribution under the program without restating the whole series — it must not make another material outcome sound incidental. Imperative, lowercase, under 72 chars, no trailing period. Match recent-commit conventions. **Never use `!` or `BREAKING CHANGE:` without explicit user confirmation.**
++`type: description` 或 `type(scope): description`。使用与技能步骤 2 相同的 `fix:`/`feat:` 默认值按意图键入。范围（可选）：最窄的有用标签。描述：从范围图的总体结果来看，不是一个集群或机制；根据项目背景，标题可以在项目下列出PR的贡献，而无需重述整个系列——它不能让另一个重大成果听起来是偶然的。命令式，小写，少于 72 个字符，无尾随句点。匹配最近提交约定。 **未经用户明确确认，切勿使用`!`或`BREAKING CHANGE:`。**
+ 
+ ---
+ 
+-## Step B1: Resolve related work references
++## 步骤B1：解决相关工作参考
+ 
+-Before writing the body, gather candidate work-item references from the user prompt, caller handoff, branch name, full commit messages, existing PR body, PR template, plan/debug notes, and visible URLs or IDs in context. Preserve existing related references when rewriting a PR unless the user asks to remove them.
++在编写正文之前，从用户提示、调用者切换、分支名称、完整提交消息、现有 PR 正文、PR 模板、plan/debug 注释以及上下文中的可见 URL 或 ID 收集候选工作项引用。重写 PR 时保留现有的相关引用，除非用户要求删除它们。
+ 
+-This step decides **tracker** close-vs-link semantics. Sibling PR / series narrative belongs in Step A's program altitude, not here — a sibling PR number already in context may still appear as a non-closing related reference when useful.
++此步骤决定**跟踪器** close-vs-link 语义。兄弟PR/系列叙述属于步骤A的程序高度，而不是在这里——上下文中已经存在的兄弟PR编号在有用时仍可能显示为非关闭相关参考。
+ 
+-Classify each candidate as:
++将每个候选人分类为：
+ 
+-- **closing reference** — the PR fully resolves the item and the tracker's closing syntax is known.
+-- **non-closing reference** — related, partial, investigative, follow-up, validation-only, or tracker semantics unknown.
+-- **uncertain** — tracked bug/incident/investigation is clear but ID or close-vs-link intent is missing. Ask (interactive) or use non-closing / omit (non-interactive); never invent a close.
++- **结束引用** — PR 完全解析该项目，并且跟踪器的结束语法是已知的。
++- **非关闭参考** - 相关、部分、调查、后续、仅验证或跟踪器语义未知。
++- **不确定** — 跟踪的 bug/incident/investigation 清晰，但缺少 ID 或关闭与链接意图。询问（交互式）或使用非关闭/省略（非交互式）；永远不要发明结束语。
+ 
+-Do not invent a closing keyword. Magic words are workflow actions, not decoration. If ambiguous, neutral related reference or omit — do not scatter the ID through the summary.
++不要发明结束关键字。魔术词是工作流程操作，而不是装饰。如果不明确、中立的相关引用文档或省略 — 不要将 ID 分散在摘要中。
+ 
+-Do not put a non-closing reference next to close/fix/resolve/address/report wording in prose. Write behavioral scope in one sentence; put the tracker ID separately. Use the table's non-closing reference labels exactly; do not substitute synonyms like `Refs`, `References`, or `Toward` unless the project's documented tracker convention requires one. For a non-closing reference, the tracker ID appears only in that related-reference sentence or block, never in the summary/opening/body prose.
++不要在散文中的close/fix/resolve/address/report措辞旁边放置非结束引用。用一句话写出行为范围；单独放置跟踪器 ID。准确使用表格的非结束参考标签；不要替换诸如 `Refs`、`References` 或 `Toward` 之类的同义词，除非项目记录的跟踪器约定需要一个同义词。对于非结束引用，跟踪器 ID 仅出现在相关引用句子或块中，而不会出现在 summary/opening/body 散文中。
+ 
+-- Bad: "closing one corruption path from #123"
+-- Bad: "This addresses the retry-related corruption path reported in #123."
+-- Good: "This covers the duplicate-row retry path; concurrent cancellation remains follow-up work."
+-- Good: "Related: #123"
++- 坏：“从 #123 开始关闭一条腐败路径”
++- 不好：“这解决了 #123 中报告的与重试相关的损坏路径。”
++- 好：“这涵盖了重复行重试路径；并发取消仍然是后续工作。”
++- 好：“相关：#123”
+ 
+-| Tracker | Closing reference | Non-closing reference | Notes |
++| 追踪器 | 结束参考 | 非关闭参考 | 笔记 |
+ |---|---|---|---|
+-| GitHub Issues | `Fixes #123`; cross-repo: `Fixes owner/repo#123` | `Related: #123`; cross-repo: `Related: owner/repo#123` | Closing keywords: `close(s/d)`, `fix(es/ed)`, `resolve(s/d)`. Use closing only when the PR targets the default branch and truly resolves the issue. Repeat the keyword per closing issue. |
+-| Linear | `Fixes ENG-123` | `Related to ENG-123` | Magic words in the PR description, not a PR comment. Multiple issues may share one magic word when intent matches, e.g. `Fixes ENG-123, DES-5 and ENG-256`. |
+-| Other trackers | Project-documented closing keyword only when known. | Full URL or tracker ID under `Related`. | Never guess a closing action. |
++| GitHub 问题 | `Fixes #123`；交叉仓库：`Fixes owner/repo#123` | `Related: #123`；交叉仓库：`Related: owner/repo#123` | 结束关键词：`close(s/d)`、`fix(es/ed)`、`resolve(s/d)`。仅当 PR 针对默认分支并真正解决问题时才使用关闭。每期结束时重复关键词。 |
++| 线性 | `Fixes ENG-123` | `Related to ENG-123` | PR 描述中的魔术词，而不是 PR 注释。当意图匹配时，多个问题可能会共享一个神奇的词，例如`Fixes ENG-123, DES-5 and ENG-256`。 |
++| 其他追踪器 | 项目记录的结束关键字仅在已知时才记录。 | `Related`下的完整 URL 或跟踪器 ID。 | 永远不要猜测关闭动作。 |
+ 
+-Closing references may live in the opening when the body is tiny. Non-closing references always get their own sentence or `## Related` block before validation/evidence. One true close can be a single line (`Fixes ENG-123.`); mixed items separate closing and non-closing bullets.
++当主体很小时，结束引用可能会存在于开口中。非闭合引用总是在 validation/evidence 之前有自己的句子或 `## Related` 块。一次真正的平仓可以是单线 (`Fixes ENG-123.`)；混合项目将结束项目符号和非结束项目符号分开。
+ 
+ ---
+ 
+-## Step B2: Judge new concepts
++## 步骤B2：判断新概念
+ 
+-Decide whether the change introduces a concept (pattern, technique, library, domain idea) a reader of this repo would plausibly not know. Skip entirely when the skill's concept teaching gate is off (SKILL.md Step 4).
++确定更改是否引入了本存储库的读者可能不知道的概念（模式、技术、库、领域思想）。当技能的概念教学门关闭时完全跳过（SKILL.md步骤4）。
+ 
+-**Gather candidates from the Pre-A diff first** (first real use of a dependency, a technique the diff introduces, a domain idea the code now encodes). Most PRs have none — stop; absence is the common case.
++**首先从 Pre-A diff 中收集候选者**（第一次真正使用依赖项、diff 引入的技术、代码现在编码的领域思想）。大多数 PRs 都没有 — 停止；缺席是常见情况。
+ 
+-**Check each candidate against the base ref, never the working tree** (the working tree contains this PR's own code):
++**根据基本引用检查每个候选者，而不是工作树**（工作树包含此 PR 自己的代码）：
+ 
+ ```bash
+ git grep -il -e "<term>" "<base-remote>/<base>" | head -5
+ ```
+ 
+-One call per candidate (cap two). Empty output → absent from the base. Teachable only when new *and* transferable. Never teach: established patterns, ordinary refactors/renames/dep bumps, project-internal plumbing. When in doubt, omit. On the `gh`-fallback path, judge from diff context alone and lean conservative.
++每个候选人一次通话（上限第二）。输出为空 → 底座不存在。仅当新的*和*可转让时才可教授。永远不要教：既定模式、普通refactors/renames/dep颠簸、项目内部管道。如有疑问，请省略。在 `gh`-后备路径上，仅根据 diff 上下文进行判断并倾向于保守。
+ 
+-- Bad: teaching "dependency injection" for one new constructor arg in a DI-heavy codebase.
+-- Good: teaching infinite scroll on the PR that first replaces pagination with it.
++- 不好：在 DI 密集的代码库中为一个新的构造函数参数教授“依赖注入”。
++- 好：在 PR 上教授无限滚动，首先用它代替分页。
+ 
+-**Compose** under `## New concepts` (Step C places it), at most 2 concepts (~10-25 lines each): (1) what it is in plain words, (2) why here vs the obvious alternative, (3) one example from this PR, (4) when not to use it. Prefer mermaid for architecture, a short code block for mechanics, a table for trade-offs. Dense is good; long is not. Never hand-draw box-drawing diagrams. Additive to Step A's sizing — does not count against size rows.
++**在 `## New concepts` 下撰写**（步骤 C 放置它），最多 2 个概念（每个约 10-25 行）：(1) 简单来说是什么，(2) 为什么在这里与明显的替代方案相比，(3) PR 中的一个示例，(4) 何时不使用它。对于架构，更喜欢美人鱼，对于机制，更喜欢短代码块，对于权衡，更喜欢表格。浓密就好；长则不然。切勿手绘方框图。添加到步骤 A 的尺寸调整 — 不计入尺寸行。
+ 
+-Preserve an existing `## New concepts` section and explainer-doc link verbatim on rewrite (same rule as `## Demo`) unless the user's focus asks to refresh. Description-only/update never write repo files. **Archival** when Step 5 confirms apply and `pr_teaching_archive` is on: content → `<root>/explainers/` per "Explainer archival" in `references/apply-and-handoff.md`.
++重写时逐字保留现有的 `## New concepts` 部分和解释文档链接（与 `## Demo` 相同的规则），除非用户的焦点要求刷新。 Description-only/update 永远不要写 repo 文件。 **存档** 当第 5 步确认应用且 `pr_teaching_archive` 打开时：内容 → `<root>/explainers/` 根据 `references/apply-and-handoff.md` 中的“解释器存档”。
+ 
+ ---
+ 
+-## Step C: Assemble the body
++## 步骤C：组装车身
+ 
+-When a project PR-body contract supplies headings or order, preserve that structure and place the applicable elements below within the sections it permits. Otherwise: opening → body sections that each answer a remaining reviewer question → related references when they need their own block → test plan if non-obvious → session-settled provenance when a labeled plan is in hand → New concepts section when Step B2 produced one → evidence block if one exists → branding when Step D calls for it → co-author trailers when contributor credit calls for them.
++当项目PR主体合同提供标题或订单时，保留该结构并将适用的元素放置在其允许的部分内。否则：打开→正文部分，每个部分回答剩余的审稿人问题→当他们需要自己的块时相关参考→测试计划（如果不明显）→当标签计划在手时会议解决的出处→步骤B2产生一个新概念部分→证据块（如果存在）→当步骤D需要时进行品牌化→当贡献者信用需要时共同创作预告片。
+ 
+-When the project PR-body contract supplies a heading or location for the opening, place it there without inventing or renaming a heading. Otherwise, the opening goes under `## Summary` if the body uses any `##` headings; bare paragraph otherwise. No orphaned opening above the first heading.
++当项目 PR-body 合同提供开头的标题或位置时，将其放置在那里，而无需发明或重命名标题。否则，如果正文使用任何 `##` 标题，开头将位于 `## Summary` 下；否则就是裸段落。第一个标题上方没有孤立的开头。
+ 
+-The opening carries one idea. The test is whether a reviewer who reads only it can say what this PR changes and why it takes this shape. Usually that one idea is the local outcome by itself — the map's "this contribution" slot. Sometimes the local outcome does not stand on its own, because the program is what gives it its shape or its point. Then the connection to the program is part of the one idea and belongs in the opening, and either half may lead — whichever reads better for this change. Naming which part of the program this PR delivers is what keeps that opening honest — an opening that names the arc but leaves a reviewer unable to say what this PR changes fails the same test. Everything the one idea does not need — the rest of the arc, deferred scope, implementation detail the diff supplies — goes in a short block immediately after the opening. That block supplies the program outcome and the known lead-in and lead-out, and never restates the outcome.
++开头带有一个想法。测试的是只读了它的审稿人是否能说出这个PR改变了什么以及为什么它会变成这样。通常，一个想法本身就是本地结果 - 地图的“此贡献”槽。有时，局部结果并不能独立存在，因为项目赋予了它其形状或意义。然后，与程序的联系是一个想法的一部分，属于开场白，任何一半都可能导致——无论哪一个对于这一改变来说读起来更好。命名该PR提供的程序的哪一部分是保持该开场诚实的原因——一个命名弧线的开场，但让审查者无法说出该PR改变了什么，无法通过相同的测试。一个想法不需要的所有东西——弧线的其余部分、延迟的范围、差异提供的实现细节——在开始后立即放入一个短块中。该块提供程序结果以及已知的导入和导出，并且从不重述结果。
+ 
+-The why belongs inside that one idea when it is the reason the outcome takes its shape, and below the opening when it is supporting evidence for an outcome that already stands. Growing the opening until both fit is the failure: past two sentences it is carrying a second idea, whatever it is punctuated as.
++当“原因”是结果形成的原因时，“原因”就属于该想法的内部；而当“原因”是支持已经存在的结果的证据时，“原因”就属于该想法的下方。扩大开头直到两者都适合是失败的：过去的两句话它带有第二个想法，无论它被标点什么。
+ 
+-**Session-settled provenance:** when a plan is already in hand (caller path or conversation) whose key technical decisions carry a `session-settled:` label, one static sentence naming settled decisions and classes (e.g. "Session-settled decisions carried from planning: X (user-directed, over Y); Z (user-approved)."). Add proceed-under-conflict clauses only when the caller flagged them. Never an outstanding-items ledger; never hunt for plans when none is in hand.
++**会话解决的出处：**当一项计划已经在手（调用者路径或对话）时，其关键技术决策带有 `session-settled:` 标签，一个静态句子命名解决的决策和类（例如，“从规划中进行的会话解决的决策：X（用户主导，超过 Y）；Z（用户批准）。”）。仅当调用者标记它们时才添加冲突下继续子句。从来没有未完成的项目分类账；当没有计划在手时，永远不要寻找计划。
+ 
+-**Contributor credit:** applies only when this PR ships work by someone other than its author. For an existing PR the author is the PR's author; for a new PR it is the person shipping, whose identity is the configured `git config user.name` and `user.email` (they may also commit under another email). The evidence is a Pre-A commit authored by such a person, a `Co-authored-by` trailer naming one, or this work continuing or replacing another PR. Model, harness, and bot attributions never count. Otherwise add nothing.
++**贡献者信用：** 仅当此 PR 由作者以外的其他人发布作品时才适用。对于现有的PR，作者是PR的作者；对于新的PR，它是交付人，其身份是配置的`git config user.name`和`user.email`（他们也可以在另一封电子邮件下提交）。证据是由这样的人编写的 Pre-A 提交、命名其中一个的 `Co-authored-by` 预告片，或者这项工作继续或取代另一个 PR。模型、工具和机器人属性永远不会被计算在内。否则什么也不加。
+ 
+-When it applies, name those contributors in the body, and link the PR this work continues or replaces when there is one. On rewrite, keep existing contributor credit.
++如果适用，请在正文中列出这些贡献者的名称，并链接 PR 这项工作将继续或在有时替换。重写时，保留现有的贡献者信用。
+ 
+-A squash merge keeps one author per PR, so other contributors survive it only as trailers in the squash message. If the repository squash-merges (its documented convention, or `squashMergeAllowed` from `gh repo view`), end the body with `Co-authored-by: Name <email>` trailers, one per contributor. They are the body's last paragraph, after any template sections, so git parses them when the body becomes the squash message. Copy each identity exactly from a commit's author or an existing trailer; for a replaced PR whose commits are not in the range, read them from that PR's commits. Never guess or construct an email: a contributor without one is credited by name only.
++壁球合并为每个 PR 保留一位作者，因此其他贡献者只能作为壁球消息中的预告片幸存下来。如果存储库压缩合并（其记录的约定，或 `squashMergeAllowed` 来自 `gh repo view`），则以 `Co-authored-by: Name <email>` 预告片结束正文，每个贡献者一个。它们是正文的最后一段，位于任何模板部分之后，因此当正文成为挤压消息时 git 会解析它们。准确复制提交作者或现有预告片中的每个身份；对于其提交不在范围内的替换的PR，请从PR的提交中读取它们。切勿猜测或构建电子邮件：没有贡献者将仅注明姓名。
+ 
+-**Evidence:** preserve existing `## Demo` / `## Screenshots` unless focus asks to refresh or later commits change what its screenshots show (`references/visual-evidence.md`). Splice caller-passed capture as `## Demo`, and screenshots this run took as `## Screenshots`. Place before the badge. Never label test output as "Demo" or "Screenshots." SKILL.md Step 4 (via `references/compose.md`) decides whether to include validation notes or skip them.
++**证据：** 保留现有的 `## Demo` / `## Screenshots`，除非焦点要求刷新或稍后提交更改其屏幕截图显示的内容 (`references/visual-evidence.md`)。将调用者传递的捕获拼接为`## Demo`，并将本次运行的屏幕截图作为`## Screenshots`。放置在徽章之前。切勿将测试输出标记为“演示”或“屏幕截图”。 SKILL.md 步骤 4（通过 `references/compose.md`）决定是否包含验证注释或跳过它们。
+ 
+-**Visual aids:** diagram or table when faster than prose (flows, trade-offs, a before/after comparison when observable behavior changed); a navigation hint (which file to start in, or the small but decisive hunk a reviewer would otherwise miss) only when the reviewer would start in the wrong place — never a list of changed files, which the diff already shows; skip all of these for simple/rename/dep-bump. Content pattern decides, never size or file count. Prose wins on conflict. **GitHub:** never prefix list items with `#` (auto-links as issues); use `org/repo#123` or full URL for real refs. Link a repository file with a full URL, such as the one `gh browse -n --commit=<head-sha> -- <path>` prints: a relative path resolves under the PR's own URL and 404s. A file the PR does not commit, such as local test output, gets no link.
++**视觉辅助：**图表或表格比散文更快（流程、权衡、可观察行为改变时的before/after比较）；仅当审查者从错误的位置开始时才提供导航提示（从哪个文件开始，或者审查者可能会错过的小但决定性的块）——绝不是已更改文件的列表，差异已显示；跳过所有这些simple/rename/dep-bump。内容模式决定，而不是大小或文件数量。散文胜于冲突。 **GitHub：**永远不要在列表项前添加`#`前缀（自动链接作为问题）；使用 `org/repo#123` 或完整 URL 来获取真实参考。使用完整 URL 链接存储库文件，例如 `gh browse -n --commit=<head-sha> -- <path>` 打印的内容：相对路径在 PR 自己的 URL 和 404 下解析。 PR 未提交的文件（例如本地测试输出）不会获得链接。
+ 
+ ---
+ 
+-## Step D: Generic Compound Engineering branding
++## 步骤 D：通用 Compound Engineering 品牌
+ 
+-For a **new PR body**, append the following only when the resolved branding gate is on; otherwise omit it.
++对于**新的PR主体**，仅当解析的品牌门打开时才附加以下内容；否则省略它。
+ 
+ ```markdown
+ ---
+@@ -192,23 +192,23 @@ For a **new PR body**, append the following only when the resolved branding gate
+ [![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/EveryInc/compound-engineering-plugin)
+ ```
+ 
+-Do not add model or harness attribution **to this branding block**. If the project's PR-body contract requires model/harness disclosure, fill *that* section per the project contract (see "Project PR-body contract").
++请勿将型号或宿主属性添加到**此品牌块**。如果项目的PR主体合同要求model/harness披露，请根据项目合同填写*该*部分（请参阅“项目PR主体合同”）。
+ 
+-For an **existing PR body**, preserve an existing branding block verbatim (including legacy model/harness badges). Never add one when absent, and never refresh, normalize, or remove it unless the user explicitly asks to remove or replace that exact content. Branding alone never creates rewrite intent.
++对于 **现有的 PR 主体**，逐字保留现有的品牌块（包括旧版 model/harness 徽章）。切勿在不存在时添加内容，也切勿刷新、标准化或删除它，除非用户明确要求删除或替换该确切内容。品牌本身永远不会产生重写意图。
+ 
+ ---
+ 
+-## Step E: Pre-apply coverage audit
++## 步骤 E：预申请覆盖范围审核
+ 
+-Before returning the title and body, check against the scope map and material claims from Step A and revise if wrong:
++在返回标题和正文之前，请对照步骤 A 中的范围图和材料声明进行检查，如果错误则进行修改：
+ 
+-- Is the umbrella itself an outcome — what is now different for someone using this — rather than the mechanism that produced it? Check this before the two questions below: both compare against the umbrella, so both pass just as readily when it is mechanism-shaped.
+-- Does the title express the umbrella outcome rather than one cluster or mechanism?
+-- Does the opening express the same umbrella — every peer outcome the map names, at parity — rather than the cluster the work started from? If the map has three peer outcomes and the opening leads with one and mentions the others as "also" or "comes with", rewrite it from the map.
+-- Does the opening carry one idea in one or two sentences, and could a reviewer who reads only it say what this PR changes and why it takes this shape? A reader who does not already know this project is the test. If the local outcome reads as unmotivated without the program, the opening is missing that connection. If the opening names the arc but a reviewer cannot say which part of it this PR delivers, it is missing the outcome. Move out whatever that one idea does not need — the rest of the arc, deferrals, or implementation detail the diff already supplies. Mechanism that is itself the outcome (an atomicity, protocol, or API guarantee) stays in the opening, per the prose rule above.
+-- Does any section, table, or hint restate what the Files-changed tab or diff already shows? Cut it. Does any section answer no remaining reviewer question? Cut it.
+-- Is every material outcome represented by the umbrella framing or body, or intentionally omitted because it is supporting-only?
+-- Is every claim the diff can't establish present — and any claim the diff *does* show restated needlessly?
+-- Was program altitude actually checked (the map says "none" or names the program)? When program context was present: does the lead place this PR on the arc (program + this contribution, with lead-in and/or lead-out when known)? When program context was absent: does the body invent a multi-PR series? If so, cut it.
+-- Is decision-changing evidence a stated result (not unexplained "tests passed"), with demonstrated results distinct from assumptions and mixed/negative outcomes?
+-- Can any sentence or section of the *description* be cut without lowering reviewer confidence? If so, cut it, except for headings, fields, checklists, or boilerplate the project's PR-body contract requires. Retain Step D branding when enabled, the session-settled provenance sentence when Step C included one, and contributor credit when Step C included it — all are intentional, not fluff.
++- 保护伞本身是一种结果——对于现在使用它的人来说有什么不同——而不是产生它的机制吗？在下面的两个问题之前先检查一下：两者都与伞进行比较，因此当伞是机制形状时，两者都同样容易通过。
++- 标题是否表达了总体结果而不是一组或机制？
++- 开头是否表达了相同的保护伞——每个同行的结果都以地图命名，平等——而不是工作开始的集群？如果地图具有三个对等结果，并且开场以其中一个开头，并将其他结果提到“也”或“附带”，则从地图中重写它。
++- 开头是否用一两句话表达了一个想法，只读了它的审稿人能否说出这个PR改变了什么以及为什么它会变成这样？尚不了解该项目的读者是一个测试。如果没有程序，本地结果看起来没有动机，那么开头就缺少这种联系。如果开头指定了弧线，但审查者无法说出该 PR 提供了它的哪一部分，则它会错过结果。移出某个想法不需要的任何内容——其余的弧线、延迟或差异已经提供的实现细节。根据上述散文规则，本身就是结果的机制（原子性、协议或API保证）保留在开头。
++- 是否有任何部分、表格或提示重申了“文件更改”选项卡或差异已显示的内容？剪掉它。是否有任何部分回答了审稿人剩下的问题？剪掉它。
++- 每一个物质成果都是由伞框或主体代表的，还是因为它只是支撑而故意省略的？
++- 是否存在差异无法证实的每项主张——以及差异*确实*显示的任何主张都不必要地重述？
++- 是否确实检查了程序高度（地图上显示“无”或为程序命名）？当程序上下文存在时：引导是否将这个PR放在弧上（程序+这个贡献，当已知时引入引入and/or引出）？当程序上下文不存在时：身体会发明一个多PR系列吗？如果是这样，就剪掉吧。
++- 改变决策的证据是否是一个既定的结果（不是无法解释的“测试通过”），所证明的结果与假设和mixed/negative结果不同？
++- 是否可以在不降低审查者信心的情况下删除*描述*的任何句子或部分？如果是这样，则将其删除，但项目的 PR 正文合同所需的标题、字段、清单或样板除外。启用时保留步骤 D 品牌、步骤 C 包含时保留会话确定的出处句子、步骤 C 包含时保留贡献者信用 — 所有这些都是有意为之，而不是无稽之谈。
+diff --git a/skills/ce-commit-push-pr/references/stack-submit.md b/skills/ce-commit-push-pr/references/stack-submit.md
+index d90990d287e5b6f1477cbb3d96b6dc6114b6bf97..2fbd542adb3500dcc0dab5c63177a600519f3e09 100644
+--- a/skills/ce-commit-push-pr/references/stack-submit.md
++++ b/skills/ce-commit-push-pr/references/stack-submit.md
+@@ -1,45 +1,45 @@
+-# Opt-in stack construction and submit recipes
++# 选择加入堆栈构建并提交食谱
+ 
+-Load this file only when commit-push-pr stack mode is active (the user asked for a PR stack, or a standing preference wants one). Use the `gh stack` CLI when it is present; never require a separate gh-stack skill package.
++仅当 commit-push-pr 堆栈模式处于活动状态时才加载此文件（用户要求 PR 堆栈，或者常设首选项需要一个）。当存在 `gh stack` CLI 时使用；永远不需要单独的 gh-stack 技能包。
+ 
+-This reference has two phases. Before ordinary Step 3 (commit and push), run Probe, Topology, and, when needed, Retrospective construction only; do not run Submit. Step 5 (apply and report) is the only phase that runs Submit and applies titles and bodies to PRs created in this run.
++该引用文档有两个阶段。在普通步骤 3（提交和推送）之前，运行 Probe、Topology，并在需要时仅运行 Retrospective 构建；不要运行提交。步骤 5（应用和报告）是运行“提交”并将标题和正文应用到在此运行中创建的 PRs 的唯一阶段。
+ 
+-A **residual** below means an unresolved item you report back to the user or the calling pipeline instead of guessing.
++下面的**剩余**表示您向用户或调用管道报告而不是猜测的未解决的项目。
+ 
+-## Probe
++## 探测
+ 
+ ```bash
+ command -v gh
+ gh stack view --json
+ ```
+ 
+-If `gh` or `gh stack` is missing, or the stack command reports that stacks are unavailable for this repo (rather than merely reporting that the current branch is not part of a stack), stop with a clear residual. Stack intent is **required** when the user explicitly demanded a multi-PR stack or a standing preference forces stacks → hard-stop. Otherwise intent is **soft** → report the residual and fall back to the ordinary single-PR create.
++如果 `gh` 或 `gh stack` 丢失，或者 stack 命令报告堆栈对此存储库不可用（而不是仅仅报告当前分支不是堆栈的一部分），则停止并显示清晰的残差。当用户明确要求多PR堆栈或常设偏好强制堆栈→硬停止时，堆栈意图是**必需的**。否则意图是**软**→报告残差并回退到普通的单PR创建。
+ 
+-## Topology
++## 拓扑结构
+ 
+-**When the user named a parent PR or branch to stack on, classify it and root the layers there.** Classify by **PR number** wherever one exists — that is what pulls a stack down from GitHub; a bare branch name resolves local stacks only. `references/gh-stack-cli.md` lists the exit codes and what each command does.
++**当用户指定要堆叠的父级 PR 或分支时，对其进行分类并将层建立为根。** 无论存在什么，都按 **PR 数字**进行分类 - 这就是从 GitHub 下拉堆栈的原因；裸分支名称仅解析本地堆栈。 `references/gh-stack-cli.md` 列出退出代码以及每个命令的作用。
+ 
+-Classification moves `HEAD`, so record your work branch and its tip **before** classifying and return to them before construction. Construction reads the checked-out branch as the original; if you classify in place, it takes the parent as the original and drops your commits from the layers.
++分类移动`HEAD`，因此在分类之前**记录你的工作分支及其提示，并在构建之前返回它们。构建将签出的分支读取为原始分支；如果您就地分类，它会将父级作为原始层，并从层中删除您的提交。
+ 
+-- **In a stack** (exit 0 — parent now checked out) — plan the layers from your restored work branch, then check the parent out again and run `gh stack add` from there, so the layer sits above the parent the user named. Exit **5** means that parent is not the top: residual. Never clear it with `gh stack top`, which succeeds only by parenting the new layer onto a different layer.
+-- **Standalone** (exit 2 — nothing checked out) — resolve `<parent-branch>` first: run `gh pr view "<n>" --json headRefName,headRefOid,author`, then make sure a local branch sits **at `headRefOid`**. Create it when absent. When that name already exists, verify it is at that commit and stop with a residual otherwise: the name may belong to an unrelated or stale branch, and resetting it can drop unpushed commits. From a branch with no PR, fetch and verify that ref directly; there is no PR author to check there, so the branch can only serve as a trunk. Then run `gh stack init --base "<parent-branch>" …` to keep the parent as an untouched trunk, or list the parent's branch first to adopt it as the bottom layer — the latter only when `author` is the current user.
+-- **Unproven** — a residual, not a guess: a wrong "standalone" is what creates the second stack, as are exit 6 and exit 9.
++- **在堆栈中**（退出 0 - 父级现已签出） - 从恢复的工作分支中规划层，然后再次签出父级并从那里运行 `gh stack add`，因此该层位于用户指定的父级之上。退出**5**表示parent不是top：residual。切勿使用 `gh stack top` 清除它，只有将新图层作为另一个图层的父级才能成功。
++- **独立**（出口 2 - 未检出任何内容） - 首先解析 `<parent-branch>`：运行 `gh pr view "<n>" --json headRefName,headRefOid,author`，然后确保本地分支位于 **位于 `headRefOid`**。缺席时创建它。当该名称已经存在时，请验证它是否在该提交处，并以剩余值停止，否则：该名称可能属于不相关或过时的分支，并且重置它可能会删除未推送的提交。从没有PR的分支，直接获取并验证该ref；那里没有PR作者可以检查，所以分支只能充当主干。然后运行 `gh stack init --base "<parent-branch>" …` 将父级保留为未触及的主干，或者首先列出父级的分支以将其采用为底层 - 后者仅当 `author` 是当前用户时。
++- **未经证实** - 残差，而不是猜测：错误的“独立”是创建第二个堆栈的原因，出口 6 和出口 9 也是如此。
+ 
+-Use the `init` form chosen here in place of the generic one shown in construction, whose `--base` would leave an adopted parent unmanaged. In construction, `<base>` is the parent's tip. `references/branch-creation.md` branches from the repo default and must not be followed when a parent was named. Require a branch name taken from a PR to match `[A-Za-z0-9._/-]+` before it reaches a command — git permits `$(...)` in branch names and double quotes do not stop expansion — and stop with a residual on a name that fails.
++使用此处选择的 `init` 形式代替构造中显示的通用形式，其 `--base` 将使收养父母不受管理。在构造中，`<base>`是父母的小费。 `references/branch-creation.md` 从存储库默认分支，在命名父级时不得遵循。要求从 PR 获取的分支名称在到达命令之前匹配 `[A-Za-z0-9._/-]+` — git 允许在分支名称中使用 `$(...)`，并且双引号不会停止扩展 — 并在失败的名称上留下残差。
+ 
+-When `gh stack view --json` confirms the current branch belongs to a managed stack, preserve that topology. If no topology exists, use retrospective construction below. When the user did not ask for a stack in this request — a standing preference alone is not asking — and the complete work is one logical change or only artificial slices are possible, refuse the stack and use the single-PR path. An explicit request is not refusable on those grounds. (Probe's soft/required split governs what to do when the CLI is missing, not whether a stack may be refused.)
++当 `gh stack view --json` 确认当前分支属于托管堆栈时，保留该拓扑。如果不存在拓扑，请使用下面的追溯构造。当用户在此请求中没有要求堆栈时（单独的常设偏好并不要求）并且完整的工作是一个逻辑更改或只能进行人工切片，则拒绝堆栈并使用单PR路径。不得以这些理由拒绝明确的请求。 （探针的 soft/required 分割决定了当 CLI 丢失时要做什么，而不是决定堆栈是否会被拒绝。）
+ 
+-Any explicit new upstack branch the user already directed must base from the **authoritative parent tip** after fetch: prefer `<tracking-remote>/<parent>` when that remote tip is current for the confirmed stack layer; if the parent’s latest work is only local (not yet on the tracking remote — common before the first `gh stack submit`), base from the local parent branch instead. Create with `git checkout --no-overwrite-ignore -b "<branch-name>" "<parent-tip>"`. If checkout fails because uncommitted or ignored files would be overwritten, stop and ask the user to handle the colliding paths; in `mode:pipeline`, report the blocker without asking. Do not stash or remove the colliding paths. For an **upstack** layer, do **not** follow `references/branch-creation.md` — that reference’s `origin/<base>` flow would detach the layer from its parent. Do not hard-code `origin/<parent>` when the tracking remote differs or the remote tip lags the local parent.
++用户已经定向的任何显式新上栈分支必须在获取后基于**权威父提示**：当该远程提示对于已确认的堆栈层来说是当前的时，更喜欢`<tracking-remote>/<parent>`；如果父级的最新工作只是本地的（尚未在跟踪远程上 - 在第一个 `gh stack submit` 之前常见），则从本地父级分支开始。使用 `git checkout --no-overwrite-ignore -b "<branch-name>" "<parent-tip>"` 进行创作。如果由于未提交或忽略的文件将被覆盖而签出失败，请停止并要求用户处理冲突路径；在`mode:pipeline`中，无需询问即可举报拦截者。不要隐藏或删除冲突路径。对于 **upstack** 层，不要**遵循 `references/branch-creation.md` — 该引用的 `origin/<base>` 流会将层与其父层分离。当跟踪远程不同或远程提示滞后于本地父级时，请勿硬编码 `origin/<parent>`。
+ 
+-## Retrospective construction
++## 追溯建设
+ 
+-Before ordinary Step 3 (commit and push), inspect the **complete change set** against the resolved base: existing commits plus tracked, staged, and untracked working changes. Derive the **smallest useful set of linear, independently reviewable layers** in dependency order, foundation first. Each layer must be coherent against its parent and must not depend on an upstack layer. Use whole-file groups or existing commit boundaries; never use `git add -p` to force a split.
++在普通步骤 3（提交和推送）之前，根据已解析的基础检查**完整的更改集**：现有提交以及已跟踪、暂存和未跟踪的工作更改。按照依赖顺序导出**最小有用的线性、可独立审查的层**，基础优先。每个层必须与其父层保持一致，并且不得依赖于上层层。使用整个文件组或现有的提交边界；切勿使用 `git add -p` 强制拆分。
+ 
+-When one safe topology is clear, proceed without asking: explicit stack intent authorizes the necessary local branches and commits. When multiple reasonable topologies would materially change review boundaries, ask the user with a concise bottom-to-top proposal. In `mode:pipeline`, stop with that proposal as a residual instead of guessing. If the split requires hunk-level partitioning or rewriting published history, ask the user before proceeding in interactive mode. In `mode:pipeline`, do not split or rewrite; stop with a residual that describes the required partition or rewrite and the explicit confirmation needed to proceed. Never rewrite published history without explicit confirmation.
++当一种安全拓扑清晰时，无需询问即可继续：显式堆栈意图授权必要的本地分支和提交。当多个合理的拓扑会实质上改变审查边界时，请向用户询问简洁的自下而上的建议。在 `mode:pipeline` 中，停止将该提案作为残差而不是猜测。如果拆分需要块级分区或重写已发布的历史记录，请在以交互模式继续之前询问用户。在`mode:pipeline`中，不要拆分或重写；停止并显示残差，该残差描述了所需的分区或重写以及继续所需的明确确认。未经明确确认，切勿重写已发表的历史记录。
+ 
+-Choose the bottom-layer path from the branch checked out when retrospective construction began. If construction starts on the resolved default branch and no parent was named, follow `references/branch-creation.md` to fetch and resolve its safe base, including the unpushed-local-commit decision. If construction starts on an existing feature branch, do not follow `references/branch-creation.md`: fetch the resolved base `<base>` from Topology — the repo default branch unless a parent was named — from its base remote, verify the fetched remote-tracking tip, and use that exact tip as the bottom parent. When Topology already resolved the parent to a verified local branch, use that instead: a fork head materialized from `refs/pull/<n>/head` has no remote-tracking branch to fetch or verify. Record the original branch and tip, preserve the original tip with a recovery ref or branch before any operation that could move it, and do not treat the feature commits between the bottom parent and original tip as unpushed commits on the local default or carry the whole feature tip into the bottom layer. Every upstack layer starts from its immediate parent through `gh stack add`.
++从回溯施工开始时检查的分支中选择底层路径。如果在解析的默认分支上开始构建并且没有命名父分支，请按照 `references/branch-creation.md` 获取并解析其安全基础，包括未推送的本地提交决策。如果在现有功能分支上开始构建，请不要遵循`references/branch-creation.md`：从拓扑（除非指定父级，否则为存储库默认分支）从其基础远程获取已解析的基础`<base>`，验证获取的远程跟踪提示，并使用该确切提示作为底部父级。当拓扑已经将父级解析为经过验证的本地分支时，请使用它：从 `refs/pull/<n>/head` 实现的分叉头没有要获取或验证的远程跟踪分支。记录原始分支和提示，在任何可以移动它的操作之前使用恢复引用或分支保留原始提示，并且不要将底部父级和原始提示之间的功能提交视为本地默认的未推送提交或将整个功能提示带入底层。每个上栈层都从其直接父层开始到`gh stack add`。
+ 
+-For uncommitted whole-file groups on an existing feature branch, save all tracked and untracked working changes before switching branches, then restore them only on the planned layer whose parent contains their prerequisites. Keep the saved work until the constructed top is verified complete. Initialize or adopt the bottom layer at the resolved `<base>` tip or its planned commit tip, commit only its files, then add and commit each next layer in order. Files named by an `exclude:<paths>` token on the invocation belong to no layer. Never save, move, or restore them — they stay in the working tree exactly as found. Name the paths on every layer commit so a pre-staged excluded file cannot get in, and treat the "complete original change set" as the change set minus those files. If a branch switch during construction would overwrite an excluded file, stop with a residual rather than proceeding. Compose `<bottom-message>` and `<next-message>` with the same subject rule as Step 3: when a plan Implementation Unit ID is already in hand for that layer's commit, append that unit's U-ID in parentheses — `(U3)` means unit 3. Do not hunt for a plan. Omit when the commit spans units, the unit is unclear, or no plan is in hand.
++对于现有功能分支上未提交的整个文件组，请在切换分支之前保存所有跟踪和未跟踪的工作更改，然后仅在其父级包含其先决条件的计划层上恢复它们。保留保存的工作，直到验证顶部构造完成。在已解析的`<base>`提示或其计划的提交提示处初始化或采用底层，仅提交其文件，然后按顺序添加并提交每个下一层。调用时由 `exclude:<paths>` 标记命名的文件不属于任何层。切勿保存、移动或恢复它们——它们与发现时一样保留在工作树中。命名每个层提交上的路径，以便预先暂存的排除文件无法进入，并将“完整的原始更改集”视为更改集减去这些文件。如果构建过程中的分支切换会覆盖排除的文件，请停止并保留剩余文件，而不是继续。使用与步骤 3 相同的主题规则编写 `<bottom-message>` 和 `<next-message>`：当该层提交的计划实施单元 ID 已在手时，请在括号中附加该单元的 U-ID — `(U3)` 表示单元 3。不要寻找计划。当提交跨越多个单元、单元不清楚或手中没有计划时，请省略。
+ 
+ ```bash
+ gh stack init --base "<base>" "<bottom-branch>"
+@@ -48,34 +48,34 @@ gh stack add "<next-branch>"
+ git add <next-files> && git commit -m "<next-message>" -- <next-files>
+ ```
+ 
+-For committed work whose existing commit boundaries already match the plan, create or reuse one branch at each planned commit tip and adopt them bottom-to-top with `gh stack init --base "<base>" "<bottom-branch>" "<next-branch>" ...`. Reuse the original feature branch only when its unchanged tip is one of those planned tips. If unpublished commits need rearrangement, keep a recovery branch at the original tip before rewriting. After construction, run `gh stack view --json`; verify the reported order matches the plan and the top layer contains the complete original change set before submit.
++对于现有提交边界已与计划匹配的已提交工作，请在每个计划的提交提示处创建或重用一个分支，并使用 `gh stack init --base "<base>" "<bottom-branch>" "<next-branch>" ...` 自下而上采用它们。仅当其未更改的提示是这些计划提示之一时，才重用原始功能分支。如果未发布的提交需要重新排列，请在重写之前在原始提示处保留一个恢复分支。构建完成后，运行`gh stack view --json`；在提交之前验证报告的订单是否与计划匹配，并且顶层包含完整的原始变更集。
+ 
+-## Submit (ready / non-draft)
++## 提交（准备好/非草稿）
+ 
+-Apply the **Project publishing gate** before submitting the stack.
++在提交堆栈之前应用**项目发布门**。
+ 
+-Before submit, resolve the ordinary `pr_teaching_archive` / `archive:on|off` gate. If archival is on, stop with a residual before `gh stack submit`; do not create an explainer commit after submission or silently disable requested archival. The user can rerun with `archive:off` to use the safe post-submit description path until stack archival has a manager-aware route.
++在提交之前，解析普通的`pr_teaching_archive`/`archive:on|off`门。如果归档开启，则在`gh stack submit`之前停止并有残差；提交后不要创建解释器提交或静默禁用请求的存档。用户可以使用 `archive:off` 重新运行以使用安全的提交后描述路径，直到堆栈存档具有管理者感知的路径。
+ 
+-Before submit, inspect the stack's open PRs (`gh stack view --json` / `gh pr view`) for any **existing draft** layers. If any draft already exists that the author did not explicitly ask to open this run, do **not** pass `--open` (GitHub documents `--open` as also marking existing PRs ready for review). In that case, submit with `gh stack submit --auto` only, then treat the remaining drafts as a hard residual before babysit when babysit is on. Never mark someone's work-in-progress drafts ready.
++在提交之前，检查堆栈的打开 PRs (`gh stack view --json` / `gh pr view`) 是否有任何 **现有草稿** 层。如果作者未明确要求打开此运行的任何草稿已存在，请不要**通过`--open`（GitHub文档`--open`也标记现有的PRs准备审查）。在这种情况下，仅提交`gh stack submit --auto`，然后在PR 看护开启时将剩余草稿视为PR 看护之前的硬残留。切勿将某人的正在进行的草稿标记为就绪。
+ 
+-When no existing drafts are present (or the user explicitly authorized opening every layer):
++当不存在现有草稿时（或用户明确授权打开每一层）：
+ 
+ ```bash
+ gh stack submit --auto --open
+ ```
+ 
+-`--auto` alone creates drafts, and babysit skips drafts by default. When babysit is on, a draft-only outcome is a hard residual (or a step to mark the PRs ready) before the babysit handoff. Never treat drafts as a successfully shipped stack.
++`--auto` 单独创建草稿，babysit 默认跳过草稿。当PR 看护开启时，仅草稿结果是PR 看护切换之前的硬残留（或标记PRs准备就绪的步骤）。切勿将草稿视为已成功发送的堆栈。
+ 
+-After submit, map every PR created in this run back to its head branch and explicit PR URL. For each new PR, pass that URL to ordinary PR-description composition so PR mode derives the immediate parent and exact head, then apply the result with `gh pr edit "<pr-url>"`. Never rely on the restored current branch to select the PR. Existing stack PRs retain their titles and bodies unless the current invocation explicitly requested a rewrite; `mode:pipeline` keeps the documented conservative no-rewrite default. Do not invent stack-specific title improvements in this skill.
++提交后，将本次运行中创建的每个PR映射回其头分支和显式PR URL。对于每个新的 PR，将该 URL 传递给普通的 PR 描述组合，以便 PR 模式派生直接父级和精确头，然后将结果应用于 `gh pr edit "<pr-url>"`。切勿依赖恢复的当前分支来选择 PR。现有堆栈PRs保留其标题和主体，除非当前调用明确请求重写； `mode:pipeline` 保留记录的保守的无重写默认值。不要在此技能中发明特定于堆栈的标题改进。
+ 
+-## Forbidden on managed members
++## 受管理成员禁止
+ 
+ ```bash
+ gh pr merge …
+ ```
+ 
+-Landing uses `gh stack merge` only, run by `ce-babysit-pr` under `posture:stack-land` or by the user.
++登陆仅使用`gh stack merge`，由`posture:stack-land`下的`ce-babysit-pr`或用户运行。
+ 
+-## Ownership
++## 所有权
+ 
+-Step 5 exclusively owns stack submission and the post-submit description steps above, for PRs created in this run. No earlier step submits.
++对于本次运行中创建的PRs，第 5 步独占堆栈提交和上述提交后描述步骤。没有更早的步骤提交。
+diff --git a/skills/ce-commit-push-pr/references/visual-evidence.md b/skills/ce-commit-push-pr/references/visual-evidence.md
+index 4c43d7c5829e17fdc7265c76161add18d9d41887..20d6f4e7cd123abef2bcf9afd2d4c9cc212a4e9f 100644
+--- a/skills/ce-commit-push-pr/references/visual-evidence.md
++++ b/skills/ce-commit-push-pr/references/visual-evidence.md
+@@ -1,53 +1,53 @@
+-# Screenshots for visual changes
++# 视觉变化的截图
+ 
+-When a PR changes what a reviewer judges by looking, screenshots in the body let them see it instead of imagining it from prose. Show before and after when a before image is cheap to get, and after only when it is not. Missing screenshots never block the PR.
++当 PR 改变了审查者通过查看判断的内容时，正文中的屏幕截图让他们看到它，而不是从散文中想象它。当之前的图像很容易获得时显示之前和之后，只有当价格不便宜时才显示之后。丢失的屏幕截图永远不会阻止PR。
+ 
+-## When to capture
++## 何时捕捉
+ 
+-Capture only when the change makes a material visual claim: rendered UI that a reviewer would judge faster or more correctly by seeing it than by reading about it. Examples are layout, styling, on-screen text, a new or changed screen, state, or component, and a visual bug fix. Otherwise take no screenshots and do not ask. Text output such as CLI output, logs, or API responses belongs in a code block, not in a picture of text.
++仅当更改做出重大视觉声明时才捕获：审查者通过查看它比通过阅读它可以更快或更正确地判断呈现的 UI。例如布局、样式、屏幕文本、新的或更改的屏幕、状态或组件以及视觉错误修复。否则不要截图，也不要询问。文本输出（例如 CLI 输出、日志或 API 响应）属于代码块，而不是文本图片。
+ 
+-In description-only mode there is no PR to attach to, so do not capture. Say in one line that screenshots can be added when the description is applied. When the body still waits on the user's confirmation before it is applied, take the screenshots after they confirm. An existing PR body that already has `## Screenshots` or `## Demo` keeps it, so do not capture again. The exceptions are a user request to refresh it and commits made after those images were taken that change what they show; then retake the affected images and replace them.
++在仅描述模式下，没有可附加的 PR，因此请勿捕获。在一行中说明应用描述时可以添加屏幕截图。当正文在应用之前仍等待用户确认时，请在确认后截取屏幕截图。已经具有 `## Screenshots` 或 `## Demo` 的现有 PR 主体将保留它，因此不要再次捕获。例外情况是用户请求刷新它以及在拍摄这些图像后所做的提交改变了它们显示的内容；然后重新拍摄受影响的图像并替换它们。
+ 
+-When the project's instructions require asking before running the app, opening a browser, or taking screenshots, follow them: ask in an interactive run, and skip with a one-line reason in `mode:pipeline`. Otherwise capture without asking. When they say where PR screenshots go, such as a hosted page linked from the body, put them there instead of attaching them. A claim in those instructions that GitHub cannot take uploads is not a reason to skip; the delivery check below decides that.
++当项目的说明要求在运行应用程序、打开浏览器或截取屏幕截图之前进行询问时，请遵循这些说明：在交互式运行中询问，并在 `mode:pipeline` 中用一行原因跳过。否则不问就捕获。当他们说 PR 屏幕截图去哪里时，例如从正文链接的托管页面，请将它们放在那里而不是附加它们。这些说明中声称 GitHub 无法上传并不是跳过的理由；下面的交货检查决定了这一点。
+ 
+-Whenever a change with a material visual claim ships without screenshots, the body says why in one line.
++每当在没有屏幕截图的情况下发布重大视觉声明的更改时，正文都会在一行中说明原因。
+ 
+-## What capture needs
++## 捕捉需要什么
+ 
+-All three must hold. If any is missing, write the validation note `references/compose.md` describes and add one line saying screenshots were not captured and why.
++三者都必须持有。如果缺少任何内容，请写下验证注释 `references/compose.md` 描述并添加一行，说明未捕获屏幕截图及其原因。
+ 
+-- **A way to deliver the images.** When the project's instructions name where screenshots go, that destination is the way. Otherwise the help for the command that will apply the body (`gh pr create --help`, or `gh pr edit --help` for an existing PR) must list an `--attach` flag. Check this before capturing anything, because without a way the images cannot reach the PR.
+-- **A browser that saves image files to disk.** Prefer a browser built into the current host. Otherwise use `agent-browser` if it is installed, and load its own instructions first. Never install a tool or bring in another browser stack. A tool that shows you the screenshot but writes no file does not qualify.
+-- **The app running at the changed route.** Use a dev server that is already running, or one the project documents and that starts without extra setup. Do not install dependencies, configure secrets, or seed data just to take screenshots.
++- **一种传递图像的方式。** 当项目的说明指定屏幕截图的去向时，该目的地就是方式。否则，将应用主体的命令的帮助（`gh pr create --help`，或`gh pr edit --help`对于现有的PR）必须列出`--attach`标志。在拍摄任何东西之前请检查此项，因为如果没有办法，图像就无法到达 PR。
++- **将图像文件保存到磁盘的浏览器。**首选当前主机内置的浏览器。否则，如果已安装，请使用`agent-browser`，并首先加载其自身的指令。切勿安装工具或引入另一个浏览器堆栈。向您显示屏幕截图但不写入文件的工具不符合资格。
++- **应用程序在更改后的路线上运行。** 使用已运行的开发服务器，或项目文档之一，无需额外设置即可启动。不要仅仅为了截图而安装依赖项、配置机密或种子数据。
+ 
+-## Where the before image comes from
++## 之前的图片来自哪里
+ 
+-Use the first source that exists, then stop:
++使用第一个存在的源，然后停止：
+ 
+-1. A screenshot of the UI without this change that the user, the caller, or a project tool already produced, such as a base-versus-branch comparison run.
+-2. An already-deployed copy of the UI without this change: a preview deployment of the base branch, or the production URL for the same route.
+-3. None. Post the after screenshots alone.
++1. 用户、调用者或项目工具已生成的未进行此更改的 UI 屏幕截图，例如基本与分支比较运行。
++2. 未进行此更改的已部署的 UI 副本：基础分支的预览部署，或同一路由的生产 URL。
++3. 没有任何。单独贴出之后的截图。
+ 
+-Net-new UI has no before image. Do not build the base revision in a second worktree or swap files in the checkout to get one unless the user asks for that. Never fake a before image, for example by undoing the change in browser devtools. Under the table, say where the before image came from (the commit or the URL), because a production URL may not match this PR's base. When the change alters existing UI and you post after images only, say under the table in one line why there is no before image.
++全新的UI没有以前的形象。除非用户要求，否则不要在第二个工作树中构建基本修订版或在签出中交换文件以获得一个工作树。切勿伪造之前的图像，例如通过撤消浏览器开发工具中的更改。在表格下，说明之前的图像来自哪里（提交或 URL），因为生产 URL 可能与此 PR 的基础不匹配。当更改改变了现有 UI 并且您仅发布后图像时，请在表格下方一行说明为什么没有前图像。
+ 
+-## Taking the screenshots
++## 截图
+ 
+-- Use the same route, viewport, and data state for both images of a pair. Prefer viewport or component screenshots over full-page ones. GitHub centers the shorter image of a table row vertically, so both images in a pair should be the same size.
+-- Keep each image under 10 MB, GitHub's upload limit for images.
+-- Take desktop screenshots by default. Add a mobile pair when the change is responsive.
+-- Take the few images that prove the claim, not a tour of the app.
+-- Take still screenshots only. Include video or GIFs only when the user supplied them.
+-- Use dev or seed data. Look at every image before publishing. If one shows credentials, tokens, personal data, or a URL carrying a secret, retake it without them or drop it. Never blur or crop instead.
+-- Save the images in one new temporary directory outside the repository, with file names that contain no spaces. Copy any supplied before images into the same directory, because the body references every image by a path relative to it. Never commit them.
++- 对一对图像使用相同的路线、视口和数据状态。与全页屏幕截图相比，更喜欢视口或组件屏幕截图。 GitHub 将表格行中较短的图像垂直居中，因此一对中的两个图像应具有相同的大小。
++- 将每张图片控制在 10 MB 以下，这是 GitHub 的图片上传限制。
++- 默认截取桌面屏幕截图。当更改响应时添加移动对。
++- 拿几张照片来证明这一说法，而不是浏览该应用程序。
++- 仅拍摄静态屏幕截图。仅当用户提供时才包含视频或 GIF。
++- 使用开发或种子数据。发布前查看每张图片。如果显示凭证、令牌、个人数据或带有秘密的 URL，请在不包含这些内容的情况下重新获取或删除它。切勿模糊或裁剪。
++- 将图像保存在存储库外部的一个新临时目录中，文件名不包含空格。将之前提供的所有图像复制到同一目录中，因为正文通过相对于每个图像的路径引用每个图像。永远不要犯下这些错误。
+ 
+-## In the body
++## 在体内
+ 
+-Put the images under `## Screenshots`, placed where `references/pr-description-writing.md` puts the evidence block. Reference each image by its local path relative to that directory, with alt text that names what it shows:
++将图像放在`## Screenshots`下，放置在`references/pr-description-writing.md`放置证据块的位置。通过相对于该目录的本地路径引用每个图像，并使用替代文本来命名它所显示的内容：
+ 
+ ```markdown
+-| Before | After |
++| 前 | 后 |
+ |:---:|:---:|
+-| ![Before: settings page](./before-settings.png) | ![After: settings page](./after-settings.png) |
++| ![之前：设置页面](./before-settings.png) | ![之后：设置页面](./after-settings.png) |
+ ```
+ 
+-For after-only screenshots, the table has a single `Preview` column. The section heading is `## Screenshots` either way, because a later rewrite preserves only `## Screenshots` and `## Demo`. The apply step uploads the files and replaces these local paths with GitHub URLs; "Applying via gh" in `references/apply-and-handoff.md` owns that.
++对于事后屏幕截图，该表只有一个 `Preview` 列。无论哪种方式，节标题都是`## Screenshots`，因为稍后的重写仅保留`## Screenshots`和`## Demo`。 apply 步骤上传文件并将这些本地路径替换为 GitHub URL； `references/apply-and-handoff.md` 中的“通过 gh 申请”拥有这一点。

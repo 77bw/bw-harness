@@ -1,167 +1,167 @@
-# Code Review Output Template
+# 代码审查输出模板
 
-This is the **canonical skeleton** for *which sections appear and in what order* — copy the section structure; the example below shows one good rendering, not the only permitted layout. Shape each finding for the reader's next action per *Presentation direction* in `references/finish-report.md` (Stage 6) (what & where / why it matters / what response it needs / how sure; let the shape serve the finding type). Findings are grouped by severity, not by reviewer.
+这是*哪些部分出现以及以什么顺序出现*的**规范骨架** - 复制部分结构；下面的示例显示了一种良好的渲染，而不是唯一允许的布局。在 `references/finish-report.md`（第 6 阶段）中，根据*呈现方向*塑造每个发现，以便读者采取下一步行动（什么、在哪里/为什么重要/需要什么响应/有多确定；让形状服务于发现类型）。结果按严重程度分组，而不是按审查者分组。
 
-**Hard constraints (non-negotiable; the rest is judgment):** ASCII-safe only — no box-drawing or per-item horizontal-rule separators (`────`), no Unicode arrows or middot; use `->`. Don't paste file contents or re-print the diff — cite `file:line`. Stable `#` numbering, reused wherever a finding reappears. The Verdict and Actionable list are present, last, and self-sufficient.
+**硬约束（不可协商；剩下的就是判断）：** 仅 ASCII 安全 — 没有方框图或每项水平规则分隔符 (`────`)，没有 Unicode 箭头或中点；使用`->`。不要粘贴文件内容或重新打印差异 - 引用`file:line`。稳定的 `#` 编号，在发现结果再次出现时重复使用。判决和可行清单是当前的、最后的且自足的。
 
-**If you use a markdown table, escape literal pipe characters in cells.** Any `|` inside a finding title, issue description, code snippet, regex pattern, or delimited-string example (e.g. cache key examples like `userName + "\|" + groups`) must be written as `\|` so column boundaries are determined only by unescaped pipes. Unescaped pipes split the cell across columns and corrupt the row's `Reviewer` and `Confidence` values (and `Route` in the Actionable Findings table).
+**如果您使用 Markdown 表，请转义单元格中的文字管道字符。** 查找标题、问题描述、代码片段、正则表达式模式或分隔字符串示例（例如，像 `userName + "\|" + groups` 这样的缓存键示例）内的任何 `|` 都必须写为 `\|`，因此列边界仅由未转义的管道确定。未转义的管道将单元格跨列拆分，并损坏行的 `Reviewer` 和 `Confidence` 值（以及“可操作结果”表中的 `Route`）。
 
-## Example
+## 例子
 
 ```markdown
 ## Code Review Results
 
-**Scope:** merge-base with the review base branch -> working tree (14 files, 342 lines)
-**Intent:** Add order export endpoint with CSV and JSON format support
-**Mode:** markdown + explicit local apply
+**范围：** merge-base 与 review base 分支 -> 工作树（14 个文件，342 行）
+**意图：** 添加订单导出端点，支持 CSV 和 JSON 格式
+**模式：** markdown + 显式本地应用
 
-**Reviewers:** correctness, testing, maintainability, security, api-contract
-- security -- new public endpoint accepts user-provided format parameter
-- api-contract -- new /api/orders/export route with response schema
+**审稿人：** 正确性、测试、可维护性、安全性、api 合约
+- 安全性——新的公共端点接受用户提供的格式参数
+- api-contract -- 具有响应模式的新 /api/orders/export 路由
 
-### Applied (explicit local apply; safe, verified)
+### 应用（显式本地应用；安全、经过验证）
 
-| # | File | Fix | Reviewer |
+| # | 文件 | 使固定 | 审稿人 |
 |---|------|-----|----------|
-| 6 | `export_helper_test.rb:40` | Added missing test for the empty-format branch | testing |
-| 7 | `orders_controller.rb:88` (+test) | Tightened export file perms `0644 -> 0600` (security-posture — verify in diff) | security |
+| 6 | `export_helper_test.rb:40` | 添加了空格式分支缺少的测试 | 测试 |
+| 7 | `orders_controller.rb:88`（+测试） | 加强导出文件权限 `0644 -> 0600`（安全状态 — 在 diff 中验证） | 安全 |
 
-Validation: export tests 11 -> 13; suite 214 pass, lint clean.
-Committed: `fix(review): cover empty-format branch + tighten export perms` (working tree was clean before review).
+验证：导出测试 11 -> 13；套房214通行证，绒毛干净。
+已承诺：`fix(review): cover empty-format branch + tighten export perms`（工作树在审查之前是干净的）。
 
 ### Triage Groups
 
-| Group | Findings | Context | Preferred Resolution | Why |
+| 团体 | 发现 | 语境 | 首选分辨率 | 为什么 |
 |-------|----------|---------|----------------------|-----|
-| Export result-set scaling | #2, #3 | Both stem from loading the full order set in one pass | Design the pagination contract first (#3), then stream with `find_each` behind it (#2) | One cursor/page decision resolves the memory bound and the API shape together |
+| 导出结果集缩放 | #2, #3 | 两者都源于一次性加载完整订单集 | 首先设计分页合约 (#3)，然后在其后面使用 `find_each` 进行流式传输 (#2) | 一个cursor/page决策同时解决了内存限制和API形状 |
 
 ### P0 -- Critical
 
-| # | File | Issue | Reviewer | Confidence |
+| # | 文件 | 问题 | 审稿人 | 信心 |
 |---|------|-------|----------|------------|
-| 1 | `orders_controller.rb:42` | User-supplied ID in lookup, no ownership check | security | 100 |
+| 1 | `orders_controller.rb:42` | 查找时用户提供的 ID，无所有权检查 | 安全 | 100 |
 
-- **#1** — `find(params[:id])` on the export path has no `where(account: current_account)` scope, so any authenticated user can export another account's orders. Scope the lookup to the current account.
+- **#1** — 导出路径上的 `find(params[:id])` 没有 `where(account: current_account)` 范围，因此任何经过身份验证的用户都可以导出其他帐户的订单。将查找范围限定为当前帐户。
 
 ### P1 -- High
 
-| # | File | Issue | Reviewer | Confidence |
+| # | 文件 | 问题 | 审稿人 | 信心 |
 |---|------|-------|----------|------------|
-| 2 | `export_service.rb:87` | Loads all orders into memory -- unbounded | performance | 100 |
-| 3 | `export_service.rb:91` | No pagination contract | api-contract, performance | 75 |
+| 2 | `export_service.rb:87` | 将所有订单加载到内存中——无限制 | 表现 | 100 |
+| 3 | `export_service.rb:91` | 无分页合同 | api合约、性能 | 75 |
 
-- **#2** — `Order.where(...).to_a` materializes the full result set; a large account OOMs the worker. Stream with `find_each` or paginate.
-- **#3** — the endpoint returns every row in one response; needs a cursor/page contract before GA. Design decision — see Actionable Findings.
+- **#2** — `Order.where(...).to_a` 实现完整的结果集；大帐户会导致工人 OOM。使用 `find_each` 或分页进行流式传输。
+- **#3** — 端点在一个响应中返回每一行；在 GA 之前需要 cursor/page 合同。设计决策——参见可操作的发现。
 
 ### P2 -- Moderate
 
-| # | File | Issue | Reviewer | Confidence |
+| # | 文件 | 问题 | 审稿人 | 信心 |
 |---|------|-------|----------|------------|
-| 4 | `export_service.rb:45` | No error handling for CSV serialization failure | correctness | 75 |
+| 4 | `export_service.rb:45` | 对 CSV 序列化失败没有错误处理 | 正确性 | 75 |
 
 ### P3 -- Low
 
-| # | File | Issue | Reviewer | Confidence |
+| # | 文件 | 问题 | 审稿人 | 信心 |
 |---|------|-------|----------|------------|
-| 5 | `export_helper.rb:12` | Format detection could use an early return | maintainability | 75 |
+| 5 | `export_helper.rb:12` | 格式检测可以使用提前返回 | 可维护性 | 75 |
 
 ### Actionable Findings
 
-| # | File | Issue | Route | Notes |
+| # | 文件 | 问题 | 路线 | 笔记 |
 |---|------|-------|-------|-------|
-| 1 | `orders_controller.rb:42` | Ownership check missing on export lookup | `gated_auto -> downstream-resolver` | `suggested_fix` present — caller decides whether to apply |
-| 3 | `export_service.rb:91` | Pagination contract needs a broader API decision | `manual -> downstream-resolver` | Needs design input before implementation |
+| 1 | `orders_controller.rb:42` | 导出查找时缺少所有权检查 | `gated_auto -> downstream-resolver` | `suggested_fix` 存在 — 呼叫者决定是否申请 |
+| 3 | `export_service.rb:91` | 分页合约需要更广泛的API决策 | `manual -> downstream-resolver` | 实施前需要设计输入 |
 
-### Pre-existing Issues
+### 先前存在的问题
 
-| # | File | Issue | Reviewer |
+| # | 文件 | 问题 | 审稿人 |
 |---|------|-------|----------|
-| 1 | `orders_controller.rb:12` | Broad rescue masking failed permission check | correctness |
+| 1 | `orders_controller.rb:12` | 广泛的救援屏蔽未通过权限检查 | 正确性 |
 
-Detail lines for Pre-existing and history-dependent P0/P1 findings may include the same short provenance string the artifact `evidence` carries (e.g. `provenance: a1b2c3d Alice 2024-08-12 - harden rescue`) when the finding depends on that history. Do not dump full-file blame into the report.
+当发现依赖于该历史时，预先存在且依赖于历史的 P0/P1 结果的详细信息行可能包括产物 `evidence` 所携带的相同短出处字符串（例如 `provenance: a1b2c3d Alice 2024-08-12 - harden rescue`）。不要将完整的责任归咎于报告中。
 
-### Learnings & Past Solutions
+### 经验教训和过去的解决方案
 
-- [Known Pattern] `<root>/solutions/export-pagination.md` -- previous export pagination fix applies to this endpoint
+- [已知模式] `<root>/solutions/export-pagination.md` -- 之前的导出分页修复适用于此端点
 
-### Deployment Notes
+### 部署注意事项
 
-- Pre-deploy: capture baseline row counts before enabling the export backfill
-- Verify: `SELECT COUNT(*) FROM exports WHERE status IS NULL;` should stay at `0`
-- Rollback: keep the old export path available until the backfill has been validated
+- 预部署：在启用导出回填之前捕获基线行计数
+- 验证：`SELECT COUNT(*) FROM exports WHERE status IS NULL;` 应保留在 `0`
+- 回滚：保持旧导出路径可用，直到验证回填
 
 ### Coverage
 
-- Suppressed: 2 findings below anchor 75 (1 at anchor 50, 1 at anchor 25)
-- Removable surface: ~40 lines / 1 file across findings #5 (signal only, not a target)
-- Residual risks: No rate limiting on export endpoint
-- Testing gaps: No test for concurrent export requests
+- 已抑制：锚点 75 以下有 2 个发现（1 个位于锚点 50，1 个位于锚点 25）
+- 可移动表面：~40 条线/1 个文件，涵盖发现#5（仅信号，不是目标）
+- 剩余风险：出口端点无速率限制
+- 测试差距：没有测试并发导出请求
 
 ---
 
-> **Verdict:** Ready with fixes
+> **结论：** 准备好修复
 >
-> **Reasoning:** 1 critical auth bypass must be fixed. The memory/pagination issues (P1) should be addressed for production safety.
+> **推理：** 必须修复 1 个关键身份验证绕过问题。安全生产要解决memory/pagination问题（P1）。
 >
-> **Fix order:** P0 auth bypass -> P1 memory/pagination -> P2 error handling if straightforward
+> **修复顺序：** P0 身份验证绕过 -> P1 memory/pagination -> P2 错误处理（如果简单）
 ```
 
-## Anti-patterns
+## 反模式
 
-Do NOT produce output like this. The following is wrong:
+不要产生这样的输出。以下是错误的：
 
 ```markdown
-Findings
+发现
 
-Sev: P1
-File: foo.go:42
-Issue: Some problem description
-Reviewer(s): adversarial
-Confidence: 75
-Route: advisory -> human
+严重程度： P1
+文件：foo.go：42
+问题：一些问题描述
+审稿人：敌对的
+置信度：75
+路线：咨询->人工
 ────────────────────────────────────────
-Sev: P2
-File: bar.go:99
-Issue: Another problem
+严重程度： P2
+文件：bar.go：99
+问题：又一个问题
 ```
 
-This fails because of the **box-drawing `────` separators between items**, no stable finding numbers, no severity-grouped `###` headers, no `## Code Review Results` title, and a verdict not set apart. The `────` rules and missing structure are the problem — `Field:`-prefixed lines are not themselves banned, but here they carry no stable numbers and bury depth. Prefer a terse table or a keyed list; put depth in a per-finding detail line (`- **#N** — …`), not in box-drawn blocks.
+由于项目之间的**方框图 `────` 分隔符**、没有稳定的结果编号、没有严重性分组的 `###` 标题、没有 `## Code Review Results` 标题以及未分开的判决，因此失败。 `────`规则和缺失的结构是问题所在——`Field:`前缀的行本身并没有被禁止，但在这里它们没有稳定的数字和埋藏深度。喜欢简洁的表格或键控列表；将深度放入每个发现的细节线（`- **#N** — …`）中，而不是盒子绘制的块中。
 
-## Formatting Rules
+## 格式规则
 
-- **ASCII-safe only** -- never box-drawing characters or per-item horizontal-rule separators (`────`) between entries (the report-level `---` before the verdict is still required), no Unicode arrows or middot; use `->`. Tables are a good default but not mandatory -- let the shape serve the finding type (`references/finish-report.md`, Stage 6); stay consistent within a section
-- **Escape literal `|` in table cells** -- any `|` inside a finding title, issue description, code snippet, regex pattern, or delimited-string example must be written as `\|`. Unescaped pipes are parsed as column separators and corrupt the row's `Reviewer` and `Confidence` columns (and `Route` in the Actionable Findings table). Applies especially to cache-key delimiter examples, regex alternations, and logical-OR operators quoted inside findings.
-- **Severity-grouped sections** -- `### P0 -- Critical`, `### P1 -- High`, `### P2 -- Moderate`, `### P3 -- Low`. Omit empty severity levels.
-- **Stable sequential finding numbers** -- assign finding numbers once after sorting, continue them across severity sections, and reuse those same numbers when findings are repeated in Actionable Findings. Do not restart at `1` for each severity or route bucket.
-- **Always include file:line location** for code review issues
-- **Reviewer column** shows which persona(s) flagged the issue. Multiple reviewers = cross-reviewer agreement.
-- **Confidence column** shows the finding's anchor as an integer (`50`, `75`, or `100`). Never render as a float.
-- **No `Route` column in the per-severity tables** -- the synthesized route (``<autofix_class> -> <owner>``) appears only in the Actionable Findings table and the `mode:agent` JSON. The scannable severity tables are 5 columns: `# | File | Issue | Reviewer | Confidence`.
-- **Detail line (per finding, as needed)** -- keep the scannable line short (the symptom + `file:line`, not the mechanism); put the why-it-matters + fix/options in a per-finding detail line keyed by stable `#`: `- **#N** — <why it matters + what response it needs>`. Add it whenever the one-liner isn't self-sufficient -- usually P0/P1; P2/P3 are often terse-only. This keyed detail is the home for depth -- don't paste code or restate the diff, and match weight to weight.
-- **Header includes** scope, intent, and reviewer team with per-conditional justifications
-- **Mode line** -- include `markdown report-only`, `markdown local-apply`, or `agent report-only`
-- **Triage Groups section (when groups exist)** -- pipe table `| Group | Findings | Context | Preferred Resolution | Why |` rendered after Applied and before the severity tables. The `Findings` cell lists stable `#`s (e.g. `#2, #3`); every referenced `#` must appear in a severity table below. Groups are a triage lens over the findings -- they never replace the severity tables, merge findings, or renumber them. Omit when `grouping:off` is active or no groups survived Stage 5b/5c pruning.
-- **Applied section (explicit local apply only)** -- when Stage 5c was authorized and applied fixes, list them first, before the severity tables, as `# | File | Fix | Reviewer` followed by a one-line validation outcome (e.g. "suite 214 pass, lint clean") and the **commit status** — committed as an isolated review-labeled fix commit (`fix(review): …`, or the repo's nearest convention when `review` isn't an allowed scope) when the working tree was clean before the review, or left uncommitted (for the user's commit) when it was already dirty. A fix spanning multiple files is **one row with one `#`** (e.g. `controller.rb:88 (+test)`) -- never duplicate the number across rows. Flag green-but-unverifiable edits (auth/contract/concurrency) inline in the `Fix` cell, e.g. `(security-posture — verify in diff)`. Applied findings keep their stable `#` and appear only here, not in the severity tables. Omit when local apply was not authorized or nothing was applied
-- **Actionable Findings section** -- include when the actionable queue is non-empty (findings for the caller to handle)
-- **Pre-existing section** -- separate table, no confidence column (these are informational)
-- **Learnings & Past Solutions section** -- results from the `learnings-researcher` local prompt asset, with links to <root>/solutions/ files
-- **Deployment Notes section** -- key checklist items from the `deployment-verification-agent` local prompt asset. Omit if the prompt did not run. Schema drift surfaces as `data-migration` findings — no separate section.
-- **Coverage section** -- suppressed count, validation outcome counts when Stage 5b ran (confirmed, rejected, unresolved, malformed, failed, shortcut-skipped) with the reason for each non-confirmed outcome, removable surface (only when deletion-oriented maintainability findings exist; approximate net lines/files removable if applied -- a dead-weight signal, never a reduction target, omit otherwise), residual risks, testing gaps, failed reviewers
-- **Summary uses blockquotes** for verdict, reasoning, and fix order
-- **Horizontal rule** (`---`) separates findings from verdict
-- **`###` headers** for each section -- never plain text headers
+- **仅限 ASCII 安全** -- 条目之间绝不使用方框绘制字符或每项水平规则分隔符 (`────`)（仍需要判决之前的报告级别`---`），没有 Unicode 箭头或中点；使用`->`。表格是一个很好的默认设置，但不是强制性的——让形状服务于查找类型（`references/finish-report.md`，第 6 阶段）；在一个部分内保持一致
+- **表格单元格中的转义文字 `|`** -- 结果标题、问题描述、代码片段、正则表达式模式或分隔字符串示例中的任何 `|` 必须写为 `\|`。未转义的管道被解析为列分隔符，并损坏行的 `Reviewer` 和 `Confidence` 列（以及“可操作结果”表中的 `Route`）。特别适用于缓存键分隔符示例、正则表达式替换以及内部结果中引用的逻辑或运算符。
+- **按严重性分组的部分** -- `### P0 -- Critical`、`### P1 -- High`、`### P2 -- Moderate`、`### P3 -- Low`。省略空的严重级别。
+- **稳定的连续结果编号** - 排序后分配一次结果编号，在严重性部分中继续它们，并在可操作结果中重复结果时重复使用这些相同的编号。对于每个严重性或路由存储桶，不要在 `1` 处重新启动。
+- **对于代码审查问题，始终包含 file:line 位置**
+- **审查者列**显示哪些角色标记了该问题。多个审稿人=跨审稿人协议。
+- **置信度列** 将结果的锚点显示为整数（`50`、`75` 或 `100`）。切勿渲染为浮动。
+- **每个严重性表中没有 `Route` 列** -- 合成路线 (``<autofix_class> -> <owner>``) 仅出现在“可操作结果”表和 `mode:agent` JSON 中。可扫描的严重性表有 5 列：`# | File | Issue | Reviewer | Confidence`。
+- **详细信息行（根据需要，根据发现）** -- 保持可扫描行简短（症状 + `file:line`，而不是机制）；将“为什么重要”+ fix/options 放入由稳定的 `#`: `- **#N** — <why it matters + what response it needs>` 键入的每个发现的详细信息行中。当单行不能自给自足时添加它——通常是P0/P1； P2/P3 通常非常简洁。这个关键细节是深度的基础——不要粘贴代码或重述差异，并将权重与权重相匹配。
+- **标题包括**范围、意图和审核团队以及每个条件的理由
+- **模式线** -- 包括 `markdown report-only`、`markdown local-apply` 或 `agent report-only`
+- **分类组部分（当组存在时）** -- 管道表 `| Group | Findings | Context | Preferred Resolution | Why |` 在“已应用”之后和严重性表之前呈现。 `Findings`单元格列出了稳定的`#`（例如`#2, #3`）；每个引用的 `#` 必须出现在下面的严重性表中。分组是对结果进行分类的透镜——它们从不替换严重性表、合并结果或重新编号。当 `grouping:off` 处于活动状态或没有群体在阶段 5b/5c 修剪中幸存时省略。
+- **应用部分（仅显式本地应用）** - 当第 5c 阶段被授权并应用修复时，首先将它们列出在严重性表之前，如 `# | File | Fix | Reviewer`，后跟单行验证结果（例如“套件 214 通过，lint clean”）和 **提交状态** - 作为独立审查标记的修复提交提交（`fix(review): …`，或 `review` 时存储库最接近的约定）当工作树在审查之前是干净的时（不是允许的范围），或者当工作树已经脏时保持未提交（对于用户的提交）。跨多个文件的修复是**一行有一个 `#`**（例如 `controller.rb:88 (+test)`）——切勿跨行重复数字。在 `Fix` 单元格中内联标记绿色但无法验证的编辑 (auth/contract/concurrency)，例如`(security-posture — verify in diff)`。应用的结果保持稳定`#`，并且仅出现在此处，而不出现在严重性表中。当本地应用未授权或未应用任何内容时省略
+- **可操作的发现部分** - 包括可操作队列非空时的情况（供调用者处理的发现）
+- **预先存在的部分** - 单独的表，无置信度列（这些是信息性的）
+- **学习和过去的解决方案部分** - 来自 `learnings-researcher` 本地提示资产的结果，以及指向 <root>/solutions/ 文件的链接
+- **部署注释部分** -- `deployment-verification-agent` 本地提示资产中的关键清单项目。如果提示未运行则省略。模式漂移表面为 `data-migration` 结果 - 没有单独的部分。
+- **覆盖部分** -- 抑制计数，第 5b 阶段运行时的验证结果计数（已确认、已拒绝、未解决、畸形、失败、跳过快捷方式）以及每个未确认结果的原因、可移除表面（仅当存在面向删除的可维护性发现时；如果应用，则近似净 lines/files 可移除 - 静重信号，绝不是减少目标，否则省略）、残余风险、测试差距、失败的审查者
+- **摘要使用块引用**进行判决、推理和修正顺序
+- **水平规则** (`---`) 将调查结果与结论分开
+- 每个部分的 **`###` 标题**——绝不是纯文本标题
 
-## Agent mode (JSON)
+## 代理模式（JSON）
 
-When `mode:agent` is active, **do not** emit the markdown table report above. Emit **one parseable JSON object** as the primary response and write the same payload to `review.json` under the resolved `<run-dir>`.
+当 `mode:agent` 处于活动状态时，**不**发出上面的 Markdown 表格报告。发出**一个可解析的JSON对象**作为主要响应，并将相同的有效负载写入已解析的`<run-dir>`下的`review.json`。
 
-The contract is defined in `references/modes-and-output.md` under **`## JSON output format (`mode:agent` only)`**. Minimum fields: `status`, `verdict`, `scope`, `intent`, `reviewers`, `findings`, `actionable_findings`, `artifact_path`, `run_id`.
+该合约在 **`## JSON output format (`mode:agent` only)`** 下的`references/modes-and-output.md` 中定义。最小字段：`status`、`verdict`、`scope`、`intent`、`reviewers`、`findings`、`actionable_findings`、`artifact_path`、`run_id`。
 
-Key differences from the human-facing markdown format:
+与面向人类的 Markdown 格式的主要区别：
 
-- **No pipe-delimited tables** — findings are JSON arrays with merged fields (`#`, `title`, `severity`, `file`, `line`, `confidence`, `autofix_class`, `owner`, `suggested_fix`, `why_it_matters`, `evidence`, `reviewers`, etc.).
-- **`actionable_findings`** — subset for caller apply workflows (`gated_auto` / `manual` with `downstream-resolver`).
-- **`triage_groups`** — the markdown Triage Groups section serialized as `{title, findings: [<stable #s>], context, preferred_resolution, why}` objects, so callers can batch related fixes by theme. Groups span the full finding set — a triage lens, not an apply queue — so a caller must intersect each group's `findings` with `actionable_findings` before applying; the apply handoff stays `actionable_findings`. Empty when `grouping:off` or no groups.
-- **No `applied_fixes` and no Applied section** — `mode:agent` does not apply fixes; the caller does. Applied work surfaces only in explicitly authorized local-apply markdown (Stage 5c/6). The handoff is `actionable_findings`.
-- **Failure/degraded paths** — `{"status":"failed","reason":"..."}` or `"status":"degraded"` with reason; never mix markdown tables into the JSON response.
-- **Stable `#`** — same numbering as Stage 5 synthesis, carried in JSON finding objects for downstream apply/residual tracking.
+- **没有管道分隔的表** - 结果是具有合并字段的 JSON 数组（`#`、`title`、`severity`、`file`、`line`、`confidence`、`autofix_class`、`owner`、`suggested_fix`、`why_it_matters`、 `evidence`、`reviewers` 等）。
+- **`actionable_findings`** — 调用者应用工作流程的子集（`gated_auto` / `manual` 和 `downstream-resolver`）。
+- **`triage_groups`** — markdown Triage Groups 部分序列化为 `{title, findings: [<stable #s>], context, preferred_resolution, why}` 对象，因此调用者可以按主题批量相关修复。组跨越完整的结果集（分类镜头，而不是应用队列），因此调用者必须在应用之前将每个组的 `findings` 与 `actionable_findings` 相交；应用切换保持`actionable_findings`。当`grouping:off`或没有组时为空。
+- **没有 `applied_fixes` 且没有应用部分** — `mode:agent` 不应用修复；呼叫者这样做。仅在明确授权的本地应用Markdown中应用工作界面（阶段5c/6）。切换是`actionable_findings`。
+- **Failure/degraded 路径** — `{"status":"failed","reason":"..."}` 或 `"status":"degraded"` 有理由；切勿将 Markdown 表混合到 JSON 响应中。
+- **稳定 `#`** — 与第 5 阶段合成相同的编号，在 JSON 寻找下游 apply/residual 跟踪的对象中进行。

@@ -1,10 +1,10 @@
-# Instruction-text target: a SKILL.md scored on a fixed case set.
-# Start here when the mutable files are instructions a model runs under.
-# See references/text-targets.md for the eval-set coverage rule, model roles,
-# and the hypothesis moves this spec's categories name.
+# 指令文本目标：在固定案例集上得分SKILL.md。
+# 当可变文件是模型运行时的指令时，从这里开始。
+# 请参阅 references/text-targets.md 了解评估集覆盖规则、模型角色、
+# 并且假设移动了该规范的类别名称。
 
 name: tighten-triage-skill
-description: Raise the pass rate of the issue-triage skill on recorded failures without growing the prompt
+description: "在不增加提示的情况下提高记录故障的问题分类技能的通过率"
 
 metric:
   primary:
@@ -19,25 +19,25 @@ metric:
   degenerate_gates:
     - name: cases_run
       check: ">= 24"
-      description: Every selection case ran; a partial run is not a measurement
+      description: "每个选择案例都运行；部分运行不是测量"
     - name: skill_parses
       check: "== 1"
-      description: Frontmatter and body still parse as a skill
+      description: "Frontmatter 和 body 仍然被解析为一项技能"
   diagnostics:
     - name: mean_output_tokens
     - name: cases_ambiguous
 
 measurement:
-  # Runs every case in eval/triage/selection.jsonl under the pinned task model
-  # and prints {"pass_rate", "prompt_tokens", "cases_run", "skill_parses",
-  # "mean_output_tokens", "cases_ambiguous", "cases": {"<id>": true|false}}.
+  # 在固定任务模型下运行eval/triage/selection.jsonl中的每个案例
+  # 并打印 {"pass_rate", "prompt_tokens", "cases_run", "skill_parses",
+  # “mean_output_tokens”，“cases_ambiguous”，“案例”：{“<id>”：true | false}}。
   command: "python eval/triage/run_cases.py --cases eval/triage/selection.jsonl --model task-model-pinned-in-script"
   timeout_seconds: 900
   working_directory: "."
   per_case: true               # decide.mjs reports cases the baseline passed and a candidate fails
   holdout:
-    # Same script, a case file the selection command never reads. Scored only
-    # before a keep and at final confirmation.
+    # 相同的脚本，选择命令永远不会读取的案例文件。仅得分
+    # 在保留之前和最终确认时。
     command: "python eval/triage/run_cases.py --cases eval/triage/holdout.jsonl --model task-model-pinned-in-script"
   stability:
     mode: repeat
@@ -67,9 +67,9 @@ constraints:
   - "Keep the skill's name and description frontmatter fields unchanged"
   - "Every rule kept in the body must have at least one case in eval/triage/ that fails without it"
 
-# Hypothesis categories for this target are the moves in text-targets.md:
-# add-examples, bootstrap-examples, rewrite-from-feedback, shorten,
-# restructure, decompose, vote, external-optimizer.
+# 该目标的假设类别是 text-targets.md 中的移动：
+# 添加示例、引导示例、根据反馈重写、缩短、
+# 重组、分解、投票、外部优化。
 
 stopping:
   max_iterations: 8

@@ -1,39 +1,39 @@
-# Building the prototype
+# 构建原型
 
-Required read before you write any prototype code, alongside `references/preview.md`.
+在编写任何原型代码之前需要阅读 `references/preview.md`。
 
-## Fidelity
+## 富达
 
-Fidelity is a different axis from size (`references/scoping.md` owns sizing, which the go-ahead depends on). Throwaway means unmaintained and unshipped, not thin — do not test, abstract, or harden past runnable, but take finish as far as the dimension under test needs. A flow or state model gets rich enough to drive; a visual direction gets finished enough to judge; a placement question stays thin. Fidelity may differ per avenue within one wide run. Do not stay low-fidelity on principle, and persist state only when persistence is the question.
+保真度是与尺寸不同的轴（`references/scoping.md`拥有尺寸，这取决于尺寸）。一次性意味着未维护和未交付，而不是薄弱——不测试、抽象或强化过去的可运行性，而是根据测试需要的维度进行完成。流或状态模型变得足够丰富以驱动；视觉方向已经足够完成以进行判断；安置问题仍然很薄弱。在一次广泛的运行中，每种途径的保真度可能有所不同。原则上不要保持低保真度，只有在持久性成为问题时才保留状态。
 
-## Yields from the web default
+## 网络默认产量
 
-It yields in exactly two cases: the user names a technology, or the dimension cannot be rendered in a browser without faking it. In that second case, build in the medium the dimension requires, and name that choice before you build. If a named technology also cannot render the dimension, say so rather than yielding silently. The rest of this file defines what the artifact may be on either path.
+它只在两种情况下产生：用户命名了一种技术，或者尺寸无法在浏览器中呈现而不伪造。在第二种情况下，使用尺寸所需的介质进行构建，并在构建之前命名该选择。如果某项指定技术也无法渲染维度，请直言不讳，而不是默默屈服。该文件的其余部分定义了任一路径上的产物。
 
-## The artifact on the web path
+## Web 路径上的产物
 
-On the web path the artifact is whatever a browser can display and you can author — HTML, SVG, CSS renderings, images — shown inside the page the preview helper already serves. Where the host offers image generation, use it. Where it does not, author the candidates as markup when markup can carry the dimension honestly, and say so; when it cannot — a photographic or painterly direction — report the missing capability instead, because substituting markup there fakes the very thing being judged. Do not introduce a second display mechanism alongside that page; a yielded run displays however its own medium does.
+在 Web 路径上，产物是浏览器可以显示并且您可以创作的任何内容 - HTML、SVG、CSS 渲染、图像 - 显示在预览助手已提供的页面内。如果主机提供图像生成，请使用它。如果没有，则在标记可以诚实地承载维度时将候选项编写为标记，并如此说；当它不能（摄影或绘画方向）报告缺失的功能时，因为在那里替换标记会伪造正在判断的东西。不要在该页面旁边引入第二个显示机制；生成的运行会显示其自身介质的显示方式。
 
-## Which run root
+## 哪个运行 root
 
-Prefer `.context/compound-engineering/ce-prototype/<date>-<slug>/` so the prototype survives alongside the decisions capsule. Fall back to `/tmp/compound-engineering-<uid>/ce-prototype/<date>-<slug>/` when the user declines the `.gitignore` append, when they ask that this run not be left in their repo, when the run is not inside a git repository, or when the path fails the safety checks; survival there is best-effort, so do not promise it a lifetime. Calling the prototype throwaway is not a request to leave the repo — throwaway describes the code, and a kept prototype is never deleted.
+更喜欢 `.context/compound-engineering/ce-prototype/<date>-<slug>/`，这样原型就能与决策胶囊一起生存。当用户拒绝 `.gitignore` 附加时、当他们要求不要将此运行留在其存储库中、当运行不在 git 存储库内或当路径未通过安全检查时，回退到 `/tmp/compound-engineering-<uid>/ce-prototype/<date>-<slug>/`；生存是要尽力而为的，所以不要许诺一辈子。调用原型一次性并不是请求离开存储库——一次性描述了代码，并且保留的原型永远不会被删除。
 
-## Recreate, do not rebuild the app
+## 重新创建，不要重建应用程序
 
-Recreate what this question needs from the current product. Do not stand up the full app unless the question is the whole-product feel.
+从当前产品中重新创建此问题所需的内容。除非问题是整个产品的感觉，否则不要站起来完整的应用程序。
 
-Scale into the existing app only as a throwaway overlay when the user asks or the question is density or chrome on an existing page — an isolated page will hide that. That overlay is not the shipped feature. Do not commit prototype code on the product branch. Undo those edits when the try ends — restore only the files you changed, never work you did not make. An overlay run therefore leaves no artifact behind; nothing survives it. If you cannot undo them cleanly, name the files you left modified rather than handing off a dirty tree.
+仅当用户询问或问题是现有页面上的密度或镶边时，才将其作为一次性覆盖层扩展到现有应用程序中 - 孤立的页面将隐藏该问题。该覆盖层不是附带的功能。不要在产品分支上提交原型代码。尝试结束时撤消这些编辑 - 仅恢复您更改的文件，永远不要恢复您没有做过的工作。因此，覆盖运行不会留下任何伪影；一切都无法幸免。如果您无法彻底撤消它们，请命名您保留修改的文件，而不是交出一棵脏树。
 
-## Showing it
+## 显示它
 
-When the question is which option wins, put the options on one surface so they can be judged together — unless that surface would distort what is being judged: a scroll or transition gets a full-size run of its own rather than being nested in a small framed panel, and the comparison surface stays static. When a control swaps the options in place, such as tabs, give each option's container `data-ce-variant="<name>"` with a name no other option on the screen uses, so an annotation pin shows only on the option it was placed on.
+当问题是哪个选项获胜时，将选项放在一个表面上，以便可以一起判断它们 - 除非该表面会扭曲正在判断的内容：滚动或过渡会获得自己的全尺寸运行，而不是嵌套在小框架面板中，并且比较表面保持静态。当控件在适当位置交换选项（例如选项卡）时，为每个选项的容器 `data-ce-variant="<name>"` 指定屏幕上其他选项不使用的名称，因此注释图钉仅显示在其所在的选项上。
 
-After each user-facing action or variant change, show the relevant state so they can see what changed.
+在每次面向用户的操作或变体更改后，显示相关状态，以便他们可以看到发生了什么变化。
 
-While an annotation loop is running, revise the screen the record names, in place. Do not mint a new numbered `00N-*.html` per pin.
+当注释循环运行时，修改屏幕上的记录名称。不要为每个引脚铸造新的编号 `00N-*.html`。
 
-Give each question in a multi-question run its own child directory under the run directory. Never delete a kept prototype — the directory is theirs to prune. Calling the prototype throwaway is not a request to delete it; throwaway describes the code.
+为多问题运行中的每个问题提供运行目录下自己的子目录。永远不要删除保留的原型——该目录是他们要修剪的。调用原型为一次性并不是请求删除它；而是请求将其删除。 Throwaway 描述了代码。
 
-The run capsule at `decisions.md` carries the question, what was built, the run and question directories each screen sits in, what won and why, what was rejected, stated adjustments that were not in the prototype, and what is still open. SKILL.md owns when it is written and what it must not become.
+`decisions.md` 处的运行胶囊包含问题、构建的内容、每个屏幕所在的运行和问题目录、获胜的内容和原因、拒绝的内容、原型中未包含的说明调整以及仍处于开放状态的内容。 SKILL.md 拥有它何时被写入以及它不能成为什么。
 
-A run's output is a set of decisions. Converging on one direction that resolves the ambiguity is the best outcome, not a precondition for the run being complete.
+运行的输出是一组决策。集中到一个解决歧义的方向是最好的结果，而不是完成运行的先决条件。

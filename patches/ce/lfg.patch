@@ -1,0 +1,1081 @@
+diff --git a/skills/lfg/SKILL.md b/skills/lfg/SKILL.md
+index 8f419ed7be9fa3f4701c3e868450d7560a0c33ac..eebe16ecc23cb35644adf45efa54bd070953d70b 100644
+--- a/skills/lfg/SKILL.md
++++ b/skills/lfg/SKILL.md
+@@ -1,57 +1,61 @@
+ ---
+ name: lfg
+-description: "Take a request all the way to done, hands-off, through the right Compound Engineering skills. A code change ends as an open pull request, pushed without stopping. Use only when the user explicitly asks for autonomous end-to-end work or invokes lfg directly. Use ce-plan, ce-work, ce-debug, or ce-commit-push-pr for work the user reviews step by step."
+-argument-hint: "[feature, bug, issue reference, or plan path; optionally assign planning and/or implementation to a model or harness]"
++description: "通过正确的 Compound Engineering 技能，将请求一路完成，不干涉。代码更改以开放拉取请求结束，不断推送。仅当用户明确要求自主端到端工作或直接调用 lfg 时才使用。使用 ce-plan、ce-work、ce-debug 或 ce-commit-push-pr 来进行用户逐步审核的工作。"
++argument-hint: "[功能、错误、问题参考或计划路径；可选择将规划and/or实施分配给模型或宿主]"
+ ---
+ 
+-**Outcome.** The request reaches the end state its shape calls for, produced by the Compound Engineering skill whose job that is, with everything unresolved recorded where the user will see it. Most requests end with that skill's result and no branch. A change to the code is the one shape with more steps of its own: it ends in an open pull request whose URL you hold, with CI decided, after being implemented, simplified, reviewed with the eligible findings applied and the rest recorded, any durable learning captured, committed, and pushed. Merging stays with the user unless they granted it for this run.
++> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
+ 
+-**Work source.** On the routes that change the code, nothing is implemented without a work source verified this run, and only three things qualify: an implementation-ready plan or a one-pass statement, each of which `ce-work` implements, or a `fixed` return from `ce-debug`, where the fix is the implementation. The plan is one the session identifies, as `references/intake.md` defines. Never search the plans directory for a candidate or act on a file you discovered. Never plan from scratch over an existing plan.
++**结果。** 请求达到其形状所要求的最终状态，由 Compound Engineering 技能产生，其工作就是将所有未解决的问题记录在用户将看到的位置。大多数请求以该技能的结果结束，没有分支。对代码的更改是一种具有更多步骤的形状：它以一个开放的拉取请求结束，您持有该拉取请求的 URL，在实施、简化、审查后应用符合条件的结果并记录其余内容，捕获、提交和推送任何持久的学习成果后，确定 CI。合并保留在用户手中，除非他们在本次运行中授予了合并权限。
+ 
+-**Route by what the request is.** Match the request to the skill whose job it is; the host's skill list is the catalog. Read `references/intake.md` before choosing; it alone defines the routes, their precedence, what each child skill is passed, and how each return is read. In short:
++**工作源。** 在更改代码的路线上，如果没有工作源验证此运行，则任何内容都不会实现，并且只有三件事符合条件：实现就绪计划或一次性语句，其中每一个都由`ce-work`实现，或者从`ce-debug`返回`fixed`，其中修复是实现。该计划是会议确定的计划，如 `references/intake.md` 所定义。切勿在计划目录中搜索候选人或对您发现的文件采取行动。切勿在现有计划的基础上从头开始计划。
+ 
+-- A plan path, or a plan `ce-plan` wrote this session, takes the plan route.
+-- A concrete report of failing or wrong behavior goes to `ce-debug`; reproducing it is that skill's job, not intake's.
+-- A change that hangs on a judgment the user did not settle goes to `ce-pov` first, and only a verdict that supports the change continues; a judgment with nothing to build ends at the verdict.
+-- Product shape with more than one plausible reading goes to `ce-brainstorm` when a human is present, and to `ce-plan` in pipeline mode when not.
+-- A request whose result is not a code change goes to the skill that owns that result (`ce-explain`, `ce-prototype`, `ce-pov`, `ce-ideate`, and so on); that invocation is the whole run: return its result and end.
+-- Any other change to the code goes to `ce-plan`, unless it can be stated, done, and verified in one pass with no decision the user would weigh; then it goes straight to `ce-work`.
++**根据请求的内容进行路由。**将请求与所从事工作的技能相匹配；主持人的技能列表就是目录。选择前请先阅读`references/intake.md`；它单独定义了路线、它们的优先级、每个子技能传递的内容以及每个返回的读取方式。简而言之：
+ 
+-**Interaction.** Ask the user only through `ce-brainstorm`, and only when a human is present. Everything else proceeds without waiting: reversible work is done and shown for the user to correct afterward, and only an irreversible action outside what they granted (a merge they did not grant, a force-push, deleting data) stops instead. `lfg` runs from schedulers, loops, and nested orchestrators. The one other question is the routing disambiguation `references/stage-routing.md` defines: when the conversation assigns planning or implementation to a model or harness, read that file before routing; it alone carries the carrier strings and the sanitization.
++- 计划路径，或本次会议编写的计划`ce-plan`，采用计划路线。
++- 失败或错误行为的具体报告将发送至`ce-debug`；复制它是技能的工作，而不是摄入的工作。
++- 如果用户未解决的判断发生变更，则首先转到`ce-pov`，只有支持变更的判断才会继续；没有任何依据的判决就以判决告终。
++- 当有人在场时，具有多个可信读数的产品形状会变为`ce-brainstorm`，而在无人存在时，在管道模式下会变为`ce-plan`。
++- 结果不是代码更改的请求将转到拥有该结果的技能（`ce-explain`、`ce-prototype`、`ce-pov`、`ce-ideate` 等）；该调用是整个运行：返回其结果并结束。
++- 对代码的任何其他更改都会转到`ce-plan`，除非可以一次性说明、完成和验证，而用户无需权衡任何决定；然后直接到`ce-work`。
+ 
+-**Stop, and say why, when** any of these holds:
++**交互。** 仅通过 `ce-brainstorm` 询问用户，并且仅当有人在场时。其他一切都无需等待即可进行：可逆的工作已完成并显示供用户随后更正，并且只有在他们授予的范围之外的不可逆操作（他们未授予的合并、强制推送、删除数据）才会停止。 `lfg` 从调度程序、循环和嵌套协调器运行。另一个问题是路由消歧`references/stage-routing.md`定义：当对话将规划或实现分配给模型或宿主时，在路由之前读取该文件；它独自承载着载体串和消毒剂。
+ 
+-- The work source cannot be produced: planning returned blocked, the diagnosis found no safe fix, the fix would be divergent, `ce-pov` did not support the change, or a stage assignment cannot be passed on.
+-- A child return is anything but complete and evidenced.
+-- A settled decision is invalidated.
+-- A project-defined shipping process falls short.
++**当**其中任何一个成立时，停下来并说出原因：
+ 
+-A stop leaves nothing pushed that was not already pushed.
++- 无法生成工作源：计划返回受阻、诊断未发现安全修复、修复会发散、`ce-pov` 不支持更改或无法传递阶段任务。
++- 儿童返还绝不是完整且有证据的。
++- 已解决的决定无效。
++- 项目定义的交付流程存在缺陷。
+ 
+-Resolve every skill named here against the host's available-skills list and invoke that exact entry; some hosts namespace it (`compound-engineering:ce-plan`). Read `references/task-visibility.md` before starting: it defines the stage view published through the platform's task-tracking capability, the chat narration, and the completion rule that a step is done only after it ran, a child skill's return resumes the next numbered step in the same turn, and the turn ends before DONE or a stop only to wait on a wake that resumes it.
++停止不会留下任何尚未被推动的东西。
+ 
+-## The run (routes that change the code)
++根据主机的可用技能列表解析此处指定的每项技能，并调用该确切的条目；一些主机命名空间（`compound-engineering:ce-plan`）。开始之前请阅读`references/task-visibility.md`：它定义了通过平台的任务跟踪功能发布的阶段视图、聊天旁白以及步骤仅在运行后完成的完成规则，子技能的返回将继续同一回合中的下一个编号的步骤，并且回合在完成或停止之前结束，仅等待恢复它的唤醒。
+ 
+-1. **Produce the work source** per `references/intake.md`. On the plan route, read `references/plan-brief.md` first; it alone defines the settled-decisions brief and the artifact-root rule. Any explicit `status: blocked` return, including `settled-decision-invalidated`, stops the run. Blocked status outranks an existing artifact and is never retried. Only absence of both a blocker and a plan file `ce-plan` reported writing this run invokes `ce-plan` a second time with the same arguments, reusing the composed brief verbatim; the plan must then pass the readiness check in `references/plan-brief.md`. Record the work source for every later step. LFG never launches `/goal` directly; `ce-work` implements and returns control.
++## 运行（更改代码的路线）
+ 
+-2. **Read `references/work-return.md` first**, then invoke the `ce-work` skill with `mode:return-to-caller <plan-path-from-step-1>`; a one-pass statement takes the path's place. On the defect route this step does not run: `ce-debug` already implemented and committed, and `references/debug-return.md` was its gate. Only a valid `status: complete` from `ce-work` may advance; every other status or malformed return stops the pipeline.
++在启动第一个可能写入的下游流程前（含会写计划的规划），记录本次工作开始前的范围：调用的分支和HEAD、未触及的dirty/staged/untracked路径（`git status --short --untracked-files=all`）、上游default/base以及已经在其之前或未知的提交。将其与运行的工作源放在一起；区分此运行所做的更改与输入时的更改。缺陷路线也返回其原生`pre_fix_scope`。请勿隐藏、变基、重置或声明现有工作。
+ 
+-3. **Read `references/review-followup.md` now**; it governs steps 3 through 7. Invoke the `ce-simplify-code` skill with `mode:pipeline` and `size-cutoff:30` on the diff that file scopes; skip only the invocation for a docs-only or roughly sub-10-line change.
++1. **按照`references/intake.md`制作工作源**。在计划路线上，先读`references/plan-brief.md`；它单独定义了已解决的决策概要和产物根规则。任何显式 `status: blocked` 返回（包括 `settled-decision-invalidated`）都会停止运行。阻止状态的优先级高于现有产物，并且永远不会重试。仅缺少阻塞项和计划文件`ce-plan`报告编写此运行会使用相同的参数第二次调用`ce-plan`，逐字重用组成的简短内容；然后，该计划必须通过`references/plan-brief.md`中的准备情况检查。记录后续每个步骤的工作源。 LFG从不直接推出`/goal`； `ce-work` 实施并返回控制权。
+ 
+-4. Invoke the `ce-code-review` skill with `mode:agent plan:<plan-path-from-step-1>`; with no plan, omit `plan:`. A `settled_conflict` finding whose evidence shows the settled decision cannot work (infeasible, wrong-thing, or destructive) stops the pipeline as blocked, with the finding reported, before the shipping precondition.
++2. **先读取`references/work-return.md`**，然后用`mode:return-to-caller <plan-path-from-step-1>`调用`ce-work`技能；一次性语句取代了路径的位置。在缺陷路线上，此步骤不会运行：`ce-debug`已经实现并提交，`references/debug-return.md`是它的大门。只有`ce-work`中有效的`status: complete`才可以晋级；所有其他状态或格式错误的返回都会停止管道。
+ 
+-**Shipping precondition (every push from step 5 on).** Run `git remote` once. No remote means local-only: make every commit the steps call for, but skip every push, PR create/edit, and CI-watch action, including step 10 in full. That is terminal, not an error.
++3. **现在阅读`references/review-followup.md`**；它控制步骤 3 到 7。在文件范围的 diff 上使用 `mode:pipeline` 和 `size-cutoff:30` 调用 `ce-simplify-code` 技能；仅跳过仅对文档或大约 10 行以下更改的调用。
+ 
+-5. **Apply and persist review fixes** as that file defines. Do not proceed to the residual handoff, run browser tests, or output DONE while eligible review fixes remain only in the working tree uncommitted.
++4. 用`mode:agent plan:<plan-path-from-step-1>`调用`ce-code-review`技能；如果没有计划，则省略 `plan:`。 `settled_conflict` 调查结果的证据显示所达成的决定无法发挥作用（不可行、错误或破坏性），该调查结果会在交付前置条件之前停止管道，并报告调查结果。
+ 
+-6. **Autonomous residual handoff**: whenever an unapplied actionable finding, a `settled_conflict` stamp from step 4, or a proceeded-and-flagged `settled_decision_conflicts` entry from step 2 exists, record it durably per that file: in the PR body, or in tickets or the DONE report when no PR will exist. Skip only when none of the three exists. Do not output DONE until the residuals are durable. Never block DONE on tracker filing failures once the report states them. Do not prompt the user.
++**交付前提条件（从步骤 5 开始的每次推送）。** 在步骤 5 的第一次审核修复推送之前以及步骤 9 之前，在 **每条路线**（计划、一次性直接提示或缺陷）上使用现有的本次获准交付范围的检查规则。将开始前的工作范围与实际远程 branch/base 和完整传出提交范围进行比较； open PR 仅计算其远程头中已有的提交。单独配置的远端并不能证明所有权。如果要发布未提供的预先存在的提交，或者无法建立范围，请使用与非远程相同的仅限本地路径。从每次提交和移交中排除未触及的预工作路径。没有远程或发布保留意味着仅限本地：进行步骤要求的每次提交，但跳过每次推送、PRcreate/edit和CI-监视操作，包括完整的步骤 10。那是终端，而不是错误。
+ 
+-7. Invoke the `ce-compound` skill with `mode:non-interactive` when the run corrected a wrong belief about how something behaves; that file states the condition.
++5. **按照该文件的定义应用并保留审核修复**。当合格的审核修复仅保留在未提交的工作树中时，请勿继续进行剩余移交、运行浏览器测试或输出 DONE。
+ 
+-8. Invoke the `ce-test-browser` skill with `mode:pipeline`.
++6. **自主剩余切换**：每当存在未应用的可操作发现、步骤 4 中的 `settled_conflict` 标记或步骤 2 中已处理并标记的 `settled_decision_conflicts` 条目时，请根据该文件持久记录它：在 PR 正文中，或者在不存在 PR 时记录在工单或完成报告中。仅当这三个都不存在时才跳过。在残差持久之前不要输出 DONE。一旦报告指出跟踪器归档失败，切勿阻止 DONE。不提示用户。
+ 
+-9. **Read `references/shipping.md` first**; it governs steps 9 through 11. Then invoke the `ce-commit-push-pr` skill with `mode:pipeline branding:on`.
++7. 当跑步纠正了对某事物行为方式的错误信念时，使用 `mode:non-interactive` 调用 `ce-compound` 技能；该文件说明了情况。
+ 
+-10. Watch the PR to CI-decided with `ce-babysit-pr mode:pipeline <pr-url>` when an open PR exists, as `references/shipping.md` decides. Do not reimplement CI-watching here.
++8. 用`mode:pipeline`调用`ce-test-browser`技能。
+ 
+-11. Output `<promise>DONE</promise>` after the close-out in `references/shipping.md`.
++9. **先读`references/shipping.md`**；它控制步骤 9 到 11。仅当交付前置条件允许发布时，才使用 `mode:pipeline branding:on` 调用 `ce-commit-push-pr` 技能；否则使用该参考中的本地步骤。
++
++10. 观察PR到CI——当存在开放的PR时，由`ce-babysit-pr mode:pipeline <pr-url>`决定，如`references/shipping.md`决定。不要在这里重新实现CI-观看。
++
++11. `references/shipping.md`平仓后输出`<promise>DONE</promise>`。
+diff --git a/skills/lfg/references/debug-return.md b/skills/lfg/references/debug-return.md
+index 49d3b31f01a4a9276fe2524fe54794595017a0d0..bdf28c009880543bd54a3da822cf3eb18129a530 100644
+--- a/skills/lfg/references/debug-return.md
++++ b/skills/lfg/references/debug-return.md
+@@ -1,25 +1,25 @@
+-# Reading ce-debug's structured return (LFG defect route)
++# 读取ce-debug的结构化回报（LFG缺陷路线）
+ 
+-On the defect route, `ce-debug mode:return-to-caller` is the work source and the implementation at once: it reproduces, root-causes, fixes with test-first discipline, verifies, and commits on a feature branch without pushing. This file defines how to read its return, which returns advance, what each later step substitutes for the plan path it would otherwise receive, and the one case that stops.
++在缺陷路线上，`ce-debug mode:return-to-caller`同时是工作源和实现：它重现、找出根本原因、按照测试优先原则进行修复、验证并在功能分支上提交而不推送。该文件定义了如何读取其返回值、返回提前值、后面的每个步骤用什么替换它将接收的计划路径，以及停止的一种情况。
+ 
+-## What advances
++## 有何进步
+ 
+-Only `status: fixed` advances to step 3. A `fixed` return may still carry `needs-human` `residuals`, such as another site of the same mistake that `ce-debug` left for a decision. They advance with the fix, and step 10 renders them with the babysitter's. `diagnosed-no-fix`, `needs-human`, and `blocked` stop the run with the return's `summary`, `root_cause`, `residuals`, blockers, and any non-null `prevention_signal` reported verbatim; nothing has been pushed. A malformed return, or a `fixed` return whose fix-owned files show no change on the branch, stops the run as blocked. A `ce-debug` run that ends without emitting its return at all is malformed, even when it committed a fix: without its `pre_fix_scope`, nothing in this run can tell what the branch held before the fix.
++只有`status: fixed`前进到步骤3。`fixed`返回可能仍然携带`needs-human``residuals`，例如与`ce-debug`留下决策相同错误的另一个站点。他们继续进行修复，第 10 步用PR 看护的修复来渲染它们。 `diagnosed-no-fix`、`needs-human`和`blocked`停止运行，并逐字报告返回的`summary`、`root_cause`、`residuals`、阻塞程序和任何非空`prevention_signal`；没有任何东西被推动。格式错误的返回，或者 `fixed` 返回，其修复拥有的文件显示分支上没有任何更改，会因阻塞而停止运行。一个 `ce-debug` 运行在根本不发出返回值的情况下结束，即使它提交了修复，也是格式错误的：如果没有它的 `pre_fix_scope`，此运行中的任何内容都无法告诉该分支在修复之前持有什么。
+ 
+-## What `status: fixed` must carry
++## `status: fixed`必须携带什么
+ 
+-Require `status`, `root_cause`, `changed_files`, `head_sha`, `branch`, `pre_fix_scope`, `verification_evidence`, `residuals`, `issue_of_record`, `behavior_change`, and `standalone_shipping_skipped: true`. Empty arrays are valid for `residuals`; `issue_of_record` is `null` when the input carried no ticket. This gate does not require `prevention_signal`: a missing or `null` value changes nothing. A non-null value is a proposal for the user, so no step in this run implements it.
++需要 `status`、`root_cause`、`changed_files`、`head_sha`、`branch`、`pre_fix_scope`、`verification_evidence`、`residuals`、`issue_of_record`、`behavior_change` 和 `standalone_shipping_skipped: true`。空数组在 `residuals` 内有效；当输入不带票据时，`issue_of_record`为`null`。此门不需要 `prevention_signal`：缺失或 `null` 值不会改变任何内容。非空值是对用户的建议，因此此运行中的任何步骤都不会实现它。
+ 
+-`verification_evidence` follows the same shape `ce-work` returns: when `behavior_change: true` it must name the regression test used, existing tests inspected, tests added/changed or used unchanged, the red failure or characterization observed before the fix, the verification run, and any deliberate test exception. Do NOT decide the test strategy inside LFG; the evidence is `ce-debug`'s contract. A `fixed` return with `behavior_change: true` and evidence missing or too vague to tell how the fix was proven stops the run as blocked, reporting the missing fields. There is no recovery invocation on this route: `ce-debug` has no reconciliation path, and a second run would reinvestigate.
++`verification_evidence`遵循相同的形状`ce-work`返回：当`behavior_change: true`时，它必须命名使用的回归测试、检查的现有测试、测试added/changed或未更改地使用、修复之前观察到的红色故障或特征、验证运行以及任何故意的测试异常。不要在 LFG 内部决定测试策略；证据就是`ce-debug`的合同。带有 `behavior_change: true` 的 `fixed` 返回，并且证据缺失或太模糊，无法说明修复是如何被证明的，从而停止运行并报告缺失的字段。此路线上没有恢复调用：`ce-debug`没有协调路径，第二次运行将重新调查。
+ 
+-## Ship only what the user offered
++## 仅发送用户提供的内容
+ 
+-The user asked for this fix. They did not offer whatever else the branch and the tree already carried: uncommitted files the fix does not touch, or commits beyond the base that are not already under review in an open pull request for this branch. `pre_fix_scope` in the return tells you what was there before the fix; it is the only record, because the fix commit is on top of it now. Before any step in this run pushes, a review-fix commit included, decide whether everything that push would publish is offered: the fix, what this run itself added (including `pre_fix_scope.caller_edits`, edits this run made for the work the user asked for before invoking `ce-debug`), and prior work an open PR already holds. When it is, ship as usual and keep the dirty files out of every commit. When it is not, or you cannot tell, hold: commit the fix locally, let no step publish, record leftover findings where a reader will find them without a PR, and say what was held back and that `ce-debug` invoked directly fixes inline on a branch the user is still working on.
++用户要求进行此修复。他们没有提供分支和树已经承载的任何其他内容：修复未触及的未提交文件，或者在该分支的开放拉取请求中尚未接受审查的超出基础的提交。返回中的`pre_fix_scope`告诉您修复之前存在什么；它是唯一的记录，因为修复提交现在位于其之上。在此运行推送的任何步骤之前，包括审查修复提交，决定是否提供推送将发布的所有内容：修复、此运行本身添加的内容（包括 `pre_fix_scope.caller_edits`、编辑此运行为用户在调用 `ce-debug` 之前要求的工作所做的操作）以及开放的 PR 已保存的先前工作。如果是这样，请照常发布，并将脏文件排除在每次提交之外。如果不是，或者您无法判断，请保留：在本地提交修复，不让任何步骤发布，记录剩余的发现，读者无需使用 PR 即可找到它们，并说出被阻止的内容以及 `ce-debug` 在用户仍在处理的分支上直接调用的内联修复。
+ 
+-## What later steps receive instead of a plan path
++## 后续步骤会收到什么而不是计划路径
+ 
+-- **Step 3, `ce-simplify-code`:** pass `changed_files` as the scope, never the branch diff, so the pass cannot reach work the user did not offer; pass `root_cause` as the structure the simplification must keep, so the fix is not simplified away; pass `mode:pipeline`, the `size-cutoff:` token step 3 names, and each test `verification_evidence` names as proving the fix as its own `proof-test:<path>`.
+-- **Step 4, `ce-code-review`:** no `plan:` argument. Its requirements check is additive by its own contract and it infers intent from the commits; pass the `root_cause` summary as review context. The review has no fix-only scope and reads the working tree, so it may report on files the user did not offer; step 5 applies a finding only to `changed_files` and this run's own edits, and reports the rest as residuals.
+-- **Step 6 and step 9:** the settled-decisions brief was never composed on this route, so no settled-decisions provenance line is rendered. Pass `root_cause`, `issue_of_record`, and any non-null `prevention_signal` to `ce-commit-push-pr` as PR-description context, so the PR body carries the diagnosis and the proposed signal and links or closes the ticket, and name the files that must stay out of the commit.
+-- **Step 7, `ce-compound`:** the same counterfactual applies; a debugged root cause is the most common shape of a durable learning.
+-- **Step 11, close-out:** the next-work offer reads a plan and is not made. State any non-null `prevention_signal` as a proposal this run did not implement.
++- **第3步，`ce-simplify-code`：**传递`changed_files`作为范围，而不是分支差异，因此传递无法到达用户未提供的工作；传递`root_cause`作为简化必须保留的结构，因此修复不会被简化掉；传递 `mode:pipeline`、`size-cutoff:` 令牌步骤 3 名称，以及每个测试 `verification_evidence` 名称作为其自己的 `proof-test:<path>` 来证明修复。
++- **第 4 步，`ce-code-review`：** 没有 `plan:` 参数。它的需求检查是通过它自己的合同来补充的，并且它从提交中推断出意图；将 `root_cause` 摘要作为审核上下文传递。审查没有仅限修复的范围并读取工作树，因此它可能会报告用户未提供的文件；步骤 5 仅将结果应用于 `changed_files` 以及此运行自己的编辑，并将其余部分报告为残差。
++- **步骤 6 和步骤 9：** 已解决的决策概要从未在此路线上编写，因此不会渲染已解决的决策出处线。将 `root_cause`、`issue_of_record` 和任何非空 `prevention_signal` 到 `ce-commit-push-pr` 作为 PR 描述上下文传递，因此 PR 主体携带诊断和建议的信号并链接或关闭票证，并命名必须保留在提交之外的文件。
++- **步骤7，`ce-compound`：**同样的反事实适用；经过调试的根本原因是持久学习的最常见形式。
++- **第11步，收尾：**下一份工作offer读取计划，未做出。将任何非空 `prevention_signal` 声明为本次运行未实现的提案。
+diff --git a/skills/lfg/references/intake.md b/skills/lfg/references/intake.md
+index 3363e5d88885b4899aa04c67b236a524b50d9461..c38df5aafabe771318143dfc4924efe3844f3dd9 100644
+--- a/skills/lfg/references/intake.md
++++ b/skills/lfg/references/intake.md
+@@ -1,41 +1,41 @@
+-# Intake: choosing the route (LFG step 1)
++# 摄入：选择路线（填埋气步骤 1）
+ 
+-Read this before choosing the route. It defines the routes, their precedence when more than one matches, what each child skill is invoked with, how its return is read, which routes end the run at the child's result, and what is never a work source. The body's work-source and stop clauses still apply; this file supplies what they cannot decide alone.
++在选择路线之前请阅读本文。它定义了路由、多个匹配时路由的优先级、调用每个子技能的内容、如何读取其返回值、哪些路由以子级结果结束运行，以及什么永远不是工作源。该机构的工作来源和停止条款仍然适用；该文件提供了他们无法单独决定的内容。
+ 
+-## What the session identifies
++## 会话标识什么
+ 
+-The work source starts from what the invocation and the conversation carry: a feature description, an issue reference, a plan path, a plan `ce-plan` wrote earlier in this session, a brainstorm artifact, or a handoff the user resumed. A file that exists in the plans directory but that nothing in the session names is not identified. `ce-work`'s blank-invocation intake discovers the newest plan on disk; `lfg` never invokes `ce-work` blank, so that path is unreachable from here. When nothing identifiable was given, the route is the plan route with an empty description, which `ce-plan` answers by asking what to plan when a human is present and by returning blocked when none is.
++工作源从调用和对话所携带的内容开始：功能描述、问题参考、计划路径、本次会议之前编写的计划`ce-plan`、头脑风暴产物或用户恢复的切换。计划目录中存在但会话名称中没有任何内容未识别的文件。 `ce-work`的空白调用摄入发现磁盘上的最新计划； `lfg` 永远不会调用 `ce-work` 空白，因此从这里无法到达该路径。当没有给出任何可识别的内容时，该路线就是具有空描述的计划路线，`ce-plan`通过询问当有人在场时要计划什么以及当无人在场时返回阻塞来回答。
+ 
+-When the invocation passes a tracker reference (`ESP-1234`, `#123`, an issue URL), read that ticket and state its title in chat before any child skill starts implementation or investigation. If the title cannot be read, say that instead of guessing one and continue, since `lfg` does not wait on the user. When no reference was passed, there is no ticket to state: do not invent one.
++当调用传递跟踪器引用（`ESP-1234`、`#123`、问题 URL）时，请在任何子技能开始实施或调查之前阅读该票证并在聊天中说明其标题。如果无法读取标题，请说出而不是猜测并继续，因为 `lfg` 不会等待用户。当没有引用被传递时，就没有任何声明：不要发明一个。
+ 
+-## Routes, in precedence order
++## 路线，按优先顺序
+ 
+-Classify from the request and bounded inline reads of what it names, only as far as needed to choose. Grounding depth belongs to the child skills: `ce-plan` and `ce-brainstorm` already read the repository and call `ce-explain` on their own condition. Take the first route that matches.
++根据请求进行分类，并有界内联读取其名称，仅根据需要进行选择。接地深度属于子技能：`ce-plan`和`ce-brainstorm`已经读取存储库并根据自己的情况调用`ce-explain`。选择第一条匹配的路线。
+ 
+-1. **Plan path.** The request asks for a plan to be carried out or continued, and names it: a unified plan artifact path, a brainstorm artifact, or a plan `ce-plan` already wrote this session. A request that only mentions a plan while asking for something else (`explain <plan path>`, `is this plan sound?`) is routed by what it asks for, not by the path it carries.
+-   - A requirements-only artifact, or a path to a plan from an earlier session: invoke `ce-plan` with it, prefixed by the settled-decisions brief `references/plan-brief.md` defines. `ce-plan` enriches or resumes it, checks drift and settled-decision conflicts, and reports it this run. That reported path is the work source.
+-   - An implementation-ready plan `ce-plan` wrote in this session: the work source is that plan; step 2 invokes `ce-work` on it directly. `ce-work`'s intake verifies readiness and prerequisites by content and returns blocked when the plan is not sufficient, which stops the run.
+-2. **Defect.** A concrete report of failing or wrong behavior that the request asks to have fixed. A request for the diagnosis alone (`explain why this test fails`, `diagnose #123`) is route 5, and `ce-debug` invoked there under its own contract ends the run with the diagnosis. Whether the failure reproduces is `ce-debug`'s question, not intake's; an intermittent or environment-specific failure is still a defect. It usually arrives as an issue reference (`ESP-1234`, `#123`, an issue URL), a stack trace, a failing test path, or a description of broken behavior. A reference alone is not proof: read enough of the ticket to see that it describes a defect; a ticket describing a feature takes route 1 or 6. Invoke `ce-debug` with `mode:return-to-caller <bug>`, passing the reference through unchanged so `ce-debug` treats it as the issue of record. Read `references/debug-return.md` before reading its return; that file is the gate. Only a `fixed` return is a work source, and steps 3 onward run from it in place of a plan.
+-3. **Judgment on the way to a change.** The request asks for a change to the code and that change depends on a decision the user did not settle: adopting or replacing a named external technology, choosing among supplied approaches, a "should we" attached to a build. A request that asks only for the judgment (`should we adopt Redis?`, with nothing to build) is route 5, and the run ends with the verdict. Invoke `ce-pov` with the question and the decision it informs. Adopt, Trial, or a position that supports the request continues to route 4 or 6 with the verdict carried as cited evidence in the brief's direction and open areas, never as a settled decision. Reject, Hold, Not-our-problem, a position against the request, or a Blocked result stops the run with the verdict and its evidence.
+-4. **Product shape unsettled.** More than one product behavior is a plausible reading, or a product question no evidence settles. When a human is present (a person can answer in this session: the run is not headless and carries no `mode:pipeline`; how the host asks, a question tool or numbered chat options, does not matter), invoke `ce-brainstorm` with `mode:return-to-caller <feature description>`. Its return carries `status`, `result_kind`, `artifact_path`, `brief`, `resolve_before_planning`, and, when a grounding scout ran, `grounding_path`; pass that path to `ce-plan` on either continuation so planning starts from the verified evidence. A non-empty `resolve_before_planning` stops the run with those items. An `artifact` result enters route 1 as a requirements-only artifact. A `brief` result enters route 6 as the feature description, with its `key_decisions` carried in the settled-decisions brief. When no human is present, take route 6: `ce-plan` in pipeline mode records an unresolved product fork as an explicit assumption in the plan, which the PR body then carries.
+-5. **A result that is not a code change.** Match the request to the Compound Engineering skill whose description owns that result, and invoke it with the request as given. Examples: `explain the architecture of X` is `ce-explain`; a throwaway prototype to settle how something should work, look, or feel is `ce-prototype`; a judgment with nothing to build is `ce-pov`; an open field of ideas is `ce-ideate`; a session handoff is `ce-handoff`. The examples are not the list; the host's skill catalog is. When no Compound Engineering skill owns the result, say so and end. A prototype exists to be experienced by a person, so that route runs only when a human is present (the same condition route 4 uses); headless, stop and say the prototype needs a person rather than invoking a skill that must refuse. That invocation is the whole run: end with its result, with no branch, no work source, none of the steps after intake, and no DONE promise, which belongs to the code-change steps. Invoking means running that skill's own procedure from its file; answering in its place, however well, is not the route. The prototype ends the run only when the prototype is what was asked for. When the request also asks for the winner built, the choices `ce-prototype` returns to its caller are user-directed decisions: carry them in the brief and continue to route 6 with the request. A question that arrived with an issue reference or a plan path is still a question, and route 1 already excludes it; the route is decided by what is asked for, not by what is attached.
+-6. **Plan.** Everything else that changes the code. Invoke `ce-plan` with the feature request, sanitized per `references/stage-routing.md` when a routing directive was present, and the settled-decisions brief when the conversation carries settled decisions. The `plan_model:<alias>` carrier rides beside the request when a planning-stage directive resolved. `ce-plan`'s reported plan is the work source once it passes the readiness check in `references/plan-brief.md`.
+-   - **One pass, no plan.** Skip `ce-plan` when the change can be stated, done, and verified in one pass with no decision the user would weigh. This is the test `ce-plan` uses for its Direct contract. Apply it whether or not a person is present. Having to choose a behavior, value, or interface that the request and the code do not settle is a decision the user would weigh, however small the change. Invoke `ce-plan` instead when a read surfaces a decision or multi-pass verification, when the change touches a risk surface (authentication, payments, migrations, external contracts), when the request asks for a plan or continues an item from an existing plan, or when settled decisions, a `ce-pov` verdict, or a planning-stage directive are in play. Decide from bounded reads, and plan when unsure. Otherwise write a few sentences saying what changes, where, and how it is verified. That statement is the work source.
++1. **计划路径。** 该请求要求执行或继续一个计划，并将其命名为：统一的计划产物路径、头脑风暴产物或已在本次会议中编写的计划`ce-plan`。仅提及计划而要求其他内容的请求（`explain <plan path>`、`is this plan sound?`）将按其要求的内容进行路由，而不是按其所承载的路径进行路由。
++   - 仅限需求的产物，或者从早期会话到计划的路径：用它调用 `ce-plan`，以已解决的决策概要 `references/plan-brief.md` 定义为前缀。 `ce-plan` 丰富或恢复它，检查漂移和已解决决策冲突，并在本次运行中报告它。报告的路径是工作源。
++   - 准备实施的计划`ce-plan`在本次会议中写道：工作来源是该计划；步骤 2 直接调用 `ce-work` 。 `ce-work` 的摄入量按内容验证准备情况和先决条件，并在计划不充分时返回阻塞，从而停止运行。
++2. **缺陷。** 请求要求修复的失败或错误行为的具体报告。单独的诊断请求（`explain why this test fails`，`diagnose #123`）是路线 5，并且根据其自己的合同调用`ce-debug`，从而结束运行并进行诊断。失败是否重现是`ce-debug`的问题，而不是摄入的问题；间歇性或特定于环境的故障仍然是一个缺陷。它通常以问题参考（`ESP-1234`、`#123`、问题 URL）、堆栈跟踪、失败的测试路径或损坏行为的描述的形式到达。单独的参考并不能证明：仔细阅读该票证，看看它描述了一个缺陷；描述功能的票证采用路线 1 或 6。使用 `mode:return-to-caller <bug>` 调用 `ce-debug`，将引用不变地传递，因此 `ce-debug` 将其视为记录问题。在读取其返回值之前先读取`references/debug-return.md`；该文件就是门。只有 `fixed` 回报才是工作源，并且从它开始执行步骤 3，而不是计划。
++3. **对更改方式的判断。** 该请求要求更改代码，而该更改取决于用户未做出的决定：采用或替换指定的外部技术、在提供的方法中进行选择、附加到构建的“我们应该”。仅要求判断的请求（`should we adopt Redis?`，无需构建任何内容）是路线 5，运行以判断结束。使用问题及其所通知的决定来调用 `ce-pov`。采用、审判或支持请求的立场继续到路线 4 或 6，判决作为简报方向和开放区域中引用的证据进行，而不是作为已解决的决定。拒绝、保留、不是我们的问题、反对请求的立场或阻止结果会停止运行以及判决及其证据。
++4. **产品形状尚未解决。** 不止一种产品行为是一种合理的解读，或者是没有证据解决的产品问题。当有人在场时（一个人可以在此会话中回答：跑步不是无头的，并且没有`mode:pipeline`；主持人如何提问、问题工具或编号的聊天选项并不重要），用`mode:return-to-caller <feature description>`调用`ce-brainstorm`。它的返回携带`status`、`result_kind`、`artifact_path`、`brief`、`resolve_before_planning`，并且当接地侦察兵运行时，`grounding_path`；在任一延续中都通过该路径到达`ce-plan`，因此计划从已验证的证据开始。非空 `resolve_before_planning` 会停止这些项目的运行。 `artifact` 结果作为仅需求产物进入路线 1。 `brief` 结果进入路线 6 作为特征描述，其 `key_decisions` 包含在已解决的决策摘要中。当无人在场时，采取路线 6：管道模式下的`ce-plan`记录未解决的产品分叉作为计划中的明确假设，然后PR主体携带该假设。
++5. **不是代码更改的结果。** 将请求与其描述拥有该结果的 Compound Engineering 技能相匹配，并使用给定的请求调用它。例子：`explain the architecture of X`是`ce-explain`；用于确定某物应该如何工作、外观或感觉的一次性原型是`ce-prototype`；没有任何可构建的判断是 `ce-pov`；开放的思想领域是`ce-ideate`；会话切换是`ce-handoff`。示例并非列表；宿主的技能目录是。当没有Compound Engineering技能拥有结果时，说出来并结束。原型的存在是为了供人体验，因此该路线仅在有人存在时运行（与路线 4 使用的条件相同）；无头，停下来并说原型需要一个人，而不是调用必须拒绝的技能。该调用是整个运行：以其结果结束，没有分支，没有工作源，没有摄入后的任何步骤，也没有 DONE 承诺，这属于代码更改步骤。调用意味着从其文件中运行该技能自己的过程；代替它的答案，无论多么好，都不是路线。仅当原型符合要求时，原型才会结束运行。当请求还要求构建获胜者时，返回给调用者的选择 `ce-prototype` 是用户主导的决策：将它们包含在摘要中，并继续通过请求路由 6。带有问题参考或计划路径的问题仍然是一个问题，路线 1 已经将其排除；路线是由要求的内容决定的，而不是由附加的内容决定的。
++6. **计划。** 更改代码的所有其他内容。使用功能请求调用 `ce-plan`，当存在路由指令时根据 `references/stage-routing.md` 进行清理，并且当对话携带已确定的决策时，已确定的决策会简要说明。当规划阶段指令得到解决时，`plan_model:<alias>` 承运人会顺应请求。一旦通过`references/plan-brief.md`中的准备检查，`ce-plan`报告的计划就是工作源。
++   - **一次通过，没有计划。** 当可以在一次通过中陈述、完成和验证更改而无需用户权衡任何决定时，请跳过 `ce-plan`。这是 `ce-plan` 用于其 Direct 合约的测试。无论是否有人在场均适用。必须选择请求和代码无法解决的行为、值或接口是用户需要权衡的决定，无论变化多么小。相反，当读取表面决策或多遍验证时，当更改触及风险面（身份验证、支付、迁移、外部合同）时，当请求请求计划或继续现有计划中的项目时，或者当解决决策、`ce-pov`判决或计划阶段指令正在发挥作用时，请调用`ce-plan`。从有限的读取中做出决定，并在不确定时进行计划。否则写几句话说明什么变化、在哪里以及如何验证。该声明是工作来源。
+ 
+-When unsure between two routes, take the one that asks more of the evidence: brainstorm over plan when a human is present, `ce-pov` before either when a change hangs on an unsettled judgment, `ce-debug` when the report is concrete and asks for a fix, and a prototype only when the request asks for one rather than for the thing itself.
++当在两条路线之间不确定时，请采取要求更多证据的路线：当有人在场时对计划进行集体讨论，当更改取决于不确定的判断时，`ce-pov`，当报告具体并要求修复时，`ce-debug`，仅当请求要求一个而不是事物本身时才使用原型。
+ 
+-## What every child receives, and what none receives
++## 每个孩子都会收到什么，以及没有孩子会收到什么
+ 
+-Every child skill receives only its own input: the sanitized request or path, the brief when one exists, and the carrier its stage accepts. No child receives the routing directive as product content. On route 3, `ce-pov`'s verdict reaches `ce-plan` as evidence, not as a `session-settled:` decision, because the settled-decisions design allows only user-directed and user-approved provenance and an agent never settles its own recommendation.
++每个子技能仅接收自己的输入：经过净化的请求或路径、存在时的简报以及其阶段接受的载体。没有子项会收到路由指令作为产品内容。在路线 3 上，`ce-pov` 的判决达到`ce-plan` 作为证据，而不是作为`session-settled:` 决策，因为已解决的决策设计仅允许用户指导和用户批准的出处，并且代理永远不会解决自己的推荐。
+ 
+-## What later steps receive on a one-pass statement
++## 后续步骤在一次性声明中收到什么
+ 
+-- **Step 2, `ce-work`:** `mode:return-to-caller <statement>`, with an implementation-stage carrier when one resolved. `references/work-return.md` still gates its return, including that the work is committed.
+-- **Step 3, `ce-simplify-code`:** pass the statement and the return's `changed_files` in place of the plan path.
+-- **Step 4, `ce-code-review`:** no `plan:` argument. Pass the statement as review context.
+-- **Step 9, `ce-commit-push-pr`:** pass the statement as PR-description context. There is no brief, so no settled-decisions provenance line is rendered.
+-- **Step 11, close-out:** the next-work offer reads a plan and is not made.
++- **步骤 2，`ce-work`：** `mode:return-to-caller <statement>`，解决后使用实施阶段载体。 `references/work-return.md` 仍然限制其回报，包括工作已提交。
++- **第3步，`ce-simplify-code`：**传递语句和返回的`changed_files`代替计划路径。
++- **第 4 步，`ce-code-review`：** 没有 `plan:` 参数。将语句作为审核上下文传递。
++- **步骤 9，`ce-commit-push-pr`：** 将语句作为 PR-描述上下文传递。没有简要说明，因此没有呈现任何确定的决策来源线。
++- **第11步，收尾：**下一份工作offer读取计划，未做出。
+ 
+-## Recording the route
++## 记录路线
+ 
+-Narrate the chosen route in one line before invoking the child, naming the request shape that decided it. On the task surface `references/task-visibility.md` defines, a route not taken is not listed; the chosen route's child skill owns the surface while it runs.
++在调用子级之前，用一行叙述所选择的路线，并命名决定它的请求形状。在任务面`references/task-visibility.md`定义的任务面中，不列出未采取的路线；所选路线的子技能在运行时拥有该表面。
+diff --git a/skills/lfg/references/next-work-handoff.md b/skills/lfg/references/next-work-handoff.md
+index b079a8449c46897a7b11edf72db9679cce04ef6c..8d8545e037a216bbe7e027996b5ba077e1194a55 100644
+--- a/skills/lfg/references/next-work-handoff.md
++++ b/skills/lfg/references/next-work-handoff.md
+@@ -1,96 +1,59 @@
+-# Next-work handoff
+-
+-Use this only at LFG closeout, after the current pipeline has finished or
+-stopped for good. Its purpose is to offer continuity into a separately planned
+-area without silently extending the completed plan or current session.
+-
+-## Establish whether an offer is warranted
+-
+-Start from the canonical plan path retained from LFG step 1. Locate a Product
+-Contract section carrying the semantic role `work-relationships`:
+-
+-- Markdown: `<!-- ce-section: work-relationships -->`
+-- HTML: `data-ce-section="work-relationships"`
+-
+-The visible heading is not part of this protocol. For an older unmarked plan,
+-use a semantic fallback only when one Product Contract section clearly names
+-the area this plan covers, one or more future areas intended for separate
+-planning, and their relationships. Do not infer eligibility from an exact
+-heading, a generic list of non-goals, or a roadmap-like wish list. If the
+-section's meaning is ambiguous, make no offer.
+-
+-An offer is warranted only when the completed work is explicitly one part of a
+-larger body of separately planned work and at least one future area remains
+-unplanned. Exclude an area that is already planned, completed, absorbed into
+-the just-finished work, or no longer supported by current evidence. A residual
+-implementation, review, PR, or merge task belongs to the current run's remaining
+-shipping work; it is not a next brainstorm candidate and does not by itself
+-suppress a valid future-area offer.
+-
+-## Recommend the next area
+-
+-Reason over the remaining candidates instead of taking the first bullet. Prefer
+-the area that, based on the plan and what the pipeline learned:
+-
+-1. has explicit user or plan priority;
+-2. can be meaningfully brainstormed now;
+-3. is enabled by the completed work;
+-4. unlocks the most downstream work;
+-5. reduces foundational uncertainty; or
+-6. especially benefits from fresh implementation knowledge.
+-
+-These are judgment criteria, not a points system. Do not choose by document
+-order, apparent ease, wording similarity, or a dependency the plan does not
+-support. Recheck the candidate against the current delivery result before
+-offering it.
+-
+-- **One justified winner:** name it and give the shortest concrete reason it is
+-  next.
+-- **Real tie:** say current evidence does not justify choosing between the tied
+-  areas. Offer a selection-focused handoff whose next session decides which one
+-  coherent area to brainstorm.
+-- **No ready candidate:** make no offer.
+-
+-## Offer, then stop
+-
+-Place the offer before LFG's `<promise>DONE</promise>`. Keep it non-blocking and
+-do not invoke `ce-handoff` yet.
+-
+-For one winner, use this shape in natural prose:
+-
+-> The clearest next area is **<area>** because <reason>. If you want to continue
+-> it in a fresh agent session, I can create a `ce-handoff` for that brainstorm.
+-
+-For a real tie, name the tied areas and offer a fresh-session handoff focused on
+-choosing the next coherent area. The pipeline still ends with the DONE promise;
+-the offer is optional continuity, not another LFG step.
+-
+-## If the user later accepts
+-
+-Only after explicit acceptance, resolve `ce-handoff` against the host's
+-available-skills list and invoke `create` with a compact, labeled next-work
+-brief. LFG owns the recommendation: it has already chosen, so do not ask
+-`ce-handoff` to rediscover or rank candidates. Include:
+-
+-- **Next-session objective:** brainstorm one coherent next area and produce a
+-  requirements-only unified plan.
+-- **Recommended area:** the winner, or the tied candidate set when the session
+-  must choose.
+-- **Why next:** the evidence-based selection rationale.
+-- **Authoritative prior plan:** the repo-relative canonical plan path.
+-- **Relationship to completed work:** the explicit depends-on, enables, shares,
+-  or independent relationship.
+-- **Actual delivery state:** what finished and what remains in the current run's
+-  shipping steps, such as implemented, PR open, CI decided, or not merged.
+-- **Carry-forward decisions:** only prior decisions that constrain the next
+-  area.
+-- **Assumptions to revalidate:** provisional relationships or facts that the
+-  fresh brainstorm must not inherit as settled.
+-- **Other candidates not selected:** each alternative and why it was not chosen,
+-  when that context prevents repeated selection work.
+-- **Artifact boundary:** create a separate requirements-only unified plan for
+-  the next area, cite the prior plan, and do not extend or edit the prior plan.
+-
+-Keep the brief short, and point at files rather than copying them. Do not paste
+-the prior Product Contract into it; the plan remains authoritative and the
+-handoff explains what the next session needs to decide.
++# 下一个工作交接
++
++仅在当前管道完成或永久停止后，在 LFG 关闭时使用此功能。其目的是为单独规划的区域提供连续性，而无需默默地扩展已完成的计划或当前会话。
++
++## 确定报价是否合理
++
++从 LFG 步骤 1 中保留的规范计划路径开始。找到带有语义角色 `work-relationships` 的产品合同部分：
++
++- Markdown：`<!-- ce-section: work-relationships -->`
++- HTML：`data-ce-section="work-relationships"`
++
++可见标题不是本协议的一部分。对于较旧的未标记计划，仅当产品合同部分明确命名该计划涵盖的区域、打算单独规划的一个或多个未来区域以及它们之间的关系时，才使用语义回退。不要从确切的标题、非目标的通用列表或类似路线图的愿望清单中推断资格。如果该部分的含义不明确，请不要提出建议。
++
++仅当已完成的工作明确是一大堆单独计划的工作的一部分，并且至少有一个未来领域尚未计划时，报价才有必要。排除已经规划、完成、纳入刚刚完成的工作或不再得到当前证据支持的领域。剩余实施、审核、PR或合并任务属于当前运行的剩余运输工作；它不是下一个集思广益的候选者，并且本身不会抑制有效的未来区域报价。
++
++## 推荐下一个区域
++
++对剩下的候选人进行推理，而不是抢先一步。根据计划和管道了解到的情况，优先选择以下区域：
++
++1. 具有明确的用户或计划优先级；
++2. 现在可以进行有意义的头脑风暴；
++3. 由已完成的工作启用；
++4. 解锁最下游的工作；
++5. 减少基本的不确定性；或者
++6. 尤其受益于新的实施知识。
++
++这些是判断标准，而不是评分系统。不要根据文档顺序、明显的易用性、措辞相似性或计划不支持的依赖性来选择。在提供候选人之前，根据当前的交付结果重新检查候选人。
++
++- **一位合理的获胜者：** 说出它的名称并给出最短的具体原因。
++- **真正的平局：**说目前的证据并不能证明在平局区域之间进行选择是合理的。提供以选择为中心的交接，其下一次会议将决定对哪个连贯的领域进行集思广益。
++- **没有准备好的候选人：**不提供报价。
++
++## 提供，然后停止
++
++将报价放在 LFG 的 `<promise>DONE</promise>` 之前。保持非阻塞并且暂时不要调用 `ce-handoff`。
++
++对于获胜者，请在自然散文中使用这种形状：
++
++> 最清晰的下一个区域是**<area>**，因为<reason>。如果你想继续
++> 在新的代理会议中，我可以为头脑风暴创建一个`ce-handoff`。
++
++对于真正的平局，命名平局区域并提供新的会话切换，重点是选择下一个一致区域。管道仍然以 DONE 承诺结束；该报价是可选的连续性，而不是另一个垃圾填埋气步骤。
++
++## 如果用户稍后接受
++
++仅在明确接受后，才根据主持人的可用技能列表解决`ce-handoff`，并使用紧凑的、标记为下一步工作的简报调用`create`。 LFG 拥有推荐：它已经选择了，所以不要要求 `ce-handoff` 重新发现或排名候选人。包括：
++
++- **下一次会议目标：**集思广益，讨论一个连贯的下一个领域，并制定一个仅满足需求的统一计划。
++- **推荐区域：**获胜者，或者会议必须选择的并列候选人。
++- **下一步为何：** 基于证据的选择理由。
++- **权威的先前计划：** 相对于仓库的规范计划路径。
++- **与已完成工作的关系：** 明确的依赖、启用、共享或独立关系。
++- **实际交付状态：** 当前运行的交付步骤中已完成的内容和剩余的内容，例如已实施、PR 打开、CI 已决定或未合并。
++- **结转决策：**仅限制下一个领域的先前决策。
++- **要重新验证的假设：**新的头脑风暴不得继承已确定的临时关系或事实。
++- **未选择的其他候选者：** 每个备选方案以及未选择的原因（当该背景阻止重复选择工作时）。
++- **产物边界：**为下一个区域创建单独的仅需求统一计划，引用先前的计划，并且不要扩展或编辑先前的计划。
++
++保持简短，指向文件而不是复制它们。请勿将之前的产品合同粘贴到其中；该计划仍然具有权威性，并且交接解释了下届会议需要决定什么。
+diff --git a/skills/lfg/references/plan-brief.md b/skills/lfg/references/plan-brief.md
+index 480c6f109c1d8ee59e28ae2a6e308f9d16e9ce2c..9bd967f3d88016d8ed2868916b65af4840f8759f 100644
+--- a/skills/lfg/references/plan-brief.md
++++ b/skills/lfg/references/plan-brief.md
+@@ -1,36 +1,36 @@
+-# Step 1: artifact root and settled-decisions brief (LFG)
++# 第 1 步：产物根源和已解决的决策简介 (LFG)
+ 
+-## Artifact root
++## 神器根
+ 
+-Resolve `<root>` when you first compose a `<root>/` path, never before you need it. LFG composes only one such path: the `<root>/plans/` location where step 1's GATE checks that the plan was written. A run that stops before that check never composes a `<root>/` path and never resolves a root. Two examples: a routing-carrier blocker (a stage assignment LFG cannot pass on, as `references/stage-routing.md` defines), or a report that the task is non-software.
++当您第一次编写 `<root>/` 路径时解析 `<root>`，而不是在您需要它之前。 LFG 仅组成一条这样的路径：步骤 1 的 GATE 检查计划是否已写入的`<root>/plans/` 位置。在该检查之前停止的运行永远不会组成 `<root>/` 路径，也永远不会解析根。两个例子：路由载体阻塞器（阶段分配 LFG 无法传递，如 `references/stage-routing.md` 所定义），或任务是非软件的报告。
+ 
+ <!-- ce-docs-root:start -->
+-**Resolve the CE artifact root `<root>` before composing any artifact path.**
++**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
+ 
+-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
+-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
+-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
++- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
++- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
++- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
+ <!-- ce-docs-root:end -->
+ 
+-## Readiness check
++## 准备情况检查
+ 
+-An explicit `status: blocked` return is terminal even when `artifact_path` names a readable plan. Report its `phase`, `blocker`, and `recovery_path`, and its `artifact_path` when present. A plan file existing on disk is not a reason to retry planning or to move on to implementation.
++即使 `artifact_path` 命名了一个可读的计划，显式的 `status: blocked` 返回也是终止的。报告其 `phase`、`blocker` 和 `recovery_path`，以及存在的 `artifact_path`。磁盘上存在的计划文件并不是重试计划或继续实施的理由。
+ 
+-The plan the GATE checks is the path `ce-plan` reported writing this run. A file already under `<root>/plans/` that `ce-plan` did not report is not a written plan, however closely it matches the feature. This gate belongs to the plan route. An implementation-ready plan `ce-plan` wrote earlier in this session bypasses `ce-plan` per `references/intake.md`; `ce-work`'s intake verifies that plan by content, and its blocked return stops the run. When the return has neither a blocker nor a reported path, invoke `ce-plan` the single allowed second time; never accept a stale file instead.
++GATE 检查的计划是编写此运行时报告的路径 `ce-plan`。已在 `<root>/plans/` 下且 `ce-plan` 未报告的文件不是书面计划，无论它与功能的匹配程度如何。该门属于规划路线。本次会议早些时候编写的可实施计划`ce-plan`绕过了`ce-plan`/`references/intake.md`； `ce-work`的摄入量通过内容验证了该计划，并且其受阻的返回停止了运行。当返回既没有阻塞器也没有报告路径时，调用`ce-plan`第二次允许的单个；永远不要接受过时的文件。
+ 
+-Inspect the returned plan before continuing past step 1's GATE. It must describe code implementation with sufficient scope, direction, and verification, and no launch-blocking question or finding. A Product Contract without implementation planning, an approach-only or answer-seeking output, or a non-code deliverable (`execution: knowledge-work`) stops the pipeline. An old readiness label cannot override the contents. `ce-work` owns verification of the active work's repository prerequisites; this gate does not duplicate that investigation.
++在继续通过步骤 1 的 GATE 之前检查返回的计划。它必须描述具有足够范围、方向和验证的代码实现，并且没有阻碍启动的问题或发现。没有实施计划的产品合同、仅方法或寻求答案的输出或非代码可交付成果 (`execution: knowledge-work`) 会停止管道。旧的就绪标签无法覆盖内容。 `ce-work` 拥有对活动作品存储库先决条件的验证；该门不会重复该调查。
+ 
+-## Settled-decisions brief
++## 已解决决定简介
+ 
+-Compose this brief from the invoking conversation and pass it with the sanitized feature request when you invoke `ce-plan`.
++从调用对话中撰写此摘要，并在调用 `ce-plan` 时将其与经过清理的功能请求一起传递。
+ 
+-The brief contains:
++简报包含：
+ 
+-- direction (1-2 lines);
+-- settled decisions, each with four required fields: the decision, its provenance class (`user-directed` or `user-approved`), the rejected alternative, and a one-line reason;
+-- open areas, including any `ce-pov` verdict the intake route consulted, cited as evidence with its grade and reason, never as a settled decision;
+-- a standing line asking `ce-plan` to report any conflict it finds with these decisions.
++- 方向（1-2行）；
++- 已解决的决策，每个决策都有四个必填字段：决策、其来源类别（`user-directed`或`user-approved`）、被拒绝的替代方案和一行原因；
++- 开放区域，包括任何摄入路线咨询的`ce-pov`判决，作为其等级和理由的证据，绝不作为已确定的决定；
++- 要求`ce-plan`报告其发现的与这些决定存在任何冲突的常设队列。
+ 
+-If you cannot state an entry's rejected alternative, demote it to a directive or an open area. Include only decisions about the feature being shipped. When in doubt, demote: having `ce-plan` reconsider a decision is the safe direction; carrying in a stale decision as settled is not. When there is nothing to carry, no settled decision and no `ce-pov` evidence, skip composition entirely and invoke `ce-plan` exactly as it is written in the body, with no empty brief.
++如果您无法说明某个条目被拒绝的替代方案，请将其降级为指令或开放区域。仅包括有关正在发布的功能的决策。当有疑问时，降级：让 `ce-plan` 重新考虑决定是安全的方向；执行已解决的陈旧决定则不然。当没有什么可携带的，没有确定的决定并且没有`ce-pov`证据时，完全跳过写作并完全按照正文中所写的那样调用`ce-plan`，没有空的摘要。
+ 
+-The brief is temporary: once `ce-plan` writes the plan, the plan's labeled KTDs are the record. A step-1 retry reuses the composed brief verbatim; never recompose it.
++概要是临时的：一旦 `ce-plan` 编写了计划，计划的标记 KTD 就是记录。步骤 1 重试重复使用撰写的简短逐字记录；永远不要重新组合它。
+diff --git a/skills/lfg/references/review-followup.md b/skills/lfg/references/review-followup.md
+index fd5226bfa53cf56b02d5d5f8ba00191b41d33010..89aa872c11e6ba92bff448ff0dcafc86cb6113f9 100644
+--- a/skills/lfg/references/review-followup.md
++++ b/skills/lfg/references/review-followup.md
+@@ -1,80 +1,82 @@
+-# Pre-ship quality steps (LFG steps 3–7)
++# 交付前质量步骤（lfg 的步骤 3-7）
+ 
+-These are the quality steps that run after implementation and before shipping. On the defect route the implementation was `ce-debug`'s fix; `references/debug-return.md` names what each step below receives in place of the plan path. `ce-code-review` is review-only. LFG applies eligible fixes itself, then commits.
++这些是实施后和交付前运行的质量步骤。在缺陷路线上，实施是`ce-debug`的修复； `references/debug-return.md` 命名下面每个步骤接收的内容来代替计划路径。 `ce-code-review` 仅供审核。 LFG 自行应用符合条件的修复程序，然后提交。
+ 
+-## The shipping precondition, in these steps
++## 交付前置条件，在这些步骤中
+ 
+-When the repo has no remote, the run finishes locally. That is a final state, not an error: never retry a push or hunt for a remote. Step 5 still makes every commit it calls for; only the pushes and the records that would live on the PR are dropped. With no PR to hold the unapplied findings, step 6 files them as tracker tickets and the DONE report states the rest. Never write them to a committed file nobody will read.
++当存储库没有远程或提供的工作门持有发布时，运行将在本地完成。这是最终状态，而不是错误：永远不要重试推送或寻找远端。第 5 步仍然进行它所要求的每一次提交；仅删除位于 PR 上的推送和记录。由于没有 PR 来保存未应用的发现，第 6 步将它们作为跟踪票归档，完成报告会说明其余内容。切勿将它们写入无人会读取的已提交文件。
+ 
+-## Step 3 — simplify before review
++## 第 3 步——审查前简化
+ 
+-Simplification runs before review so the code-review in step 4 covers the simplified code. It reviews code only. Code is source in a programming language that a compiler, interpreter, or shell runs, and the tests written in one. Prose is not code in any format, including markdown that agents read, such as skills, prompts, and agent instructions. Neither are documentation, plans, data, or configuration. A change with none of that code is docs-only for step 3's skip, however large it is.
++简化在审核之前运行，因此步骤 4 中的代码审核涵盖了简化的代码。它仅审查代码。代码是编译器、解释器或 shell 运行的编程语言的源代码，并且是用其中编写的测试。散文不是任何格式的代码，包括代理阅读的 Markdown，例如技能、提示和代理指令。文档、计划、数据或配置也都不是。没有任何代码的更改仅适用于步骤 3 的跳过，无论它有多大。
+ 
+-When `ce-work`'s return carries `simplified_through: <sha>`, its own pass already covered everything up to that commit, so pass only the changes after it as the scope (`git diff <sha>`, which includes the working tree). Otherwise let `ce-simplify-code` resolve the branch-diff scope itself. Either way it preserves behavior and runs the test suite, and the sub-10-line skip applies to that scope. Pass the `size-cutoff:` token step 3 names unchanged; `ce-simplify-code` measures the scope and picks single-pass or the full team. Pass the plan path from step 1 as context about structure the simplification must keep, not as the simplification scope; on the defect route pass the debug return's `root_cause` and `changed_files` instead, so the fix is not simplified away. On either route, pass each test `verification_evidence` names as proving the work (the regression or red-before-fix test, characterization coverage, or an existing test used unchanged) as its own `proof-test:<path>`, so the simplification leaves those tests untouched. Add a one-line constraint: KTDs labeled `session-settled:` describe structure the simplification must preserve, so deliberate duplication stays duplicated.
++当`ce-work`的返回携带`simplified_through: <sha>`时，它自己的传递已经覆盖了该提交之前的所有内容，因此仅传递其之后的更改作为范围（`git diff <sha>`，其中包括工作树）。否则，只有当所有工作都提供时，才让 `ce-simplify-code` 自行解析分支差异范围。如果存在前置工作，则传递工作源拥有的更改files/scope；不要简化或将审查结果应用于用户不相关的工作。无论哪种方式，它都会保留行为并运行测试套件，并且 10 行以下的跳过适用于该范围。传递`size-cutoff:`令牌第3步名称不变； `ce-simplify-code` 衡量范围并选择单次通过或整个团队。将步骤 1 中的计划路径作为简化必须保留的结构上下文传递，而不是作为简化范围；在缺陷路由上传递调试返回的`root_cause`和`changed_files`，因此修复不会被简化。在任一路线上，将每个测试 `verification_evidence` 名称作为证明工作（回归或修复前红色测试、特征覆盖或未更改使用的现有测试）作为其自己的 `proof-test:<path>` 传递，因此简化使这些测试保持不变。添加一行约束：标记为 `session-settled:` 的 KTD 描述了简化必须保留的结构，因此故意的重复仍然是重复的。
+ 
+-Do not commit in this step. `ce-simplify-code` leaves its changes in the working tree; step 4's review scopes the working tree (uncommitted changes included), and step 9's `ce-commit-push-pr` commits whatever remains. Committing here would sweep any still-uncommitted `ce-work` edits into a misleading `refactor` commit and could stall on a tree that never goes clean.
++不要在此步骤中提交。 `ce-simplify-code` 将其变化留在工作树中；第 4 步的审查范围是工作树（包括未提交的更改），第 9 步的 `ce-commit-push-pr` 提交剩余的内容。在这里提交会将任何尚未提交的 `ce-work` 编辑清除为误导性的 `refactor` 提交，并且可能会停在永远不会干净的树上。
+ 
+-## Step 4 — invoke `ce-code-review`
++## 第 4 步 — 调用 `ce-code-review`
+ 
+-Load `ce-code-review` from the host catalog's listed path. A host skill named `review` is not this step; do not invent `skills/review/SKILL.md` under this plugin.
++从主机目录的列出路径加载`ce-code-review`。名为`review`的宿主技能不是这一步；不要在这个插件下发明`skills/review/SKILL.md`。
+ 
+ ```
+ ce-code-review mode:agent plan:<plan-path-from-step-1>
+ ```
+ 
+-Read the **Actionable Findings** summary and artifact path. Do not pass `mode:autofix`.
++阅读 **可行的发现** 摘要和产物路径。不要通过`mode:autofix`。
+ 
+-Pass the plan file path from step 1 so `ce-code-review` can verify requirements completeness. On a one-pass statement there is no plan: omit `plan:` and pass the statement as review context. On the defect route there is no plan: omit `plan:` and pass the `root_cause` summary as review context; the requirements check is additive by `ce-code-review`'s own contract and review still covers the diff. Also read any findings stamped `settled_conflict` (each names the conflicting KTD). Stamped findings that are matters of preference do not stop the pipeline (they are report-only), but they must reach step 6's record of unapplied findings.
++传递步骤 1 中的计划文件路径，以便 `ce-code-review` 可以验证需求完整性。在一次性语句中没有计划：省略 `plan:` 并将语句作为审查上下文传递。在缺陷路线上没有计划：省略`plan:`并传递`root_cause`摘要作为审查上下文；要求检查是由 `ce-code-review` 自己的合同附加的，并且审查仍然涵盖差异。另请阅读标记为 `settled_conflict` 的任何发现（每个结果都命名了冲突的 KTD）。属于优先事项的盖章结果不会停止管道（它们仅是报告），但它们必须达到步骤 6 的未应用结果记录。
+ 
+-`mode:agent` is report-only **by design**: it reports findings but never edits the tree, and LFG applies the eligible ones in step 5. When narrating progress to the user, frame this as "review found X -> applied X in step 5," not as "code review did not auto-fix." A report-only review followed by an LFG-applied fix is the intended contract, not a gap.
++`mode:agent` **按设计**仅报告：它报告结果，但从不编辑树，LFG 在步骤 5 中应用符合条件的结果。在向用户叙述进度时，将其描述为“在步骤 5 中审查发现 X -> 应用 X”，而不是“代码审查未自动修复”。仅报告审查，然后采用垃圾填埋气进行修复是预期的合同，而不是差距。
+ 
+-Capture parsed JSON (`status`, `actionable_findings`, `findings`, `artifact_path`, `run_id`) or the markdown Actionable Findings section. If `status` is `failed`, stop and report `reason`.
++捕获已解析的 JSON (`status`、`actionable_findings`、`findings`、`artifact_path`、`run_id`) 或 markdown 可操作结果部分。如果`status`为`failed`，则停车报告`reason`。
+ 
+-## Step 5 — apply and persist review fixes
++## 第 5 步 — 应用并保留审核修复
+ 
+-### What to apply
++### 申请什么
+ 
+-Apply a finding in the working tree only when **all** of the following hold:
++仅当以下条件全部满足时才在工作树中应用结果：
+ 
+-1. **`suggested_fix` is present** — concrete change shape from the reviewer.
+-2. **`confidence` is `100`, or `75` with cross-persona agreement noted in the report** — do not apply anchor-50 findings.
+-3. **The fix is mechanical** — one coherent change; no change to a contract, permission, or security stance; no new public API shape; no behavior change that needs product sign-off.
+-4. **Evidence still matches the code** at the cited `file:line` before editing.
++1. **`suggested_fix` 存在** — 审查者的具体更改形状。
++2. **`confidence` 是 `100` 或 `75`，具有报告中指出的跨人物协议** — 不应用锚点 50 的发现。
++3. **修复是机械性的**——一个连贯的改变；合同、许可或安全立场没有改变；没有新的公共API形状；没有需要产品签字的行为改变。
++4. **证据仍然与编辑前引用的`file:line`处的代码**匹配。
+ 
+-Do not treat `autofix_class` as permission to auto-apply.
++不要将`autofix_class`视为自动申请的权限。
+ 
+-### What not to apply
++### 什么不可以申请
+ 
+-- `autofix_class: manual` without a clear mechanical `suggested_fix`
+-- `autofix_class: advisory` — report-only
+-- `gated_auto` findings that change behavior, contracts, auth, or permissions
+-- Anything that needs a design conversation
++- `autofix_class: manual` 无清晰机械 `suggested_fix`
++- `autofix_class: advisory` — 仅报告
++- `gated_auto` 改变行为、合同、身份验证或权限的发现
++- 任何需要设计对话的事情
+ 
+-### Execution
++### 执行
+ 
+-1. Filter `actionable_findings` (or markdown Actionable Findings) with the bar above.
+-2. Apply eligible fixes in the working tree in severity order (`#` stable from the review).
+-3. Run targeted tests when `requires_verification: true` on any applied finding.
+-4. If `git status --short` shows changes, stage only review-driven files and commit `fix(review): apply review findings`. Then push before step 6 **when a remote is configured** (per LFG's shipping precondition) and, on the defect route, when everything the push would publish is work the user offered (`references/debug-return.md`). To push: if an upstream exists, run `git push`. If no upstream exists but a remote is configured (common on a fresh feature branch), pick a writable remote at run time: prefer `origin` when present, otherwise run `git remote` and choose the first configured remote. Then run `git push --set-upstream <remote> HEAD`. If there is no remote at all, do not push; the local commit suffices. If no eligible fixes were applied, say so explicitly and skip the commit.
++1. 使用上面的栏过滤`actionable_findings`（或Markdown可操作的结果）。
++2. 按严重性顺序在工作树中应用符合条件的修复（从审核来看`#`稳定）。
++3. 当`requires_verification: true`时对任何应用的发现运行有针对性的测试。
++4. 如果 `git status --short` 显示更改，则仅暂存审查驱动的文件并提交 `fix(review): apply review findings`。仅当**所有路线**上的交付前置条件通过时，才在步骤 6 之前推送。仅对所提供的工作进行阶段路径限制修复；安全文件列表不会限制哪些预先存在的提交与 HEAD 一起传输。如果传出范围包含未提供的提交或其所有权未知，则将提交保留在本地，跳过此推送，并将保留进行到步骤 6、9 和 10。要推送：如果存在上游，请运行 `git push`。如果不存在上游但配置了远程（在新功能分支上常见），请在运行时选择一个可写远程：如果存在，则首选 `origin`，否则运行 `git remote` 并选择第一个配置的远程。然后运行`git push --set-upstream <remote> HEAD`。如果根本没有远端，就不要推；本地提交就足够了。如果没有应用符合条件的修复，请明确说明并跳过提交。
+ 
+-## Step 6 — residual handoff
++## 步骤 6 — 剩余切换
+ 
+-Residuals are the findings left over: actionable findings **not** applied in step 5. They are not leftovers from an autofix inside `ce-code-review`. Use the Actionable Findings summary / artifact from step 4.
++残差是留下的结果：可操作的结果**未**应用在步骤 5 中。它们不是 `ce-code-review` 内自动修复的剩余部分。使用步骤 4 中的可操作结果摘要/产物。
+ 
+-Two further triggers also require step 6, both outside the apply path: step 4 emitted any `settled_conflict`-stamped findings, or step 2's return carried proceeded-and-flagged `settled_decision_conflicts` entries. These are the findings where the work diverged from a settled decision, and this step is where they get written down somewhere that lasts.
++另外两个触发器也需要步骤 6，两者都在应用路径之外：步骤 4 发出任何带有 `settled_conflict` 标记的结果，或者步骤 2 的返回携带进行并标记的 `settled_decision_conflicts` 条目。这些是工作偏离既定决定的发现，而这一步是它们被写在持久的地方的地方。
+ 
+-A residual at this point is undecided, not accepted debt. Step 5 declined it because it needs judgment, and the pipeline does not merge unless the user granted it, so the human reviewing the PR supplies that judgment: fix it in this branch, dismiss it, or file it to carry past merge. The record therefore goes where that reviewer already looks, the PR body. The pipeline files no tickets for these; one ticket per finding, decided by nobody, is how a run of small nits floods a tracker.
++此时的剩余债务是未决定的、未接受的债务。第 5 步拒绝了它，因为它需要判断，并且除非用户授予它，否则管道不会合并，因此审查 PR 的人员提供了该判断：在此分支中修复它，驳回它，或将其归档以进行合并。因此，记录位于审查者已查看的位置，即 PR 主体。管道没有为这些提交票据；每次发现一张罚单，由任何人决定，这就是一群小虱子如何淹没追踪器的方式。
+ 
+-**When a PR will exist (a remote is configured):** compose a `## Unapplied review findings` section, one checkbox bullet per item so a human ticks it when they close it:
++**当存在PR时（交付前置条件允许发布）：**组成一个`## Unapplied review findings`部分，每个项目一个复选框项目符号，以便人们在关闭它时勾选它：
+ 
+-- For each unapplied actionable finding: `- [ ] <severity> — <file:line> — <title>`, plus the reviewer's `suggested_fix` on the next line when present.
+-- For each `settled_conflict`-stamped finding from step 4: the same bullet plus the conflicting KTD the stamp names — included even though the finding is report-only.
+-- For each proceeded-and-flagged `settled_decision_conflicts` entry from step 2: a bullet with the KTD, the evidence, and how it was routed.
++- 对于每个未应用的可操作发现：`- [ ] <severity> — <file:line> — <title>`，加上审查者的`suggested_fix`（如果存在）在下一行。
++- 对于第 4 步中的每个 `settled_conflict` 标记结果：相同的项目符号加上冲突的 KTD 标记名称 — 即使该结果仅用于报告，也包括在内。
++- 对于步骤 2 中的每个已处理并标记的 `settled_decision_conflicts` 条目：带有 KTD 的项目符号、证据及其路由方式。
+ 
+-Close the section with the review run context (`run_id`, `artifact_path`). Hand the section to step 9 as PR-description context; `references/shipping.md` says where step 9 passes it into `ce-commit-push-pr`. Step 9 writes the body, so nothing here edits the PR directly, and nothing posts a PR comment for these.
++关闭包含审核运行上下文的部分（`run_id`、`artifact_path`）。将部分作为 PR-描述上下文交给第 9 步； `references/shipping.md` 表示步骤 9 将其传递到 `ce-commit-push-pr` 的位置。步骤 9 写入正文，因此这里没有直接编辑 PR，也没有为这些内容发布 PR 注释。
+ 
+-**When no PR will exist (no remote):** load `references/tracker-defer.md` in **non-interactive mode** with the same items, collect `{ filed: [...], failed: [...], no_sink: [...] }`, and state every `failed` and `no_sink` item verbatim in the DONE report. The report is the only record those get.
++**当不存在 PR 时（没有远程或发布）：** 在 **非交互模式** 下使用相同的项目加载 `references/tracker-defer.md`，收集 `{ filed: [...], failed: [...], no_sink: [...] }`，并在“完成”报告中逐字说明每个 `failed` 和 `no_sink` 项目。该报告是他们获得的唯一记录。
+ 
+-## Step 7 — compound before shipping
++## 第 7 步 — 交付前复合
+ 
+-Invoke `ce-compound` with `mode:non-interactive` when the run corrected a wrong belief about how something behaves: the plan's approach failed, a review finding exposed a real defect, a diagnosis disproved its first hypothesis, or an assumption or document turned out wrong. A naming, style, or preference fix does not count, and a run that went as first planned skips this step. Do not judge whether the lesson deserves a document: `ce-compound` decides whether it qualifies and what holds it (a test or lint rule, a coding standard, or a learning on the branch). It asks no questions. Pass the plan or `root_cause`, the review residuals, and the fixes applied in step 5 as its context. `Documentation skipped` is a successful outcome, not a stop. Step 9 commits and pushes whatever it wrote with the rest of the change, so the lesson is in the PR at the moment it opens and CI runs against a head that contains it. Pass any `Recommended form` other than `none` to step 9 as PR-description context, so a form that needs product code stays visible. Do not run it after the babysit result: a push after "CI decided" leaves an unwatched head.
++当运行纠正了关于某些行为的错误信念时，调用 `ce-compound` 和 `mode:non-interactive`：计划的方法失败、审查发现暴露了真正的缺陷、诊断反驳了其第一个假设，或者假设或文档被证明是错误的。命名、样式或首选项修复不算在内，并且按最初计划进行的运行会跳过此步骤。不要判断该课程是否值得记录：`ce-compound` 决定它是否合格以及它的内容（测试或 lint 规则、编码标准或分支上的学习）。它不问任何问题。将计划或`root_cause`、审核残差以及步骤 5 中应用的修复作为其上下文传递。 `Documentation skipped`是成功的结果，而不是停止。第 9 步提交并推送它所写的任何内容以及其余的更改，因此课程在它打开的那一刻就在 PR 中，而 CI 则针对包含它的头运行。将除 `none` 之外的任何 `Recommended form` 作为 PR 描述上下文传递到步骤 9，以便需要产品代码的表单保持可见。不要在PR 看护结果后运行它：“CI决定”后的推动会留下无人看管的头部。
++
++对于已加载的 BW 项目，这是活动指令的完成检查点，而不是额外的触发器。当已处理相同的校正时，重复使用实际的 capture/skip 结果。如果项目使用该结果和现有证据，则将其传递给`project-governance close`。如果在第 4 步审核后 capture 或 close 添加了突变，请检查实际的增量并运行受影响的验证；如果新的行为、测试或审核规则使其覆盖范围失效，请根据第 4 步获取更新的审核。携带适用的收据，而不是旧树的陈旧收据。保留现有的浏览器、运输和恢复门。
+diff --git a/skills/lfg/references/shipping.md b/skills/lfg/references/shipping.md
+index 1a1931e76736db4ddfed47d503eb5900f37feefa..e883a04b45feae236615296c3a15f576ed206a76 100644
+--- a/skills/lfg/references/shipping.md
++++ b/skills/lfg/references/shipping.md
+@@ -1,65 +1,67 @@
+-# Shipping (LFG steps 9–11)
++# 运输（垃圾填埋气步骤 9–11）
+ 
+-The shipping steps are the last stretch of the run: commit, push, PR, CI, and close-out. LFG's SKILL.md defines the shipping precondition (the `git remote` check) and the two invocation strings. This file defines everything else: which handoff runs, what LFG passes into it, what it does with the result, and how the run closes out.
++运输步骤是运行的最后阶段：提交、推送、PR、CI 和结束。 LFG 的 SKILL.md 定义了交付前置条件（`git remote` 检查）和两个调用字符串。该文件定义了其他所有内容：运行哪个切换、LFG 传递给它什么、它对结果做什么以及运行如何结束。
+ 
+-## Step 9 — a project-defined process may replace the default handoff
++## 步骤 9 — 项目定义的流程可以取代默认的移交
+ 
+-The goal is the remaining work committed, pushed, and in an open PR whose URL you hold.
++目标是剩余的已提交工作，并且在交付前置条件允许的情况下，将其推送到您持有其 URL 的开放 PR 中。首先检查下面的本地分支，即使步骤 5 没有进行推送。对于远程切换，将未触及的预工作路径传递为 `exclude:<paths>`；如果项目定义的流程无法遵守它们，请改用默认的本机切换。
+ 
+-The project's active instructions may name a process for that handoff: a named skill or command, a stacking tool, or documented steps. Commit or PR-title conventions do not count, because the default already honors them, and a skill directory alone is not a directive. When such a process is named, run it non-interactively with the same plan path and context below instead of the default. It is done only when the work is pushed and you hold the URL of an open PR containing it, either one the process opened or a PR that already exists for the branch. If it cannot run headlessly, is unavailable, or ends short of that state, stop as **blocked** naming the process. Do not fall through to the default or to step 10.
++项目的活动指令可以命名该切换的过程：指定的技能或命令、堆叠工具或记录的步骤。提交或 PR-标题约定不算数，因为默认值已经遵循它们，并且单独的技能目录并不是指令。当命名此类流程时，请使用下面的相同计划路径和上下文（而不是默认值）以非交互方式运行它。仅当工作被推送并且您持有包含该工作的打开 PR 的 URL（打开的进程之一或分支已存在的 PR）时，才会完成此操作。如果它无法无头运行、不可用或未达到该状态，则以 **阻止** 命名该进程而停止。不要落入默认值或步骤 10。
+ 
+-## Step 9 — what LFG passes into the default
++## 第 9 步 — LFG 传递给默认值的内容
+ 
+-Pass the recorded plan path from step 1 into the `ce-commit-push-pr` invocation, along with any proceeded-and-flagged `settled_decision_conflicts` entries from step 2, so the PR body can include its settled-decisions provenance line and its note that work proceeded under a flagged conflict. On a one-pass statement there is no plan and no brief: pass the statement as PR-description context instead. On the defect route there is no plan and no brief: pass the debug return's `root_cause` and `issue_of_record` as PR-description context instead, per `references/debug-return.md`, so the PR body carries the diagnosis and links or closes the ticket. Also pass step 6's `## Unapplied review findings` section, when one exists, as PR-description context to be rendered as a dedicated section verbatim. That section is the record of unapplied findings; a run that opened a PR without it has lost them. Check the plan's execution profile for whether it ships as one PR or several. When it ships as several, ask for a stack and name its layers: one per PR group, bottom to top in merge order, each with its units and, when its `Waits on:` line names a deployment that must be live first, that deploy dependency as PR-description context. `ce-commit-push-pr` picks the stack's babysit posture from land intent in this request, so the merge grant is decided here. When the user granted merging, include land intent so it hands off `posture:stack-land`. When any layer carries a deploy dependency, leave land intent out so it hands off `posture:stack-ready`, because no skill observes deployments; the close-out then lists each layer whose deployment the user must confirm before it merges. The stack handoff in step 10 then applies.
++将记录的计划路径从步骤 1 传递到 `ce-commit-push-pr` 调用，以及步骤 2 中任何已处理和标记的 `settled_decision_conflicts` 条目，因此 PR 主体可以包含其已解决的决策出处行及其在标记的冲突下进行工作的注释。在一次性语句中，没有计划也没有简介：将语句作为 PR-描述上下文传递。在缺陷路线上，没有计划，也没有简介：将调试返回的 `root_cause` 和 `issue_of_record` 作为 PR 描述上下文传递，每个 `references/debug-return.md`，因此 PR 主体携带诊断并链接或关闭票证。还传递步骤 6 的 `## Unapplied review findings` 部分（如果存在）作为 PR 描述上下文，逐字呈现为专用部分。该部分记录了未应用的发现；在没有它的情况下打开PR的运行已经丢失了它们。检查计划的执行配置文件是否作为一个 PR 或多个进行交付。当它作为多个交付时，要求一个堆栈并命名其层：每个 PR 组一个，按合并顺序从下到上，每个都有其单位，并且当其 `Waits on:` 行命名必须首先运行的部署时，将依赖项部署为 PR 描述上下文。 `ce-commit-push-pr`在此请求中从土地意图中选择堆栈的PR 看护姿势，因此合并授权在这里决定。当用户同意合并时，请包含土地意图，以便它移交 `posture:stack-land`。当任何层带有部署依赖项时，请忽略土地意图，以便它交出`posture:stack-ready`，因为没有技能观察部署；然后，收尾会列出用户在合并之前必须确认其部署的每个层。然后应用步骤 10 中的堆栈切换。
+ 
+-This commits any remaining changes, pushes the branch, and opens a pull request, non-interactively because of the `mode:pipeline` token. If it prints a `New concepts:` trailer after the PR URL, record the concept name(s) for step 11. If a PR already exists for the branch (check with `gh pr view --json number,url,state 2>/dev/null`), skip PR creation but still commit and push any uncommitted changes. Pipeline mode leaves an existing PR body alone by default, so the description context above would be lost there; after the push, invoke `ce-commit-push-pr mode:pipeline` again in its description-update mode on that PR with the same context, so the record reaches the reviewer without a confirmation prompt.
++由于 `mode:pipeline` 令牌，这会以非交互方式提交所有剩余的更改、推送分支并打开拉取请求。如果它在 PR URL 之后打印 `New concepts:` 预告片，请记录步骤 11 的概念名称。如果分支已存在 PR（检查`gh pr view --json number,url,state 2>/dev/null`），则跳过 PR 创建，但仍提交并推送任何未提交的更改。管道模式默认情况下会保留现有的PR主体，因此上面的描述上下文将会丢失；推送后，在具有相同上下文的 PR 上以描述更新模式再次调用 `ce-commit-push-pr mode:pipeline`，因此记录到达审查者时不会出现确认提示。
+ 
+-**Per the shipping precondition, when no remote is configured, do NOT invoke `ce-commit-push-pr` or a project-defined shipping process.** The default's commit step pushes unconditionally (`git push -u origin HEAD`), so a literal invocation would still hit the impossible push. Instead commit the files this run changed, by name (the work source's files, the review fixes, and any captured learning), and skip the push and PR creation entirely. Never `git add -A`: a file that was already dirty before the run, or one the defect route's `pre_fix_scope` lists, stays uncommitted and is named in the report.
++**根据交付前置条件，当没有配置远程或传出工作未提供或未知时，请勿调用 `ce-commit-push-pr` 或项目定义的交付流程。** 默认的提交步骤无条件推送 (`git push -u origin HEAD`)，因此文字调用仍然会遇到不可能的推送。相反，按名称提交此运行更改的文件（工作源的文件、审阅修复以及任何捕获的学习内容），并完全跳过推送和 PR 创建。从不`git add -A`：运行前已经脏的文件，或者缺陷路由的`pre_fix_scope`列表之一，保持未提交状态并在报告中命名。
+ 
+-## Step 10 — stack handoff from step 9
++## 第 10 步——第 9 步的堆栈切换
+ 
+-If step 9's `ce-commit-push-pr` completed a stack-mode submit and handed off `ce-babysit-pr` on the **bottom open non-draft** PR with `posture:stack-ready` or `posture:stack-land`:
++如果步骤 9 保持发布，则完全跳过步骤 10，包括在先前具有 PR 的分支上。说明哪些内容保留在本地以及原因。
+ 
+-- Do **not** start a second bare `mode:pipeline` babysit on the current-branch URL. A second run can replace the stack-aware one with a run that watches only the current PR, or watch the wrong layer of the stack.
+-- Prefer the structured result already returned from that handoff when it reflects a completed pipeline stop.
+-- If step 9 only confirmed babysit **started** (or no structured result is available), re-invoke `ce-babysit-pr mode:pipeline <bottom-pr-url> posture:<same>` and wait for its pipeline completion — never treat "started" as DONE.
+-- Record the bottom PR URL and posture for step 11's user-facing resume line.
+-- Collect `{ status, fixes_applied, residuals }` and proceed to step 11.
++如果步骤 9 的 `ce-commit-push-pr` 完成了堆栈模式提交，并在 **底部打开的非草稿** PR 上与 `posture:stack-ready` 或 `posture:stack-land` 交接了 `ce-babysit-pr`：
+ 
+-## Step 10 — the default babysit
++- **不要**在当前分支 URL 上启动第二个裸 `mode:pipeline` PR 看护。第二次运行可以用仅监视当前 PR 的运行替换堆栈感知的运行，或者监视堆栈的错误层。
++- 当反映已完成的管道停止时，首选已从该切换返回的结构化结果。
++- 如果第 9 步仅确认babysit **started**（或没有可用的结构化结果），请重新调用 `ce-babysit-pr mode:pipeline <bottom-pr-url> posture:<same>` 并等待其管道完成 - 切勿将“started”视为完成。
++- 记录步骤 11 面向用户的简历行的底部 PR URL 和姿势。
++- 收集 `{ status, fixes_applied, residuals }` 并继续执行步骤 11。
+ 
+-Otherwise invoke `ce-babysit-pr mode:pipeline <pr-url>` on the current open PR. It runs the bounded pipeline loop: it watches CI, repairs real (convergent) failures via `ce-debug mode:pipeline` without ever weakening, skipping, or mocking an assertion, resolves any review comments that arrived via `ce-resolve-pr-feedback mode:pipeline`, and stops when CI is decided or its budget (default 3 fix rounds) is hit. This replaces LFG's former hand-rolled CI loop; do not reimplement CI-watching here.
++## 第 10 步 — 默认PR 看护
+ 
+-Invoke it unconditionally whenever an open PR exists **and** step 9 did not already hand off stack babysit. That includes a run under a standing `auto_babysit: false`: that setting opts out of the open-ended watch handed off after a PR is opened, not of this bounded loop that produces the pipeline's "CI decided" result. A run whose CI looks likely-clean is not a reason to skip babysit and poll `gh pr checks` yourself. Green CI at one instant is not this step's goal: babysit also resolves review comments across the PR's life, so a passing check while advisory checks (e.g. Bugbot) are still pending or comments are unhandled is not "done" and never substitutes for the invocation.
++否则在当前打开的PR上调用`ce-babysit-pr mode:pipeline <pr-url>`。它运行有界管道循环：它监视 CI，通过 `ce-debug mode:pipeline` 修复真实（收敛）故障，而不会削弱、跳过或嘲笑断言，解决通过 `ce-resolve-pr-feedback mode:pipeline` 到达的任何评审意见，并在 CI 决定或其预算（默认 3 轮修复）达到时停止。这取代了 LFG 以前的手卷CI环；不要在这里重新实现CI-观看。
+ 
+-Collect its structured result (`{ status, fixes_applied, residuals }`).
++每当存在打开的 PR 时无条件调用它**并且**步骤 9 尚未移交堆栈PR 看护。这包括在常设`auto_babysit: false`下运行：该设置选择退出打开PR后移交的开放式手表，而不是产生管道“CI决定”结果的有界循环。 CI 看起来可能干净的运行并不是跳过PR 看护并亲自投票 `gh pr checks` 的理由。瞬间绿色 CI 并不是此步骤的目标：babysit 还解决了 PR 整个生命周期中的审核评论，因此在咨询检查（例如 Bugbot）仍待处理或评论未处理时通过检查并没有“完成”，并且永远不会替代调用。
+ 
+-Merging is the user's unless they granted it for this run. When they did, pass the grant in the form `ce-babysit-pr` accepts: `posture:stack-land` on a managed stack, decided in step 9. A single-PR grant has no pipeline carrier today, so on that path do not merge yourself; say in the close-out that the grant could not be carried and the merge is still theirs.
++收集其结构化结果（`{ status, fixes_applied, residuals }`）。
+ 
+-## Step 10 — common result gate
++合并是用户的，除非他们为这次运行授予了合并权限。当他们这样做时，以 `ce-babysit-pr` 接受：`posture:stack-land` 的形式传递授权，在第 9 步中决定的托管堆栈上。单个 PR 授权目前没有管道载体，因此在该路径上不要合并自己；在结案中说，这笔赠款无法进行，合并仍然属于他们。
+ 
+-This check applies to whichever handoff produced the result. Keep the `needs-human` residuals it returned unchanged, with every field they carry. On the defect route, add the `residuals` that `ce-debug`'s `fixed` return carried, also unchanged. Before DONE, render the complete set under `## Needs your decision`, including each residual's quoted feedback, investigation, decision reason, options and tradeoffs, recommendation if any, and every open-thread link. A non-empty set means the run hands decisions to the user; it is never successful completion. A generic count or a PR link does not count as passing the set on. Unfixable CI still belongs in the babysitter's run-report comment, never a PR-body section.
++## 第 10 步——公共结果门
+ 
+-## Step 11 — close out
++此检查适用于产生结果的任何切换。保持其返回的 `needs-human` 残差及其携带的每个字段不变。在缺陷路由上，添加`ce-debug`的`fixed`返回携带的`residuals`，同样不变。在完成之前，在`## Needs your decision`下呈现完整的集合，包括每个残差引用的反馈、调查、决策原因、选项和权衡、建议（如果有）以及每个开放线程链接。非空集意味着运行将决策交给用户；它永远不会成功完成。通用计数或 PR 链接不算作传递集合。无法修复的 CI 仍然属于PR 看护的运行报告注释，而不是 PR-body 部分。
+ 
+-Everything below happens before LFG outputs `<promise>DONE</promise>`. Write the close-out, the `## Needs your decision` framing, and any progress you narrate to the user through the `ce-noslop` skill; the residual entries themselves are rendered verbatim.
++## 第 11 步 — 结束
+ 
+-### Rendering the user-runnable invocations
++下面的一切都发生在 LFG 输出 `<promise>DONE</promise>` 之前。写下结尾、`## Needs your decision`框架，以及通过`ce-noslop`技能向用户讲述的任何进度；剩余条目本身是逐字呈现的。
+ 
+-For the two handoffs below, default to `/ce-explain <name>` / `/ce-babysit-pr <pr-url>`. Use `$ce-explain <name>` / `$ce-babysit-pr <pr-url>` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
++### 呈现用户可运行的调用
++
++对于下面的两次切换，默认为 `/ce-explain <name>` / `/ce-babysit-pr <pr-url>`。仅当活动主机为 Codex 或明确记录以美元为前缀的技能调用时，才使用 `$ce-explain <name>` / `$ce-babysit-pr <pr-url>`。仅将调用呈现为内联代码并仅输出一种形式。
+ 
+ ### New concepts
+ 
+-If step 9 recorded a `New concepts:` trailer, first echo one line per concept: `New concept introduced: <name> — run <rendered ce-explain invocation> to go deeper.`
++如果步骤 9 录制了 `New concepts:` 预告片，则首先回显每个概念一行：`New concept introduced: <name> — run <rendered ce-explain invocation> to go deeper.`
+ 
+-### The open PR
++### 开放PR
+ 
+-If an open PR exists, add one line pointing the user to the interactive watch-to-merge (pipeline mode stopped at "CI decided," not "merged"): `PR is moving — run <rendered ce-babysit-pr invocation> to watch it through review to merge.`
++如果存在打开的PR，则添加一行将用户指向交互式监视以进行合并（管道模式停止于“CI已决定”，而不是“已合并”）：`PR 已进入后续流程；如需看护到审查完成和合并，请运行 <rendered ce-babysit-pr invocation>。`
+ 
+-When step 9/10 used a stack handoff, render that invocation for the **bottom open non-draft** PR URL with the same `posture:stack-ready` or `posture:stack-land` token — never a bare current-branch URL that would supersede stack scope.
++当步骤 9/10 使用堆栈切换时，使用相同的 `posture:stack-ready` 或 `posture:stack-land` 令牌呈现对 **底部开放非草稿** PR URL 的调用 — 绝不是会取代堆栈范围的裸露当前分支 URL。
+ 
+-### The optional next-work offer
++### 可选的下一份工作报价
+ 
+-On the defect route there is no plan: make no next-work offer. A one-pass statement has no plan either: make no next-work offer. Otherwise inspect the plan recorded in step 1 for the semantic role `work-relationships`. Load `references/next-work-handoff.md` when that role exists, or when an older unmarked Product Contract appears to name the area this plan owns plus future separately planned areas and their relationships. That reference defines the cautious legacy semantic fallback, how to choose the candidate, and how the opt-in offer is worded. Do not match an exact visible heading, treat ordinary non-goals as future work, or invoke `ce-handoff` before the user explicitly accepts the offer. If neither semantic signal exists, do not load the reference and make no next-work offer.
++在缺陷路线上没有计划：不提供下一步工作。一次性声明也没有计划：不提供下一份工作机会。否则检查步骤 1 中记录的计划中的语义角色`work-relationships`。当该角色存在时，或者当较旧的未标记产品合同出现命名该计划拥有的区域以及未来单独计划的区域及其关系时，加载`references/next-work-handoff.md`。该引用文档定义了谨慎的遗留语义回退、如何选择候选人以及选择加入要约的措辞方式。不要匹配精确的可见标题，将普通的非目标视为未来的工作，或者在用户明确接受要约之前调用`ce-handoff`。如果这两个语义信号都不存在，则不加载引用文档并且不提供下一步工作。
+ 
+-Then output the DONE promise.
++然后输出 DONE 承诺。
+diff --git a/skills/lfg/references/stage-routing.md b/skills/lfg/references/stage-routing.md
+index 6626f7bf0f3cffce8f18de390d9e35be68b706e0..076d5a40085ec64260a9ccfe98a46cb4f69360f7 100644
+--- a/skills/lfg/references/stage-routing.md
++++ b/skills/lfg/references/stage-routing.md
+@@ -1,49 +1,49 @@
+-# Per-stage routing carriers
++# 每阶段路由载体
+ 
+-A carrier is the prefix string that passes a stage assignment (which model or harness should do that stage's work) to a child skill. LFG has two routable stages, each with its own carrier. This file defines how to detect an assignment, how to resolve its scope and strength, the carrier grammar, the ordered-fallback case, how to strip routing from the feature request, and how each carrier is passed when LFG invokes the child skill.
++载体是将阶段分配（哪个模型或宿主应执行该阶段的工作）传递给子技能的前缀字符串。填埋气有两个可路由的阶段，每个阶段都有自己的载体。该文件定义如何检测分配、如何解析其范围和强度、载体语法、有序回退情况、如何从功能请求中剥离路由，以及当 LFG 调用子技能时如何传递每个载体。
+ 
+-LFG is otherwise hands-off and never stops to ask. The single question it may ask is the one in scope rule 3 below, and only on an interactive host.
++LFG 则不干涉，并且从不停止询问。它可能会问的一个问题是下面范围规则 3 中的问题，并且仅在交互式主机上。
+ 
+-## What is routable
++## 什么是可路由的
+ 
+-Interpret whether the invoking conversation expresses **semantic intent to assign a pipeline stage** — planning or implementation — to a specific model or harness. This is judgment, not keyword or prompt-token matching: an explicit instruction such as "plan with fable" or "use Codex for implementation" creates an assignment, while a plain mention of Codex, Composer, Fable, or another model/harness in feature content, quoted material, comparison text, or a filename does not. Two pipeline stages are routable, each with its own carrier:
++解释调用对话是否表达了将管道阶段（规划或实施）分配给特定模型或工具的**语义意图。这是判断，而不是关键字或提示标记匹配：诸如“用寓言进行计划”或“使用Codex进行实施”之类的明确指令会创建一个作业，而在专题内容、引用材料、比较文本或文件名中简单提及Codex、作曲家、寓言或另一个model/harness则不会。两个管道阶段是可路由的，每个阶段都有自己的载体：
+ 
+-- **Planning** routes to `ce-plan` as a `plan_model:<alias>` carrier. This names the **model** that authors the plan (model elevation) and nothing else. Example aliases: `fable`, `opus`. LFG has no way to pass a harness assignment to planning: an assignment that scopes a *harness* to planning ("plan with codex", "plan on cursor") is **not supported**. Stop and report it as a routing-carrier blocker (a stage assignment LFG cannot pass on) rather than encoding a harness name as `plan_model:<harness>`, which `ce-plan` cannot serve and would silently fall back to the session model. Only the implementation stage routes to a different harness.
+-- **Implementation** routes to `ce-work` as an `implementation_engine` object (grammar below). This names the harness and model that write the code.
++- **规划** 作为 `plan_model:<alias>` 承运人飞往 `ce-plan` 的航线。这命名了创作平面图（模型立面）的**模型**，仅此而已。别名示例：`fable`、`opus`。 LFG 无法将宿主分配传递给计划：**不支持将*宿主*范围限定为计划的分配（“使用代码进行计划”、“在光标上进行计划”）。停止并将其报告为路由载体阻塞项（阶段分配 LFG 无法传递），而不是将宿主名称编码为 `plan_model:<harness>`，`ce-plan` 无法提供服务，并且会默默地回退到会话模型。只有实施阶段才会路由到不同的宿主。
++- **实现** 将 `ce-work` 作为 `implementation_engine` 对象路由（语法如下）。这命名了编写代码的宿主和模型。
+ 
+-## Resolve each directive by scope
++## 按范围解析每个指令
+ 
+-1. **Scoped directive** — the instruction names the stage ("plan with fable", "codex for implementation", "plan fable, codex work"). Route it to that stage's carrier. Multiple scoped directives may resolve at once, each to its own stage.
+-2. **Unscoped directive** — a bare model/harness assignment with no stage named ("use fable", "with codex"). Bind it to the **implementation stage only**; never broaden an unscoped directive to planning or to every stage. Disclose the resolved binding in LFG's opening line before step 1 (e.g. "Routing implementation to Codex; planning stays on the session model.").
+-3. **Unscoped and genuinely ambiguous, human present** — ask exactly **one** upfront question to bind the stage before step 1, then proceed hands-off. Ask only when all three hold: an unscoped directive could credibly belong to more than one stage, mis-binding would be materially costly, and the host is interactive (it exposes a blocking-question tool and is not a `disable-model-invocation`/headless run). In a `disable-model-invocation`/headless run, never ask; apply the implementation default and disclose it. The default path is mandatory: LFG runs from schedulers, loops, and nested orchestrators with no user to answer, so an unresolved directive must always fall to the disclosed default rather than block.
++1. **作用域指令** — 指令命名阶段（“计划寓言”、“实施法典”、“计划寓言、法典工作”）。将其路由到该阶段的载体。多个作用域指令可以同时解析，每个指令都有自己的阶段。
++2. **无作用域指令** — 一个裸的 model/harness 分配，没有命名的阶段（“use fable”，“with codex”）。仅将其绑定到**实现阶段**；切勿将范围外的指令扩大到规划或每个阶段。在步骤 1 之前披露 LFG 开头行中已解决的绑定（例如“将实施路由到 Codex；规划保留在会话模型上。”）。
++3. **无范围且真正模糊的人类存在** - 在步骤 1 之前准确提出 **一个** 预先问题以绑定阶段，然后继续进行。仅当这三个条件都成立时才询问：无作用域指令可以可信地属于多个阶段，错误绑定将付出高昂的代价，并且主机是交互式的（它公开了一个阻塞问题工具，并且不是`disable-model-invocation`/无头运行）。在`disable-model-invocation`/无头奔跑中，永远不要问；应用实施默认值并披露它。默认路径是强制性的：LFG 从调度程序、循环和嵌套协调器运行，没有用户应答，因此未解析的指令必须始终落入公开的默认路径而不是阻塞。
+ 
+-Requirement strength is inferred from the whole instruction, not one word: "use Codex for implementation" is preference-strength (`prefer`); "only use Composer for implementation" is requirement-strength (`require`) because its meaning rejects native fallback.
++需求强度是从整个指令中推断出来的，不是一个字：“使用Codex来实现”是偏好强度（`prefer`）； “仅使用 Composer 进行实现”是需求强度 (`require`)，因为它的含义拒绝本机回退。
+ 
+-## Implementation carrier grammar
++## 实现载体语法
+ 
+-When implementation resolves to one candidate, retain one transient `implementation_engine` object with exactly these four fields:
++当实现解析为一个候选者时，保留一个具有以下四个字段的瞬态 `implementation_engine` 对象：
+ 
+-- `mode`: `prefer` or `require`
+-- `target`: exactly one of `codex`, `claude`, `grok`, `cursor`, `composer`, `opencode`, `antigravity`, or `pi` — a **harness** name, never a model name
+-- `model`: the explicit model pin, otherwise `null`
+-- `source`: a caller-visible string saying where the binding came from, identifying the current LFG instruction
++- `mode`: `prefer` 或 `require`
++- `target`：恰好是 `codex`、`claude`、`grok`、`cursor`、`composer`、`opencode`、`antigravity` 或 `pi` 之一 — **宿主**名称，绝不是型号名称
++- `model`：显式模型引脚，否则`null`
++- `source`：调用者可见的字符串，说明绑定来自何处，标识当前的 LFG 指令
+ 
+-A directive that names a bare **model** with no harness (e.g. "use fable", "with opus") is a model *pin*, not a target: encode it as the harness that serves that model family with the alias in `model`. A Claude-family model (`fable`, `opus`, `sonnet`, `haiku`) is `{"target":"claude","model":"<alias>"}`. Never put a model name in `target`. If you cannot map the named model to one of the harnesses above, that is a routing-carrier blocker, not a `null` binding that silently drops the user's instruction.
++命名没有宿主的裸 **模型** 的指令（例如“use fable”、“with opus”）是一个模型 *pin*，而不是目标：将其编码为为该模型系列提供服务的宿主，别名为 `model`。克劳德家族模型（`fable`、`opus`、`sonnet`、`haiku`）为`{"target":"claude","model":"<alias>"}`。切勿将型号名称放入`target`。如果您无法将命名模型映射到上述宿主之一，则这是路由载体阻塞项，而不是默默删除用户指令的 `null` 绑定。
+ 
+-When the implementation instruction instead names an ordered fallback list, do not truncate it to the scalar carrier (the single-candidate object above). Instead, retain the whole ordered assignment as current-task implementation intent and pass no `implementation_engine:` object. When LFG invokes `ce-work`, that still-active current-task assignment outranks configuration, and `ce-work` normalizes and preflights the candidates in order. This is context scoped to the implementation stage, not plan content. If the host cannot preserve that context across its skill invocation, stop with a routing-carrier blocker rather than silently dropping later candidates.
++当实现指令改为命名有序回退列表时，不要将其截断为标量载体（上面的单候选对象）。相反，保留整个有序分配作为当前任务实现意图，并且不传递 `implementation_engine:` 对象。当 LFG 调用 `ce-work` 时，仍然活动的当前任务分配优先于配置，并且 `ce-work` 按顺序标准化和预检候选者。这是实施阶段的背景，而不是计划内容。如果主机无法在其技能调用中保留该上下文，请使用路由载体阻塞项停止，而不是默默地丢弃后来的候选者。
+ 
+-## Sanitize product input
++## 净化产品输入
+ 
+-Remove every routing directive from the feature request that enters planning, keeping the request otherwise unchanged. Never pass the `implementation_engine` object or any removed directive to `ce-plan`, `ce-doc-review`, `ce-code-review`, the settled-decisions brief, or any planning or review **product** input. The carrier is a routing instruction for one stage, not product content or a settled product decision. The `plan_model:<alias>` carrier is the one exception: it is structured routing data handed to `ce-plan` *alongside* the sanitized request, never woven into it. Do not construct a carrier from standing configuration here: when no explicit binding exists for a stage, `ce-work` and `ce-plan` each decide for themselves how to apply still-applicable session/project intent and standing per-checkout configuration.
++从进入规划的功能请求中删除每个路由指令，保持请求在其他方面不变。切勿将 `implementation_engine` 对象或任何已删除的指令传递给 `ce-plan`、`ce-doc-review`、`ce-code-review`、已解决的决策概要或任何计划或审查 **产品** 输入。载体是一个阶段的路由指令，而不是产品内容或已确定的产品决策。 `plan_model:<alias>` 运营商是一个例外：它是结构化路由数据，与经过净化的请求一起传递给 `ce-plan`，但从未编织到其中。不要在此处从常设配置构建载体：当阶段不存在显式绑定时，`ce-work`和`ce-plan`各自决定如何应用仍然适用的session/project意图和常设每次结帐配置。
+ 
+-## Pass the planning carrier at step 1
++## 通过步骤1的规划载体
+ 
+-When a planning-stage directive resolved, prefix the `ce-plan` invocation with its `plan_model:<alias>` carrier. It is structured routing data beside the request, never woven into it, so `ce-plan`'s model elevation authors the plan on the chosen model even in pipeline mode.
++当规划阶段指令得到解决时，在 `ce-plan` 调用前加上其 `plan_model:<alias>` 载体。它是请求旁边的结构化路由数据，从未融入其中，因此即使在管道模式下，`ce-plan` 的模型提升也会在所选模型上制定计划。
+ 
+-## Pass the implementation carrier at step 2
++## 在步骤2中传递实施载体
+ 
+-Use `mode:return-to-caller <plan-path-from-step-1>` when no scalar transient carrier exists, including when a retained ordered current-task assignment is still active in context. When the scalar carrier exists, use the exact string-host form `mode:return-to-caller implementation_engine:<compact-json> <plan-path-from-step-1>`.
++当不存在标量瞬态载波时，包括当保留的有序当前任务分配在上下文中仍然处于活动状态时，请使用`mode:return-to-caller <plan-path-from-step-1>`。当标量载体存在时，使用精确的字符串主机形式`mode:return-to-caller implementation_engine:<compact-json> <plan-path-from-step-1>`。
+ 
+-Serialize its exact `implementation_engine.{mode,target,model,source}` data as compact JSON immediately after the `implementation_engine:` prefix (for example `implementation_engine:{"mode":"prefer","target":"codex","model":null,"source":"lfg-current-turn"}`). This is structured caller data in a portable string any host can pass through, not part of the plan path or implementation prompt. Pass no empty carrier when it does not exist. `ce-work` then resolves a retained ordered current-task assignment when present, otherwise applicable session/project intent and standing per-checkout configuration. LFG is an automatic, headless caller: it never prompts to weaken a requirement-strength route.
++将其精确的 `implementation_engine.{mode,target,model,source}` 数据序列化为紧凑的 JSON 紧跟在 `implementation_engine:` 前缀之后（例如 `implementation_engine:{"mode":"prefer","target":"codex","model":null,"source":"lfg-current-turn"}`）。这是任何主机都可以通过的可移植字符串中的结构化调用者数据，而不是计划路径或实现提示的一部分。当空载体不存在时，不传递该空载体。然后，`ce-work`解析保留的有序当前任务分配（如果存在），否则适用session/project意图和常备每次结账配置。 LFG 是一个自动的无头调用程序：它从不提示削弱需求强度路由。
+ 
+-The optional `implementation_run:<safe-id>` carrier is recovery-only. Never include it on the initial step-2 call. On the one evidence-reconciliation recovery, place it after the same engine carrier when one existed and before the unchanged plan path: `mode:return-to-caller implementation_run:<safe-id> <plan-path-from-step-1>` or `mode:return-to-caller implementation_engine:<compact-json> implementation_run:<safe-id> <plan-path-from-step-1>`. A safe id matches `^[A-Za-z0-9._-]{1,128}$` and contains at least one non-period character. Reject a malformed or duplicate run/engine carrier instead of launching work.
++可选的 `implementation_run:<safe-id>` 载体仅用于恢复。切勿将其包含在最初的第 2 步调用中。在一个证据协调恢复中，将其放置在同一发动机载体（如果存在）之后和未更改的计划路径之前：`mode:return-to-caller implementation_run:<safe-id> <plan-path-from-step-1>` 或 `mode:return-to-caller implementation_engine:<compact-json> implementation_run:<safe-id> <plan-path-from-step-1>`。安全 ID 匹配 `^[A-Za-z0-9._-]{1,128}$` 并包含至少一个非句点字符。拒绝格式错误或重复的 run/engine 载体，而不是启动工作。
+diff --git a/skills/lfg/references/task-visibility.md b/skills/lfg/references/task-visibility.md
+index ba2818b39a5b6f6d44f7c2f2cb1688f0130d2f95..587bbc8d58b175eeb77e789f54addeba37ce2975 100644
+--- a/skills/lfg/references/task-visibility.md
++++ b/skills/lfg/references/task-visibility.md
+@@ -1,21 +1,21 @@
+-# Task visibility, narration, verification, and completion
++# 任务可见性、叙述、验证和完成
+ 
+-Before step 1, use the platform's task-tracking capability when available to publish a short stage-level view of the remaining pipeline. Derive it from the user-meaningful outcomes of LFG's steps rather than mirroring all ten steps or exposing internal checks. Before invoking a child skill, replace or clear LFG's view so only the child skill's task surface is visible; after it returns, recreate or refresh LFG's remaining pipeline work before invoking the next child. Add a conditional step only when its condition is actually met. If no task-tracking capability is available, continue normally without simulating a task list in chat.
++在步骤 1 之前，使用平台的任务跟踪功能（如果可用）来发布剩余管道的简短阶段级视图。从 LFG 步骤的对用户有意义的结果中得出它，而不是镜像所有十个步骤或暴露内部检查。在调用子技能之前，替换或清除 LFG 的视图，以便只有子技能的任务表面可见；返回后，在调用下一个子级之前重新创建或刷新 LFG 的剩余管道工作。仅当实际满足条件时才添加条件步骤。如果没有可用的任务跟踪功能，请正常继续，而不在聊天中模拟任务列表。
+ 
+-## Chat narration
++## 聊天旁白
+ 
+-Narrate the run in chat as it moves. Narration is chat prose, never entries on the task surface above. One line entering each step names the step and what it should produce; one line when it returns names what it actually produced (plan path, return status, fixes applied, PR URL). Close with a recap that stands on its own: what was built, how it was verified and by which methods, what shipped, and any leftover findings. Print it alongside the close-out lines `references/shipping.md` defines, so a reader who sees only the final message has the full picture.
++在聊天中讲述跑步的移动过程。旁白是聊天散文，绝不是上面任务表面上的条目。输入每个步骤的一行命名该步骤及其应产生的内容；返回时的一行命名了它实际生成的内容（计划路径、返回状态、应用的修复、PR URL）。最后进行一个独立的回顾：构建了什么、如何验证以及通过什么方法、交付了什么以及任何剩余的发现。将其与`references/shipping.md`定义的结束行一起打印，这样只看到最终消息的读者就可以了解完整的情况。
+ 
+-When the run stops short of DONE, its final message is not that recap, because a reader who sees only the final message must not mistake it for finished work. Open the message with the stop itself: say that the run stopped and at which step, what blocks it, and the decision the user has to make. Give the options with your recommendation first, and the PR link when a PR exists. After that, recap what was done and where it was left, and put any child skill's return you quote below the opening. Then end the run. Do not ask through a question tool or wait for a reply; the message itself hands the decision over.
++当运行在完成之前停止时，它的最终消息并不是重述，因为只看到最终消息的读者一定不会将其误认为是已完成的工作。打开带有停止本身的消息：说明运行停止了，在哪一步停止了，什么阻止了它，以及用户必须做出的决定。首先提供带有您的建议的选项，当存在 PR 时，提供 PR 链接。之后，回顾一下所做的事情以及剩下的事情，并将您引用的任何子技能的回报放在开头下方。然后结束跑步。不要通过提问工具提问或等待答复；消息本身就把决定权交给了。
+ 
+-## Verification the request permits
++## 验证请求是否允许
+ 
+-Invoking `lfg` is the user's approval, given in advance, for the verification this change needs: browser tests, a simulator or device, screenshots, running the app or a dev server, and computer use on that app. When project instructions say to ask the user before one of these, or to leave testing to the user, that approval has already been given, so run the verification without asking. This follows the instruction rather than overriding it, because the user answered when they invoked `lfg`. A run that stops to ask stalls with nobody there to answer, and a run that skips the check drops the proof that the change works. This holds in every step, including the checks a child skill runs, such as `ce-work`'s verification and step 8's browser tests.
++调用 `lfg` 是用户提前给予的批准，用于验证此更改所需：浏览器测试、模拟器或设备、屏幕截图、运行应用程序或开发服务器以及该应用程序上的计算机使用。当项目说明说在其中一项之前询问用户或将测试留给用户时，则表示已经获得批准，因此无需询问即可运行验证。这遵循指令而不是覆盖它，因为用户在调用 `lfg` 时进行了回答。停下来询问无人回答的运行，以及跳过检查的运行会丢弃更改有效的证据。这适用于每个步骤，包括子技能运行的检查，例如 `ce-work` 的验证和步骤 8 的浏览器测试。
+ 
+-The approval replaces only the request to ask first or to leave testing to the user. Project rules about how to test still apply, so use the command, fixture, data, or check they name. The approval covers only the verification this change needs. It does not extend to production systems, real accounts or their data, deleting data, or anything else outside what `lfg` already does. It never answers a harness or system approval prompt for you.
++批准仅取代首先询问或将测试留给用户的请求。关于如何测试的项目规则仍然适用，因此请使用命令、夹具、数据，或检查它们的名称。批准仅涵盖此更改所需的验证。它不会扩展到生产系统、真实账户或其数据、删除数据或 `lfg` 已经做的事情之外的任何其他事情。它永远不会为您回答宿主或系统批准提示。
+ 
+-The approval can still be refused. It covers instructions that hand the decision or the step to the user, such as "ask first" or "leave testing to the user". It does not cover an instruction that bans the method no matter who runs it, such as "never run browser tests in this repo"; treat that as a refusal. Some hosts also follow a project or user instruction over this skill, and a harness or system approval prompt can say no. When a refusal leaves the change without the proof it needs, the run stops at that step and does not report DONE. Use the stop message above: name the instruction or prompt that refused the verification, and recommend what would let it run, such as approving it or relaxing that instruction. A method that cannot run for another reason, such as a missing tool, is not a refusal. Leave that method out, say in the recap that it did not run and why, and continue.
++批准仍然可以被拒绝。它涵盖将决定或步骤交给用户的指令，例如“先询问”或“将测试留给用户”。它不包括禁止该方法的指令，无论谁运行该方法，例如“永远不要在此存储库中运行浏览器测试”；将其视为拒绝。一些主机还遵循该技能的项目或用户说明，并且工具或系统批准提示可以说“不”。当拒绝在没有所需证明的情况下留下更改时，运行将在该步骤停止并且不会报告“完成”。使用上面的停止消息：命名拒绝验证的指令或提示，并建议让它运行的内容，例如批准它或放宽该指令。由于其他原因（例如缺少工具）而无法运行的方法并不属于拒绝。忽略该方法，在回顾中说明它没有运行以及原因，然后继续。
+ 
+-## Completion discipline
++## 完成纪律
+ 
+-Report a step as done only after it actually ran and returned. Describing what a step would do, or what comes next, is not doing it; invoke it in the same turn. A child skill runs inline, and nothing resumes you when it returns. Its return ends the child, not the run: after writing or reading it, continue with the next numbered step in the same turn. Do not end the turn before `<promise>DONE</promise>` or an explicit GATE stop naming the blocker. Work merely described, or a step skipped outside its stated skip condition, makes DONE false.
++仅在实际运行并返回后报告步骤已完成。描述一个步骤会做什么，或者接下来会发生什么，并不是在做；而是在做。在同一回合中调用它。子技能内联运行，当它返回时，没有任何东西可以恢复。它的返回结束了子进程，而不是运行：在写入或读取它之后，继续同一回合中的下一个编号步骤。不要在 `<promise>DONE</promise>` 或明确的 GATE 停止点名阻挡者之前结束回合。仅仅描述工作，或者在规定的跳过条件之外跳过的步骤，会使 DONE 为假。
+diff --git a/skills/lfg/references/tracker-defer.md b/skills/lfg/references/tracker-defer.md
+index ecb1bd51ed739829600ddf6dd1b954a41a08b1a4..4383c5597d9dce9b3cee6abf27ee185028361ec2 100644
+--- a/skills/lfg/references/tracker-defer.md
++++ b/skills/lfg/references/tracker-defer.md
+@@ -1,150 +1,150 @@
+-# Tracker Detection and Defer Execution
++# 跟踪器检测和延迟执行
+ 
+-This reference covers how Defer actions file tickets in the project's tracker. `ce-code-review`'s `SKILL.md` loads it in three places: when Interactive mode's routing question needs to decide whether to offer option C (File tickets), when the walk-through's Defer option executes, and when the bulk-preview of option C is shown. Autonomous callers such as `lfg` also load it to file leftover actionable findings without user prompts; see Execution Modes below.
++此参考介绍了延迟操作如何在项目的跟踪器中归档票证。 `ce-code-review`的`SKILL.md`在三个地方加载它：当交互模式的路由问题需要决定是否提供选项C（文件票证）时，当演练的Defer选项执行时，以及当显示选项C的批量预览时。诸如`lfg`之类的自主调用者也可以将其加载以归档剩余的可操作结果，而无需用户提示；请参阅下面的执行模式。
+ 
+ ---
+ 
+-## Execution Modes
++## 执行模式
+ 
+-Tracker-defer has two execution modes. The caller selects one; the detection, fallback chain, and ticket composition are shared. A "sink" below is any place a finding can be durably filed.
++Tracker-defer 有两种执行模式。呼叫者选择一个；检测、后备链和票据组成是共享的。下面的“水槽”是指可以持久归档调查结果的任何地方。
+ 
+-### Interactive mode (default)
++### 交互模式（默认）
+ 
+-Used by `ce-code-review` Interactive mode's routing question, walk-through Defer actions, and bulk-preview option C. All user-facing prompts are asked:
++由 `ce-code-review` 交互模式的路由问题、演练延迟操作和批量预览选项 C 使用。询问所有面向用户的提示：
+ 
+-- First Defer of the session with a generic (non-named) label confirms the effective tracker choice.
+-- Execution failures prompt with Retry / Fall back to next sink / Convert to Skip.
+-- Labels in the routing question name the tracker when `named_sink_available` is true, and use generic wording when a fallback is in use.
++- 带有通用（未命名）标签的会话的首次延迟确认了有效的跟踪器选择。
++- 执行失败时会提示重试/回退到下一个接收器/转换为跳过。
++- 当 `named_sink_available` 为真时，路由问题中的标签命名跟踪器，并在使用后备时使用通用措辞。
+ 
+-### Non-interactive mode
++### 非交互模式
+ 
+-Used by autonomous callers like `lfg` that must not prompt. All blocking questions are skipped; the fallback chain is executed silently in order. Behavior:
++由像 `lfg` 这样的自主呼叫者使用，不得提示。跳过所有阻塞问题；后备链按顺序静默执行。行为：
+ 
+-- No confirmation on the first generic-label Defer; proceed directly.
+-- On execution failure, automatically fall to the next tier without prompting. Record the failure.
+-- On total chain exhaustion (every tier failed or no sink available), return findings in the `no_sink` bucket so the caller can record them somewhere else (e.g., inline them in a PR description).
+-- Return a structured result: `{ filed: [{ finding_id, tracker, url }], failed: [{ finding_id, tracker, reason }], no_sink: [{ finding_id, title, severity, file, line }] }`.
++- 第一个通用标签 Defer 没有确认；直接进行。
++- 执行失败时，自动跳至下一层而不提示。记录失败情况。
++- 在总链耗尽时（每个层都失败或没有可用的接收器），返回`no_sink`存储桶中的结果，以便调用者可以将它们记录在其他地方（例如，将它们内联在PR描述中）。
++- 返回结构化结果：`{ filed: [{ finding_id, tracker, url }], failed: [{ finding_id, tracker, reason }], no_sink: [{ finding_id, title, severity, file, line }] }`。
+ 
+-The caller decides how to show the result to the user. The non-interactive mode treats "no sink available" as a data-producing outcome, not a prompt trigger.
++调用者决定如何向用户显示结果。非交互模式将“无可用接收器”视为数据生成结果，而不是提示触发。
+ 
+ ---
+ 
+-## Detection
++## 检测
+ 
+-The agent determines the project's tracker from whatever documentation is obvious. Primary source: the project's active instructions and conventions already in its context — no need to open or name specific instruction files. Read a file directly only when the relevant instructions aren't already in context: a subdirectory-scoped instruction file governing the area you're working in, or when you're a fresh subagent that wasn't given the project's instructions. Supplementary signals (when primary documentation is ambiguous): `CONTRIBUTING.md`, `README.md`, PR templates under `.github/`, visible tracker URLs in the repo.
++代理根据任何明显的文档来确定项目的跟踪器。主要来源：项目的活动指令和约定已经在其上下文中 - 无需打开或命名特定的指令文件。仅当相关说明尚未在上下文中时才直接读取文件：管理您正在工作的区域的子目录范围的说明文件，或者当您是未获得项目说明的新子代理时。补充信号（当主要文档不明确时）：`CONTRIBUTING.md`、`README.md`、`.github/`下的PR模板、存储库中可见的跟踪器 URL。
+ 
+-A tracker can be reached through an MCP tool (e.g., a Linear MCP server), a CLI (e.g., `gh`), or a direct API. All are acceptable. The detection output is a tuple with two availability flags. One is for the named tracker specifically and drives label confidence in Interactive mode. The other is for the full fallback chain and drives whether Defer is offered at all:
++可以通过 MCP 工具（例如 Linear MCP 服务器）、CLI（例如`gh`）或直接API 来访问跟踪器。一切都可以接受。检测输出是一个具有两个可用性标志的元组。一种是专门针对指定的跟踪器，并在交互模式下提高标签的信心。另一个用于完整的后备链，并决定是否提供 Defer：
+ 
+ ```
+ { tracker_name, confidence, named_sink_available, any_sink_available }
+ ```
+ 
+-Where:
+-- `tracker_name` — human-readable name ("Linear", "GitHub Issues", "Jira"), or `null` when detection cannot identify a specific tracker
+-- `confidence` — `high` when the tracker is named explicitly in documentation (or via a linked URL to a specific project/workspace) and is unambiguously the project's canonical tracker; `low` when the signal is thin, conflicting, or implied only
+-- `named_sink_available` — `true` only when the agent can actually invoke the detected tracker (MCP tool is loaded, CLI is authenticated, or API credentials are in environment); `false` when the tracker is documented but no tool reaches it, or when no tracker is found at all. Drives label confidence: inline tracker naming requires this to be `true`.
+-- `any_sink_available` — `true` when any tier in the fallback chain (named tracker or GitHub Issues via `gh`) can be invoked this session. Drives whether Defer is offered in Interactive mode, and drives the `no_sink` bucket in Non-interactive mode.
++在哪里：
++- `tracker_name` — 人类可读的名称（“Linear”、“GitHub Issues”、“Jira”），或当检测无法识别特定跟踪器时为 `null`
++- `confidence` — `high` 当跟踪器在文档中明确命名（或通过链接到特定 project/workspace 的 URL）并且明确是项目的规范跟踪器时； `low` 当信号微弱、冲突或仅暗示时
++- `named_sink_available` — `true` 仅当代理可以实际调用检测到的跟踪器时（MCP 工具已加载，CLI 已通过身份验证，或 API 凭证位于环境中）； `false` 当跟踪器被记录但没有工具到达它时，或者根本没有找到跟踪器时。提高标签信心：内联跟踪器命名要求为`true`。
++- `any_sink_available` — `true` 当后备链中的任何层（名为跟踪器或GitHub问题通过`gh`）可以调用此会话时。交互模式下驱动是否提供Defer，非交互模式下驱动`no_sink`桶。
+ 
+-Detection is reasoning-based. Do not maintain an enumerated checklist of files to read. Read the obvious sources and form a confident conclusion; when the obvious sources don't resolve, the label falls back to generic wording and the agent confirms with the user before executing (Interactive mode only).
++检测是基于推理的。不要维护要读取的文件的枚举清单。阅读明显的来源并得出自信的结论；当明显的来源无法解决时，标签会回退到通用措辞，并且代理在执行之前与用户确认（仅限交互模式）。
+ 
+ ---
+ 
+-## Probe timing and caching
++## 探测定时和缓存
+ 
+-Availability probes run **at most once per session** and **only when Defer execution is imminent**. Never speculatively at review start, never per-Defer, never per-walk-through-finding. The cached tuple is reused for every Defer action in the same run.
++可用性探测**每个会话最多运行一次**并且**仅在延迟执行即将到来时**。绝不在审查开始时进行推测，绝不是每次推迟，绝不是每次走查发现。缓存的元组可重复用于同一运行中的每个 Defer 操作。
+ 
+-Typical probe sequence:
++典型的探针序列：
+ 
+-1. Consult the project's instructions already in context for tracker references — don't open or name specific instruction files; read one directly only when the relevant instructions aren't in context (subdirectory scope, or a fresh subagent). If nothing found, set `tracker_name = null`, `confidence = low`.
+-2. **Probe the named tracker when one was found.** For GitHub Issues, run `gh auth status` and `gh repo view --json hasIssuesEnabled`. For Linear or other connector/MCP-backed trackers, first discover available tools via the platform's tool-discovery primitive (e.g., `ToolSearch` in Claude Code) rather than assuming absence from an unloaded tool, then verify the discovered tool is responsive. For API-backed trackers, verify credentials wherever the platform exposes them (environment, connector auth, or a documented secrets location), not only shell env vars. Set `named_sink_available` from the probe result.
+-3. **Probe the GitHub Issues fallback to compute `any_sink_available`.** Even when the named tracker was found and probed, `gh` matters for the `no_sink` bucket decision so that a run with no documented tracker but working `gh` still offers Defer.
+-   - If `named_sink_available = true`: `any_sink_available = true` (no further probes needed).
+-   - Otherwise, probe GitHub Issues via `gh auth status` + `gh repo view --json hasIssuesEnabled` (skip if already probed in step 2). If it works, `any_sink_available = true`.
+-   - Otherwise, `any_sink_available = false`.
++1. 请查阅上下文中已有的项目说明以获取跟踪器参考 - 不要打开或命名特定的说明文件；仅当相关指令不在上下文中（子目录范围或新的子代理）时才直接读取。如果没有找到，则设置`tracker_name = null`，`confidence = low`。
++2. **发现指定跟踪器时对其进行探测。** 对于 GitHub 问题，运行 `gh auth status` 和 `gh repo view --json hasIssuesEnabled`。对于 Linear 或其他 connector/MCP-backed 跟踪器，首先通过平台的工具发现原语发现可用工具（例如，Claude Code 中的 `ToolSearch`），而不是假设未加载的工具不存在，然后验证发现的工具是否响应。对于 API 支持的跟踪器，请在平台暴露凭证的任何地方（环境、连接器身份验证或记录的机密位置）验证凭证，而不仅仅是 shell 环境变量。根据探测结果设置`named_sink_available`。
++3. **探测GitHub问题回退到计算`any_sink_available`。**即使找到并探测了指定的跟踪器，`gh`对于`no_sink`存储桶决策也很重要，因此没有记录的跟踪器但工作`gh`的运行仍然提供延迟。
++   - 如果`named_sink_available = true`：`any_sink_available = true`（无需进一步探测）。
++   - 否则，通过 `gh auth status` + `gh repo view --json hasIssuesEnabled` 探测 GitHub 问题（如果已在步骤 2 中探测过，则跳过）。如果有效，`any_sink_available = true`。
++   - 否则，`any_sink_available = false`。
+ 
+-When Interactive mode's routing question is skipped entirely (R2 zero-findings case), no probes run. When the cached tuple is reused across a session, any `named_sink_available = true` from the session's first probe stays cached — do not re-probe per Defer.
++当交互模式的路由问题被完全跳过（R2零结果情况）时，不会运行任何探测器。当缓存的元组在会话中重用时，会话第一个探测中的任何 `named_sink_available = true` 都会保持缓存状态 - 不要在每次延迟时重新探测。
+ 
+ ---
+ 
+-## Label logic (Interactive mode)
++## 标签逻辑（交互模式）
+ 
+-- When `confidence = high` AND `named_sink_available = true`: the routing question's option C and the walk-through's per-finding Defer option both include the tracker name verbatim. Example: `File a Linear ticket per finding`, `Defer — file a Linear ticket`.
+-- When `any_sink_available = true` but either `confidence = low` or `named_sink_available = false` (a fallback tier is working instead): the labels read generically — `File an issue per finding`, `Defer — file a ticket`. Before executing the first Defer of the session, the agent confirms the effective tracker choice with the user using the platform's blocking question tool.
+-- When `any_sink_available = false`: option C is omitted from the routing question, option B (Defer) is omitted from the walk-through per-finding options, and the agent tells the user why in the routing question's stem.
++- 当 `confidence = high` AND `named_sink_available = true` 时：路由问题的选项 C 和演练的每次查找的延迟选项都逐字包含跟踪器名称。例如：`每个发现分别创建一条 Linear 工作项`、`延后处理——创建 Linear 工作项`。
++- 当`any_sink_available = true`但`confidence = low`或`named_sink_available = false`（后备层正在工作）时：标签一般为`File an issue per finding`、`Defer — file a ticket`。在执行第一次会话延迟之前，代理使用平台的阻塞问题工具与用户确认有效的跟踪器选择。
++- 当 `any_sink_available = false`：从路由问题中省略选项 C 时，选项 B（延迟）从演练每次查找选项中省略，并且代理会在路由问题的主干中告诉用户原因。
+ 
+-Non-interactive mode skips label decisions entirely; it acts silently on the detected sink.
++非交互模式完全跳过标签决策；它默默地作用于检测到的接收器。
+ 
+ ---
+ 
+-## Fallback chain
++## 后备链
+ 
+-When the named tracker is unavailable or no tracker is named, fall back in this order. Prefer the project's detected tracker; use `gh` only when no named tracker was found or the named one is unreachable.
++当指定的跟踪器不可用或没有指定跟踪器时，按此顺序回退。更喜欢项目检测到的跟踪器；仅当未找到指定跟踪器或指定跟踪器无法访问时才使用 `gh`。
+ 
+-1. **Named tracker** (MCP tool, CLI, or API the agent can invoke directly, identified via Detection above)
+-2. **GitHub Issues via `gh`**: when `gh auth status` succeeds and the current repo has issues enabled (`gh repo view --json hasIssuesEnabled` returns `true`)
+-3. **No sink** — findings remain in the review report's residual-work section (Interactive mode) or are returned in the `no_sink` bucket for the caller to route (Non-interactive mode). The agent does not re-display them somewhere that does not persist, such as chat.
++1. **命名跟踪器**（MCP工具，CLI或API代理可以直接调用，通过上面的检测识别）
++2. **GitHub 通过 `gh`** 发出问题：当 `gh auth status` 成功且当前存储库已启用问题时（`gh repo view --json hasIssuesEnabled` 返回 `true`）
++3. **无接收器** — 结果保留在审核报告的剩余工作部分（交互模式）中，或者返回到 `no_sink` 存储桶中以供调用者路由（非交互模式）。代理不会在不持久的地方（例如聊天）重新显示它们。
+ 
+-Previously this chain included a third in-session fallback tier. That tier was removed because in-session tasks do not survive past the session and therefore do not meet the "durable filing" intent of a Defer action. When no durable tracker exists, the correct behavior is to leave findings in the report (Interactive) or return them to the caller (Non-interactive).
++此前，该链包括第三个会话中后备层。该层已被删除，因为会话中的任务在会话结束后无法继续存在，因此不符合推迟操作的“持久归档”意图。当不存在持久跟踪器时，正确的行为是将结果保留在报告中（交互式）或将其返回给调用者（非交互式）。
+ 
+ ---
+ 
+-## Ticket composition
++## 门票构成
+ 
+-Every Defer action creates a ticket with the following content, adapted to the tracker's capabilities:
++每个延迟操作都会创建一个包含以下内容的票证，并适应跟踪器的功能：
+ 
+-- **Title:** the merged finding's `title` (schema-capped at 10 words).
+-- **Body:**
+-  - Plain-English problem statement — reads the persona-produced `why_it_matters` from the contributing reviewer's artifact file at `<artifact-path>/{reviewer}.json`, using the same `file + line_bucket(line, +/-3) + normalize(title)` matching agent mode uses (see SKILL.md Stage 6 detail enrichment). Falls back to the merged finding's `title`, `severity`, `file`, and `suggested_fix` (when present) when no artifact match is available — these fields are guaranteed in the merge-tier compact return.
+-  - Suggested fix (when present in the finding's `suggested_fix`).
+-  - Evidence (direct quotes from the reviewer's artifact).
+-  - Source: a link to the PR carrying this change when one already exists at filing time; otherwise the branch and head commit SHA, so the ticket points at the code even before a PR is opened. When the same run opens a PR after the ticket is filed, back-fill the PR link into the ticket (best-effort; never block shipping on the update).
+-  - Metadata block: `Severity: <level>`, `Confidence: <score>`, `Reviewer(s): <list>`, `Finding ID: <fingerprint>`.
+-- **Labels** (when the tracker supports labels): severity tag (`P0`, `P1`, `P2`, `P3`) and, when the tracker convention supports it, a category label sourced from the reviewer name.
+-- **Length cap:** when the composed body would exceed a tracker's body length limit, truncate with `... (continued in ce-code-review run artifact: <artifact-path>/)` and include the finding_id in both the truncated body and the metadata block so the artifact is discoverable.
++- **标题：** 合并结果的 `title`（模式上限为 10 个单词）。
++- **身体：**
++  - 简单英语问题陈述 — 使用相同的 `file + line_bucket(line, +/-3) + normalize(title)` 匹配代理模式使用的内容，从 `<artifact-path>/{reviewer}.json` 处的审查者产物文件中读取角色生成的`why_it_matters`（请参阅SKILL.md 第 6 阶段细节丰富）。当没有可用的产物匹配时，回退到合并结果的 `title`、`severity`、`file` 和 `suggested_fix`（如果存在） — 这些字段在合并层紧凑返回中得到保证。
++  - 建议的修复（当存在于调查结果的 `suggested_fix` 中时）。
++  - 证据（直接引用审稿人的产物）。
++  - 来源：当提交时已经存在时，指向携带此更改的PR的链接；否则，分支和头会提交 SHA，因此即使在打开 PR 之前，票证也会指向代码。当同一次运行在提交票证后打开 PR 时，将 PR 链接回填到票证中（尽力而为；切勿阻止更新的发送）。
++  - 元数据块：`Severity: <level>`、`Confidence: <score>`、`Reviewer(s): <list>`、`Finding ID: <fingerprint>`。
++- **标签**（当跟踪器支持标签时）：严重性标签（`P0`、`P1`、`P2`、`P3`），以及当跟踪器约定支持时，来自审查者姓名的类别标签。
++- **长度上限：**当组成的正文超出跟踪器的正文长度限制时，使用 `... (continued in ce-code-review run artifact: <artifact-path>/)` 进行截断，并将 finding_id 包含在截断的正文和元数据块中，以便可以发现产物。
+ 
+-The finding_id is a stable fingerprint composed as `normalize(file) + line_bucket(line, +/-3) + normalize(title)` — the same fingerprint used by the merge pipeline.
++finding_id 是由 `normalize(file) + line_bucket(line, +/-3) + normalize(title)` 组成的稳定指纹 — 与合并管道使用的指纹相同。
+ 
+ ---
+ 
+-## Failure path
++## 失败路径
+ 
+-When ticket creation fails at execution (API error, auth expiry mid-session, rate limit, malformed body rejected, 4xx/5xx response):
++当票证创建在执行时失败时（API错误、身份验证在会话中过期、速率限制、格式错误的正文被拒绝、4xx/5xx响应）：
+ 
+-**Interactive mode:** report the failure inline and ask the user using the platform's blocking question tool.
++**交互模式：**内联报告失败并使用平台的阻塞问题工具询问用户。
+ 
+-Stem:
+-> Defer failed: <tracker name> returned <error summary>. How should the agent handle this finding?
++干：
++> 延迟失败：<跟踪器名称> 返回<错误摘要>。代理人应如何处理这一发现？
+ 
+-Options:
+-- `Retry on <tracker>` — re-attempt the same tracker once more (useful for transient errors)
+-- `Fall back to next sink` — move this finding's Defer to the next tier in the fallback chain (e.g., from Linear to GitHub Issues)
+-- `Convert to Skip — record the failure` — abandon this Defer, note the failure in the completion report's failure section, and continue the walk-through or bulk flow
++选项：
++- `Retry on <tracker>` — 再次尝试相同的跟踪器（对于暂时性错误很有用）
++- `Fall back to next sink` — 将此发现的 Defer 移动到回退链中的下一层（例如，从 Linear 到 GitHub 问题）
++- `转为跳过——记录失败` — 放弃此延迟，在完成报告的失败部分中记下失败，并继续演练或批量流程
+ 
+-**Non-interactive mode:** do not prompt. Automatically fall through to the next tier. If every tier fails, record the finding in the `failed` bucket of the structured return and continue. If the chain exhausts with no sink ever available, the finding ends up in the `no_sink` bucket.
++**非交互模式：**不提示。自动下降到下一层。如果每一层都失败，则将结果记录在结构化回报的 `failed` 存储桶中并继续。如果链条耗尽而没有可用的水槽，则发现的东西最终会进入`no_sink`桶中。
+ 
+-When a high-confidence named tracker fails at execution, the cached `named_sink_available` is set to `false` for the rest of the session. Subsequent Defer actions fall straight through to the next tier without retrying a confirmed-broken sink. `any_sink_available` is only downgraded to `false` when every tier has been confirmed broken; a failed Linear call that succeeds via `gh` keeps `any_sink_available = true`.
++当高置信度命名跟踪器执行失败时，缓存的 `named_sink_available` 将在会话的其余部分设置为 `false`。随后的延迟操作将直接进入下一层，而无需重试已确认损坏的接收器。 `any_sink_available`只有在每一层都被确认被破坏后才会降级为`false`；通过 `gh` 成功的失败的线性调用将保留 `any_sink_available = true`。
+ 
+-When no such tool is in the list, a real question call errors, or the platform has no blocking question tool, fall back to presenting numbered options in the host's chat and waiting for the user's reply (Interactive mode only).
++当列表中没有此类工具、真正的问题调用错误或平台没有阻止问题工具时，将回退到在主持人的聊天中显示编号选项并等待用户的回复（仅限交互模式）。
+ 
+ ---
+ 
+-## Per-tracker behavior
++## 每个跟踪器的行为
+ 
+-Concrete behavior per tracker at execution time. The agent may invoke any of these through the appropriate interface (MCP, CLI, or API); the choice depends on what is available in the current environment.
++每个跟踪器在执行时的具体行为。代理可以通过适当的接口（MCP、CLI或API）调用其中任何一个；选择取决于当前环境中可用的内容。
+ 
+-| Tracker | Interface | Invocation sketch | Body format | Labels |
++| 追踪器 | 界面 | 调用草图 | 正文格式 | 标签 |
+ |---------|-----------|-------------------|-------------|--------|
+-| Linear | MCP (preferred) or API | Create issue in the project/workspace identified by documentation; assign to the reporter if the MCP tool exposes user context | Markdown | Severity priority field if the MCP exposes it; otherwise include severity in body |
+-| GitHub Issues | `gh issue create` | Repo defaults to the current repo. Use `--label` for severity tag when labels exist; omit `--label` if the repo has no label fixture. Fall back to a label-less issue on first failure. | Markdown | `--label P0` / `--label P1` / etc. when labels exist |
+-| Jira | MCP or API | Create issue in the project identified by documentation; Jira's markdown dialect differs from GitHub's — use plain text in the body when MCP does not handle conversion | Plain text when MCP does not handle markdown | Severity priority field |
+-| No sink available | — | Interactive: Defer option omitted, findings remain in the report's residual-work section. Non-interactive: findings returned in the `no_sink` bucket for caller routing. | — | — |
++| 线性 | MCP（首选）或 API | 在文档标识的project/workspace中创建问题；如果 MCP 工具公开用户上下文，则分配给报告者 | Markdown | 严重性优先级字段（如果 MCP 公开）；否则包括身体的严重程度 |
++| GitHub 问题 | `gh issue create` | 存储库默认为当前存储库。当标签存在时，使用`--label`作为严重性标签；如果仓库没有标签固定装置，则省略 `--label`。在第一次失败时回退到无标签问题。 | Markdown | `--label P0` / `--label P1` / 等，当标签存在时 |
++| 吉拉 | MCP 或 API | 在文档确定的项目中创建问题； Jira 的 markdown 方言与 GitHub 不同 — 当 MCP 不处理转换时，在正文中使用纯文本 | MCP 不处理 Markdown 时的纯文本 | 严重性优先级字段 |
++| 没有可用的水槽 | — | 互动：省略推迟选项，调查结果保留在报告的剩余工作部分。非交互式：在 `no_sink` 存储桶中返回结果以用于呼叫者路由。 | — | — |
+ 
+-When uncertain, prefer "drop with explicit user-facing notice" over "pass through silently and hope." A Defer that produces no durable artifact and no user message is data loss.
++当不确定时，更喜欢“带有明确的面向用户的通知丢弃”而不是“默默地通过并希望”。不产生持久产物且不产生用户消息的 Defer 就是数据丢失。
+ 
+ ---
+ 
+-## Cross-platform notes
++## 跨平台笔记
+ 
+-The question-tool name varies by platform. In Interactive mode, use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options in the host's chat only when no such tool is in the list, a real question call errors, or the runtime mode does not expose one. Never silently skip the question.
++问题工具名称因平台而异。在交互模式下，使用当前工具列表中已有的主机阻塞问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具、真正的问题调用错误或运行时模式未公开此类工具时，才会回退到主持人聊天中的编号选项。永远不要默默地跳过这个问题。
+ 
+-Non-interactive mode is platform-agnostic: it never prompts, so the platform's question tool is not relevant.
++非交互模式与平台无关：它从不提示，因此平台的提问工具不相关。
+diff --git a/skills/lfg/references/work-return.md b/skills/lfg/references/work-return.md
+index 71000abc5a1ec3abfd7e40257dfa45f5dd2975c6..0c9f26df1ee438391d7725a2ba351409591feec3 100644
+--- a/skills/lfg/references/work-return.md
++++ b/skills/lfg/references/work-return.md
+@@ -1,31 +1,31 @@
+-# Reading ce-work's structured return (LFG step 2)
++# 读取 ce-work 的结构化回报（LFG 步骤 2）
+ 
+-LFG's SKILL.md lets only a valid `status: complete` return advance; every other status or malformed return stops the pipeline. This file defines how to validate a complete return: what the route binding means, which fields are required, what the verification evidence must contain, and the one recovery invocation.
++LFG 的 SKILL.md 仅允许有效的 `status: complete` 返回预付款；所有其他状态或格式错误的返回都会停止管道。该文件定义了如何验证完整的返回：路由绑定的含义、需要哪些字段、验证证据必须包含什么以及一次恢复调用。
+ 
+-## Missing-owner blocked return
++## 失踪业主阻止退货
+ 
+-When `ce-work` cannot re-read the reference file that defines its return after it has already created partial state, it returns a reduced blocked result from its SKILL.md. Accept that reduced result as a valid terminal blocker, not as a malformed complete return. It contains `status: blocked`, `plan_path`, `run_id` when known, `changed_state`, `blockers`, and `recovery_path`. Preserve those recovery facts and stop; the complete-return field inventory below does not apply to this failure shape.
++当`ce-work`在创建了部分状态后无法重新读取定义其返回的参考文件时，它会从其SKILL.md返回一个减少的阻塞结果。接受减少的结果作为有效的终端阻塞项，而不是格式错误的完整返回。它包含 `status: blocked`、`plan_path`、`run_id`（已知）、`changed_state`、`blockers` 和 `recovery_path`。保留这些恢复事实并停止；下面的完整返回现场清单不适用于此故障形状。
+ 
+-## What each route outcome means
++## 每条路线的结果意味着什么
+ 
+-`ce-work` discloses an unavailable route once and continues natively under both `prefer` and `require` (its `cross-model-execution.md` defines that behavior), so LFG decides the route outcome from the return fields rather than expecting `ce-work` to refuse. A return whose `implementation_engine_binding.mode` is `require` and whose `actual_route` differs from `requested_route` stops the pipeline as blocked, reporting `requested_route`, `actual_route`, and `fallback_reason`; `require` is the caller's instruction, and work done natively against it does not ship. A completed `prefer` fallback may continue to step 3 exactly once after prominently disclosing its requested-versus-actual route/model and `fallback_reason` to the user; fallback is not a reason to invoke implementation again.
++`ce-work`公开了一次不可用的路由，并在`prefer`和`require`下继续本机地继续（其`cross-model-execution.md`定义了该行为），因此LFG根据返回字段决定路由结果，而不是期望`ce-work`拒绝。 `implementation_engine_binding.mode`为`require`且`actual_route`与`requested_route`不同的返回将管道停止为阻塞，报告`requested_route`、`actual_route`和`fallback_reason`； `require` 是调用者的指令，并且本机根据它完成的工作不会传送。已完成的`prefer`回退可以在向用户显着地披露其请求与实际route/model和`fallback_reason`之后继续执行步骤3；回退并不是再次调用实现的理由。
+ 
+-## What `status: complete` must carry
++## `status: complete`必须携带什么
+ 
+-Verify that implementation work was performed: files were created or modified beyond the plan. Require `status`, `plan_path`, `changed_files`, `u_ids_attempted`, `u_ids_completed`, `verification_results`, `verification_evidence`, `source_kind`, `source_digest`, `settled_decision_conflicts`, `behavior_change`, and `standalone_shipping_skipped: true`. The source fields must identify the same plan authority that entered the implementation run. `source_digest` is the digest the controller recorded, or null on a native run. On a one-pass statement, `plan_path` is null, `source_kind` is `prompt`, and `u_ids_attempted` and `u_ids_completed` are empty arrays. A recovery invocation repeats the statement unchanged in place of the plan path. Evidence and conflict fields are present on every complete return; empty arrays are valid when their conditions did not occur.
++验证实施工作是否已执行：文件的创建或修改超出了计划。需要 `status`、`plan_path`、`changed_files`、`u_ids_attempted`、`u_ids_completed`、`verification_results`、`verification_evidence`、`source_kind`、`source_digest`、`settled_decision_conflicts`、`behavior_change` 和 `standalone_shipping_skipped: true`。源字段必须标识进入实施运行的同一计划机构。 `source_digest` 是控制器记录的摘要，或者在本机运行时为 null。在一次性语句中，`plan_path`为空，`source_kind`为`prompt`，`u_ids_attempted`和`u_ids_completed`为空数组。恢复调用会重复该语句而不改变计划路径。每一份完整的回报中都会出现证据和冲突字段；当条件未发生时，空数组有效。
+ 
+-Also require the fields that record which route actually ran: `implementation_engine_binding`, `requested_route`, `actual_route`, `requested_model`, `actual_model`, `fallback_reason`, `run_id`, `unit_receipts`, `plan_checkpoint`, `blockers`, and `recovery_path`. These fields are required even when native execution makes some values `null`. Together they carry where the binding came from, requested-versus-actual identity, fallback, the durable run, per-unit process/integration/verification/commit state, checkpoint disclosure, blockers, and recovery. A resumed return must carry the same `run_id`; never treat resume as permission to start a new unit or a second LFG shipping run.
++还需要记录实际运行路线的字段：`implementation_engine_binding`、`requested_route`、`actual_route`、`requested_model`、`actual_model`、`fallback_reason`、`run_id`、`unit_receipts`、`plan_checkpoint`、`blockers` 和 `recovery_path`。即使本机执行使某些值`null` 时，这些字段也是必需的。它们一起承载了绑定的来源、请求的身份与实际的身份、回退、持久运行、每单元 process/integration/verification/commit 状态、检查点披露、阻塞项和恢复。恢复的退货必须携带相同的`run_id`；切勿将简历视为启动新装置或第二次垃圾填埋气运输的许可。
+ 
+-## The work must be committed
++## 工作必须全力以赴
+ 
+-`ce-code-review` leaves out untracked files, so files this run added go unreviewed until they are committed. Before step 3, confirm the return's `changed_files` are committed. If any are not, commit those files and continue. Do not stop for this.
++`ce-code-review` 遗漏了未跟踪的文件，因此此运行添加的文件在提交之前不会进行审核。在步骤 3 之前，确认退货的 `changed_files` 已提交。如果没有，请提交这些文件并继续。不要为此停下来。
+ 
+-## Verification evidence
++## 验证证据
+ 
+-When `behavior_change: true`, `verification_evidence` must name the relevant units/tasks, existing tests inspected, tests added/changed or used unchanged, red failure or characterization evidence when applicable, verification run, and any deliberate test exception. Do NOT decide the test strategy inside LFG; the evidence is ce-work's contract.
++当`behavior_change: true`、`verification_evidence`必须命名相关units/tasks、已检查的现有测试、测试added/changed或未更改使用、红色故障或特性证据（适用时）、验证运行以及任何故意的测试异常。不要在 LFG 内部决定测试策略；证据就是ce-work的合同。
+ 
+-Also read `settled_decision_conflicts` from the return: blocker-routed entries arrive as `status: blocked` and stop the pipeline. **Record any proceeded-and-flagged entries**: they must reach step 6's lasting record of unapplied findings and step 9's PR-description context, since later review may not rediscover them.
++还从返回中读取`settled_decision_conflicts`：阻塞路由条目以`status: blocked`到达并停止管道。 **记录任何已处理和标记的条目**：它们必须达到步骤 6 的未应用结果的持久记录和步骤 9 的 PR 描述上下文，因为以后的审查可能不会重新发现它们。
+ 
+-## The one recovery invocation
++## 一次恢复调用
+ 
+-If `behavior_change: true` but `verification_evidence` is missing or too vague to tell how behavior was protected, invoke `ce-work` one more time in recovery mode. Reuse the same `implementation_engine:<compact-json>` carrier when one existed and keep the same plan path. With a safe non-null `run_id`, add `implementation_run:<safe-id>` with that exact value from the first return. When `actual_route` is `native` and `run_id` is `null`, repeat the original ce-work invocation once without an `implementation_run:` carrier; this preserves the pre-existing native idempotency/evidence-reconciliation path. A non-native return without a safe run id remains blocked instead of attempting discovery or a second implementation. Do not prompt the user and do not alter the plan path or engine carrier; this is evidence reconciliation, not a fresh dispatch. The recovery relies on ce-work's reconciliation path to inspect the already-implemented work, fill the missing evidence, and return without reimplementing. If the second return still lacks coherent verification evidence, stop as blocked and report the missing fields instead of continuing to simplify/review/ship.
++如果 `behavior_change: true` 但 `verification_evidence` 丢失或太模糊而无法说明如何保护行为，请在恢复模式下再次调用 `ce-work`。当存在相同的`implementation_engine:<compact-json>`载体时，重复使用该载体并保持相同的计划路径。使用安全的非空 `run_id`，将 `implementation_run:<safe-id>` 添加到第一次返回的确切值。当`actual_route`为`native`且`run_id`为`null`时，重复原始ce-work调用一次，无需`implementation_run:`载体；这保留了预先存在的本机 idempotency/evidence-reconciliation 路径。没有安全运行 ID 的非本机返回仍会被阻止，而不是尝试发现或第二次实现。不提示用户，也不改变计划路径或发动机托架；这是证据和解，而不是新的派遣。恢复依靠ce-work的协调路径来检查已经实施的工作，填补缺失的证据，然后返回而不重新实施。如果第二次返回仍然缺乏连贯的验证证据，则停止并报告缺失的字段，而不是继续simplify/review/ship。

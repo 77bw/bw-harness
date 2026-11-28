@@ -1,69 +1,69 @@
-# Pattern catalog
+# 图案目录
 
-Rule numbers are stable ids. A removed rule leaves a gap; never renumber. Each rule names the pattern and the fix. The tests in `SKILL.md` decide whether a passage is a finding; this catalog names what to look for and what to write instead.
+规则编号是稳定的 ID。删除的规则会留下空白；永远不要重新编号。每条规则都命名了模式和修复方法。 `SKILL.md`中的测试决定一段文章是否是一个发现；该目录列出了要查找的内容以及要编写的内容。
 
-**False-positive floor.** A single device is a choice, not a tell. Flag a passage when patterns accumulate (SKILL.md test 5), and never flag: text inside quotation marks, the title of a cited work, or code; a term the domain uses for one exact meaning; deliberate repetition for emphasis; a scope statement, safety notice, or real correction; one short sentence for emphasis; a letter's greeting, heading, or sign-off, where the sign-off is the closing word and the name, not a stock line before them.
+**误报底线。** 单个设备是一种选择，而不是告诉。当模式累积时标记一个段落（SKILL.md测试5），并且从不标记：引号内的文本、引用作品的标题或代码；该领域使用的具有确切含义的术语；故意重复强调；范围说明书、安全通知或实际更正；一个简短的句子来强调；一封信的问候语、标题或结束语，其中结束语是结束语和姓名，而不是它们前面的行。
 
-**What an edit may change.** Decide for each sentence whether a test or rule fails on it before you rewrite anything. A sentence nothing fails on comes back exactly as written, even when the sentence beside it is rewritten. In a failing sentence, change only the span that fails and keep the rest of its words. When a deleted span holds a fact, keep the fact in plain words. Before returning, compare each sentence with its source and restore every change no test or rule required. The usual failure is a passing sentence reworded while its neighbor was being fixed: a word swapped for a synonym ("sits on" to "is on", "Thank you" to "Thanks"), a tense or voice changed ("will stop" to "stops", "signed off by Shifza" to "Shifza signs off"), a qualifier trimmed ("has room for 45 desks" to "has 45 desks"), or a sentence split or merged.
+**编辑可能会改变什么。** 在重写任何内容之前，确定每个句子的测试或规则是否失败。一个没有失败的句子会完全按照所写的内容返回，即使它旁边的句子被重写了。在失败的句子中，仅更改失败的跨度并保留其余单词。当删除的跨度包含事实时，请用简单的语言保留事实。返回之前，将每个句子与其源进行比较，并恢复每个更改，无需测试或规则。通常的失败是在修复其邻居时对过去的句子进行改写：将单词交换为同义词（“sits on”改为“is on”，“Thank you”改为“Thanks”），时态或语气改变（“will stop”改为“stops”，“sign off by Shifza”改为“Shifza Signs off”），限定词被修剪（“has room for 45 desks”改为“has 45 desks”），或者句子拆分或合并。
 
-## Content
+## 内容
 
-1. **Puffery.** A claim of importance stapled to an ordinary fact: "marks a turning point", "plays a vital role", "a testament to", "in today's landscape". Delete the claim and keep the fact.
-2. **Trailing -ing analysis.** A clause bolted on the end that explains significance: "highlighting", "ensuring", "reflecting", "showcasing", "underscoring". Delete the clause; the sentence survives.
-3. **Promotional adjectives.** "Vibrant", "seamless", "robust", "groundbreaking", "stunning", "thoughtfully designed", "powerful yet simple". State the property or delete the claim.
-4. **Vague attribution.** "Experts believe", "industry reports suggest", "widely regarded", "studies show". Name the source or cut the claim. Never invent a source.
-5. **Formulaic outlook.** "Despite challenges, continues to thrive"; a closing paragraph about the bright future. Keep one real limitation or plan, stated plainly, and end on the last concrete fact.
-6. **Setup-reversal copy.** "Ten features. Zero headaches." "Everything changed. Your invoice didn't." State what the thing does; if the reversal was carrying the sentence, the sentence had no content.
-7. **Faux insight.** "The part everyone misses", "what nobody tells you", "the real question is", "at its core". Cut the setup and let the claim stand.
-8. **Commentary on the writing.** "This matters more than it sounds", "the key point is", "as you can see", "in other words" when nothing was unclear. Delete the aside; if the point is unclear, add support instead.
-9. **Rejecting an alternative no one raised.** "A tempting approach would be", "some might say", "this isn't about X". Remove the fake option and state the real constraint.
+1. **吹嘘。** 一个重要的声明钉在一个普通的事实上：“标志着一个转折点”，“发挥着至关重要的作用”，“证明”，“在当今的景观中”。删除声明并保留事实。
+2. **尾随分析。** 附加在末尾的子句解释重要性：“突出显示”、“确保”、“反映”、“展示”、“强调”。删除该条款；该判决仍然有效。
+3. **促销形容词。** “充满活力”、“无缝”、“稳健”、“开创性”、“令人惊叹”、“精心设计”、“强大而简单”。说明财产或删除声明。
+4. **归因模糊。**“专家认为”、“行业报告建议”、“广泛关注”、“研究表明”。指出来源或删除声明。永远不要发明来源。
+5. **公式化的前景。**“尽管面临挑战，仍继续蓬勃发展”；关于光明未来的结束语。保留一个真正的限制或计划，明确说明，并以最后一个具体事实结束。
+6. **设置反转副本。**“十个功能。零头痛。” “一切都变了。你的发票没有。”说明该事物的作用；如果反转带有句子，则该句子没有内容。
+7. **虚假洞察。**“每个人都错过的部分”，“没有人告诉你什么”，“真正的问题是”，“其核心”。切断设置并让声明成立。
+8. **对写作的评论。** “这比听起来更重要”，“关键点是”，“正如你所看到的”，“换句话说”，当没有什么不清楚的时候。删除旁白；如果观点不清楚，请添加支持。
+9. **拒绝没有人提出的替代方案。**“一种诱人的方法是”，“有些人可能会说”，“这与 X 无关”。删除假选项并陈述真正的约束。
 
 ## Language
 
-10. **Model vocabulary.** Delve, tapestry, testament, underscore, showcase, garner, interplay, intricate, enduring, foster, crucial, pivotal, additionally, moreover, enhance, leverage, utilize, facilitate, landscape and realm and journey as abstractions. Use the plain word for the actual claim.
-11. **Long ways to say "is" or "has".** "Acts as", "functions as", "serves as", "offers", "boasts", "represents" where the sentence means "is" or "has". Use the short verb.
-12. **Not X but Y.** "It's not just a linter, it's a system." "The question isn't A, it's B." Nobody claimed X; state Y.
-13. **Forced triads.** Three adjectives, three examples, three beats when the natural number is one or two. Keep the items that are true and specific.
-14. **Synonym cycling.** The same thing called three names in one passage. Pick one term and repeat it; in technical writing, repetition is precision.
-15. **A span that is really a list.** "From onboarding to billing" when onboarding and billing are two items, not the ends of anything. Name the items.
-16. **Filler.** "In order to" is "to". "Due to the fact that" is "because". "It is important to note that" is nothing. "At this point in time" is "now".
-17. **Stacked hedges.** "Could potentially possibly" is "may". One hedge, and only when the uncertainty is real.
-18. **Adverbs doing a verb's work.** "Runs quickly" becomes "finishes in 40 ms"; "significantly improves" becomes the measured change. When the adverb carries the meaning, replace the verb or supply the number.
-19. **Verbs turned into nouns.** "The demotion of the grid is the change" is "demote the grid". Prefer the verb.
-20. **Borrowed metaphors for ordinary operations.** Words from physics, strategy, or machinery standing in for a plain code action: a "vector" that is a method, a "surface" that is an API, a "primitive" that is a function, a "lever" or "wedge" that is a change, a "north star" that is a goal, a "flywheel" that is a feedback loop, "evacuating" code that is being moved, a "substrate" that is a base layer, "gold-plating" that is more than the job needs, a "ratchet" that is a limit that only tightens, an "endgame" that is the last phase. Name the operation or the thing.
-21. **Feeling instead of mechanism.** "Deploys feel effortless", "errors are handled gracefully", "the API gets out of your way". Name what the reader can do or check: "a failed deploy rolls back within one minute", "a malformed row is skipped and logged with its line number".
+10. **典型词汇。** 深入、挂毯、遗嘱、下划线、展示、收集、相互作用、复杂、持久、培育、关键、关键、此外、此外、增强、利用、利用、促进、景观和领域和旅程作为抽象。使用简单的词来表达实际的主张。
+11. **说“是”或“有”的方式很长。** “充当”、“充当”、“充当”、“提供”、“夸耀”、“代表”，其中句子的意思是“是”或“有”。使用短动词。
+12. **不是 X，而是 Y。** “这不仅仅是一个 linter，它是一个系统。” “问题不是A，而是B。”没有人声称 X；状态 Y。
+13. **强制三和弦。** 三个形容词，三个例子，当自然数为一或二时三个节拍。保留真实且具体的项目。
+14. **同义词循环。**同一件事在一篇文章中叫了三个名字。选择一个术语并重复它；在技术写作中，重复就是精确。
+15. **实际上是一个列表的跨度。**“从入职到计费”，当入职和计费是两个项目时，而不是任何事情的结束。为项目命名。
+16. **填充词。** “为了”是“为了”。 “由于事实”是“因为”。 “值得注意的是”没什么。 “此时”就是“现在”。
+17. **堆叠的树篱。** “可能、可能、可能”是“可能”。一种对冲，而且只有在不确定性真实存在的情况下。
+18. **副词完成动词的工作。**“快速运行”变为“40 毫秒内完成”； “显着改善”成为测量到的变化。当副词带有含义时，替换动词或提供数字。
+19. **动词变成名词。** “降格即变”就是“降格”。更喜欢动词。
+20. **借用普通操作的隐喻。** 来自物理、策略或机械的单词代表纯代码操作：“向量”是一种方法，“表面”是API，“基元”是函数，“杠杆”或“楔子”是变化，“北极星”是目标，“飞轮”是反馈循环，“疏散”正在移动的代码， “基底”是基础层，“镀金”是超出工作需要的层，“棘轮”是只会收紧的限制，“终局”是最后阶段。命名操作或事物。
+21. **感觉而不是机制。**“部署感觉毫不费力”，“错误被优雅地处理”，“API 不妨碍你”。列出读者可以执行或检查的操作：“失败的部署在一分钟内回滚”、“跳过格式错误的行并记录其行号”。
 
-## Structure
+## 结构
 
-22. **Dense sentences.** A sentence the reader parses twice. One idea per sentence; a chain of semicolons becomes a list.
-23. **Passive hiding the actor.** "Queries are validated" leaves the reader guessing who validates; "the compiler validates queries" does not. Keep the passive only when naming the actor adds nothing.
-24. **Buried decision.** The conclusion arrives after its rationale. Conclusion, then reason, then background.
-25. **Heading restated in the first sentence.** Delete the restatement; start with the content.
-26. **Summary-recap ending.** "In conclusion", "overall", a paragraph that repeats the piece. End on the last concrete point or the next action.
-27. **Dramatic fragments.** "No priors. No nostalgia. The old rules were gone." One short sentence can land a point; a row of them is a pose. Rewrite as sentences.
-28. **Colon reveal.** "The detail that makes it work: a separate grader." A colon belongs before a list or a quote, not as drama or a mid-sentence connector.
+22. **密集的句子。** 读者解析两次的句子。每句话一个想法；一串分号成为一个列表。
+23. **被动隐藏参与者。**“查询已验证”让读者猜测谁验证； “编译器验证查询”则不然。仅当命名演员时才保留被动语态，不会带来任何影响。
+24. **埋藏的决定。**结论是在其基本原理之后得出的。结论，然后是理由，最后是背景。
+25. **第一句中重述的标题。**删除重述；从内容开始。
+26. **总结-回顾结尾。** “结论”，“总体”，重复该片段的段落。结束于最后一个具体点或下一个动作。
+27. **戏剧性的片段。** “没有先验。没有怀旧。旧规则消失了。”短短一句话，就能得分；一排就是一个姿势。重写为句子。
+28. **冒号显示。**“让它发挥作用的细节：一个单独的分级机。”冒号属于列表或引言之前，而不是作为戏剧或句子中间的连接符。
 
-## Formatting
+## 格式化
 
-29. **Em dash as a rhythm crutch.** Several per paragraph, or a formulaic "this isn't X — it's Y". Use a period or a comma, or split the sentence. A semicolon is not a substitute. Leave dashes alone in code, ranges, and tables.
-30. **Bold label that restates its line.** "**Performance:** performance improved." Convert to prose. Keep a bold lead-in only when the sentence after it says something the label did not.
-31. **Bold sprinkled for emphasis**, every proper noun or acronym bolded. Bold only what the reader must find.
-32. **Title Case headings.** Sentence case. A document's title line is a heading whether or not it carries a `#` marker.
-33. **Decorative emoji** in headings and bullets. Remove, unless the caller's contract fixes them.
-34. **Bullets where two sentences of prose read better**; headers over two-sentence sections; horizontal rules between every section of a short document. Format follows content.
-35. **Curly quotes** mixed with straight ones. Straight quotes in technical text.
+29. **用破折号作为节奏拐杖。** 每段有几个，或者公式化的“这不是 X — 这是 Y”。使用句点或逗号，或拆分句子。分号不能替代。在代码、范围和表格中保留破折号。
+30. **粗体标签重申其产品线。**“**性能：**性能改进。”转换为散文。仅当后面的句子说了标签没有提到的内容时，才保留粗体引言。
+31. **加粗表示强调**，每个专有名词或首字母缩写词都加粗。仅将读者必须找到的内容加粗。
+32. **标题首字母大写。**句子大小写。文档的标题行就是一个标题，无论它是否带有 `#` 标记。
+33. **标题和项目符号中的装饰表情符号**。删除，除非调用者的合同修复了它们。
+34. **两句散文读起来更好的项目符号**；两句话部分的标题；短文档每个部分之间的水平规则。格式遵循内容。
+35. **弯引号**与直引号混合。技术文本中的直接引用。
 
-## Chat artifacts
+## 聊天神器
 
-36. **Chatbot openers and closers.** "Certainly", "Great question", "Happy to help", "I'm thrilled to share", "Excited to announce", "Hope this helps", "Feel free to", "Don't hesitate to reach out", "Let me know if you need anything else", "Want me to". A courtesy that names something the reader did or must do carries content, so thanks for specific screenshots stays and a request for something specific stays. Delete the stock phrase; do not reword it into a milder one. When it wraps a request or fact, keep that request or fact in plain words.
-37. **Sycophancy.** Praise for the reader before the answer, such as "You're absolutely right" or "Great catch". Delete all of it and answer. When the praise names the reader, start the answer with that name.
-38. **Announcing the next point.** "Let's dive in", "here's what you need to know", "without further ado". State the point.
-39. **Process narration in a report.** Steps the agent took that do not change what the reader does next. A cause that was ruled out or a fix that failed stays, stated as a finding; the account of how the agent spent its time goes.
-40. **Knowledge-limit disclaimers and gap-filling.** "While details are limited, it likely..." State what the source does not show, or cut the sentence. Never present a guess as a fact.
-41. **Manufactured thoroughness.** Bare counts ("resolved 11 threads"), scorecards, and lists of everything checked. Say what was decided and why; if nothing non-routine was decided, say nothing.
+36. **聊天机器人开场白和结束语**“当然”、“好问题”、“很乐意提供帮助”、“我很高兴分享”、“很高兴宣布”、“希望这有帮助”、“随时”、“不要犹豫，联系我们”、“如果您还需要什么，请告诉我”、“希望我这么做”。礼貌地指出读者所做或必须做的事情包含内容，因此感谢您留下特定的屏幕截图并请求留下特定的内容。删除库存短语；不要将其改写为更温和的措辞。当它包装一个请求或事实时，请用简单的语言保留该请求或事实。
+37. **阿谀奉承。** 在回答之前对读者进行赞美，例如“你完全正确”或“很棒的收获”。全部删除然后回答。当赞美指出读者的名字时，以该名字开始回答。
+38. **宣布下一点。**“让我们深入探讨”，“这是您需要了解的内容”，“事不宜迟”。陈述要点。
+39. **处理报告中的叙述。** 代理采取的步骤不会改变读者下一步的操作。被排除的原因或失败的修复保留下来，作为调查结果指出；代理人如何度过时间的记录会被记录下来。
+40. **知识限制免责声明和填补空白。**“虽然细节有限，但很可能......”说明来源未显示的内容，或删掉句子。切勿将猜测当作事实。
+41. **制造的彻底性。** 裸计数（“已解决的 11 个线程”）、记分卡和检查的所有内容的列表。说出决定的内容以及原因；如果没有做出非常规的决定，就什么也不说。
 
-## Plain speech
+## 平白的讲话
 
-42. **Clipped sentences.** Dropped articles, missing verbs, symbols in place of words, or abbreviations that make the reader decode the line: "Retry fails → page on-call, no rollback." Write the sentence: "A failed retry pages the on-call engineer and does not roll back." Expand only from what the source states. When a full sentence would need a guess, keep the source's words. A guess can be the actor, the tense, a cause, how certain the claim is, or what an abbreviation stands for. A clipped line the reader gets on the first pass stays, and so do fragments the format expects, such as table cells, commit subjects, and changelog lines.
-43. **Figurative phrasing.** A figure where a literal phrase exists: an aphorism ("ship it or kill it"), code given intent, knowledge, or judgment it does not have ("the config knows about the queue"), a verb borrowed from physical action ("the flag rides along", "retries sit on top of the queue"). Say what happens: "the config lists the queue". Verbs for a literal operation, such as reads, rejects, and validates, stay. Rule 20 covers the nouns.
-44. **Intensifiers.** "Critically", "genuinely", "actually", "simply", "deliberately", "explicitly" where the sentence says the same without them. Delete the word. Keep it when it changes the claim, as in "explicitly set" against a default or "deliberately skipped" against an accident.
+42. **删减的句子。** 删除的文章、缺少动词、代替单词的符号或缩写，使读者解码这行内容：“重试失败 → 页面待命，无回滚。”写下这句话：“重试失败会呼叫值班工程师并且不会回滚。”仅从来源说明的内容进行扩展。当需要猜测一个完整的句子时，请保留来源的文字。猜测可以是行动者、时态、原因、断言的确定性或缩写代表什么。读者在第一遍中得到的剪裁行会保留，格式所需的片段也会保留，例如表格单元格、提交主题和更改日志行。
+43. **比喻性的措辞。**存在字面短语的图形：格言（“运送它或杀死它”），给出其不具备的意图、知识或判断的代码（“配置知道队列”），借用物理动作的动词（“旗帜飘扬”，“重试坐在队列顶部”）。说出发生了什么：“配置列出了队列”。用于文字操作的动词，例如读取、拒绝和验证、停留。规则 20 涵盖了名词。
+44. **强化词。** “批判性地”、“真诚地”、“实际上”、“简单地”、“故意地”、“明确地”，句子在没有它们的情况下表达了相同的意思。删除这个词。当索赔发生变化时保留它，例如针对默认情况“明确设置”或针对事故“故意跳过”。

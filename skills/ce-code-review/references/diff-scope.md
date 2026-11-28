@@ -1,59 +1,59 @@
-# Diff Scope Rules
+# 差异范围规则
 
-These rules apply to every reviewer. They define what is "your code to review" versus pre-existing context.
+这些规则适用于每个审稿人。他们定义什么是“要审查的代码”与预先存在的上下文。
 
-## Scope Discovery
+## 范围发现
 
-Determine the diff to review using this priority order:
+使用此优先级顺序确定要查看的差异：
 
-1. **User-specified scope.** If the caller passed `BASE:`, `FILES:`, or `DIFF:` markers, use that scope exactly.
-2. **Working copy changes.** If there are unstaged or staged changes (`git diff HEAD` is non-empty), review those.
-3. **Unpushed commits vs base branch.** If the working copy is clean, review `git diff $(git merge-base HEAD <base>)..HEAD` where `<base>` is the default branch (main or master).
+1. **用户指定的范围。** 如果调用者传递了 `BASE:`、`FILES:` 或 `DIFF:` 标记，请准确使用该范围。
+2. **工作副本更改。** 如果存在未暂存或已暂存的更改（`git diff HEAD` 非空），请查看这些更改。
+3. **未推送的提交与基础分支。** 如果工作副本是干净的，请查看 `git diff $(git merge-base HEAD <base>)..HEAD`，其中 `<base>` 是默认分支（主分支或主分支）。
 
-The scope step in the SKILL.md handles discovery and passes you the resolved diff. You do not need to run git commands yourself unless PR scope mode requires it (below).
+SKILL.md 中的范围步骤处理发现并向您传递已解析的差异。您不需要自己运行 git 命令，除非 PR 范围模式需要它（如下）。
 
-## Remote scope (`pr-remote` and `branch-remote`)
+## 远程范围（`pr-remote` 和 `branch-remote`）
 
-When the review context includes `<pr-scope-mode>pr-remote</pr-scope-mode>` or `<pr-scope-mode>branch-remote</pr-scope-mode>`, the working tree is **not** the reviewed head. Do **not** use Read/Grep on workspace paths for any file that belongs to the reviewed tree — the changed-file list, and any other file the review points you at, such as a criteria file. They may not match the branch or PR under review, and an unchanged file is not exempt: the checkout can hold a version the reviewed head never had.
+当审阅上下文包含`<pr-scope-mode>pr-remote</pr-scope-mode>`或`<pr-scope-mode>branch-remote</pr-scope-mode>`时，工作树**不是**审阅的头。 **不要**在属于已审阅树的任何文件的工作区路径上使用 Read/Grep - 已更改文件列表以及审阅指向您的任何其他文件，例如条件文件。它们可能与正在审查的分支或PR不匹配，并且未更改的文件也不例外：签出可以保存已审查的头从未拥有的版本。
 
-Instead:
+反而：
 
-- Prefer `git show <remote-head-ref>:<path>` when `<pr-head-ref>` or `<branch-head-ref>` is provided in context.
-- Otherwise rely on diff hunks in the provided `<diff>` only.
-- Do not treat local workspace contents as evidence for findings on changed files.
+- 当上下文中提供 `<pr-head-ref>` 或 `<branch-head-ref>` 时，首选 `git show <remote-head-ref>:<path>`。
+- 否则仅依赖于提供的 `<diff>` 中的差异块。
+- 不要将本地工作区内容视为更改文件的发现证据。
 
-## Whole-file deletions
+## 整个文件删除
 
-A file the change deletes appears in the diff as a header only: `deleted file mode` and its path. Its old body is left out. The `<deleted-files>` block in your review context lists each one with what it exported and whether it ran anything at import time. Read a body only when a finding needs it, with `git show <base>:<path>` against the base that block names.
+更改删除的文件仅作为标头出现在 diff 中：`deleted file mode` 及其路径。它的旧身体被遗弃了。查看上下文中的 `<deleted-files>` 块列出了每个块及其导出的内容以及导入时是否运行了任何内容。仅在发现需要时才读取正文，并使用 `git show <base>:<path>` 对抗块名称的基础。
 
-Whether the surviving tree still uses a deleted file is the correctness and adversarial reviewers' question; their personas say what to check. That check needs the reviewed tree, and a body needs the base the block names. When you cannot read one of them (for example, remote scope with no head ref, or a block with no base), record in `residual_risks` which deleted files went unchecked and why; never report their liveness as checked. Every other reviewer reviews the files that survive, including what the deletion left behind there: imports, props, styles, flags, and assets that no longer have a reader. The body of a deleted file is not code to review.
+幸存的树是否仍然使用已删除的文件是正确性和对抗性审稿人的问题；他们的角色说明了要检查的内容。该检查需要经过审查的树，而主体需要块名称的基础。当您无法读取其中之一时（例如，没有头引用的远程作用域，或者没有基础的块），请在 `residual_risks` 中记录哪些已删除的文件未被检查以及原因；切勿报告其已检查的活性。其他每个审查者都会审阅幸存的文件，包括删除后留下的文件：导入、道具、样式、标志和不再有读者的资产。已删除文件的正文不是要查看的代码。
 
-## Evidence Tools (tool-adaptive)
+## 证据工具（工具自适应）
 
-Recall depends on how you find related code. A diff-local read plus a text `grep` misses callers reached through re-exports, aliases, and barrel files, and mis-hits identifiers inside strings, comments, or longer names. When a claim depends on a symbol's callers, implementations, or whether a construct appears elsewhere, use the strongest search your harness actually exposes, preferring in this order and falling through when a tier is unavailable:
+召回率取决于您如何找到相关代码。差异本地读取加上文本 `grep` 会错过通过重新导出、别名和桶文件到达的调用者，并误命中字符串、注释或较长名称内的标识符。当声明取决于符号的调用者、实现或构造是否出现在其他地方时，请使用您的工具实际公开的最强搜索，优先按此顺序进行搜索，并在层不可用时失败：
 
-1. **Symbol-aware search** — a references/definitions/implementations capability (LSP or an equivalent MCP tool) that follows renames, re-exports, and barrels text search cannot. Most reviewer harnesses do not expose one; when it is absent, drop to the next tier without ceremony.
-2. **Structural (AST) search** — a syntax-tree matcher such as `ast-grep` (optional; may not be installed). For "does construct X occur elsewhere" it beats regex: it matches the parsed tree, ignoring formatting and skipping the string/comment hits `grep` reports as false positives.
-3. **Text search (`grep`)** — always available; correct for genuinely lexical checks (config keys, string literals, log messages), and the fallback when the tiers above are not reachable.
+1. **符号感知搜索** — references/definitions/implementations 功能（LSP 或等效的 MCP 工具），可遵循重命名、重新导出和桶文本搜索功能。大多数审查者工具不会暴露一个；当它不存在时，无需仪式就下降到下一层。
+2. **结构 (AST) 搜索** — 语法树匹配器，例如 `ast-grep`（可选；可能未安装）。对于“构造 X 是否出现在其他地方”，它击败了正则表达式：它匹配解析的树，忽略格式并跳过 string/comment 命中 `grep` 报告为误报。
+3. **文本搜索 (`grep`)** — 始终可用；纠正真正的词法检查（配置键、字符串文字、日志消息），以及无法访问以上层时的回退。
 
-No tool is complete: dynamic dispatch, reflection, dependency injection, string-keyed routes/config, generated code, and external consumers hide usages from all of them. This only bites a claim that rests on *exhaustive* coverage — "this symbol is unused," "nothing else calls this," "safe to change." For such a claim, when coverage is text-search-only or a hiding construct could apply, record the unresolved boundary in `residual_risks` (e.g. `callsite completeness: grep-only`) or step the finding down, rather than asserting absence or safety. A finding that does not turn on exhaustive coverage needs no such note.
+没有工具是完整的：动态调度、反射、依赖项注入、字符串键控 routes/config、生成的代码以及外部使用者隐藏所有这些工具的用法。这只会削弱基于“详尽”覆盖范围的声明——“这个符号未被使用”，“没有其他东西叫这个”，“可以安全更改”。对于这样的声明，当覆盖范围仅限于文本搜索或可以应用隐藏构造时，将未解决的边界记录在`residual_risks`（例如`callsite completeness: grep-only`）中或逐步减少发现，而不是断言不存在或安全。不涉及详尽报道的发现不需要这样的注释。
 
-In `pr-remote` / `branch-remote` scope these tiers inspect the working tree, which is not the reviewed head — apply the Remote scope rules above (`git show` / `git grep <remote-head-ref>`) instead of local search.
+在 `pr-remote` / `branch-remote` 范围内，这些层检查工作树，这不是审查的头 - 应用上面的远程范围规则 (`git show` / `git grep <remote-head-ref>`) 而不是本地搜索。
 
-## Finding Classification Tiers
+## 查找分类层
 
-Every finding you report falls into one of three tiers based on its relationship to the diff:
+您报告的每个发现根据其与差异的关系分为三个级别之一：
 
-### Primary (directly changed code)
+### 初级（直接改代码）
 
-Lines added or modified in the diff. This is your main focus. Report findings against these lines at full confidence.
+在 diff 中添加或修改的行。这是你的主要关注点。完全保密地报告这些方面的发现。
 
-### Secondary (immediately surrounding code)
+### 次要（紧邻代码）
 
-Unchanged code within the same function, method, or block as a changed line. If a change introduces a bug that's only visible by reading the surrounding context, report it -- but note that the issue exists in the interaction between new and existing code.
+与已更改的行相同的函数、方法或块中的未更改代码。如果更改引入了只有通过阅读周围上下文才能看到的错误，请报告它 - 但请注意，该问题存在于新代码和现有代码之间的交互中。
 
-### Pre-existing (unrelated to this diff)
+### 预先存在的（与此差异无关）
 
-Issues in unchanged code that the diff didn't touch and doesn't interact with. Mark these as `"pre_existing": true` in your output. They're reported separately and don't count toward the review verdict. When history is what makes the pre-existing call, attach one concise provenance evidence line from targeted blame/log (see the line provenance rule in `subagent-template.md`).
+未更改的代码中存在差异未触及且不与之交互的问题。在输出中将它们标记为 `"pre_existing": true`。它们是单独报告的，不计入审查结论。当历史是预先存在的调用的原因时，请附加来自目标blame/log的一条简明出处证据行（请参阅`subagent-template.md`中的行出处规则）。
 
-**The rule:** If you'd flag the same issue on an identical diff that didn't include the surrounding file, it's pre-existing. If the diff makes the issue *newly relevant* (e.g., a new caller hits an existing buggy function), it's secondary.
+**规则：** 如果您在不包含周围文件的相同差异上标记相同的问题，则该问题是预先存在的。如果差异使问题变得*新相关*（例如，新的调用者遇到了现有的有缺陷的函数），那么它就是次要的。

@@ -1,155 +1,155 @@
-# Post-Ideation Workflow
+# 构思后工作流程
 
-Read this file after Phase 2 ideation agents return and the orchestrator has merged and deduped their outputs into a master candidate list. Do not load before Phase 2 completes.
+在第 2 阶段构思代理返回并且编排器已将其输出合并并删除重复数据到主候选列表后，请阅读此文件。在第 2 阶段完成之前请勿加载。
 
-## Phase 3: Adversarial Filtering
+## 第三阶段：对抗性过滤
 
-Review every candidate idea critically. Critique runs in two layers — a fresh-context verifier first, then orchestrator arbitration. Fresh-context verification outperforms self-critique: the orchestrator synthesized some of these candidates itself and carries the full generation history, so it is anchored in ways a verifier that never saw the generation is not.
+批判性地审查每个候选人的想法。 Critique 分两层运行——首先是新上下文验证器，然后是协调器仲裁。新上下文验证胜过自我批评：编排器本身合成了其中一些候选者并携带了完整的生成历史，因此它以从未见过生成的验证者的方式锚定。
 
-1. **Basis verification (one generation-tier sub-agent — see the model tiers in `references/grounding.md`).** Dispatch a verifier whose payload is only the consolidated grounding summary (including any user-supplied research dossier paths — it reads those files itself as needed) and the merged candidate list — none of the generation history. Prompt it to refute: for each candidate, check that the stated basis actually supports the claimed move, that `direct:` quotes exist where cited (spot-check by reading the file in repo mode), that `external:` prior art is real and relevantly analogous, and that `reasoned:` arguments hold. It returns a per-candidate verdict (sound / weak / refuted) with a one-line reason. Under `go deep` (Phase 0.5), dispatch a second, ceiling-tier critic focused on novelty and feasibility with the same fresh-context payload.
+1. **基础验证（一个生成层子代理 - 请参阅`references/grounding.md`中的模型层）。 ** 调度一个验证器，其有效负载仅为综合基础摘要（包括任何用户提供的研究档案路径 - 它根据需要自行读取这些文件）和合并的候选列表 - 没有生成历史记录。提示其反驳：对于每个候选人，检查所陈述的基础实际上支持所声称的举动，`direct:`引用存在于引用的地方（通过在回购模式下阅读文件进行抽查），`external:`现有技术是真实的并且相关类似，并且`reasoned:`参数成立。它返回每个候选人的判决（合理/弱/反驳），并带有一行理由。在 `go deep`（阶段 0.5）下，派遣第二个最高级别的评论家，重点关注具有相同新鲜上下文有效负载的新颖性和可行性。
 
-   **Meeting-test in the verifier payload — state the floor explicitly, either way.** By default, also have it judge whether each idea genuinely passes the meeting-test; because the verifier did not write the ideas, that judgment supersedes the generators' self-attestation. **When tactical scope is active (Phase 0.5), tell the verifier the floor is waived** and have it judge basis only. The verifier runs on a fresh context with none of the generation history, so a waiver it is not told about does not reach it — omitting this turns a tactical run's every candidate `weak`.
+   **验证者有效负载中的会议测试 - 明确说明底线，无论哪种方式。**默认情况下，也让它判断每个想法是否真正通过会议测试；因为验证者没有写下想法，所以该判断取代了生成者的自我证明。 **当战术范围处于活动状态时（阶段 0.5），告诉验证者放弃发言**并仅作为判断依据。验证者在没有任何生成历史的新环境中运行，因此未告知的弃权不会到达验证者 - 忽略这一点会使每个候选者的战术运行变成`weak`。
 
-2. **Orchestrator arbitration.** The orchestrator makes the final cut, weighing verifier verdicts without being bound by them — overrule a verdict when evidence in context contradicts it, and say so in the rejection reason.
+2. **协调器仲裁。** 协调器做出最终决定，权衡验证者的裁决，但不受其约束——当上下文中的证据与裁决相矛盾时推翻裁决，并在拒绝理由中说明这一点。
 
-If verifier dispatch fails for a reason that survives correcting the invocation, fall back to orchestrator-only filtering and note the degradation in the rejection summary.
+如果验证程序调度因纠正调用后仍然存在的原因而失败，则回退到仅协调器过滤并注意拒绝摘要中的降级。
 
-Do not generate replacement ideas in this phase unless explicitly refining.
+除非明确改进，否则不要在此阶段产生替代想法。
 
-For each rejected idea, write a one-line reason.
+对于每个被拒绝的想法，写下一行原因。
 
-Rejection criteria:
-- too vague
-- not actionable
-- duplicates a stronger idea
-- not grounded in the stated context
-- too expensive relative to likely value
-- already covered by existing workflows or docs
-- interesting but better handled as a brainstorm variant, not a product improvement
-- **unjustified — no articulated basis** (sub-agent failed to provide `direct:`, `external:`, or `reasoned:` justification, or the stated basis does not actually support the claimed move)
-- **basis refuted by verification** (the verifier found a cited quote absent, prior art mischaracterized, or a reasoned argument unsound — and the orchestrator concurs)
-- **below ambition floor** (fails the meeting-test: would not warrant team discussion — except when tactical scope is active (Phase 0.5), in which case this criterion is waived)
-- **subject-replacement** (abandons or replaces the subject of ideation rather than operating on it — e.g., "pivot to an unrelated domain," "become a different organization")
-- **scope overrun** (expands beyond the asked scope rather than ideating within it — e.g., proposes changes to the whole product when the user asked about one flow, stage, or section). Allowed only when the basis explicitly justifies the expansion; default is reject or downgrade.
+拒绝标准：
+- 太模糊
+- 不可采取行动
+- 重复一个更强烈的想法
+- 没有根据所述上下文
+- 相对于可能的价值来说太贵了
+- 现有工作流程或文档已涵盖
+- 有趣，但更好地处理为头脑风暴变体，而不是产品改进
+- **不合理 - 没有明确的依据**（子代理未能提供 `direct:`、`external:` 或 `reasoned:` 理由，或者所述依据实际上并不支持所声称的举动）
+- **通过验证驳斥的基础**（验证者发现引用的引文不存在，现有技术被错误描述，或者合理的论点不合理 - 并且协调者同意）
+- **低于目标底线**（会议测试失败：不保证团队讨论——除非战术范围处于活动状态（阶段 0.5），在这种情况下，该标准被放弃）
+- **主题替换**（放弃或替换构思的主题，而不是对其进行操作 - 例如，“转向不相关的领域”，“成为不同的组织”）
+- **范围超出**（超出所要求的范围，而不是在其中进行构思 - 例如，当用户询问一个流程、阶段或部分时，建议对整个产品进行更改）。仅当基础明确证明扩展合理时才允许；默认为拒绝或降级。
 
-Score survivors using a consistent rubric weighing: groundedness in stated context, **basis strength** (`direct:` > `external:` > `reasoned:`; none excluded, but direct-evidence ideas score higher all else equal), expected value, novelty, pragmatism, leverage on future work, implementation burden, overlap with stronger ideas, and **axis spread** (when Phase 1.5 produced an axis list) — survivor sets that cover the topic's axes outscore sets that cluster on one axis, all else equal.
+使用一致的衡量标准对幸存者进行评分：规定背景下的基础性，**基础强度**（`direct:`>`external:`>`reasoned:`；不排除任何情况，但直接证据的想法在其他条件相同的情况下得分更高），预期价值，新颖性，实用主义，对未来工作的影响，实施负担，与更强的想法重叠，以及**轴传播**（当第1.5阶段产生轴列表时） - 覆盖主题轴的幸存者集外分集聚集在一个轴上，其他条件都相同。
 
-**Axis coverage as a list-level concern.** When axes were defined, axis spread is evaluated across the survivor set, not per-idea. After per-idea filtering, check the survivor set: if axis coverage is uneven and stronger candidates exist on under-represented axes, prefer the spread when promoting borderline candidates. Phase 2's recovery dispatch should already have produced candidates for empty axes; this is a polish step on the survivor selection. If an axis ends up with zero survivors despite recovery (or because recovery hit the 2-axis cap), note it in the rejection summary as a deliberate gap rather than an oversight.
+**轴覆盖范围作为列表级别的关注点。**定义轴时，轴分布是在幸存者集中评估的，而不是针对每个想法的。在每个想法过滤之后，检查幸存者集：如果轴覆盖不均匀并且在代表性不足的轴上存在更强的候选者，则在提升边缘候选者时更喜欢分布。第二阶段的恢复调度应该已经产生了空轴候选者；这是对幸存者选择的改进。如果尽管恢复（或者因为恢复达到了 2 轴上限），但轴最终的幸存者为零，请在拒绝摘要中将其标记为故意的差距，而不是疏忽。
 
-Target output:
-- **an explicit survivor count in the prompt wins outright** — `top 3`, or a total too small to spread across the frames; absent one, keep 5-7 survivors
-- if too many survive, run a second stricter pass
-- if fewer than that count survive — five, on a default run — report that honestly rather than lowering the bar
+目标输出：
+- **提示中明确的幸存者计数获胜** — `top 3`，或者总数太小而无法分布在帧中；缺席一名，保留5-7名幸存者
+- 如果太多人幸存，则进行第二次更严格的通行证
+- 如果幸存的数量少于该数量（默认运行时为 5 个），请诚实报告而不是降低标准
 
-## Phase 4: Write and Present the Deliverable
+## 第 4 阶段：编写并展示可交付成果
 
-The ideation artifact is produced **automatically** — persistence is not opt-in. After filtering, write the deliverable, show a concise summary, and open it. The full content lives in the file; the session shows only an orienting summary, so the rich format is what the reader actually engages with.
+构思产物是**自动**产生的——持久性不是选择加入的。筛选后，编写可交付成果，显示简洁的摘要，然后将其打开。完整内容位于文件中；该会议仅显示一个定向摘要，因此丰富的格式才是读者真正参与的内容。
 
-**Survivors checkpoint.** Before writing the deliverable, write `<scratch-dir>/survivors.md` (absolute path from Phase 1) containing the survivor list plus key context (focus hint, grounding summary, rejection summary). Best-effort: if the write fails, log a warning and proceed; the run does not depend on the checkpoint. Reuses the same `<run-id>` / `<scratch-dir>` generated in Phase 1.
+**幸存者检查点。** 在编写可交付成果之前，编写`<scratch-dir>/survivors.md`（来自阶段 1 的绝对路径），其中包含幸存者列表以及关键上下文（焦点提示、基础摘要、拒绝摘要）。尽力而为：如果写入失败，记录警告并继续；运行不依赖于检查点。重复使用第 1 阶段生成的相同 `<run-id>` / `<scratch-dir>`。
 
-### 4.1 Write the Deliverable (automatic, both modes)
+### 4.1 编写可交付成果（自动，两种模式）
 
-`OUTPUT_FORMAT` (resolved per `references/output-mode.md`; default `html`) sets the extension. Write the file every run — do not wait for the user to ask.
+`OUTPUT_FORMAT`（根据`references/output-mode.md`解析；默认`html`）设置扩展名。每次运行时写入文件 - 不要等待用户询问。
 
-1. **Resolve the target directory and extension.**
-   - Extension follows `OUTPUT_FORMAT` (`.html` default, `.md` on override).
-   - **Repo mode:** ensure `<root>/ideation/` exists (create if absent).
-   - **Elsewhere mode with `<root>/ideation/` already present:** use it.
-   - **Otherwise (no repo, or elsewhere with no `<root>/ideation/`):** write into the run's CE temp area — the `<scratch-dir>` resolved in Phase 1 (`<scratch-root>/ce-ideate/<run-id>/`). Do **not** write into the user's current working directory, and do **not** create a `<root>/ideation/` tree for a subject unrelated to the repo. Announce the absolute path and note it is temporary (`/tmp` is cleared on reboot — move it to keep it).
-2. **Choose the file path:** `<dir>/YYYY-MM-DD-<topic>-ideation.<ext>` (or `<dir>/YYYY-MM-DD-open-ideation.<ext>` when no focus exists).
-3. **Load the section contract and rendering reference** (deferred from Phase 0.0): read `references/ideation-sections.md` and the format-rendering reference matching `OUTPUT_FORMAT` — `references/markdown-rendering.md` for `md`, `references/html-rendering.md` for `html`.
-4. **Write the document** per those references. `ideation-sections.md` defines the section contract (metadata, Grounding Context, Topic Axes, Ranked Ideas with per-idea fields, Rejection Summary); the rendering reference defines how the resolved format presents it. Content is identical across formats; only presentation differs.
-   - **On write failure** (no writable path, permissions): announce the failure and offer a custom path (validate writable; create parent dirs). Never lose the survivors silently.
+1. **解析目标目录和扩展名。**
+   - 扩展遵循 `OUTPUT_FORMAT`（`.html` 默认值，`.md` 覆盖）。
+   - **Repo模式：**确保`<root>/ideation/`存在（如果不存在则创建）。
+   - **已存在 `<root>/ideation/` 的其他模式：** 使用它。
+   - **否则（没有存储库，或其他地方没有 `<root>/ideation/`）：** 写入运行的 CE 临时区域 - 在第 1 阶段 (`<scratch-root>/ce-ideate/<run-id>/`) 中解析的 `<scratch-dir>`。 **不要**写入用户的当前工作目录，并且**不要**为与存储库无关的主题创建 `<root>/ideation/` 树。宣布绝对路径并注意它是临时的（`/tmp`在重新启动时被清除 - 移动它以保留它）。
+2. **选择文件路径：** `<dir>/YYYY-MM-DD-<topic>-ideation.<ext>`（或当不存在焦点时为`<dir>/YYYY-MM-DD-open-ideation.<ext>`）。
+3. **加载部分契约和渲染参考**（从阶段0.0推迟）：读取`references/ideation-sections.md`和匹配`OUTPUT_FORMAT`的格式渲染参考 - `md`的`references/markdown-rendering.md`，`html`的`references/html-rendering.md`。
+4. **根据这些引用文档编写文档**。 `ideation-sections.md` 定义部分契约（元数据、基础上下文、主题轴、带有每个想法字段的排名想法、拒绝摘要）；渲染参考定义解析格式如何呈现它。不同格式的内容是相同的；只是表现形式不同。
+   - **写入失败**（无可写路径、权限）：宣布失败并提供自定义路径（验证可写；创建父目录）。永远不要默默地失去幸存者。
 
-**Resume:** update the existing file in place, in its existing format (per the resume precedence in `references/output-mode.md`); carry the prior ideas and rejection summary forward, adding to them rather than overwriting.
+**恢复：**以其现有格式就地更新现有文件（根据`references/output-mode.md`中的恢复优先级）；将先前的想法和拒绝摘要继续下去，添加而不是覆盖。
 
-### 4.2 Present a Concise Summary (not the full deliverable)
+### 4.2 提出简明摘要（不是完整的可交付成果）
 
-The full cards, rationale, downsides, diagrams, and the rejection table live in the file. Do **not** reproduce them in the session — reprinting the whole deliverable as chat text defeats the rich format and leads the reader through plain text before they ever see it. Show a tight orientation instead:
+完整的卡片、基本原理、缺点、图表和拒绝表都在文件中。不要在会话中复制它们——重新打印整个可交付成果，因为聊天文本会破坏丰富的格式，并在读者看到纯文本之前就引导他们浏览它们。相反，显示一个紧密的方向：
 
-- One line with counts and the path: e.g. `Wrote 7 ranked ideas (36 raw, 13 cut) across 5 axes → <absolute path>`.
-- A ranked list, **one line per survivor**: `1. <Title> · <axis> · Conf <High/Med/Low> · Cx <S/M/L>`.
-- The top pick called out in a sentence.
-- Any axis with zero survivors noted in one line (the deliberate gap).
+- 一行包含计数和路径：例如`Wrote 7 ranked ideas (36 raw, 13 cut) across 5 axes → <absolute path>`。
+- 排名列表，**每个幸存者一行**：`1. <Title> · <axis> · Conf <High/Med/Low> · Cx <S/M/L>`。
+- 状元一句话喊了出来。
+- 任何有零个幸存者的轴都在一行中注明（故意的间隙）。
 
-This ranked list doubles as the index the user references when choosing an idea in Phase 5. Terminal-only readers still get a usable view; depth is one open away.
+此排名列表兼作用户在第 5 阶段选择想法时参考的索引。仅限终端的读者仍然可以获得可用的视图；深度是一开的距离。
 
-### 4.3 Open It
+### 4.3 打开它
 
-- **HTML:** in an interactive session, best-effort open the file in the browser via the platform's open primitive (`open` on macOS, `xdg-open` on Linux, `start` on Windows); always print the absolute path so it can be reopened or shared. Skip auto-open in headless / pipeline runs (there is no interactive session to open a browser in).
-- **Markdown:** print the path. Publishing a copy is a network action reached through the Phase 5 menu, never auto-invoked.
+- **HTML：**在交互式会话中，尽力通过平台的打开原语在浏览器中打开文件（macOS上的`open`，Linux上的`xdg-open`，Windows上的`start`）；始终打印绝对路径，以便可以重新打开或共享它。在无头/管道运行中跳过自动打开（没有可打开浏览器的交互式会话）。
+- **Markdown：** 打印路径。发布副本是通过第 5 阶段菜单实现的网络操作，不会自动调用。
 
-## Phase 5: Next Steps
+## 第五阶段：后续步骤
 
-Ask what to do next through the host's blocking question tool, with the fallback SKILL.md Boundary 4 states. Free-text answers are accepted.
+通过主持人的阻止提问工具询问下一步该做什么，并使用后备SKILL.md边界 4 状态。接受自由文本答案。
 
-The deliverable already exists (Phase 4), so the menu is purely *what next* — there is no "save" step.
+可交付成果已经存在（第 4 阶段），因此菜单纯粹是“下一步是什么”——没有“保存”步骤。
 
-**Stem:** "Your ideation is saved to `<path>`. What next?"
+**茎：**“你的想法已保存到`<path>`。接下来做什么？”
 
-Offer up to four options (self-contained labels with the distinguishing word front-loaded so they stay distinct when truncated):
+提供最多四个选项（独立标签，前面加载了区分词，以便在截断时保持清晰）：
 
-1. *Open or share the saved file.* The option's label is the destination `references/publishing.md` chooses: **Publish a copy to <destination>** for a publisher the user named or the host's artifact tool, or **Open in browser** for the local HTML file. Omit this option on a markdown run when no publisher or host artifact tool applies; Phase 4.2 already printed the path.
-2. **Brainstorm one idea with `ce-brainstorm`** — commit a chosen idea to a requirements-only unified plan under `<root>/plans/`; leaves ce-ideate. Asks which idea first.
-3. **Discuss or refine the ideas first** — stay here to think across the set before committing: adjust or interrogate one idea, compare several, or combine/merge them. Asks what you want to work on.
-4. **Done — keep the file and stop.**
+1. *打开或共享保存的文件。* 该选项的标签是`references/publishing.md`选择的目标：**将副本发布到<destination>**（对于用户指定的发布者或主机的产物工具），或**在浏览器中打开**（对于本地HTML文件）。当没有发布者或主机产物工具适用时，在Markdown运行时忽略此选项；阶段 4.2 已经打印了路径。
+2. **与 `ce-brainstorm`** 集思广益 - 将选定的想法提交到 `<root>/plans/` 下的仅需求统一计划；叶子ce-ideate。首先询问哪个想法。
+3. **首先讨论或完善想法** - 在提交之前留在这里思考整个想法：调整或询问一个想法，比较几个想法，或combine/merge它们。询问你想从事什么工作。
+4. **完成 — 保留文件并停止。**
 
-**Adjacent nudge (prose, not a slot):** "Don't want it kept? Say 'discard' and the agent deletes the file." Handled via free text (see §5.5); it is create-only and never deletes a resumed or pre-existing doc.
+**相邻轻推（散文，而不是插槽）：**“不想保留它？说‘丢弃’，代理就会删除该文件。”通过自由文本处理（参见§5.5）；它仅用于创建，绝不会删除已恢复或预先存在的文档。
 
-If the user already named what they want to work on inline (e.g. "brainstorm the table tool", "tighten the highlighter idea", "merge the table and highlighter ideas"), skip the follow-up that asks what to work on for §5.2 / §5.3.
+如果用户已经指定了他们想要内联处理的内容（例如“集思广益表格工具”、“加强荧光笔想法”、“合并表格和荧光笔想法”），请跳过询问第 5.2 / §5.3 节要做什么的后续操作。
 
-### 5.1 Open or Share the Saved File
+### 5.1 打开或共享保存的文件
 
-Read `references/publishing.md` and follow it. The Phase 4 file already exists and stays the authoritative record. Pass a publisher the doc title `Ideation: <topic>` or the doc's H1. Show the user the resulting URL or path, then return to the Phase 5 menu.
+阅读`references/publishing.md`并遵循它。第 4 阶段文件已经存在并保留权威记录。向出版商传递文档标题 `Ideation: <topic>` 或文档的 H1。向用户显示生成的 URL 或路径，然后返回到第 5 阶段菜单。
 
-### 5.2 Brainstorm One Idea
+### 5.2 头脑风暴一个想法
 
-1. **Identify the idea** by number or name (skip if the user already named it). Match against the ranked list from Phase 4.2.
-2. **Build a focused seed** from the idea's substance already in the orchestrator's context. Do **not** pass the whole file — wasteful and noisy (the other survivors, grounding, and rejection table are irrelevant to defining this one idea, and an HTML file carries CSS/SVG chrome). Do **not** pass only a file pointer — that forces `ce-brainstorm` to re-open and re-extract the idea the orchestrator already holds. The seed is feature-description-shaped:
+1. **通过数字或名称来识别想法**（如果用户已经命名，则跳过）。与4.2阶段的排名名单进行比赛。
+2. **从协调者背景下已有的想法实质内容中构建一个集中的种子**。不要**传递整个文件——既浪费又嘈杂（其他幸存者、接地和拒绝表与定义这一想法无关，并且 HTML 文件带有 CSS/SVG chrome）。 **不要**仅传递文件指针 - 这会强制 `ce-brainstorm` 重新打开并重新提取编排器已经持有的想法。种子是特征描述形状的：
 
    > `<title> — <description>. Basis: <basis/evidence>. Why it matters: <rationale>. Known tradeoffs: <downsides>.`
 
-   The basis/evidence directly feeds `ce-brainstorm`'s product-pressure-test, so it won't re-derive what we already know. Append a one-line provenance pointer: `(Seeded from ce-ideate: <path>, idea "<title>")` — it records origin and lets brainstorm pull adjacent detail if it wants, without being forced to read anything.
-3. **Load the `ce-brainstorm` skill** with that seed. The saved file is already the record — no extra write step. `OUTPUT_FORMAT` does **not** propagate: ce-brainstorm re-resolves its own `brainstorm_output` config independently. Asymmetric output (`ideation.html` plus a markdown unified plan) is expected; a user who wants HTML for both sets both keys in CE config (`config.local.yaml` then `config.yaml`).
+   basis/evidence 直接提供`ce-brainstorm` 的产品压力测试，因此它不会重新推导我们已经知道的内容。附加一个单行出处指针：`(Seeded from ce-ideate: <path>, idea "<title>")`——它记录起源，并让头脑风暴在需要时拉出相邻的细节，而无需被迫阅读任何内容。
+3. **用该种子加载`ce-brainstorm`技能**。保存的文件已经是记录——无需额外的写入步骤。 `OUTPUT_FORMAT` **不**传播：ce-brainstorm 独立重新解析其自己的 `brainstorm_output` 配置。预计不对称产出（`ideation.html`加上markdown统一方案）；想要两者都使用 HTML 的用户在 CE 配置中设置两个键（`config.local.yaml` 然后`config.yaml`）。
 
-**Repo mode only:** do **not** skip brainstorming and go straight to `ce-plan` — `ce-plan` wants a brainstorm-grounded Product Contract. In elsewhere modes, ideation is a legitimate terminal state; brainstorming is optional deeper development of one idea, not a required next rung on an implementation ladder that does not exist in these modes.
+**仅限回购模式：**不要**跳过头脑风暴并直接进入 `ce-plan` — `ce-plan` 想要一份基于头脑风暴的产品合同。在其他模式中，构思是一种合理的最终状态。头脑风暴是一个想法的可选更深层次发展，而不是这些模式中不存在的实施阶梯上必需的下一个梯级。
 
-### 5.3 Discuss or Refine the Ideas First
+### 5.3 首先讨论或完善想法
 
-This stays in ce-ideate — no skill handoff. It is the "think across the set before committing" step, and a normal outcome of ideation. The orchestrator still holds the full grounding and generation context, so it can reason across every survivor.
+这保持在ce-ideate——没有技能交接。这是“在提交之前思考整个集合”的步骤，也是构思的正常结果。协调器仍然拥有完整的基础和生成背景，因此它可以对每个幸存者进行推理。
 
-- **Scope comes from the user.** Infer it from their phrasing when given; otherwise ask one open question ("What do you want to work on?"). It may be one idea, a subset, or the whole set, and cross-idea discussion — comparing, finding overlap, combining — never requires naming a single idea first.
-- **Ground the work** in the ideas' bases and the Phase 1 grounding.
-- **Rewrite the saved file only when idea content changes** — an adjustment, a merge, or added analysis the user wants kept. Answers and comparisons alone leave the file untouched.
-- **A merge replaces its source entries with one combined entry.** Write a unified title, description, and basis that draws on each source (carry the strongest basis forward; union their evidence), remove the originals, renumber the ranked list, and re-evaluate the combined idea's axis and confidence rather than copying one source's. If the combined idea leaves out a source's substance, say so in the rejection summary.
+- **范围来自用户。** 从他们给出的措辞中推断出来；否则问一个开放性问题（“你想从事什么工作？”）。它可能是一个想法、一个子集或整个集合，而跨想法讨论——比较、寻找重叠、组合——从来不需要首先命名一个想法。
+- **将工作扎根于想法的基础和第一阶段的基础上。
+- **仅当想法内容发生变化时才重写保存的文件** - 用户希望保留的调整、合并或添加的分析。仅答案和比较就不会影响文件。
+- **合并将其源条目替换为一个组合条目。** 编写一个统一的标题、描述和基础，借鉴每个源（将最有力的基础向前推进；合并它们的证据），删除原始内容，重新对排名列表进行编号，并重新评估组合想法的轴和置信度，而不是复制一个源的轴和置信度。如果合并后的想法遗漏了来源的实质内容，请在拒绝摘要中注明。
 
-Then return to the Phase 5 menu. Typically the user next brainstorms a sharpened or merged idea (§5.2), discusses more, opens it, or finishes.
+然后返回到第 5 阶段菜单。通常，用户接下来会集体讨论一个尖锐或合并的想法（§5.2），讨论更多，打开它，或完成。
 
-### 5.4 Done
+### 5.4 完成
 
-The file is already written, so there is no save step.
+文件已经写入，因此没有保存步骤。
 
-- **Inside a git repo:** offer to commit only the ideation doc (do not create a branch, do not push; if the user declines, leave it uncommitted).
-- **Temp-area or non-repo file:** skip the commit offer.
+- **在 git 存储库中：** 提供仅提交构思文档（不创建分支，不推送；如果用户拒绝，则将其保留为未提交）。
+- **临时区域或非存储库文件：**跳过提交提议。
 
-Then narrate the path and end the session — do not return to the menu.
+然后叙述路径并结束会话——不要返回菜单。
 
-### 5.5 Discard (free text)
+### 5.5 丢弃（自由文本）
 
-Only when the file was **created fresh this run**: delete it, confirm the deletion, and end. On a **resume** run (a pre-existing file was updated in place), do **not** delete — tell the user the existing doc at `<path>` remains and offer no destructive action. Discard is never a default; it happens only on an explicit request.
+仅当文件在本次运行中**创建时**：删除它，确认删除，然后结束。在 **恢复** 运行时（预先存在的文件已就地更新），不要 ** 删除 — 告诉用户 `<path>` 处的现有文档仍然存在，并且不提供任何破坏性操作。丢弃绝不是默认行为；它仅在明确请求时发生。
 
-Do not delete the run's scratch directory (`<scratch-dir>`) on completion — it holds the web-research cache reused across run-ids by later ideation invocations in the same session (see `references/web-research-cache.md`), the raw-candidates and survivors checkpoints, any research dossiers, and (in the no-repo case) the deliverable itself. OS handles eventual cleanup.
+完成后不要删除运行的临时目录 (`<scratch-dir>`) — 它保存了同一会话中稍后的构思调用在运行 ID 之间重用的 Web 研究缓存（请参阅`references/web-research-cache.md`）、原始候选者和幸存者检查点、任何研究档案以及（在无回购情况下）可交付成果本身。操作系统处理最终的清理工作。
 
-## Quality Bar
+## 品质吧
 
-Before finishing, check:
+完成之前，请检查：
 
-- **every surviving idea has an articulated basis** (`direct:`, `external:`, or `reasoned:`) that actually supports the claimed move — speculation dressed as ambition was rejected, with reasons
-- the `direct:` bases that surviving ideas rest on were verified against the repo (or the supplied context) — by the generating agent's verification reads or the Phase 3 verifier — not taken on faith
-- **every surviving idea passes the meeting-test** unless tactical scope was active (Phase 0.5) and waived the floor
-- **no surviving idea replaces the subject** rather than operating on it
-- when Phase 1.5 produced an axis list, the survivor set spreads across axes rather than clustering on one — and any axis with zero survivors is noted as a deliberate gap in the rejection summary, not silently absent
-- every rejected idea has a reason
-- the deliverable was written automatically in both modes (Phase 4) — to `<root>/ideation/` when present, else the CE temp area, never the user's CWD
-- the session showed a concise summary, not a reproduction of the full deliverable
-- acting on an idea routes to `ce-brainstorm` (with a substance seed, not the whole file), not directly to implementation
+- **每一个幸存的想法都有一个明确的基础**（`direct:`、`external:`或`reasoned:`）实际上支持所声称的举动——伪装成野心的猜测被拒绝，并有理由
+- 幸存想法所依赖的 `direct:` 基础是根据存储库（或提供的上下文）进行验证的 - 通过生成代理的验证读取或第 3 阶段验证器 - 并非出于信任
+- **每个幸存的想法都会通过会议测试**除非战术范围处于活动状态（阶段 0.5）并放弃发言权
+- **没有任何现存的想法可以取代主题**而不是对其进行操作
+- 当第 1.5 阶段产生一个轴列表时，幸存者集分布在各个轴上，而不是聚集在一个轴上 - 并且任何具有零幸存者的轴都被标记为拒绝摘要中故意的间隙，而不是默默地缺席
+- 每个被拒绝的想法都有理由
+- 可交付成果在两种模式下自动写入（第 4 阶段）- 存在时写入 `<root>/ideation/`，否则为 CE 临时区域，而不是用户的 CWD
+- 会议进行了简明总结，而不是完整交付成果的复制
+- 根据一个想法采取行动会导致`ce-brainstorm`（使用物质种子，而不是整个文件），而不是直接实现

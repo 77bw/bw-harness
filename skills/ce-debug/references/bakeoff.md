@@ -1,11 +1,11 @@
-# Choosing among repair approaches
+# 选择修复方法
 
-Use `ce-bakeoff` to develop competing repairs when the cause is confirmed, the intended behavior and current design remain settled, and a consequential repair choice is still open. Automatic use requires materially different mechanisms that need development before comparison, a costly reversal, and tradeoffs that available direct evidence cannot settle. Otherwise continue ordinary diagnosis and fix selection. A user-requested comparison can waive the cost threshold, but cannot reopen settled decisions or substitute for causal evidence.
+当原因得到确认、预期行为和当前设计保持不变并且后续修复选择仍然存在时，使用 `ce-bakeoff` 开发竞争修复。自动使用需要本质上不同的机制，需要在比较之前进行开发，代价高昂的逆转以及现有直接证据无法解决的权衡。否则继续普通诊断并修复选择。用户请求的比较可以放弃成本阈值，但不能重新启动已解决的决策或替代因果证据。
 
-Prefer a discriminating probe when it can settle the choice. Several fixes passing the reproduction check establishes neither their equivalence nor a reason to run a competition. Already-developed alternatives need judgment, not further generation. When correcting the cause requires changing the design or intended behavior, use Phase 2's existing design/defer boundary.
+当区分探针可以解决选择时，首选它。通过复制检查的几个修复程序既不能确定它们的等效性，也不能确定进行竞赛的理由。已经开发出的替代方案需要判断，而不是进一步生成。当纠正原因需要更改设计或预期行为时，请使用阶段 2 的现有 design/defer 边界。
 
-In interactive mode, run an eligible Bake-off without adding a permission gate. In `mode:pipeline` and `mode:return-to-caller`, it is off by default to bound nested work; run it only when the caller explicitly authorizes the comparison within its budget. A general instruction to fix the bug or an overall run budget is not that opt-in. Skipping Bake-off does not make a convergent technical choice a human decision.
+在交互模式下，运行符合条件的烘焙，无需添加权限门。在`mode:pipeline`和`mode:return-to-caller`中，默认关闭绑定嵌套工作；仅当调用者明确授权在其预算范围内进行比较时才运行它。修复错误的一般说明或总体运行预算并不是选择加入。跳过烘烤并不会使趋同的技术选择成为人类的决定。
 
-Invoke `ce-bakeoff` with the confirmed causal chain and source evidence, reproduction check and results, intended contracts, prior failed approaches, open repair question, scope, and budget. Request repair sketches and preserve the user's model and provider restrictions. Bake-off owns candidate dispatch, assessment, and synthesis under its existing authority; this handoff grants no new recipients or implementation scope.
+使用已确认的因果链和源证据、复制检查和结果、预期合同、先前失败的方法、开放维修问题、范围和预算调用`ce-bakeoff`。请求维修草图并保留用户的型号和提供商限制。 Bake-off在现有权限下拥有候选人派遣、评估、综合；这种移交不会授予新的接收者或实施范围。
 
-Resume Phase 2 by checking the returned repair against the confirmed cause, intended contracts, and scope. A selection label or candidate agreement cannot establish a required guarantee: if the repair leaves one unsupported, report that gap rather than adopt the winner. Carry a supported mechanism, its decisive tradeoffs, and implementation verification needs into the proposed fix. Preserve incomplete or unresolved results; continue only when the available evidence independently supports a safe repair, otherwise use the current mode's existing blocker or deferred-result contract. Do not invent a winner or a new return status. Phase 2 still owns whether a fix may proceed, and Phase 3 still verifies it with the regression and reproduction checks.
+通过根据已确认的原因、预期合同和范围检查退回的维修，恢复第 2 阶段。选择标签或候选者协议无法建立所需的保证：如果修复后留下一个不受支持，请报告该差距而不是采用获胜者。将支持的机制、其决定性的权衡和实施验证需求纳入提议的修复中。保留不完整或未解决的结果；仅当可用证据独立支持安全修复时才继续，否则使用当前模式的现有阻塞项或延迟结果合约。不要发明获胜者或新的退货状态。第 2 阶段仍然决定修复是否可以继续，第 3 阶段仍然通过回归和再现检查来验证它。

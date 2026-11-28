@@ -1,78 +1,78 @@
-# Visual Probes
+# 视觉探头
 
-Use visual probes when a brainstorm decision is faster to judge by seeing a rough artifact than by reading prose. A visual probe is a disposable decision sketch, not a prototype, implementation plan, UI spec, or design deliverable.
+当通过看到粗糙的产物比阅读散文更快地做出头脑风暴决策时，请使用视觉探针。视觉探针是一次性决策草图，而不是原型、实施计划、UI 规范或设计交付成果。
 
-## Trigger
+## 扳机
 
-Use this reference only when the next question has a specific visual decision:
+仅当下一个问题具有特定的视觉决策时才使用此参考：
 
-- behavior shape: "Which annotation or drawing behavior feels right?"
-- layout shape: "Which navigation structure matches the workflow?"
-- flow shape: "Where should this decision point sit?"
-- state shape: "Which empty/loading/error state communicates the right thing?"
-- diagram shape: "Which relationship or system boundary is clearer?"
+- 行为形状：“哪种注释或绘图行为感觉正确？”
+- 布局形状：“哪种导航结构与工作流程匹配？”
+- 流程形状：“这个决策点应该放在哪里？”
+- 状态形状：“哪个empty/loading/error状态传达了正确的信息？”
+- 图表形状：“哪种关系或系统边界更清晰？”
 
-Do not use a visual probe for product goals, scope boundaries, success criteria, evidence probes, tradeoff prose, or technical decisions that are easier to discuss in chat. A decision that meets Interaction Rule 7 in `references/interaction-rules.md` — which states that test — belongs to `ce-prototype`, not to a visual probe.
+不要将视觉探针用于产品目标、范围边界、成功标准、证据探针、权衡散文或更容易在聊天中讨论的技术决策。满足 `references/interaction-rules.md` 中交互规则 7 的决策（规定测试）属于 `ce-prototype`，而不属于视觉探针。
 
-**Classifying a wide decision.** Per-avenue classification applies only once the avenues have been named. An undecomposed decision is classified once, on its dominant dimension. When any named avenue meets Rule 7, the whole decision goes to `ce-prototype` — the sketchable avenues ride along there as thin variants rather than splitting one decision across two tiers.
+**对广泛的决策进行分类。** 仅在命名途径后，才适用按途径分类。未分解的决策根据其主导维度进行一次分类。当任何命名的大道满足规则 7 时，整个决策将转向`ce-prototype`——可绘制的大道作为薄变体沿着那里行驶，而不是将一个决策分成两层。
 
-## The gate (when the offer must fire)
+## 大门（当报价必须触发时）
 
-When Phase 0.3 flagged an inherently-visual topic, the offer must be made before the **first** decision about shape, behavior, state, layout, flow, or a diagram is raised in *any* form — plain chat or a blocking question. A decision that meets Interaction Rule 7 routes to `ce-prototype` instead; this rule does not apply to it.
+当阶段 0.3 标记了一个固有视觉主题时，必须在以“任何”形式（普通聊天或阻塞问题）提出有关形状、行为、状态、布局、流程或图表的“第一个”决定之前提出要约。满足交互规则 7 的决策改为路由至`ce-prototype`；这条规则不适用于它。
 
-**Timing is state-based, not memory-based.** Anchor the check to the decision you are about to raise, not to a "pending offer" remembered since Phase 0.3: offer unless this specific decision has already been through the offer (the user already chose text or visual for it). This rule takes precedence over the default blocking-question path — do not raise the shape decision as a blocking-question menu, or as a plain-chat shape question, until the user has declined visual (or visual feedback has returned to chat).
+**时间是基于状态的，而不是基于内存的。** 将检查锚定到您将要提出的决策，而不是锚定到自阶段 0.3 以来记住的“待定报价”：报价，除非此特定决策已经通过报价（用户已经为其选择了文本或视觉效果）。此规则优先于默认的阻塞问题路径 - 不要将形状决策作为阻塞问题菜单或普通聊天形状问题提出，直到用户拒绝视觉（或视觉反馈返回到聊天）。
 
-**Having been through the offer closes only this offer, never Rule 7.** Two paths reopen the prototype route for a decision already offered here: the user chose text and the decision then turns on finish or motion, or a rough sketch was built and did not settle it. Route those to `ce-prototype` rather than treating the decision as closed.
+**完成报价后，仅关闭此报价，而不会关闭规则 7。 ** 两条路径重新打开此处已提供的决策的原型路线：用户选择文本，然后决策打开完成或动作，或者构建了一个粗略的草图，但没有解决它。将这些路由到`ce-prototype`，而不是将决策视为已结束。
 
-**An ASCII preview or text mockup embedded inside the question's choices does NOT satisfy the offer** — that shortcut is exactly what this rule exists to stop. The offer is its own prior question with two options (sketch vs describe); only after the user chooses does the shape decision proceed.
+**问题选项中嵌入的 ASCII 预览或文本模型不能满足要约** — 该快捷方式正是此规则所要阻止的。该报价是它自己的先决问题，有两个选项（草图与描述）；只有在用户选择之后，形状决策才会继续。
 
-## Offer
+## 提供
 
-Ask once at the decision point. Do not enable a session-wide mode.
+在决策点询问一次。不要启用会话范围模式。
 
-Use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Use a plain chat question only when no such tool is in the list or a real question call errors. The opt-in should have two clear options:
+使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或实际问题调用错误时才使用普通聊天问题。选择加入应该有两个明确的选项：
 
-- Visual sketch — create rough options in a local browser
-- Text description — keep the decision in chat
+- 视觉草图——在本地浏览器中创建粗略的选项
+- 文字描述——在聊天中保留决定
 
-Use this wording:
+使用这样的措辞：
 
-> This decision may be easier to judge visually. I can either sketch rough options in a local browser so you can react to the shape, or keep it in chat and describe the options textually, which is faster but lower-fidelity. Which do you prefer?
+> 这个决定可能更容易通过视觉来判断。我可以在本地浏览器中绘制粗略的选项，以便您可以对形状做出反应，或者将其保留在聊天中并以文本方式描述选项，这更快但保真度较低。你更喜欢哪一个？
 
-The text path must be credible. If you cannot explain the decision clearly in text, you do not understand it well enough to sketch it.
+文本路径必须是可信的。如果你不能用文字清楚地解释这个决定，那么你就没有充分理解它，无法勾勒出它。
 
-If the user chooses text, continue in chat and do not re-offer for the same decision. If they choose visual, proceed below.
+如果用户选择文本，请继续聊天，并且不要再次提出相同的决定。如果他们选择视觉，请继续以下操作。
 
-## Visual Path
+## 视觉路径
 
-Create the cheapest artifact that answers the current question. Optimize for fast feedback, not polish.
+创建回答当前问题的最便宜的产物。优化是为了快速反馈，而不是润色。
 
-Allowed:
+允许：
 
-- rough behavior sketches
-- low-fidelity wireframes
-- state comparisons
-- flow diagrams
-- simple A/B/C visual contrasts
-- a disposable one-decision interaction demo only when a single behavior shape is the decision — not a wide diverge, layered slices, or an in-app overlay
+- 粗略的行为草图
+- 低保真线框
+- 状态比较
+- 流程图
+- 简单的A/B/C视觉对比
+- 仅当单一行为形状是决策时才使用一次性单决策交互演示 - 不是大范围的、分层的切片或应用内覆盖
 
-Avoid:
+避免：
 
-- polished branding
-- final colors or typography
-- component-library precision
-- pixel-perfect layout
-- production-like implementation
-- unnecessary animation
-- details that imply exact UI commitments
+- 抛光品牌
+- 最终颜色或版式
+- 元件库精度
+- 像素完美的布局
+- 类似生产的实现
+- 不必要的动画
+- 暗示确切 UI 承诺的细节
 
-Label the artifact as directional. State what the user should judge and what they should ignore.
+将产物标记为定向。说明用户应该判断什么以及应该忽略什么。
 
-## Display Helper
+## 显示助手
 
-Use the bundled display-only helper when the current platform can run a bundled skill script. Invoke it via the `SKILL_DIR` anchor: set `SKILL_DIR` to the absolute path of the directory containing the `ce-brainstorm` `SKILL.md` you loaded (the Bash tool's cwd is the user's project, not the skill dir), and re-set it in the same command on each call since shell vars don't persist between Bash invocations. Do not resolve the helper from the user's project CWD.
+当当前平台可以运行捆绑的技能脚本时，使用捆绑的仅显示帮助程序。通过 `SKILL_DIR` 锚点调用它：将 `SKILL_DIR` 设置为包含您加载的 `ce-brainstorm` `SKILL.md` 的目录的绝对路径（Bash 工具的 cwd 是用户的项目，而不是技能目录），并在每次调用时在同一命令中重新设置它，因为 shell 变量在 Bash 调用之间不会保留。不要从用户的项目 CWD 解析帮助程序。
 
-Start (detached):
+开始（分离）：
 
 ```bash
 SKILL_DIR="<absolute path of the ce-brainstorm skill directory>";
@@ -86,7 +86,7 @@ PROBE_DIR="$SCRATCH_ROOT/ce-brainstorm-visual/<run-id>"; (umask 077; mkdir -p "$
 node "$SKILL_DIR/scripts/light-webserver.js" start --root "$PROBE_DIR"
 ```
 
-Append `--foreground` to that `start` command for foreground mode. Status and stop take the same anchor — and because `SKILL_DIR` does not persist between Bash invocations, each must re-set it in its own call rather than reuse the `start` block's value:
+将 `--foreground` 附加到 `start` 命令以实现前台模式。 Status 和 stop 采用相同的锚点 - 并且由于 `SKILL_DIR` 在 Bash 调用之间不会持续存在，因此每个调用都必须在自己的调用中重新设置它，而不是重用 `start` 块的值：
 
 ```bash
 SKILL_DIR="<absolute path of the ce-brainstorm skill directory>";
@@ -101,57 +101,57 @@ node "$SKILL_DIR/scripts/light-webserver.js" status --root "$PROBE_DIR"
 # stop: the same command with `stop` in place of `status` (re-set SKILL_DIR again)
 ```
 
-If `SKILL_DIR` cannot be resolved to a concrete skill directory, do not guess from the project CWD — use the text path.
+如果`SKILL_DIR`无法解析为具体的技能目录，请不要从项目CWD中猜测——使用文本路径。
 
-The helper creates `screens/` and `state/`, serves the newest `.html` file in `screens/`, writes `state/display-info.json`, and exposes `/version` so the browser can poll for screen changes. The browser reloads only when the newest screen changes; it must not continually reload on a timer. `/version` polling does not count as activity, so an abandoned browser tab cannot keep the server alive forever. Detached servers monitor the owning harness process when it can be resolved, and all servers exit after an idle timeout. The helper has no click tracking or browser-to-agent event path.
+帮助器创建`screens/`和`state/`，提供`screens/`中最新的`.html`文件，写入`state/display-info.json`，并公开`/version`，以便浏览器可以轮询屏幕更改。仅当最新屏幕发生变化时，浏览器才会重新加载；它不能不断地重新加载计时器。 `/version` 轮询不算作活动，因此废弃的浏览器选项卡无法使服务器永远保持活动状态。分离的服务器会在可以解决问题时监视所属的宿主进程，并且所有服务器会在空闲超时后退出。该帮助程序没有点击跟踪或浏览器到代理的事件路径。
 
-If the helper path is unavailable or the platform cannot display a local URL cleanly, say so briefly and use the text path. Do not build a custom event system or long-lived server to compensate during the brainstorm.
+如果辅助路径不可用或者平台无法清晰地显示本地 URL，请简单说明并使用文本路径。不要构建自定义事件系统或长期服务器来在头脑风暴期间进行补偿。
 
-## Launch Mode by Platform
+## 按平台划分的启动模式
 
-The server is the same everywhere; only the launch mode changes.
+服务器到处都是一样的；仅启动模式发生变化。
 
-- **Claude Code / Claude desktop app:** detached `start` is the default path. If the app opens localhost URLs, show the returned URL and continue. If the browser surface is unavailable, use the text path.
-- **Codex CLI / Codex app:** if detached processes are reaped or the URL dies after the tool call, use `start --foreground` through the platform's long-running/background terminal mechanism. If there is no stable browser surface, use the text path.
-- **Plain terminal UI:** print the returned URL for the user to open manually. If opening a browser would interrupt the flow, keep the decision in chat.
-- **Remote or containerized sessions:** if `localhost` is not reachable from the user's browser, start with `--host 0.0.0.0` and tell the user which host/port to open. That serves the run directory to anything that can reach the port, with no auth — do it only on a network the user trusts, and say so when you hand over the URL. If that cannot be made clear, use the text path.
+- **Claude Code / Claude 桌面应用程序：** 分离的 `start` 是默认路径。如果应用程序打开本地主机 URL，则显示返回的 URL 并继续。如果浏览器界面不可用，请使用文本路径。
+- **Codex CLI / Codex app：** 如果在工具调用后分离进程被回收或 URL 消失，则通过平台的 long-running/background 终端机制使用 `start --foreground`。如果没有稳定的浏览器表面，请使用文本路径。
+- **普通终端UI：**打印返回的URL供用户手动打开。如果打开浏览器会中断流程，请在聊天中做出决定。
+- **远程或容器化会话：** 如果从用户的浏览器无法访问 `localhost`，则从 `--host 0.0.0.0` 开始并告诉用户要打开哪个 host/port。它将运行目录提供给任何可以到达端口的东西，无需身份验证 - 仅在用户信任的网络上执行此操作，并在您交出 URL 时说明这一点。如果无法明确，请使用文本路径。
 
-Never force the visual path because a local server exists. The user chose visual to understand the decision faster; if the platform plumbing gets in the way, switch back to text.
+切勿强制使用可视路径，因为存在本地服务器。用户选择视觉是为了更快地理解决策；如果平台管道妨碍，请切换回文本。
 
-## Post-Artifact Feedback
+## 产物后反馈
 
-After showing the visual artifact, use the host's blocking question tool already in the current tool list for bounded artifact feedback. This is still chat-based feedback, not browser event capture.
+显示视觉产物后，使用当前工具列表中已有的主持人阻塞问题工具来获取有界产物反馈。这仍然是基于聊天的反馈，而不是浏览器事件捕获。
 
-Use a bounded interactive question when the expected response is a small choice set:
+当预期响应是一个小的选择集时，使用有界交互式问题：
 
-- A/B/C/D option selection
-- visual direction vs mix
-- choose one layout/state/behavior
-- accept one option with requested tweaks
+- A/B/C/D 选项选择
+- 视觉方向与组合
+- 选择一项layout/state/behavior
+- 接受一项带有请求调整的选项
 
-Include a free-text fallback option when the tool supports it. Use plain chat only when feedback is genuinely open critique, no interactive question tool exists, or the tool errors.
+当工具支持时，包括自由文本后备选项。仅当反馈是真正公开的批评、不存在交互式问题工具或工具错误时才使用普通聊天。
 
-Good post-artifact prompt:
+好的神器后提示：
 
-> Which direction best matches what you want? Pick A, B, C, D, or mix, and use the free-text fallback for anything that feels off. Judge the behavior shape, not the exact styling.
+> 哪个方向最符合您的需求？选择 A、B、C、D 或混合，并使用自由文本后备来处理任何感觉不舒服的情况。判断行为形状，而不是确切的样式。
 
-Do not ask the user to click inside the browser artifact. The question tool is for the chat/session response after the artifact is visible.
+不要要求用户在浏览器产物内单击。问题工具用于产物可见后的 chat/session 响应。
 
-## Interaction Contract
+## 互动合约
 
-The browser/artifact is display-only. Feedback happens in chat.
+browser/artifact 仅用于显示。反馈发生在聊天中。
 
-Do not add click tracking, selected states, event ingestion, forms, analytics, or "submit" affordances in v1. Do not ask the user to click an option. Ask them to look at the artifact and reply in chat with the choice, mix, or correction.
+不要在 v1 中添加点击跟踪、选定状态、事件摄取、表单、分析或“提交”功能可见性。不要要求用户单击选项。请他们查看产物并在聊天中回复选择、混合或更正。
 
-If no interactive question tool is available, use this plain-chat fallback after showing the artifact:
+如果没有可用的交互式问题工具，请在显示产物后使用此简单聊天后备：
 
-> I’m showing three rough options. Reply here with A, B, C, or "mix", plus anything that feels off. Judge the behavior shape, not the exact styling.
+> 我展示了三个粗略的选择。在这里回复 A、B、C 或“混合”，以及任何感觉不对劲的内容。判断行为形状，而不是确切的样式。
 
-The user's chat response is authoritative. The visual artifact is supporting context only.
+用户的聊天回复具有权威性。视觉产物仅支持上下文。
 
-## File Placement
+## 文件放置
 
-Use OS temp by default because visual probes are disposable scratch:
+默认情况下使用操作系统温度，因为视觉探针是一次性的划痕：
 
 ```text
 <scratch-root>/ce-brainstorm-visual/<run-id>/
@@ -161,4 +161,4 @@ Use OS temp by default because visual probes are disposable scratch:
     display-info.json
 ```
 
-Use `.context/compound-engineering/ce-brainstorm-visual/<run-id>/` only when the user explicitly wants to inspect, preserve, or curate the sketches after the session. The probe is disposable scratch; the durable artifact is the Phase 3 requirements-only unified plan under `<root>/plans/`.
+仅当用户明确想要在会话后检查、保留或整理草图时才使用 `.context/compound-engineering/ce-brainstorm-visual/<run-id>/`。探头为一次性划痕；持久产物是`<root>/plans/`下的第3阶段仅需求统一计划。

@@ -1,123 +1,125 @@
-# Completion reports
+# 竣工报告
 
-## Success Output
+## 成功输出
 
-**User-runnable refresh rendering.** The reports below print a refresh invocation for the user to copy. Default to `/ce-compound refresh <scope>`; use `$ce-compound refresh <scope>` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
+对于下面的每个词汇表结果，使用具体解析的词汇表路径，并命名未解析的范围或冲突的定义，而不是报告干净的扫描。
 
-### Non-interactive mode
+**用户可运行的刷新渲染。** 下面的报告打印刷新调用以供用户复制。默认为`/ce-compound refresh <scope>`；仅当活动主机为 Codex 或明确记录以美元为前缀的技能调用时才使用 `$ce-compound refresh <scope>`。仅将调用呈现为内联代码并仅输出一种形式。
 
-Emit a structured terminal report as the last thing this skill writes. No "What's next?" question, no blocking prompt. The report ends this skill, not the turn. When a caller invoked this skill, its next step follows the report in the same session; otherwise end the turn. End with `Documentation complete` as the terminal signal so callers can detect completion.
+### 非交互模式
 
-For `depth:lightweight`, use this lower-overhead report after the Lightweight Mode workflow:
+发出结构化终端报告作为该技能写入的最后内容。没有“接下来怎么办？”问题，没有阻止提示。报告结束该技能，而不是回合。当调用者调用此技能时，其下一步将遵循同一会话中的报告；否则结束回合。以 `Documentation complete` 作为终止信号结束，以便调用者可以检测完成。
+
+对于 `depth:lightweight`，请在轻量级模式工作流程之后使用此较低开销的报告：
 
 ```
-✓ Documentation complete (non-interactive lightweight mode)
+✓ 文档齐全（非交互轻量级模式）
 
-File: <root>/solutions/<category>/<filename>.md  (created | updated) | none
-Also written: <test, lint rule, or standard path, and how it was proven> | none
-Recommended form: none | <form>: <where, the defect shape, the failure message or rule text>
-Track: <bug | knowledge>
+文件：<root>/solutions/<category>/<filename>.md（创建|更新）|没有任何
+还写了：<测试、lint 规则或标准路径，以及如何证明它> |没有任何
+推荐形式：无| <form>：<其中，缺陷形状、失败消息或规则文本>
+跟踪：<bug |知识>
 Category: <category>
-Grounding: <mechanical check clean | N flags adjudicated>
-Discoverability: <no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
-CONCEPTS.md: <not present | scanned, no qualifying terms | updated — N added, N refined, N folded, N scrubbed>
-CONCEPTS.md discoverability: <not checked — CONCEPTS.md unchanged | no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
-Refresh recommendation: <none | /ce-compound refresh <scope>>
+接地：<机械检查清洁| N 旗标判定>
+可发现性：<无间隙|注意到差距 - 发出指令文件提示 |不适用 — 没有有效的项目说明>
+GLOSSARY.md：<不存在|已扫描，无限定条件 |更新了——N添加，N精炼，N折叠，N擦洗>
+GLOSSARY.md 可发现性：<未检查 — GLOSSARY.md 不变 |无间隙|注意到差距 - 发出指令文件提示 |不适用 — 没有有效的项目说明>
+刷新推荐：<无| /ce-compound刷新<scope>>
 
 Documentation complete
 ```
 
-For `depth:full` or backward-compatible non-interactive calls with no depth token, use the Full report:
+对于 `depth:full` 或没有深度标记的向后兼容非交互式调用，请使用完整报告：
 
 ```
-✓ Documentation complete (non-interactive mode)
+✓ 文档完整（非交互模式）
 
-File: <root>/solutions/<category>/<filename>.md  (created | updated) | none
-Also written: <test, lint rule, or standard path, and how it was proven> | none
-Recommended form: none | <form>: <where, the defect shape, the failure message or rule text>
-Track: <bug | knowledge>
+文件：<root>/solutions/<category>/<filename>.md（创建|更新）|没有任何
+还写了：<测试、lint 规则或标准路径，以及如何证明它> |没有任何
+推荐形式：无| <form>：<其中，缺陷形状、失败消息或规则文本>
+跟踪：<bug |知识>
 Category: <category>
-Overlap: <none | low | moderate — see <path> | high — existing doc updated>
-Grounding: <clean | N flags adjudicated (X fixed, Y annotated, Z confirmed) | N claims softened or corrected | degraded — merge-state claims unverified offline>
-Instruction-file edit: <none needed | gap noted, not applied>
-CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded from the learning's area) | updated — N added, N refined, N folded, N scrubbed>
-Refresh recommendation: <none | /ce-compound refresh <scope>>
+重叠：<无|低|中等 — 参见 <path> |高 — 现有文档已更新>
+接地：<干净|判定 N 个标志（X 已修复，Y 已注释，Z 已确认）| N 项主张被软化或纠正 |降级——合并状态声明未经离线验证>
+指令文件编辑：<不需要|注意到差距，未应用>
+GLOSSARY.md：<已扫描，无限定条件 |创建了 N 个条目（M 个来自学习区域）|更新了——N添加，N精炼，N折叠，N擦洗>
+刷新推荐：<无| /ce-compound刷新<scope>>
 
 Documentation complete
 ```
 
-`Documentation complete` means the run wrote something, including when the only file written is a test or a standard. Track, Category, Overlap, and Grounding then read `n/a`.
+`Documentation complete` 表示运行写入了某些内容，包括当唯一写入的文件是测试或标准时。轨道、类别、重叠和接地，然后阅读 `n/a`。
 
-When the run wrote nothing (e.g., non-interactive invoked on a session where the problem is not yet solved), emit a structured failure instead and end with `Documentation skipped` so callers can distinguish success from no-op:
+当运行没有写入任何内容时（例如，在问题尚未解决的会话上调用非交互式），则发出结构化失败并以 `Documentation skipped` 结尾，以便调用者可以区分成功与无操作：
 
 ```
-✗ Documentation skipped (non-interactive mode)
+✗ 跳过文档（非交互模式）
 
-Reason: <one-sentence explanation — e.g., "no solved problem detected in
-conversation history" or "solution not yet verified">
+原因：<一句话解释 - 例如，“在
+对话历史记录”或“解决方案尚未验证”>
 
 Documentation skipped
 ```
 
-### Interactive mode
+### 交互模式
 
 ```
-✓ Documentation complete
+✓ 文件齐全
 
 Ran Full mode.
-Auto memory: 2 relevant entries used as supplementary evidence
+自动记忆：2条相关条目作为补充证据
 
 Research Results:
-  ✓ Classified: performance_issue in background_job (component from corpus), category: performance-issues/
-  ✓ Drafted: 3 code fixes, prevention strategies
-  ✓ Related Docs Finder: 2 related issues
-  ✓ Session History: 3 prior sessions on same branch, 2 failed approaches surfaced
+  ✓ 分类：background_job 中的performance_issue（来自语料库的组件），类别：性能问题/
+  ✓ 起草：3 个代码修复、预防策略
+  ✓ 相关文档查找器：2 个相关问题
+  ✓ 会话历史记录：同一分支上的 3 个先前会话，2 个失败的方法浮出水面
 
 Grounding Validation:
-  ✓ Mechanical check: 14 paths, 2 SHAs, 3 links checked — 1 flag annotated as historical
-  ✓ Semantic validator: 9 claims verified, 1 merge-state claim softened to pending
+  ✓ 机械检查：检查 14 个路径、2 个 SHA、3 个链接 - 1 个标记注释为历史
+  ✓ 语义验证器：9 个声明已验证，1 个合并状态声明软化为待处理
 
-Specialized Agent Reviews (Auto-Triggered):
-  ✓ performance-oracle: Validated query optimization approach
-  ✓ Code simplification review: Code examples are appropriately minimal
+专业代理评论（自动触发）：
+  ✓ Performance-Oracle：经过验证的查询优化方法
+  ✓ 代码简化审查：代码示例适当减少
 
 Files written:
-- <root>/solutions/performance-issues/n-plus-one-brief-generation.md (created)
-- CONCEPTS.md (created with 3 entries: BriefSystem, EmailQueue, Brief Status)
+- <root>/solutions/performance-issues/n-plus-one-brief-generation.md（已创建）
+- GLOSSARY.md（由 3 个条目创建：BriefSystem、EmailQueue、Brief Status）
 
-This documentation will be searchable for future reference when similar
-issues occur in the Email Processing or Brief System modules.
+当类似的情况发生时，可以搜索该文档以供将来参考
+电子邮件处理或简报系统模块中出现问题。
 
 Refresh recommendation: none
 ```
 
-`Files written:` lists everything the run wrote: any test, lint rule, or standard with how it was proven, and the destination the assembly step settled on. That destination is a pack rule's path (`<pack dir>/<file>.md`) when the user routed the capture into a writable pack, and the `<root>/solutions/` path otherwise. Add a `Recommended form:` line when a check or owner consolidation was reported rather than written.
+`Files written:` 列出了运行写入的所有内容：任何测试、lint 规则或如何证明的标准，以及组装步骤确定的目标。当用户将捕获路由到可写包时，该目标是包规则的路径 (`<pack dir>/<file>.md`)，否则为 `<root>/solutions/` 路径。当报告而不是写入支票或所有者合并时，添加`Recommended form:`行。
 
-When the lesson met the standard form but the repo has no `CODING_STANDARDS.md`, add this one line and ask nothing: `This could be a coding standard if you adopt them.` Only an attended report carries it. Non-interactive reports read `Recommended form: none` for this case, so it never reaches a pull request.
+当课程符合标准形式但存储库没有 `CODING_STANDARDS.md` 时，添加这一行并且不询问任何内容： `采纳后可作为一条编码标准。` 只有出席的报告才会包含它。对于这种情况，非交互式报告读取`Recommended form: none`，因此它永远不会达到拉取请求。
 
-**The summary is the last thing this skill writes. When a caller invoked this skill, its next step follows the summary in the same session; otherwise end the turn. `ce-compound` does not present a "What's next?" menu.** The lesson is written and any cross-references the workflow found are already in it. Cross-doc maintenance (fixing references in *other* docs, consolidation) is left to a refresh, through the `Refresh recommendation` line above. It is not applied here, because that would edit tracked docs beyond this run's deliverable. If the user wants to view the file or take a follow-up action, they will ask. (Interactive mode only.)
+**摘要是该技能的最后写的内容。当调用者调用此技能时，其下一步将遵循同一会话中的摘要；否则结束回合。 `ce-compound` 不呈现“下一步是什么？”菜单。** 课程已编写完毕，工作流程中找到的所有交叉引用均已在其中。跨文档维护（修复*其他*文档中的引用，合并）通过上面的`Refresh recommendation`行进行刷新。此处不应用它，因为这将编辑超出本次运行可交付成果的跟踪文档。如果用户想要查看文件或采取后续操作，他们会询问。 （仅限交互模式。）
 
-**Alternate interactive output (when updating an existing doc due to high overlap):** in non-interactive mode, this case is communicated via the `Overlap: high — existing doc updated` line of the non-interactive terminal report above, not as a separate output block.
+**备用交互式输出（由于高度重叠而更新现有文档时）：** 在非交互式模式下，这种情况通过上面非交互式终端报告的 `Overlap: high — existing doc updated` 行进行通信，而不是作为单独的输出块。
 
 ```
-✓ Documentation updated (existing doc refreshed with current context)
+✓ 更新文档（现有文档根据当前上下文进行刷新）
 
 Overlap detected: <root>/solutions/performance-issues/n-plus-one-queries.md
-  Matched dimensions: problem statement, root cause, solution, referenced files
-  Action: Updated existing doc with fresher code examples and prevention tips
+  匹配维度：问题陈述、根本原因、解决方案、参考文件
+  操作：使用更新的代码示例和预防技巧更新现有文档
 
 File updated:
-- <root>/solutions/performance-issues/n-plus-one-queries.md (added last_updated: 2026-03-24)
+- <root>/solutions/performance-issues/n-plus-one-queries.md（添加last_updated：2026-03-24）
 ```
 
-## Common Mistakes to Avoid
+## 要避免的常见错误
 
-| ❌ Wrong | ✅ Correct |
+| ❌ 错误 | ✅ 正确 |
 |----------|-----------|
-| Subagents write product files into `docs/` or edit tracked paths | Subagents write only scratch artifacts under `<run-dir>/` and return the path; orchestrator writes the final form |
-| Subagent returns a long prose body only as its inline response | Subagent writes full output to its run artifact; orchestrator Reads it back (inline return is fallback only) |
-| Research and assembly run in parallel | Research completes → then assembly runs |
-| Non-interactive Discoverability Check edits AGENTS.md/CLAUDE.md | non-interactive Full reports `Instruction-file edit: gap noted, not applied`; non-interactive Lightweight emits a discoverability tip; only interactive Full applies the edit after consent |
-| Creating a new doc when an existing doc covers the same problem | Check overlap assessment; update the existing doc when overlap is high |
-| Asserting code behavior or merge-state from conversation memory | Read the defining source line before asserting; cite PR numbers over SHAs; soften unverifiable claims (Phase 1 extractor rules, re-checked in Phase 2.45) |
-| Batching several learnings through one run and stitching cross-references between drafts | One learning per run; run the skill sequentially for each additional learning |
+| 子代理将产品文件写入`docs/`或编辑跟踪路径 | 子代理仅在 `<run-dir>/` 下写入暂存产物并返回路径； Orchestrator 编写最终形式 |
+| 子代理仅返回长散文正文作为其内联响应 | 子代理将完整输出写入其运行产物； Orchestrator 读回（内联返回仅作为后备） |
+| 研究和组装并行进行 | 研究完成→然后组装运行 |
+| 非交互式可发现性检查编辑 AGENTS.md/CLAUDE.md | 非交互式完整报告`Instruction-file edit: gap noted, not applied`；非交互式轻量级发出可发现性提示；仅交互式完全在同意后应用编辑 |
+| 当现有文档涵盖相同问题时创建新文档 | 检查重叠评估；当重叠度较高时更新现有文档 |
+| 从对话内存中断言代码行为或合并状态 | 在断言之前阅读定义源代码行；在 SHA 上引用 PR 数字；软化无法验证的声明（第 1 阶段提取器规则，在第 2.45 阶段重新检查） |
+| 通过一次运行批处理多个学习内容并缝合草稿之间的交叉引用 | 每次运行一次学习；为每个额外的学习按顺序运行技能 |

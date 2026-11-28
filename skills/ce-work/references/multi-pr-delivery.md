@@ -1,54 +1,54 @@
-# Multi-PR Delivery
+# 多PR交付
 
-Read this when the plan's execution profile says the work ships as several PRs and this run is standalone, before building the task list. A `mode:return-to-caller` run does not use this file: it builds every unit on one branch and returns, and its caller owns how the work splits into PRs.
+当计划的执行配置文件显示工作作为多个 PRs 交付并且此运行是独立的时，请在构建任务列表之前阅读此内容。 `mode:return-to-caller` 运行不使用此文件：它在一个分支上构建每个单元并返回，并且其调用者拥有工作如何拆分为 PRs 的权利。
 
-**Outcome:** every PR group of the plan ends this run merged, in an open PR, built and waiting on a dependency, or not yet built because a start wait is unmet, and the report names each wait. The only things left for a person are confirming a deployment and merging when the user did not grant merging.
+**结果：** 计划的每个 PR 组结束此运行合并，在开放的 PR 中，构建并等待依赖项，或者尚未构建，因为未满足启动等待，并且报告命名每个等待。当用户未授予合并权限时，用户唯一要做的就是确认部署和合并。
 
-A run that a coordinator handed one named group builds and ships only that group, from the branch it was given, and returns that group's state. The rest of this file is how a run decides which groups to build and how they land.
+协调员交给一个命名组的运行仅从给定的分支构建和传送该组，并返回该组的状态。该文件的其余部分是运行如何决定构建哪些组以及它们如何着陆。
 
-## Group state
+## 集团状态
 
-Each group carries one identity: the plan's file name without its extension plus the group's label, the `PR<N>` that starts the group's heading. The group's PR description carries it as one line, `Plan group: <plan path> <label>`, and its branch name ends with `<plan file name>-<label>` (lowercased). Match that identity exactly, with the label as a whole token, so `PR1` never matches `PR10` and another plan's `PR1` never matches this one. Read each group's state through it:
+每个组都有一个标识：计划的文件名（不带扩展名）加上组的标签，即开始组标题的 `PR<N>`。该组的 PR 描述将其作为一行 `Plan group: <plan path> <label>` 进行，其分支名称以 `<plan file name>-<label>` （小写）结尾。与该身份完全匹配，将标签作为一个整体标记，因此 `PR1` 永远不会与 `PR10` 匹配，而另一个计划的 `PR1` 永远不会与这个计划匹配。通过它读取每个组的状态：
 
-- **merged** when a merged PR carries it;
-- **open** when an open PR carries it;
-- **built** when an unpublished branch carries it and holds the group's finished work: every unit of the group is present and its verification passes. A branch carries the marker before its work is done, so a branch without finished work is a build in progress: resume its unfinished units on that branch;
-- **unbuilt** otherwise.
+- **合并** 当合并的 PR 携带它时；
+- **open** 当 open PR 携带它时；
+- **构建**当未发布的分支携带它并保存该组已完成的工作时：该组的每个单元都存在并且其验证通过。分支在其工作完成之前携带标记，因此未完成工作的分支是正在进行的构建：恢复该分支上未完成的单元；
+- 否则**未建成**。
 
-Squash merges leave no ancestry, so commit history is not evidence of a merged group. Skip merged and open groups, and do not rebuild a built one. A branch is visible only in the checkout or session that made it. Treat a group with no PR and no visible branch as unbuilt only when no session started for this plan, by this run or an earlier one, may still be building it. An earlier run's report names those sessions; when you cannot rule one out, stop and report rather than build the group again. When the evidence conflicts or you cannot tell, stop and report what you found: rebuilding a group duplicates its PR, and skipping one ships the plan with a hole.
+挤压合并不会留下祖先，因此提交历史记录并不是合并组的证据。跳过合并和打开的组，并且不重建已构建的组。分支仅在创建它的结账或会话中可见。仅当没有为此计划启动任何会话时，通过本次运行或之前的运行，可能仍在构建它，才将没有 PR 且没有可见分支的组视为未构建。早期运行的报告对这些会话进行了命名；当你无法排除其中一个时，请停下来报告，而不是再次建立小组。当证据相互冲突或者你无法判断时，停止并报告你的发现：重建一个组会重复它的PR，而跳过一个组会导致计划有漏洞。
 
-## Which groups to build
+## 建立哪些组
 
-Each group's `Waits on:` line names the PRs it waits on and the kind of each wait.
+每个组的 `Waits on:` 行命名它等待的 PRs 以及每个等待的类型。
 
-- **Merge order only** does not stop a group from being built. A group that uses an earlier group's code is built on top of that group's built branch, so it starts once that group is built. Groups that share no code are built at the same time.
-- **Needed before start** holds the group until the wait is met. A wait on a merge is met when that PR merges. A wait on a deployment is met only when the user confirms the deployment, because no skill observes deploys.
+- **仅合并顺序**不会阻止构建组。使用早期组代码的组是在该组的构建分支之上构建的，因此一旦该组构建完毕，它就会启动。不共享代码的组是同时构建的。
+- **开始前需要**保留该组，直到满足等待要求。当 PR 合并时，就会满足合并等待。仅当用户确认部署时才会满足部署等待，因为没有技能观察部署。
 
-Each group is built and verified with the normal implementation loop and execution strategy, against its own units and the requirements they trace to. Read the plan's `Deferred / Open Questions` entries as open review items for the group. When the group settles one, remove its entry, and remove the review subsection and the section once they are empty.
+每个组都是根据其自己的单元及其追踪的需求，使用正常的实施循环和执行策略来构建和验证的。阅读计划的 `Deferred / Open Questions` 条目作为小组的开放评审项目。当小组解决一个问题后，删除其条目，并删除评论小节和空后的节。
 
-## Publishing in merge order
+## 按合并顺序发布
 
-- **The project allows stacked PRs:** open the built groups as one stack, bottom to top in merge order, through `ce-commit-push-pr` with explicit stack intent and one layer per group, each with its units, its marker line, and any deploy dependency.
-- **It does not** (for example squash merges with a fresh branch from the default branch per PR, or no force-push): publish a group once every group it waits on has merged, on a fresh branch from the updated default branch that carries only that group's changes. Later groups stay built until then. Before publishing, rerun the group's final validation and code review on that branch. When the merged predecessor changed in a way that breaks the group, rebuild it rather than publish it, and say so in the report.
+- **该项目允许堆叠PRs：**将构建的组作为一个堆栈打开，从下到上按合并顺序，通过`ce-commit-push-pr`，具有明确的堆栈意图，每组一层，每个组都有其单元、标记线和任何部署依赖项。
+- **它不会**（例如，squash 与每个 PR 的默认分支中的新分支合并，或者不强制推送）：一旦它等待的每个组合并，就在来自更新的默认分支的新分支上发布一个组，该新分支仅包含该组的更改。稍后的组会一直保留到那时为止。在发布之前，在该分支上重新运行小组的最终验证和代码审查。当合并后的前任发生了破坏团体的变化时，应重建而不是发布，并在报告中如此说明。
 
-Each group's PR gets its own code review with `plan:<path>` and `plan_group:<label>`, its own final validation, and a description naming any deployment that must be live before it merges. Never merge past a deploy dependency on the user's behalf.
+每个组的 PR 都会通过 `plan:<path>` 和 `plan_group:<label>` 进行自己的代码审查、自己的最终验证以及在合并之前命名任何必须处于活动状态的部署的描述。切勿代表用户合并过去的部署依赖项。
 
-## Waiting and resuming
+## 等待并恢复
 
-When the host can wake this session on a change to a PR, keep a watch on each PR that a waiting group depends on, and continue when it merges. When it cannot, end with the report. Re-running `ce-work` on the same plan continues from there, because the state rules above read what already exists.
+当主机可以在PR更改时唤醒此会话时，请监视等待组所依赖的每个PR，并在其合并时继续。如果不能，则以报告结束。从那里继续在同一计划上重新运行`ce-work`，因为上面的状态规则读取已经存在的内容。
 
-## Separate sessions
+## 单独的会议
 
-Some hosts can start a separate long-lived session in its own checkout that outlives this turn, such as T3 delegated worktree tasks, Orca worktree children, or Codex cloud tasks. This is not a subagent: a subagent ends with the turn that started it, while a group's PR needs hours of CI, review, and merge.
+某些主机可以在自己的结账中启动一个单独的长期会话，该会话在本轮中持续存在，例如 T3 委托工作树任务、Orca 工作树子任务或Codex 云任务。这不是子代理：子代理在开始它的回合结束，而小组的 PR 需要 CI 小时的时间进行审查和合并。
 
-Where the host offers such sessions and its own rules let the agent start them, hand each group to its own session automatically and coordinate from this one.
+如果主机提供此类会话并且其自己的规则让代理启动它们，则自动将每个组移交给其自己的会话并从此会话进行协调。
 
-- **What a session receives:** the plan path, its group label, the branch it builds on, the marker convention, the user's constraints and publishing authority for this run (for example, leave changes local, or open no PR), and the instruction to build only that group and ship it within that authority. A session does not inherit this conversation, so a limit not passed here does not exist for it.
-- **What the coordinator does:** keeps the group states; starts a group's session once the group it builds on is built and its start waits are met; watches each PR whose session the host does not let watch it.
-- **When a session cannot reach the branch:** a chain that builds on a branch the host's sessions cannot reach, such as a local branch from a cloud session, is built in the main thread.
+- **会话接收的内容：** 计划路径、其组标签、其构建的分支、标记约定、用户的约束和此次运行的发布权限（例如，将更改保留在本地，或不打开 PR），以及仅构建该组并在该权限内发布它的指令。会话不会继承此会话，因此它不存在此处未传递的限制。
+- **协调员的作用：** 保持组状态；一旦其所构建的组已构建并且满足其开始等待，则启动组的会话；监视主机不允许其会话观看的每个PR。
+- **当会话无法到达分支时：** 在主线程中构建在主机会话无法到达的分支上构建的链，例如来自云会话的本地分支。
 
-Without such sessions, or when the host's rules require the user to ask first, the main thread does all of the above itself.
+如果没有这样的会话，或者当主机的规则要求用户首先询问时，主线程会自行执行上述所有操作。
 
-## Report
+## 报告
 
-List every group with its label, its state (merged; open, with its link; built and waiting; building in a session, naming where; blocked), what it still waits on, and for a blocked group what only the user can do. When every group is merged, say the plan is complete.
+列出每个组及其标签、其状态（已合并、打开、及其链接、构建并等待、在会话中构建、命名位置、阻止）、它仍在等待的内容，以及对于阻止的组，只有用户可以执行的操作。当每个小组合并后，就说计划完成了。

@@ -1,44 +1,44 @@
-# Getting the document, and classifying it
+# 获取文档并对其进行分类
 
-- **Path provided:** read it, then proceed. If the read fails or the file is not on disk, apply the missing-document check below instead of continuing.
-- **No path, interactive:** ask which document to review, or find the most recent under `<root>/plans/` with a file-search/glob tool.
-- **No path, non-interactive:** output "Review failed: non-interactive mode requires a document path. Expected arguments: mode:non-interactive <path>" and stop without dispatching reviewers.
+- **提供的路径：**阅读它，然后继续。如果读取失败或文件不在磁盘上，请应用下面的丢失文档检查，而不是继续。
+- **无路径，交互式：**询问要查看哪个文档，或使用 file-search/glob 工具在 `<root>/plans/` 下找到最新的文档。
+- **无路径，非交互：**输出“审阅失败：非交互模式需要文档路径。预期参数：mode:non-interactive<path>”并停止而不派遣审查者。
 
-**Missing-document check — verify before any dispatch.** Persona reviewers read from the filesystem and several run without Bash, so they cannot read git refs. A path that exists only on an unchecked-out branch wastes the entire persona team discovering they cannot proceed (issue #925). Confirm every resolved path is readable on disk before Phase 2 (dispatch). Location does not matter — an absolute path outside the checkout or a doc in another checkout reviews fine. If any path is unreadable, dispatch **no** personas:
+**缺少文档检查 - 在任何调度之前进行验证。** Persona 审查者从文件系统中读取内容，并且有几个在没有 Bash 的情况下运行，因此他们无法读取 git refs。仅存在于未签出分支上的路径会浪费整个角色团队发现他们无法继续（问题＃925）。在第 2 阶段（分派）之前，确认磁盘上的每个解析路径都是可读的。位置并不重要——结帐外的绝对路径或另一个结帐中的文档评论都很好。如果任何路径不可读，则分派**不**角色：
 
-- **Interactive:** stop and name the missing path(s): "Document(s) not found on disk: <paths>. Check out the branch containing them, use a worktree, or provide corrected readable paths before retrying the review."
-- **Non-interactive:** output "Review failed: document(s) not found on disk: <paths>. Expected input: paths to readable files on disk; check out the branch containing them or provide corrected paths." and return without dispatching reviewers.
+- **交互式：**停止并命名丢失的路径：“在磁盘上找不到文档：<paths>。在重试审阅之前，检查包含它们的分支，使用工作树，或提供更正的可读路径。”
+- **非交互式：**输出“审核失败：在磁盘上找不到文档：<paths>。预期输入：磁盘上可读文件的路径；检查包含它们的分支或提供正确的路径。”并返回而不派遣审稿人。
 
-### Resume a completed review
+### 恢复已完成的审核
 
-Reuse complete previous reviewer responses, evidence, classifications, and decision state when they cover the same document and scope, and the relevant source has not materially changed. Check the current document and the saved review state to confirm that they match and that the evidence is still current. A summary alone is not enough. A new interaction mode or a request to handle existing findings is not a new review.
+当审稿人之前的回复、证据、分类和决策状态涵盖相同的文档和范围，并且相关来源没有发生重大变化时，可以重复使用它们。检查当前文档和保存的审阅状态以确认它们匹配并且证据仍然是最新的。仅仅总结是不够的。新的交互模式或处理现有发现的请求并不是新的审查。
 
-A resume keeps the review depth the saved state records; `references/depth.md` says when it may rise. On a valid resume, go directly to synthesis and presentation with the retained state. Preserve completed coverage instead of repeating the persona team or cross-model pass. Synthesis may obtain a limited independent local review when missing corroboration prevents resolution of a retained, worthwhile correction. Use the normal reviewer prompt and output contract from `references/dispatch.md` for that limited check. The reviewer must have a fresh context that has not seen the peer review. Supply the relevant document and source, agreed outcome, and constraints; do not supply peer claims, proposed fixes, or diagnostic questions derived from them. Choosing the relevant scope does not require telling the reviewer what problem to find. Reconcile new user decisions in synthesis. Missing complete evidence, material source changes, an explicit request for a fresh review, or `depth:full` against saved state that records a lite review takes the normal dispatch path. Preserve prior decisions as history on either path. A rejected finding stays suppressed only while the evidence and assumptions supporting that rejection remain current; synthesis makes that check under rule R29 in `references/later-round-synthesis.md`.
+简历保留了已保存状态记录的审阅深度； `references/depth.md`表示何时可能上涨。在有效的简历上，直接进入保留状态的综合和演示。保留完整的覆盖范围，而不是重复角色团队或跨模型传递。当缺少佐证而无法解决保留的、有价值的修正时，综合可能会获得有限的独立本地审查。使用 `references/dispatch.md` 中的正常审查者提示和输出合同进行有限检查。审稿人必须有没有见过同行评审的新鲜背景。提供相关文件和来源、商定的结果和限制；不提供同行主张、建议的修复方案或由此衍生的诊断问题。选择相关范围不需要告诉审稿人要发现什么问题。协调综合中的新用户决策。缺少完整的证据、材料来源更改、重新审核的明确请求或 `depth:full` 反对记录精简版审核的已保存状态会采用正常的调度路径。将先前的决策保留为任一路径的历史。仅当支持该拒绝的证据和假设仍然存在时，被拒绝的发现才会被保留；综合在`references/later-round-synthesis.md`中的规则R29下进行检查。
 
-### Classify Document Type
+### 对文档类型进行分类
 
-Classify by **content shape and metadata, not file path**. Under the unified plan contract a requirements-only plan and an implementation-ready plan both live in `<root>/plans/`, so location no longer signals type. Reviewers work differently per classification, so a misclassification produces noisy or under-scrutinized findings.
+按**内容形状和元数据，而不是文件路径**进行分类。根据统一计划合同，仅需求计划和实施就绪计划都位于`<root>/plans/`，因此位置不再表示类型。审稿人对每个分类的工作方式不同，因此错误分类会产生嘈杂或未经充分审查的结果。
 
-For a unified artifact (`artifact_contract: ce-unified-plan/v1`), classify by the content to review:
+对于统一的产物（`artifact_contract: ce-unified-plan/v1`），按要审查的内容分类：
 
-- Product Contract without implementation planning -> **`unified-requirements`**. Review the Product Contract; missing implementation sections are expected.
-- Any implementation planning -> **`unified-plan`**. Review the Product Contract and the implementation planning, including incomplete sections, for feasibility and execution completeness. A blocker or old readiness label must not hide those sections from review.
-- HTML unified artifacts (`.html`) use the same review and mutation routes. Apply changes in the document's native format and preserve its existing structure; never insert markdown syntax into HTML. For an ID-bearing HTML item, mirror the nearest sibling's structure and preserve both its anchor convention and visible ID text.
+- 无实施计划的产品合同 -> **`unified-requirements`**。审查产品合同；预计会缺少实施部分。
+- 任何实施计划 -> **`unified-plan`**。审查产品合同和实施计划（包括不完整的部分）的可行性和执行完整性。阻塞项或旧的就绪标签不得隐藏这些部分以防止审查。
+- HTML 统一产物 (`.html`) 使用相同的审查和变更路线。应用文档本机格式的更改并保留其现有结构；切勿将 Markdown 语法插入 HTML。对于带有 ID 的 HTML 项目，镜像最近的同级结构并保留其锚约定和可见 ID 文本。
 
-Otherwise decide between the two legacy types on these signals:
+否则，请在这些信号的两种传统类型之间做出决定：
 
-- **`requirements`** (what-to-build): frontmatter like `actors:`, `flows:`, `acceptance_examples:`, or brainstorm-shaped `status:`; headings such as `Acceptance Examples`, `Actors`, `Key Flows`, `User Flows`, `Outstanding Questions`, `Resolve Before Planning`; `R1`/`A1`/`F1`/`AE1` identifiers; framing on user/business problem, behavior, scope boundaries, success criteria; no implementation units, per-unit file lists, or unit-attached test scenarios.
-- **`plan`** (how-to-build): frontmatter like `type: feat|fix|refactor`, `origin: docs/brainstorms/...`, or `product_contract_source: ce-brainstorm|ce-plan-bootstrap|legacy-requirements`; headings such as `Implementation Units`, `Output Structure`, `Key Technical Decisions`, `Risks & Dependencies`, `System-Wide Impact`; `U1`/`U2` unit identifiers; per-unit `Goal`/`Files`/`Approach`/`Test scenarios`/`Verification` fields; repo-relative paths to create/modify/test; framing on technical decisions, sequencing, implementer-facing detail.
+- **`requirements`**（构建什么）：frontmatter，如 `actors:`、`flows:`、`acceptance_examples:` 或头脑风暴型 `status:`； `Acceptance Examples`、`Actors`、`Key Flows`、`User Flows`、`Outstanding Questions`、`Resolve Before Planning` 等标题； `R1`/`A1`/`F1`/`AE1`标识符；制定user/business问题、行为、范围边界、成功标准；没有实现单元、每个单元的文件列表或单元附加的测试场景。
+- **`plan`**（如何构建）：frontmatter，如 `type: feat|fix|refactor`、`origin: docs/brainstorms/...` 或 `product_contract_source: ce-brainstorm|ce-plan-bootstrap|legacy-requirements`； `Implementation Units`、`Output Structure`、`Key Technical Decisions`、`Risks & Dependencies`、`System-Wide Impact` 等标题； `U1`/`U2` 单位标识符；每个单元`Goal`/`Files`/`Approach`/`Test scenarios`/`Verification`字段； create/modify/test 的仓库相对路径；制定技术决策、排序、面向实施者的细节。
 
-**Tie-breaker:** treat the dominant content shape as authoritative. If the shape is genuinely ambiguous, default to `requirements`; that is the conservative choice because it activates fewer plan-specific feasibility checks. Path location never disambiguates. A legacy `origin: docs/brainstorms/...` field still reads as a `plan` signal.
+**决胜局：** 将主导内容形式视为权威。如果形状确实不明确，则默认为`requirements`；这是保守的选择，因为它激活的特定计划的可行性检查较少。路径位置永远不会消除歧义。传统的 `origin: docs/brainstorms/...` 字段仍然读取为 `plan` 信号。
 
-Pass the result to each persona via the `{document_type}` slot — personas adapt their analysis to it.
+通过 `{document_type}` 槽将结果传递给每个角色 - 角色根据结果调整他们的分析。
 
-## Extract once, here, for the dispatch payload
+## 在此处为调度有效负载提取一次
 
-Personas never re-parse the document for these, so Phase 1 (this step) extracts both and passes them in the dispatch payload:
+角色永远不会重新解析这些文档，因此第 1 阶段（此步骤）提取两者并将它们传递到调度有效负载中：
 
-- `{origin_path}` — upstream Product Contract provenance: the document's `origin:` frontmatter when present, else `product_contract_source:<value>` when present, else `none`.
-- `{settled_ktds}` — any Key Technical Decision **or Product Contract Key Decision** carrying a `session-settled:` annotation, listed as decision name, class (`user-directed` / `user-approved`), and rejected alternative; else the literal `none`.
+- `{origin_path}` — 上游产品合同来源：文档的 `origin:` frontmatter（如果存在），否则 `product_contract_source:<value>`（如果存在），否则 `none`。
+- `{settled_ktds}` — 带有 `session-settled:` 注释的任何关键技术决策 **或产品合同关键决策**，列为决策名称、类别 (`user-directed` / `user-approved`) 和被拒绝的替代方案；否则字面量`none`。
 
-The product-lens, adversarial, and scope-guardian personas use these slots to decide whether to suppress their premise-level techniques. An unfilled slot silently disables that suppression, so pass both even when the value is `none`.
+产品镜头、对抗者和范围守护者角色使用这些槽位来决定是否压制他们的前提级技术。未填充的槽会默默地禁用该抑制，因此即使值为 `none` 也请传递两者。

@@ -1,75 +1,70 @@
-# Intent discovery and plan requirements
+# 意图发现和计划要求
 
-Read this at Stage 2. It defines the intent summary, plan discovery, what context each reviewer receives, and the plan-readiness rules that Stage 6 (Synthesize and present) verifies requirements against.
+请阅读第 2 阶段的内容。它定义了意图摘要、计划发现、每个审查者收到的上下文以及第 6 阶段（综合和呈现）验证需求所依据的计划准备规则。
 
-## Plan Requirements Completeness
+## 计划要求完整性
 
-When a plan is provided via `plan:<path>` or discovered from PR/branch context,
-inspect the contents before checking completeness. A Product Contract alone informs product intent and does not create implementation-unit obligations. When implementation units are present, check their coverage as well, including incomplete planning. Old readiness labels do not change the review scope. Legacy plans keep the existing completeness checks.
+当通过`plan:<path>`提供计划或从PR/branch上下文发现计划时，请在检查完整性之前检查内容。产品合同仅告知产品意图，并不产生实施单元义务。当实施单位存在时，也要检查其覆盖范围，包括不完整的规划。旧的就绪标签不会改变审核范围。旧计划保留现有的完整性检查。
 
-An unaddressed requirement or implementation unit is a finding on every depth path, routed by `plan_source`: `explicit` (a `plan:` argument or a PR-body link) yields a P1 finding with `autofix_class: manual` and `owner: downstream-resolver`, which enters the actionable queue; `inferred` (auto-discovered) yields a P3 finding with `autofix_class: advisory` and `owner: human`, which stays in the report only, because an inferred match is a hint, not a contract.
+未解决的需求或实现单元是每个深度路径上的发现，通过`plan_source`路由：`explicit`（`plan:`参数或PR主体链接）产生带有`autofix_class: manual`和`owner: downstream-resolver`的P1发现，进入可操作队列； `inferred`（自动发现）与`autofix_class: advisory`和`owner: human`一起生成P3结果，该发现仅保留在报告中，因为推断的匹配是提示，而不是合同。
 
-When `plan_group:` names a PR group of a plan that ships as several PRs, this diff builds only that group. Completeness covers that group's units and the requirements they trace to; units in the plan's other groups are out of scope here, not unaddressed. A `plan_group:` label that starts no group heading in the plan is reported in Coverage, and completeness falls back to the whole plan.
+当 `plan_group:` 命名作为多个 PRs 提供的计划的 PR 组时，此 diff 仅构建该组。完整性涵盖该组的单位及其所追踪的要求；该计划其他组中的单位超出了此处的范围，并非未解决。计划中不开始任何组标题的 `plan_group:` 标签会在覆盖范围中报告，完整性会回落到整个计划。
 
-The check also runs in reverse. A behavior rule is a decision about what users or callers observe that a product owner would otherwise have made, such as silently dropping a repeated refund request. When the diff introduces a behavior rule that nothing in the plan asks for, that unrequested behavior rule is a finding on every depth path, listed with the requirements completeness results. Route it P3 with `autofix_class: advisory` and `owner: human`, whatever the `plan_source`, and never let it change the verdict. Whether the rule is wanted is the user's call, and a correct diff is no evidence either way. Internal structure, refactors, and handling of inputs a requirement already covers are not behavior rules.
+支票也反向运行。行为规则是关于用户或呼叫者观察到的产品所有者本来会做出的决定，例如默默地放弃重复的退款请求。当差异引入计划中没有要求的行为规则时，该未请求的行为规则是每个深度路径上的发现，并与需求完整性结果一起列出。将它与 `autofix_class: advisory` 和 `owner: human` 一起路由到 P3，无论 `plan_source` 是什么，永远不要让它改变判决。是否需要该规则是用户的决定，正确的差异无论哪种方式都没有证据。需求已经涵盖的内部结构、重构和输入处理不是行为规则。
 
-Extract requirements from these shapes, in order:
+从这些形状中提取要求，按顺序：
 
-1. Unified `Product Contract` -> `### Requirements`
-2. Legacy top-level `## Requirements`
-3. Legacy `## Requirements Trace`
+1. 统一 `Product Contract` -> `### Requirements`
+2. 旧版顶级`## Requirements`
+3. 旧版`## Requirements Trace`
 
-For unified plans with implementation units, also extract U-IDs from
-`## Implementation Units` and compare against PR body/branch context when
-available. Do not require every Product Contract R-ID to map one-to-one to a
-single U-ID; verify that implemented U-IDs cite the relevant R/F/AE/KTD IDs and
-that no claimed U-ID is missing from the plan.
+对于具有实施单位的统一计划，还可以从 `## Implementation Units` 中提取 U-ID，并在可用时与 PR body/branch 上下文进行比较。不要求每个产品合同 R-ID 一对一映射到单个 U-ID；验证已实施的 U-ID 是否引用了相关的 R/F/AE/KTD ID，并且计划中未丢失已声明的 U-ID。
 
-### Stage 2: Intent discovery
+### 第二阶段：意图发现
 
-Understand what the change is trying to accomplish. The source of intent depends on which Stage 1 path was taken:
+了解变革想要实现的目标。意图的来源取决于所采取的第一阶段路径：
 
-**PR/URL mode:** Use the PR title, body, and linked issues from `gh pr view` metadata. Supplement with commit messages from the PR if the body is sparse.
+**PR/URL 模式：** 使用 `gh pr view` 元数据中的 PR 标题、正文和链接问题。如果正文稀疏，则补充来自 PR 的提交消息。
 
-**Branch mode:** Run `git log --oneline ${BASE}..<branch-ref>` using the resolved merge-base and resolved branch ref from Stage 1. Use `<branch-ref>` (the resolved `origin/<branch>` or fetched ref), not the raw `<branch>` argument — a remote-only branch has no matching local ref, so the raw name would fail or read a stale same-named local branch.
+**分支模式：** 使用第 1 阶段中已解析的合并基和已解析的分支引用运行 `git log --oneline ${BASE}..<branch-ref>`。使用 `<branch-ref>`（已解析的 `origin/<branch>` 或获取的引用），而不是原始 `<branch>` 参数 - 仅远程分支没有匹配的本地引用，因此原始名称将失败或读取过时的同名本地分支。
 
-**Standalone (current branch):** Run:
+**独立（当前分支）：** 运行：
 
 ```
 echo "BRANCH:" && git rev-parse --abbrev-ref HEAD && echo "COMMITS:" && git log --oneline ${BASE}..HEAD
 ```
 
-Combined with conversation context (plan section summary, PR description), write a 2-3 line intent summary:
+结合对话上下文（计划部分摘要、PR描述），写出2-3行意图摘要：
 
 ```
-Intent: Simplify tax calculation by replacing the multi-tier rate lookup
-with a flat-rate computation. Must not regress edge cases in tax-exempt handling.
+目的：通过替换多层税率查找来简化税收计算
+采用统一费率计算。不得回归免税处理中的边缘情况。
 ```
 
-Pass this to every reviewer in their spawn prompt. Intent shapes *how hard each reviewer looks*, not which reviewers are selected. When the user stated a limit on what reviewers examine or raise, such as paths to leave out, a concern not to raise, or a focus to keep to, add it to this summary in the user's words, even when the user gave a decision as the reason. A spawned reviewer knows only what its prompt carries, so a limit left out of the summary does not exist for it. Keep any `session-settled:` annotations (from a plan or the conversation) out of this summary. Reviewers must not see settlement annotations (Stage 2b, Plan discovery).
+在生成提示中将其传递给每个审查者。意图决定了*每个审稿人看上去有多努力*，而不是选择了哪些审稿人。当用户对审稿人检查或提出的内容提出限制时，例如要省略的路径、不要提出的问题或要保留的重点，请用用户的话将其添加到此摘要中，即使用户给出了决定作为原因。生成的审查者只知道其提示携带的内容，因此不存在摘要中遗漏的限制。将任何`session-settled:`注释（来自计划或对话）排除在本摘要之外。审查者不得看到和解注释（第 2b 阶段，计划发现）。
 
-**When intent is ambiguous:** Infer from branch name, commits, PR title/body, diff, `plan:`, and conversation. Write the best-effort intent summary and note uncertainty in Coverage — never block on a clarifying question.
+**当意图不明确时：** 从分支名称、提交、PR title/body、diff、`plan:` 和对话进行推断。写出尽力而为的意图摘要，并注意覆盖范围中的不确定性——永远不要阻止澄清问题。
 
-### Stage 2b: Plan discovery (requirements verification)
+### 阶段 2b：计划发现（需求验证）
 
-Locate the plan document so Stage 6 can verify requirements completeness. Check these sources in priority order — stop at the first hit:
+找到计划文档，以便第 6 阶段可以验证需求的完整性。按优先顺序检查这些来源 - 在第一次点击时停止：
 
-1. **`plan:` argument.** If the caller passed a plan path, use it directly. Read the file to confirm it exists.
-2. **PR body.** If PR metadata was fetched in Stage 1, scan the body for paths matching `<root>/plans/*.{md,html}` (unified plans may be markdown or HTML). If exactly one match is found and the file exists, use it as `plan_source: explicit`. If multiple plan paths appear, treat as ambiguous — demote to `plan_source: inferred` for the most recent match that exists on disk, or skip if none exist or none clearly relate to the PR title/intent. Always verify the selected file exists before using it — stale or copied plan links in PR descriptions are common.
-3. **Auto-discover.** Extract 2-3 keywords from the branch name (e.g., `feat/onboarding-skill` -> `onboarding`, `skill`). Glob `<root>/plans/*` and filter filenames containing those keywords. If exactly one match, use it. If multiple matches or the match looks ambiguous (e.g., generic keywords like `review`, `fix`, `update` that could hit many plans), **skip auto-discovery** — a wrong plan is worse than no plan. If zero matches, skip.
+1. **`plan:`参数。** 如果调用者传递了计划路径，则直接使用它。读取该文件以确认其存在。
+2. **PR body.** 如果在第 1 阶段获取了 PR 元数据，则扫描正文以查找与 `<root>/plans/*.{md,html}` 匹配的路径（统一计划可能是 markdown 或 HTML）。如果恰好找到一个匹配项并且该文件存在，则将其用作 `plan_source: explicit`。如果出现多个计划路径，则视为不明确 - 对于磁盘上存在的最新匹配，降级为 `plan_source: inferred`，或者如果不存在或没有与 PR title/intent 明确相关，则跳过。使用前务必验证所选文件是否存在 - PR 描述中的过时或复制的计划链接很常见。
+3. **自动发现。** 从分支名称中提取 2-3 个关键字（例如，`feat/onboarding-skill` -> `onboarding`、`skill`）。 Glob `<root>/plans/*` 并过滤包含这些关键字的文件名。如果恰好有一个匹配，则使用它。如果多个匹配或匹配看起来不明确（例如，`review`、`fix`、`update`等通用关键字可能会命中许多计划），**跳过自动发现** - 错误的计划比没有计划更糟糕。如果零个匹配，则跳过。
 
-**Confidence tagging:** Record how the plan was found:
-- `plan:` argument -> `plan_source: explicit` (high confidence)
-- Single unambiguous PR body match -> `plan_source: explicit` (high confidence)
-- Multiple/ambiguous PR body matches -> `plan_source: inferred` (lower confidence)
-- Auto-discover with single unambiguous match -> `plan_source: inferred` (lower confidence)
+**置信度标记：** 记录如何找到计划：
+- `plan:` 参数 -> `plan_source: explicit`（高置信度）
+- 单一明确PR身体匹配->`plan_source: explicit`（高置信度）
+- Multiple/ambiguous PR 身体匹配 -> `plan_source: inferred`（较低置信度）
+- 使用单个明确匹配自动发现 -> `plan_source: inferred`（较低置信度）
 
-If a plan is found, classify by contents before extraction (see "Plan Requirements Completeness" above): treat a Product Contract without implementation planning as product intent only — it must not drive implementation-unit completeness findings. Then read its **Requirements** in this order — unified `Product Contract` -> `### Requirements`, then legacy top-level `## Requirements`, then legacy `## Requirements Trace` — and the R-IDs (R1, R2, etc.) listed there, plus **Implementation Units** (current numeric subsections such as `### U1.`, `### U2.`, or `### Unit 1:` under `## Implementation Units`; legacy bullet or checkbox unit entries under that section also count). For HTML unified plans the same section names and R-/U-IDs appear as visible headings/anchors — match on the section name, ignoring HTML wrapper tags. Store the extracted requirements list and `plan_source` for Stage 6. Do not block the review if no plan is found — requirements verification is additive, not required.
+如果找到计划，请在提取之前按内容进行分类（请参阅上面的“计划要求完整性”）：将没有实施计划的产品合同仅视为产品意图 - 它不得驱动实施单元完整性调查结果。然后按此顺序阅读其**要求** — 统一的`Product Contract` -> `### Requirements`，然后是旧版顶级`## Requirements`，然后是旧版`## Requirements Trace` — 以及其中列出的 R-ID（R1、R2 等），加上 **实现单元**（当前的数字小节，例如 `### U1.`、 `### U2.` 或 `## Implementation Units` 下的 `### Unit 1:`；该部分下的旧式项目符号或复选框单元条目也算在内）。对于 HTML 统一计划，相同的部分名称和 R-/U-IDs 显示为可见 headings/anchors — 与部分名称匹配，忽略 HTML 包装标签。存储提取的需求列表和第 6 阶段的`plan_source`。如果未找到计划，请勿阻止审核 - 需求验证是附加的，不是必需的。
 
-When the discovered plan's Key Technical Decisions carry `session-settled:` annotations (classes `user-directed` / `user-approved`), extract each labeled KTD — the decision, its class, and the rejected alternative — for your own use in Stage 5 triage (step 6c). Settlement annotations are **context for you (the orchestrator) only**: exclude them from the Stage 2 intent summary and from every reviewer's prompt, including the cross-model adversarial pass. The point is reviewer independence: each reviewer must stay free to re-derive the rejected alternative on the merits, and you triage any settlement conflicts afterwards in Stage 5.
+当发现的计划的关键技术决策带有 `session-settled:` 注释（类别 `user-directed` / `user-approved`）时，提取每个标记的 KTD - 决策、其类别和被拒绝的替代方案 - 供您自己在第 5 阶段分类中使用（步骤 6c）。和解注释**仅适用于您（协调器）**：将它们从第 2 阶段意图摘要和每个审查者的提示中排除，包括跨模型对抗传递。关键是审核者的独立性：每个审核者都必须自由地根据案情重新得出被拒绝的替代方案，并且您可以在第 5 阶段对任何和解冲突进行分类。
 
-### Stage 2c: Keep grounding review-specific
+### 第 2c 阶段：保持具体的接地审查
 
-Use the project's active instructions already in context plus the current diff and source. Give each reviewer only the context relevant to its review focus; the `project-standards` reviewer reads the actual standards sources. If a reviewer cannot scope the affected area from the diff and supplied context, allow one targeted probe.
+使用上下文中已经存在的项目的活动指令以及当前的差异和源。仅向每个审查者提供与其审阅重点相关的上下文； `project-standards` 审查者阅读实际的标准来源。如果审查者无法根据差异和提供的上下文确定受影响区域的范围，则允许进行一次有针对性的探测。
 
-In `pr-remote` / `branch-remote`, current source and any targeted probe must use `git show` against the supplied reviewed head ref, or the supplied diff hunks when no head ref is available; never inspect workspace paths.
+在 `pr-remote` / `branch-remote` 中，当前源和任何目标探针必须使用 `git show` 来对抗所提供的经过审查的头参考，或者当没有头参考可用时所提供的 diff 块；从不检查工作空间路径。

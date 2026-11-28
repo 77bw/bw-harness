@@ -1,9 +1,9 @@
-# Bake-off in brainstorming
+# 头脑风暴中的烘焙
 
-Use `ce-bakeoff` only when explicitly requested and the need and constraints are clear enough to develop competing product mechanisms. If the goal itself is unsettled, finish discovery first. Preserve specific settled decisions; do not invent a fork to satisfy the request.
+仅在明确要求且需求和约束足够明确以开发竞争产品机制时才使用`ce-bakeoff`。如果目标本身还没有确定，那就先完成发现。保留具体的既定决定；不要发明叉子来满足要求。
 
-Resolve model preferences using the activation-resolution rules in `references/reasoning-elevation.md`. Pass the resolved preference, including explicit restrictions, to `ce-bakeoff` with the full grounding dossier, relevant dialogue and constraints, the specific question, settled decisions, budget, and product-mechanism fidelity. An explicit candidate model mix takes precedence. `ce-bakeoff` dispatches the fresh candidates and handles its own fallback; do not run the ordinary generation adapter for each baker. With no preference, allow Bake-off's default model-family exploration.
+使用 `references/reasoning-elevation.md` 中的激活解析规则解析模型偏好。将已解决的偏好（包括明确的限制）传递给`ce-bakeoff`，并提供完整的基础档案、相关对话和约束、具体问题、已解决的决策、预算和产品机制保真度。明确的候选模型组合优先。 `ce-bakeoff` 派遣新的候选人并处理自己的后备；不要为每个面包师运行普通生成适配器。如果没有任何偏好，请允许 Bake-off 的默认模型系列探索。
 
-This replaces the ordinary generation call for the selected question. The session orchestrator dispatches and persists the returned artifacts; read-only elevated authors do neither. Do not produce an ordinary approach set before or after the competition for the same question.
+这取代了对所选问题的普通生成调用。会话编排器调度并保留返回的产物；只读的高级作者两者都不做。不要在比赛之前或之后对同一问题制定普通的方法。
 
-Bake-off selects a recommendation, not a user-approved Product Contract. Return to Phase 2 (Explore Approaches) with the complete result, present viable options before the recommendation, and keep the existing rules: approaches stay at the product-mechanism level rather than architecture, choices that turn on how something feels are offered to `ce-prototype`, and scope is confirmed before writing. Keep incomplete or unresolved outcomes visible; obtain the missing product input when it prevents a defensible recommendation. Incorporate the decision record into the existing artifact rather than create another canonical plan.
+Bake-off 选择推荐，而不是用户批准的产品合同。带着完整的结果返回第二阶段（探索方法），在建议之前提出可行的选项，并保留现有的规则：方法停留在产品机制层面而不是体系结构，选择取决于向`ce-prototype`提供的感觉，并且在编写之前确认范围。保持不完整或未解决的结果可见；当缺少的产品输入妨碍合理的推荐时，获取该输入。将决策记录合并到现有产物中，而不是创建另一个规范计划。

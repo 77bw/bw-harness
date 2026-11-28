@@ -1,191 +1,115 @@
-# Ideation Sections
+# 构思部分
 
-This is the section contract for the ce-ideate artifact — it describes
-*what* a persisted ideation document contains, independent of output
-format. It is paired with a format-rendering reference
-(`references/markdown-rendering.md` or `references/html-rendering.md`)
-that describes *how* the resolved format presents these sections. The
-same content renders in either format; only presentation differs.
+这是ce-ideate产物的部分契约——它描述了持久构思文档包含的“内容”，与输出格式无关。它与格式渲染参考（`references/markdown-rendering.md`或`references/html-rendering.md`）配对，描述解析的格式*如何*呈现这些部分。相同的内容以任一格式呈现；只是表现形式不同。
 
-Load this file at save time alongside the rendering reference matching
-`OUTPUT_FORMAT` (see `references/post-ideation-workflow.md` §4.1).
+在保存时加载此文件以及匹配 `OUTPUT_FORMAT` 的渲染参考（请参阅`references/post-ideation-workflow.md`§4.1）。
 
-## What the artifact contains
+## 产物包含什么
 
-An ideation artifact is a ranked, critiqued candidate set, the grounding
-the candidates were qualified against, and a record of what was cut. It
-is a human-facing discovery document, not a requirements doc or plan —
-keep it about the ideas and their basis, not implementation.
+构思产物是经过排名的、经过批评的候选集、候选者资格的依据以及删减内容的记录。这是一个面向人类的发现文档，而不是需求文档或计划——保留其想法及其基础，而不是实现。
 
-### Metadata
+### 元数据
 
-- **date** — composition date (YYYY-MM-DD).
-- **topic** — kebab-case topic slug.
-- **focus** — the focus hint, when one was given. Omit when open-ended.
-- **mode** — `repo-grounded`, `elsewhere-software`, or
+- **日期** — 合成日期 (YYYY-MM-DD)。
+- **topic** — kebab-case 主题 slug。
+- **焦点** — 给出焦点提示时。开放式时省略。
+- **模式** — `repo-grounded`、`elsewhere-software` 或
   `elsewhere-non-software`.
 
-Markdown renders metadata as YAML frontmatter at the top of the file.
-HTML renders it as visible text placed as `references/html-rendering.md`
-describes, with one visible copy per value and no hidden machine-readable
-copy.
+Markdown 将元数据渲染为文件顶部的 YAML frontmatter。 HTML 将其呈现为按照 `references/html-rendering.md` 描述放置的可见文本，每个值都有一个可见副本，并且没有隐藏的机器可读副本。
 
-**No status field — not on the doc, not per idea.** An ideation doc is a
-point-in-time discovery artifact, not a tracked work item: it carries no
-`active → completed` lifecycle and no per-idea "explored" marker.
-Tracking mutable workflow progress inside the artifact would create a
-second source of truth that drifts — whether an idea was later pursued is
-knowable from downstream artifacts (a brainstorm or plan that picked it
-up), so it is not duplicated here.
+**没有状态字段 - 不在文档上，不是每个想法。** 构思文档是一个时间点发现产物，而不是跟踪的工作项：它没有 `active → completed` 生命周期，也没有每个想法“探索”标记。跟踪产物内部可变的工作流程进度将创建第二个漂移的事实来源——从下游产物（头脑风暴或拾取它的计划）中可以知道后来追求的想法是否可以，因此这里不再重复。
 
-### Grounding Context
+### 接地背景
 
-The Phase 1 grounding summary the ideas were qualified against — labeled
-"Codebase Context" in repo mode, "Topic Context" in elsewhere mode.
+想法被限定的第一阶段基础总结 - 标记为
+回购模式下的“代码库上下文”，其他模式下的“主题上下文”。
 
-### Topic Axes (conditional)
+### 主题轴（有条件）
 
-The 3-5 axes from Phase 1.5, one per line. When Phase 1.5 was skipped, a
-single line records why (`Decomposition skipped — atomic subject` or
-`Decomposition skipped — surprise-me mode`). Omit the section entirely
-when not applicable.
+第 1.5 阶段的 3-5 个轴，每行一个。当阶段 1.5 被跳过时，一行记录原因（`Decomposition skipped — atomic subject` 或 `Decomposition skipped — surprise-me mode`）。如果不适用，请完全省略该部分。
 
-### Ranked Ideas
+### 想法排名
 
-The surviving candidates, ranked. Each idea carries:
+幸存的候选人，排名。每个想法都承载：
 
-- **title**
-- **description** — concrete explanation.
-- **axis** — the topic axis this idea targets. Omit when decomposition
-  was skipped.
-- **basis** — tagged `direct:` (quoted evidence) / `external:` (named
-  prior art) / `reasoned:` (written-out first-principles argument).
-- **rationale** — how the basis connects to the move's significance.
-- **downsides** — tradeoffs or costs.
-- **confidence** — 0-100%.
-- **complexity** — Low / Medium / High.
+- **标题**
+- **描述** — 具体解释。
+- **轴** — 此想法所针对的主题轴。跳过分解时省略。
+- **基础** — 标记为`direct:`（引用的证据）/`external:`（命名现有技术）/`reasoned:`（书面第一原理论证）。
+- **基本原理** — 基础如何与此举的重要性联系起来。
+- **缺点**——权衡或成本。
+- **置信度** — 0-100%。
+- **复杂性** — 低/中/高。
 
-**Keep idea cards expanded; add a jump-list when the section is long.**
-Unlike plan Implementation Units, ideation idea cards are meant to be read
-in full to choose a direction — do not hide their substance behind
-default-closed `<details>`. But the Ranked Ideas section is typically 5-7
-cards and runs long in HTML, so add a within-section jump-list of the
-ranked titles (anchor links to each card) at the top of the section, per
-the rendering reference's within-section sub-nav affordance.
+**保持创意卡的扩展；当该部分很长时添加跳转列表。**与计划实施单元不同，构思想法卡需要完整阅读以选择方向 - 不要将其实质内容隐藏在默认关闭的`<details>`后面。但排名创意部分通常有 5-7 张卡片，并且在 HTML 中运行很长，因此根据渲染参考的部分内子导航功能，在该部分的顶部添加排名标题的部分内跳转列表（指向每张卡片的锚链接）。
 
-**Illustrative visuals — decide on the idea's shape, not on how clear the
-prose reads.** A well-placed visual can make a direction land faster for a
-human scanning a set of candidates. Decide per survivor — none, a few, or
-most may warrant one; there is no quota and no cap.
+**说明性视觉效果 - 决定想法的形状，而不是散文读起来有多清晰。** 位置恰当的视觉效果可以使人类扫描一组候选者时更快地找到方向。根据每个幸存者做出决定——没有人、少数人或大多数人可能需要一个；没有配额，也没有上限。
 
-Watch one trap when you make this call: the prose always conveys the idea
-(that is the hard rule below), and as a text-native reasoner you will tend
-to read your own prose, judge it "clear," and conclude no visual is needed
-— which quietly under-produces the visuals that actually help a reader. So
-"the prose is already clear" is never the reason to skip. The real
-question is what the idea *hinges on*, and whether that has a shape a
-picture carries faster than a sentence.
+当你做出这个决定时要注意一个陷阱：散文总是传达想法（这是下面的硬性规则），作为一个文本本地推理者，你会倾向于阅读自己的散文，判断它“清晰”，并得出不需要视觉的结论
+——这悄悄地降低了对读者真正有帮助的视觉效果。所以
+“散文已经很清楚了”绝不是跳过的理由。真正的问题是这个想法“取决于”什么，以及它是否具有图片比句子更快地传达的形状。
 
-**Concrete-vs-abstract is the wrong axis.** Don't reach for a visual
-because an idea feels big or conceptual, and don't skip one because it
-feels small or concrete. A new-feature *concept* is often the best
-candidate — the reader has to picture an unfamiliar arrangement — while
-many concrete changes (an error fix, a drop-in dependency swap) have
-nothing structural to draw. Ask what the idea hinges on, not how abstract
-it is.
+**具体与抽象是错误的轴。** 不要因为一个想法感觉很大或概念性而追求视觉效果，也不要因为感觉很小或具体而跳过一个想法。新功能*概念*通常是最好的候选者——读者必须想象一个不熟悉的安排——而许多具体的变化（错误修复、插入依赖交换）没有任何结构性的可绘制。询问这个想法的依据是什么，而不是它有多抽象。
 
-- **Hinges on a structure → lean toward a visual.** A relationship
-  between parts, a flow or sequence, a before/after contrast, a
-  structural arrangement, an analogy mapping (especially cross-domain
-  ideas), a quantitative comparison. A picture lands these faster than a
-  sentence even when the prose is perfectly clear — and it should show
-  the *basis* or the *why-it-matters*, not restate the title. New-feature
-  concepts frequently live here.
-- **A single point with nothing structural to show → no visual.** A
-  renamed thing, a copy change, "handle the null case," a drop-in library
-  swap — there is no shape a diagram would add; one here is decoration.
-  Size and abstraction don't decide this: a sweeping concept can still be
-  one proposition ("ship dark mode"), and a small concrete fix can still
-  re-route how two parts talk (real shape, worth drawing).
+- **取决于结构 → 倾向于视觉。** 部分之间的关系、流程或顺序、before/after对比、结构安排、类比映射（尤其是跨领域的想法）、定量比较。即使散文非常清晰，图片也比句子更快地表达这些内容——而且它应该显示*基础*或*为什么重要*，而不是重述标题。新功能概念经常出现在这里。
+- **没有任何结构可显示的单点→没有视觉效果。**重命名的东西，副本更改，“处理空情况”，插入库交换 - 图表不会添加任何形状;其中之一是装饰。大小和抽象并不能决定这一点：一个全面的概念仍然可以是一个命题（“交付黑暗模式”），而一个小的具体修复仍然可以重新路由两个部分的对话方式（真实的形状，值得绘制）。
 
-Decoration — a visual with no shape to show, or one that just restates the
-title — is the failure mode, and it is slop whether it appears once or
-five times. A visual that genuinely shows the idea's shape is never slop,
-however many ideas warrant one.
+装饰——一种没有形状可展示的视觉效果，或者只是重述标题的视觉效果——是失败的模式，无论出现一次还是五次，都是草率的。无论有多少想法都值得，真正展现想法形状的视觉效果永远不会马虎。
 
-Two constraints on any visual you do add:
+对于您添加的任何视觉效果有两个限制：
 
-- **Stay at the idea's altitude — illustrative, not a spec.** This is the
-  *opposite* of a plan or requirements diagram. The shared rendering
-  reference treats plan diagrams as authoritative content and forbids
-  "directional sketch" framing; ideation visuals are the reverse —
-  deliberately directional overviews of a direction nobody has committed
-  to yet. Keep them conceptual (contrast, analogy, rough flow). Detailed
-  architecture, sequence diagrams, and wireframes belong downstream in
-  ce-brainstorm / ce-plan once a direction is chosen, not here.
-- **Keep the prose standing alone.** A reader who ignores the visual
-  still gets the complete idea and its basis. The visual accelerates
-  understanding; it never carries content found nowhere else.
+- **保持想法的高度——说明性的，而不是规范。**这是计划或需求图的“相反”。共享渲染参考将平面图视为权威内容并禁止
+  “定向草图”取景；构思视觉效果则相反——对尚未有人承诺的方向进行刻意的定向概述。保持概念性（对比、类比、粗略流程）。一旦选择了方向，详细的架构、序列图和线框图就属于 ce-brainstorm / ce-plan 的下游，而不是这里。
+- **让散文保持独立。** 忽略视觉效果的读者仍然可以获得完整的想法及其基础。视觉加速理解；它从不包含在其他地方找不到的内容。
 
-Rendering mechanics (inline SVG in HTML with the layout-legibility and
-halo rules; a fenced mermaid block in markdown when the shape suits it)
-follow the rendering reference's Diagrams section — but that section's
-plan-centric, authoritative-diagram framing is overridden here by the
-illustrative, decide-per-idea stance above.
+渲染机制（HTML 中的内联 SVG，具有布局易读性和光环规则；当形状适合时，Markdown 中的围栏美人鱼块）遵循渲染参考的图表部分 - 但该部分以计划为中心的权威图表框架在这里被上面的说明性的、根据想法决定的立场所覆盖。
 
-### Rejection Summary
+### 拒绝总结
 
-A table of considered-and-cut ideas with a one-line reason each. When an
-axis ended with zero survivors despite recovery, record it as its own
-row so the coverage gap is visible rather than silently absent.
+一张经过深思熟虑和削减的想法表，每个想法都有一行理由。当轴尽管恢复但仍以零幸存者结束时，请将其记录为自己的行，以便覆盖间隙可见，而不是默默地消失。
 
-## Markdown skeleton
+## Markdown 骨架
 
-The section shape both formats carry. In markdown it is written
-literally (omit clearly irrelevant fields only when necessary); in HTML
-the same sections render per `html-rendering.md`.
+两种格式都具有截面形状。在 Markdown 中，它是按字面书写的（仅在必要时省略明显不相关的字段）；在 HTML 中，相同的部分按 `html-rendering.md` 渲染。
 
 ```markdown
 ---
-date: YYYY-MM-DD
-topic: <kebab-case-topic>
-focus: <optional focus hint>
-mode: <repo-grounded | elsewhere-software | elsewhere-non-software>
+日期：年-月-日
+主题：<kebab-case-topic>
+focus: <可选焦点提示>
+模式：<repo-grounded |其他地方的软件 |其他地方-非软件>
 ---
 
-# Ideation: <Title>
+# 创意：<Title>
 
-## Grounding Context
-[Grounding summary from Phase 1 — "Codebase Context" in repo mode, "Topic Context" in elsewhere mode]
+## 接地背景
+[第一阶段的基础总结——回购模式下的“代码库上下文”，其他模式下的“主题上下文”]
 
-## Topic Axes
-[3-5 axes from Phase 1.5, one per line, OR a single `Decomposition skipped — ...` line. Omit the section if not applicable.]
+## 主题轴
+[第 1.5 阶段的 3-5 个轴，每行一个，或单个 `Decomposition skipped — ...` 行。如果不适用，请省略该部分。]
 
-## Ranked Ideas
+## 想法排名
 
-### 1. <Idea Title>
-**Description:** [Concrete explanation]
-**Axis:** [Topic axis this idea targets — omit when decomposition was skipped]
-**Basis:** [`direct:` / `external:` / `reasoned:` — quoted, cited, or written-out argument]
-**Rationale:** [How the basis connects to the move's significance]
-**Downsides:** [Tradeoffs or costs]
-**Confidence:** [0-100%]
-**Complexity:** [Low / Medium / High]
+### 1. <想法标题>
+**说明：** 【具体说明】
+**轴：** [此想法针对的主题轴 - 跳过分解时省略]
+**基础：** [`direct:` / `external:` / `reasoned:` — 引用、引用或写出的论点]
+**理由：** [基础如何与此举的重要性联系起来]
+**缺点：** [权衡或成本]
+**置信度：** [0-100%]
+**复杂性：** [低/中/高]
 
-## Rejection Summary
+## 拒绝总结
 
-| # | Idea | Reason Rejected |
+| # | 主意 | 拒绝原因 |
 |---|------|-----------------|
-| 1 | <Idea> | <Reason rejected> |
+| 1 | <Idea> | <拒绝原因> |
 
-[When applicable, append axis-coverage gaps as their own rows so the gap is visible:]
-| - | axis: <name> | recovery skipped (cap reached) — no survivors on this axis |
+[如果适用，将轴覆盖间隙附加为自己的行，以便间隙可见：]
+| - | 轴：<name> | 跳过恢复（达到上限）- 该轴上没有幸存者 |
 ```
 
-## No process exhaust
+## 无工艺废气
 
-Keep engineering-process metadata out of the artifact — no "captured at
-Phase X" notes, no skill-pointer "next steps", no italic provenance
-lines. The reader wants the ideas and their basis. (HTML carries a
-single visible composition-signal footer per the html-rendering
-invariant; that is the one provenance element that belongs in the doc.)
+将工程流程元数据排除在产物之外 - 没有“在 X 阶段捕获”注释，没有技能指针“下一步”，没有斜体出处线。读者想要这些想法及其基础。 （HTML 根据 html 渲染不变式携带单个可见的合成信号页脚；这是属于文档中的唯一出处元素。）

@@ -41,8 +41,8 @@
   const chrome = document.createElement("div")
   chrome.className = "ce-annotate-chrome"
   chrome.innerHTML = `
-    <button type="button" class="ce-annotate-toggle" aria-pressed="false" aria-keyshortcuts="Control+A Escape" title="Click pins the rest state. Ctrl+A while hovering freezes hover, then click to pin. Esc or Ctrl+A again turns it off."><span class="ce-annotate-toggle-label">Annotate</span><kbd class="ce-annotate-hotkey">Ctrl+A</kbd></button>
-    <button type="button" class="ce-annotate-stop" title="Close the preview and return to chat">End session</button>
+    <button type="button" class="ce-annotate-toggle" aria-pressed="false" aria-keyshortcuts="Control+A Escape" title="点击以标注静止状态。悬停时按 Ctrl+A 冻结效果，再点击标注；按 Esc 或再次按 Ctrl+A 关闭。"><span class="ce-annotate-toggle-label">标注</span><kbd class="ce-annotate-hotkey">Ctrl+A</kbd></button>
+    <button type="button" class="ce-annotate-stop" title="关闭预览并返回对话">结束会话</button>
     <span class="ce-annotate-status" hidden></span>
   `
   shadow.appendChild(chrome)
@@ -65,10 +65,10 @@
   composer.className = "ce-annotate-composer"
   composer.hidden = true
   composer.innerHTML = `
-    <textarea class="ce-annotate-comment" rows="3" placeholder="What should change here?"></textarea>
+    <textarea class="ce-annotate-comment" rows="3" placeholder="这里需要怎么改？"></textarea>
     <div class="ce-annotate-actions">
-      <button type="submit" class="ce-annotate-submit" disabled>Submit</button>
-      <button type="button" class="ce-annotate-cancel">Cancel</button>
+      <button type="submit" class="ce-annotate-submit" disabled>提交</button>
+      <button type="button" class="ce-annotate-cancel">取消</button>
     </div>
     <p class="ce-annotate-error" hidden></p>
   `
@@ -289,28 +289,28 @@
       if (commentToolOn) setCommentTool(false)
       toggle.hidden = true
       stop.hidden = true
-      setStatus("Sent to agent")
-      status.title = "Return to chat. You can annotate again after this batch is applied."
+      setStatus("已发送给代理")
+      status.title = "返回对话；处理完本批标注后可以继续。"
       return
     }
     toggle.hidden = false
     stop.hidden = false
     status.removeAttribute("title")
-    if (status.textContent === "Sent to agent") setStatus("")
+    if (status.textContent === "已发送给代理") setStatus("")
     const n = unflushedCount()
     if (n === 0) {
-      stop.textContent = "End session"
+      stop.textContent = "结束会话"
       stop.removeAttribute("aria-label")
-      stop.title = "Close the preview and return to chat"
+      stop.title = "关闭预览并返回对话"
       return
     }
     const badge = document.createElement("span")
     badge.className = "ce-annotate-count"
     badge.textContent = String(n)
-    stop.replaceChildren(badge, document.createTextNode("Send to agent"))
-    const notes = n === 1 ? "1 note" : `${n} notes`
-    stop.setAttribute("aria-label", `Send ${notes} to the agent`)
-    stop.title = `Send ${notes} to the agent. The session stays open for another batch.`
+    stop.replaceChildren(badge, document.createTextNode("发送给代理"))
+    const notes = `${n} 条标注`
+    stop.setAttribute("aria-label", `发送 ${notes} 给代理`)
+    stop.title = `发送 ${notes} 给代理。会话保持开放，可以发送下一批。`
   }
 
   function cssPath(el) {
@@ -441,7 +441,7 @@
     setCommentTool(false)
     toggle.hidden = true
     stop.hidden = true
-    setStatus("Session ended")
+    setStatus("会话已结束")
     closeComposer()
     pins.length = 0
     renderPins()
@@ -485,7 +485,7 @@
     commentToolOn = on
     toggle.setAttribute("aria-pressed", String(on))
     toggle.classList.toggle("is-on", on)
-    toggleLabel.textContent = on ? "Annotating" : "Annotate"
+    toggleLabel.textContent = on ? "正在标注" : "标注"
     catcher.hidden = !on
     if (!on) {
       unfreezeHover()
@@ -711,7 +711,7 @@
       if (!sessionEnded) {
         composer.hidden = false
         error.hidden = false
-        error.textContent = "Could not send — retry"
+        error.textContent = "发送失败，请重试"
       }
     } finally {
       inFlight = false
@@ -733,7 +733,7 @@
       if (!response.ok) throw new Error("retry")
     } catch {
       stop.disabled = false
-      setStatus(sending ? "Could not send to agent — retry" : "Could not end session — retry")
+      setStatus(sending ? "发送给代理失败，请重试" : "结束会话失败，请重试")
       return
     }
     if (sending) {

@@ -1,147 +1,147 @@
-# `ce-optimize` Usage Guide
+# `ce-optimize` 使用指南
 
-## What This Skill Is For
+## 这个技能的用途是什么
 
-The `ce-optimize` skill is for hard engineering problems where:
+`ce-optimize` 技能适用于困难的工程问题，其中：
 
-1. You can measure the same target twice.
-2. You can either attribute a named-workload cost or try multiple scored variants.
-3. You want the skill to keep confirmed improvements and reject the rest.
+1. 您可以对同一目标进行两次测量。
+2. 您可以归因于命名工作负载成本，也可以尝试多个评分变体。
+3. 您希望该技能保留已确认的改进并拒绝其余的。
 
-On a cost target, the first useful action is often a locating measurement, not a batch of implementation experiments. On a scored variant space, the skill searches and keeps. It is not one-shot implementation of a change you already know.
+对于成本目标，第一个有用的行动通常是定位测量，而不是一批实施实验。在有分数的变体空间上，技能搜索并保留。这不是一次性实施您已经知道的更改。
 
-## When To Use It
+## 何时使用它
 
-Reach for `ce-optimize` when the problem looks like:
+当问题如下所示时，请触碰 `ce-optimize`：
 
-- "Find the smallest memory limit that stops OOM crashes without wasting RAM."
-- "Tune clustering parameters without collapsing everything into one garbage cluster."
-- "Find a prompt that is cheaper but still produces summaries good enough for downstream clustering."
-- "Compare several ranking, retrieval, batching, or threshold strategies against the same harness."
+- “找到阻止 OOM 崩溃且不浪费 RAM 的最小内存限制。”
+- “调整集群参数，而不会将所有内容都折叠到一个垃圾集群中。”
+- “找到一个更便宜但仍能生成足以用于下游聚类的摘要的提示。”
+- “针对同一工具比较多种排名、检索、批处理或阈值策略。”
 
-Choose `type: hard` when success is objective and cheap to measure:
+当成功是客观且易于衡量时选择 `type: hard`：
 
-- Memory usage
-- Latency
-- Throughput
-- Test pass rate
-- Build time
+- 内存使用情况
+- 延迟
+- 吞吐量
+- 测试通过率
+- 构建时间
 
-Choose `type: judge` when a numeric metric can be gamed or when human usefulness matters:
+当数字指标可以被玩弄或当人类有用性很重要时，选择`type: judge`：
 
-- Cluster coherence
-- Search relevance
-- Summary quality
-- Prompt quality
-- Classification quality with semantic edge cases
+- 集群一致性
+- 搜索相关性
+- 总结质量
+- 及时的质量
+- 具有语义边缘情况的分类质量
 
-## When Not To Use It
+## 何时不使用它
 
-`ce-optimize` is usually the wrong tool when:
+在以下情况下，`ce-optimize` 通常是错误的工具：
 
-- The change is already known. Make it, or use `ce-work`
-- The job is diagnosing failing or slow behavior. That is `ce-debug`
-- There is no repeatable measurement harness
-- The search space is fake and only has one plausible answer
-- The cost of evaluating variants is too high to justify multiple runs
+- 这种变化是已知的。制作它，或者使用`ce-work`
+- 这项工作是诊断失败或缓慢的行为。也就是`ce-debug`
+- 没有可重复的测量工具
+- 搜索空间是假的，只有一个合理的答案
+- 评估变体的成本太高，无法证明多次运行的合理性
 
-## How To Think About It
+## 如何思考
 
-The pattern is:
+模式是：
 
-1. Define the target.
-2. Build or validate the measurement harness first.
-3. Take the cheapest next action that would change what gets implemented: a locating measurement on a cost target, or a scored variant on a search target.
-4. Keep confirmed improvements and reject the rest.
+1. 定义目标。
+2. 首先构建或验证测量工具。
+3. 采取最便宜的下一步行动来改变所实施的内容：对成本目标进行定位测量，或对搜索目标进行评分变体。
+4. 保留已确认的改进并拒绝其余的。
 
-The core rule is simple:
+核心规则很简单：
 
-- If a hard metric captures "better," optimize the hard metric.
-- If a hard metric can be gamed, add LLM-as-judge.
+- 如果硬指标捕获“更好”，则优化硬指标。
+- 如果硬指标可以被玩弄，请添加法学硕士作为法官。
 
-Example: lowering a clustering threshold may increase cluster coverage. That sounds good until everything ends up in one giant cluster. Hard metrics may say "improved"; an LLM judge sampling real clusters can say "this is trash."
+示例：降低聚类阈值可能会增加聚类覆盖范围。这听起来不错，直到所有东西最终都形成一个巨大的集群。硬指标可能会说“改进”；法学硕士法官对真实集群进行采样可以说“这是垃圾”。
 
-## First-Run Advice
+## 首次运行建议
 
-For the first run:
+对于第一次运行：
 
-- Prefer `execution.mode: serial`
-- Set `execution.max_concurrent: 1`
-- Keep `stopping.max_iterations` small
-- Keep `stopping.max_hours` small
-- Avoid new dependencies until the baseline is trustworthy
-- In judge mode, use a small sample and a low cost cap
+- 更喜欢`execution.mode: serial`
+- 设置`execution.max_concurrent: 1`
+- 保持 `stopping.max_iterations` 小
+- 保持 `stopping.max_hours` 小
+- 避免新的依赖关系，直到基线值得信赖
+- 在判断模式下，使用小样本和低成本上限
 
-The goal of the first run is to validate the harness, not to win the optimization immediately.
+第一次运行的目标是验证宿主，而不是立即赢得优化。
 
-## Example Prompts
+## 提示示例
 
-### 1. Memory Tuning
-
-```text
-Run the `ce-optimize` skill to find the smallest memory setting that keeps this service stable under our load test.
-
-The current container limit is 512 MB and the app sometimes OOM-crashes. Do not just jump to 8 GB. Try a small set of realistic memory limits, run the same load test for each one, and score the results using:
-- did the process OOM
-- did tail latency spike badly
-- did GC pauses become excessive
-
-Prefer the smallest memory limit that passes the guard rails.
-```
-
-### 2. Clustering Quality
+### 1. 内存调整
 
 ```text
-Run the `ce-optimize` skill to improve issue and PR clustering quality.
+运行 `ce-optimize` 技能来找到在我们的负载测试下保持该服务稳定的最小内存设置。
 
-We have about 18k open issues and PRs. We want to test changes that improve clustering quality, reduce singleton clusters, and improve match quality within each cluster.
+当前的容器限制为 512 MB，应用程序有时会 OOM 崩溃。不要直接跳到 8 GB。尝试一小组实际的内存限制，对每个限制运行相同的负载测试，并使用以下方法对结果进行评分：
+- 进程是否 OOM
+- 尾部延迟是否严重增加
+- GC 暂停是否过多
 
-Do not mutate the shared default database. Copy it for the run, then use per-experiment copies when needed.
-
-Do not optimize only for coverage. Use LLM-as-judge to sample clusters and confirm they still preserve real semantic similarity instead of collapsing into giant low-quality clusters.
+优先选择通过护栏的最小内存限制。
 ```
 
-### 3. Expensive Test Suite
+### 2. 聚类质量
 
 ```text
-Run the `ce-optimize` skill to reduce this repository's full test-suite wall time without making CI slower or spending more runner-minutes.
+运行`ce-optimize`技能来提高问题和PR聚类质量。
 
-Local warm median is currently about six minutes and the range is wide. Treat local wall time, CI critical path, and aggregate runner-minutes as required targets: a change that helps only CI may be kept if it does not regress the others, and the run is not done until every declared target is met.
+我们有大约 18k 个未决问题和 PRs。我们想要测试能够提高聚类质量、减少单例聚类以及提高每个聚类内的匹配质量的更改。
 
-Do not spend a five-run cold/warm protocol on every exploratory experiment. Smoke for correctness, take one paired sample, abort anything already far worse than the current best, and reserve the full protocol for a candidate you are about to keep and for final confirmation.
+不要改变共享默认数据库。复制它以供运行，然后在需要时使用每个实验的副本。
+
+不要仅针对覆盖范围进行优化。使用 LLM 作为判断对集群进行采样，并确认它们仍然保留真正的语义相似性，而不是崩溃成巨大的低质量集群。
 ```
 
-### 4. Prompt Optimization
+### 3. 昂贵的测试套件
 
 ```text
-Run the `ce-optimize` skill to create a summarization prompt for issues and PRs that minimizes token spend while still producing summaries that are good enough for downstream clustering.
+运行 `ce-optimize` 技能可以减少此存储库的完整测试套件的运行时间，而不会使 CI 变慢或花费更多的运行时间。
 
-I want the loop to compare prompt variants, measure token cost, and judge whether the summaries preserve the distinctions needed to cluster related issues together without merging unrelated ones.
+目前当地温暖中值约为六分钟，范围较大。将本地墙时间、CI 关键路径和总跑步者分钟数视为所需目标：如果不使其他目标倒退，则可以保留仅有助于CI 的更改，并且在满足每个声明的目标之前不会完成运行。
+
+不要在每个探索性实验中都花费五次运行cold/warm协议。为了正确性而吸烟，采取一对样本，中止任何已经比当前最好的情况差得多的事情，并为您即将保留的候选者保留完整的协议并进行最终确认。
 ```
 
-## Choosing Between Hard Metrics And Judge Mode
+### 4. 及时优化
 
-Use hard metrics alone when:
+```text
+运行 `ce-optimize` 技能可为问题创建摘要提示，并运行 PRs 最大限度地减少令牌支出，同时仍生成足以用于下游集群的摘要。
 
-- "Better" is obvious from the numbers.
+我希望循环比较提示变体，测量令牌成本，并判断摘要是否保留将相关问题聚集在一起所需的区别，而不合并不相关的问题。
+```
 
-Add judge mode when:
+## 在硬指标和判断模式之间进行选择
 
-- The numbers can improve while the real output gets worse.
+在以下情况下单独使用硬指标：
 
-Common pattern:
+- “更好”从数字中显而易见。
 
-- Hard gates reject broken outputs.
-- Judge mode scores the surviving candidates for actual usefulness.
+添加判断模式时：
 
-That hybrid setup is often the best default for ranking, clustering, and prompt work.
+- 数字可能会有所改善，而实际产出却会变得更糟。
 
-## First-run defaults
+常见模式：
 
-A first run optimizes for signal and safety, not throughput:
+- 硬门拒绝损坏的输出。
+- 评判模式对幸存候选人的实际有用性进行评分。
 
-- Start from `references/example-hard-spec.yaml` when the metric is objective and cheap to measure; use `references/example-judge-spec.yaml` only when quality genuinely requires semantic judgment; use `references/example-expensive-benchmark-spec.yaml` when each run costs minutes or several hard targets must all hold.
-- Prefer `execution.mode: serial` with `execution.max_concurrent: 1`.
-- Cap the run with `stopping.max_iterations: 4` and `stopping.max_hours: 1`.
-- Add no new dependencies until the baseline and measurement harness are trusted.
-- For judge mode, start at `sample_size: 10`, `batch_size: 5`, and `max_total_cost_usd: 5`.
+这种混合设置通常是排名、聚类和即时工作的最佳默认设置。
+
+## 首次运行默认值
+
+首次运行优化信号和安全性，而不是吞吐量：
+
+- 当指标客观并且测量成本低时，从`references/example-hard-spec.yaml`开始；仅当质量确实需要语义判断时才使用`references/example-judge-spec.yaml`；当每次运行需要几分钟或几个硬目标必须全部实现时，请使用`references/example-expensive-benchmark-spec.yaml`。
+- 优先选择 `execution.mode: serial` 和 `execution.max_concurrent: 1`。
+- 使用 `stopping.max_iterations: 4` 和 `stopping.max_hours: 1` 限制运行。
+- 在基线和测量工具受到信任之前，不要添加新的依赖项。
+- 对于判断模式，从`sample_size: 10`、`batch_size: 5`和`max_total_cost_usd: 5`开始。

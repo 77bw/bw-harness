@@ -1,7 +1,7 @@
-# Requested Write-Up
+# 要求撰写
 
-Expand the judgment for its intended readers and destination. Preserve the active subject's evidence and conditions from `references/method.md`: an adoption grade, a document's overall take, or a position among supplied approaches. Do not turn a document take or approach comparison into an adoption report.
+扩大对目标读者和目的地的判断。保留 `references/method.md` 中活动主体的证据和条件：采用等级、文档的总体看法或提供的方法中的位置。不要将文档记录或方法比较转化为采用报告。
 
-Use the requested format or the destination's supported format. When none is specified, choose what makes the result usable. Cite project sources and any external sources the judgment depends on. Distinguish inference from evidence and retain the conditions that could change the judgment. Do not paste raw dossiers.
+使用请求的格式或目标支持的格式。如果未指定任何内容，请选择使结果可用的内容。引用项目来源和判断所依赖的任何外部来源。区分推论和证据，保留可能改变判断的条件。请勿粘贴原始档案。
 
-Write a standalone file to private scratch and deliver its path. Resolve the CE artifact root before writing to a requested project location. When another workflow is responsible for the surrounding document, return the content for it to incorporate. A request for a write-up does not authorize publishing it. When publication is requested, use the destination’s available tools and follow its authorization requirements. If publication cannot complete, retain the local result and report the limitation.
+将独立文件写入私有暂存区并提供其路径。在写入请求的项目位置之前解析 CE 产物根。当另一个工作流程负责周围文档时，返回其要合并的内容。请求撰写文章并不代表授权发布该文章。当请求发布时，使用目的地的可用工具并遵循其授权要求。如果发布无法完成，请保留本地结果并报告限制。

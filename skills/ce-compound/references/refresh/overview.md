@@ -1,66 +1,66 @@
-# Refresh
+# 刷新
 
-Audit the learnings under `<root>/solutions/` against the current codebase, apply the maintenance actions the evidence supports, and deliver a complete per-doc report plus committed changes. The report and the corrected document set are the deliverables. The store only compounds value if every doc can be trusted.
+根据当前代码库审核`<root>/solutions/`下的学习内容，应用证据支持的维护操作，并提供完整的每个文档报告以及已提交的更改。报告和更正后的文件集是可交付成果。如果每个文档都可信，则商店只会增加价值。
 
 
-## Mode
+## 模式
 
-**Read `references/refresh/modes.md` now.** It reads the mode off the arguments and defines what each mode may apply unattended, the stale-marking fallback, the question tools, and the `CONCEPTS.md` bootstrap.
+**现在阅读`references/refresh/modes.md`。**它从参数中读取模式，并定义每种模式可以在无人值守的情况下应用的内容、过时标记后备、问题工具和`GLOSSARY.md`引导程序。
 
-Two rules hold in both modes. A failed write is recorded as **recommended**, and the run continues. And a question is asked through the host's blocking tool, or through the numbered-options fallback that reference defines. It is never silently skipped.
+两种模式都适用两条规则。失败的写入记录为**推荐**，并且运行继续。通过主机的阻止工具或通过参考定义的编号选项回退来提出问题。它永远不会被默默地跳过。
 
-## Worth
+## 值得
 
-Every refresh judges worth as well as accuracy: a lesson should live in one place, in the strongest form that holds it. **Read `references/refresh/worth-audit.md` before Investigate.** It adds the bar, the evidence rule, and the routing, including the changes a refresh makes to `CODING_STANDARDS.md`. When the user asked for drift fixes only, do not read it and do not apply its test; the accuracy refresh is the whole run.
+每次刷新都会判断其价值和准确性：一堂课应该以最有力的形式存在于一个地方。 **在调查之前阅读`references/refresh/worth-audit.md`。**它添加了栏、证据规则和路由，包括刷新对`CODING_STANDARDS.md`所做的更改。当用户仅要求漂移修复时，不要阅读它，也不要应用它的测试；准确性刷新是整个运行过程。
 
-## Artifact Root
+## 神器根
 
-Resolve `<root>` when you first compose a `<root>/solutions/` path, following the Artifact Root section of `SKILL.md`. Pass the resolved `<root>/solutions/` path to any subagent, not the config. Every subagent spawn omits the `mode` parameter, so the user's permission settings apply.
+当您第一次按照 `SKILL.md` 的 Artifact Root 部分组成 `<root>/solutions/` 路径时，解析 `<root>`。将解析后的 `<root>/solutions/` 路径传递给任何子代理，而不是配置。每个子代理生成都会忽略 `mode` 参数，因此应用用户的权限设置。
 
-## Scope
+## 范围
 
-Candidates are the `.md` files under `<root>/solutions/`, excluding `README.md` and anything under `_archived/`. A hint that matches nothing never widens the scope. **Read `references/refresh/scope.md`** for the narrowing strategy, what each mode does on a miss, the empty-store message, triage order, and the README-row cleanup each action carries.
+候选者是`<root>/solutions/`下的`.md`文件，不包括`README.md`和`_archived/`下的任何文件。与任何内容都不匹配的提示永远不会扩大范围。 **阅读`references/refresh/scope.md`**了解缩小策略、每种模式在未命中时执行的操作、空存储消息、分类顺序以及每个操作所进行的README行清理。
 
-## Investigate
+## 调查
 
-**Read `references/refresh/investigate.md`** for the staleness dimensions, auto-memory rules, subagent roles, and category-shape notes.
+**阅读 `references/refresh/investigate.md`** 了解过时维度、自动记忆规则、子代理角色和类别形状注释。
 
-Check each learning against the current codebase, then check the set for overlap, supersession, and contradiction. A contradiction misleads actively, so it outranks individual staleness.
+根据当前代码库检查每个学习，然后检查集合是否有重叠、取代和矛盾。矛盾会主动误导，因此它比个人的陈旧更重要。
 
-Judge a learning's code citations against the repository's default branch, where the learning lives, not against a working tree that may hold unmerged work. A citation that matches the default branch has not drifted. When a cited line number no longer points at what the learning describes, cite the function, class, or config key that defines it instead of a new line number.
+根据学习所在的存储库的默认分支来判断学习的代码引用，而不是根据可能保存未合并工作的工作树。与默认分支匹配的引文并未发生漂移。当引用的行号不再指向学习内容所描述的内容时，请引用定义它的函数、类或配置键，而不是新的行号。
 
-A knowledge-track learning sometimes points at a guidance file it names or links, such as a skill's `SKILL.md`, a runbook, or an instruction file. Compare only guidance the learning names. Never search the guidance layer for one.
+知识轨道学习有时会指向它命名或链接的指导文件，例如技能的 `SKILL.md`、操作手册或说明文件。仅比较学习名称的指导。切勿在引导层中搜索。
 
-Every investigation subagent's prompt carries that reference's **Subagent prompt** clauses verbatim: search tools, auto-memory, the citation rule above, and this one:
+每个调查子代理的提示都逐字携带该引用文档的**子代理提示**子句：搜索工具、自动记忆、上面的引用规则，以及这个：
 
-> If the learning is knowledge-track and names or links a guidance file (a skill's `SKILL.md`, a runbook, a root instruction file), read that file and, when it states a different order or a contradictory rule for the same procedure, return both conflicting quotes plus which side current code follows — or that code witnesses neither. Read only guidance the learning names; do not search for one, and do not edit it.
+> 如果学习是知识轨道，并命名或链接指导文件（技能的`SKILL.md`、操作手册、根指令文件），请阅读该文件，并且当它为同一过程规定不同的顺序或矛盾的规则时，返回两个冲突的引号以及当前代码遵循的哪一方 - 或者该代码两者都没有见证。只读指导学习名称；不要搜索，也不要编辑它。
 
-## Classify
+## 分类
 
-Every doc gets exactly one outcome: **Keep**, **Update**, **Consolidate**, **Replace**, or **Delete**. A doc is never archived in place: there is no `_archived/`, since version history is the archive.
+每个文档都会得到一个结果：**保留**、**更新**、**合并**、**替换**或**删除**。文档永远不会就地存档：不存在 `_archived/`，因为版本历史记录就是存档。
 
-**Read `references/refresh/classify.md` before assigning any of them.** It defines each outcome's meaning, the Update/Replace boundary, the auto-delete rule and its pre-checks, the relocation and split rules, the retrieval-value test, unverifiable-is-not-false, pattern docs, and what interactive mode asks.
+**在分配任何结果之前先阅读`references/refresh/classify.md`。**它定义了每个结果的含义、Update/Replace边界、自动删除规则及其预检查、重定位和拆分规则、检索值测试、不可验证的不是假的、模式文档以及交互模式要求的内容。
 
-Two boundaries hold whatever the evidence says. A refresh never changes product code. A claim about current mechanics follows current code, but independently supported guidance does not become false merely because implementation stopped satisfying it: classify the doc from the guidance evidence and report the implementation conflict as a potential product regression. And when a learning contradicts guidance, the refresh reports that; it must never edit a skill, runbook, or instruction file. It also writes no checks. `references/refresh/worth-audit.md` governs what it changes in `CODING_STANDARDS.md`.
+无论证据如何，有两个界限。刷新永远不会改变产品代码。关于当前机制的声明遵循当前代码，但独立支持的指导不会仅仅因为实现不再满足它而变得错误：从指导证据中对文档进行分类，并将实现冲突报告为潜在的产品回归。当学习内容与指导相矛盾时，刷新报告：它绝不能编辑技能、操作手册或说明文件。它也不写任何支票。 `references/refresh/worth-audit.md` 控制`CODING_STANDARDS.md` 中的变化。
 
-## Execute
+## 执行
 
-Read `references/refresh/per-action-flows.md` and follow the section matching each doc's classification, one flow per doc. It defines the criteria, the relocation and split procedures, the replacement subagent contract, and citation cleanup.
+阅读`references/refresh/per-action-flows.md`并按照与每个文档的分类相匹配的部分进行操作，每个文档一个流程。它定义了标准、搬迁和拆分程序、替换子代理合同以及罚单清理。
 
-## Vocabulary Capture
+## 词汇捕捉
 
-After the per-doc actions, reconcile the domain terms flagged during investigation with `CONCEPTS.md`. **Read `references/concepts-vocabulary.md` unconditionally.** Its qualifying criteria are non-obvious, so a "nothing qualifies" judgment reached without reading it is a shortcut, not a result.
+在执行每个文档操作后，将调查期间标记的域术语与 `GLOSSARY.md` 进行协调。 **无条件地阅读`references/concepts-vocabulary.md`。**它的合格标准是不明显的，所以不读它就得出“没有合格”的判断是一种捷径，而不是结果。
 
-Edits apply silently in every mode. The report's `CONCEPTS.md` line records what the scan found, including "scanned, no qualifying terms".
+编辑在每种模式下都会默默应用。报告的`GLOSSARY.md`行记录了扫描发现的内容，包括“已扫描，没有限定条件”。
 
-## Report
+## 报告
 
-**Print the full report as markdown.** It is the deliverable, not an internal summary, and in non-interactive mode it is the only one. Keep it self-contained and never abbreviated, split into **Applied** and **Recommended**. **Read `references/refresh/report.md`** for the summary block, per-file detail, and what belongs under Recommended.
+**以Markdown形式打印完整报告。** 它是可交付成果，而不是内部摘要，并且在非交互模式下它是唯一的。保持其独立性且绝不缩写，分为**应用**和**推荐**。 **阅读 `references/refresh/report.md`** 了解摘要块、每个文件的详细信息以及“推荐”下的内容。
 
-## Commit
+## 犯罪
 
-Skip if nothing changed. Otherwise stage **only** the files this refresh modified, and commit in the repo's convention. **Read `references/refresh/commit.md`** for the per-mode branch decision and the git-failure fallback.
+如果没有任何变化则跳过。否则，**仅**此刷新修改的文件，并按照存储库的约定提交。 **阅读 `references/refresh/commit.md`** 了解每个模式的分支决策和 git-failure 后备。
 
-## Discoverability Check
+## 可发现性检查
 
-After the report, check that the project's instructions would lead an agent to `<root>/solutions/` before working in a documented area. Do this every time: the store only compounds value when agents can find it. **Read `references/refresh/discoverability.md`** for what the reader must learn, the smallest-addition rule and its tone, the `CONCEPTS.md` variant, consent versus a report line per mode, and folding a late edit into the commit.
+报告后，在记录区域工作之前，检查项目说明是否会引导特工到达`<root>/solutions/`。每次都这样做：只有当客服人员可以找到它时，才会存储复合值。 **阅读`references/refresh/discoverability.md`**了解读者必须学习的内容、最小加法规则及其语气、`GLOSSARY.md`变体、每种模式的同意与报告行，以及将后期编辑折叠到提交中。

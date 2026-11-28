@@ -1,7 +1,11 @@
 ---
 name: grill-with-docs
-description: A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.
+description: "为了完善计划或设计而进行的不懈采访，同时也会创建文档（ADR 和术语表）。"
 disable-model-invocation: true
 ---
 
-Call the Skill tool twice, for "grilling" and "domain-modeling".
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
+
+使用活动主机的技能机制加载并遵循已安装的`grilling`和`domain-modeling`技能。如果主机缺少嵌套调用工具，请打开两个编目的SKILL.md文件并将它们应用到本次对话中；不要模拟两个已完成的调用。
+
+面谈后，向规划者提供确认的目标和非目标、要求、约束、验收证据、重要的权衡和剩余问题。引用实际更改的 glossary/ADR 路径（如果有）。当需要规划时，最好是在本次会议中，将该简介带入本地`ce-plan`路线。否则退回简报；在会话更改时使用现有项目指针或当前计划。不要开始另一个采访、规格或门票系列。

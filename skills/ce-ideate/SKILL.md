@@ -1,73 +1,75 @@
 ---
 name: ce-ideate
-description: "Generate and evaluate grounded ideas. Use when the user wants ideas, improvements, or surprising directions before choosing one to develop. Not for refining an idea they already have (ce-brainstorm) or judging one already on the table (ce-pov)."
-argument-hint: "[feature, focus area, or constraint] [output:md]"
+description: "产生并评估扎根的想法。当用户在选择开发之前想要想法、改进或令人惊讶的方向时使用。不是为了完善他们已有的想法（ce-brainstorm）或判断已经摆在桌面上的想法（ce-pov）。"
+argument-hint: "[特征、焦点区域或约束] [output:md]"
 
 ---
 
-# Generate Improvement Ideas
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-`ce-ideate` runs before `ce-brainstorm`. This skill answers "which ideas are worth exploring?" `ce-brainstorm` then answers what one chosen idea should mean. `ce-plan` answers how it gets built.
+# 产生改进想法
 
-**Done:** a ranked ideation artifact is written to `<root>/ideation/` when that root is present, else to a CE temp path. Every idea generated has been critiqued, and the survivors are explained. The user is left holding the next-steps menu. No requirements, plans, or code.
+`ce-ideate` 在 `ce-brainstorm` 之前运行。这项技能回答“哪些想法值得探索？” `ce-brainstorm` 然后回答一个所选想法的含义。 `ce-plan` 回答了它是如何构建的。
 
-## Boundaries
+**完成：** 当该根存在时，排名构思产物将写入 `<root>/ideation/`，否则写入 CE 临时路径。产生的每一个想法都受到了批评，并对幸存者进行了解释。用户只能拿着后续步骤菜单。没有需求、计划或代码。
 
-1. **Ground before ideating.** No advice detached from the repo.
-2. **Generate many, critique all, explain survivors only.** Generate the full candidate list before critiquing any of it. Rejection is explicit and carries a reason; this is not optimistic ranking.
-3. **Send the user to brainstorming for action.** Never skip from ideation output to planning.
-4. **Never dispatch on an unidentified subject.** Ask instead, through the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Where no such tool is in the list, or a real question call errors, offer numbered options on the user-visible surface. Never skip a question silently. Keep "Surprise me" a real option, alongside a Cancel that exits cleanly. Do not ask about solution direction, constraints, audience, tone, or success criteria; `ce-brainstorm` asks those. If it takes more than 3 questions, ideation is the wrong workflow.
-5. **Never print the internal taxonomy label.** The labels `repo-grounded`, `elsewhere-software`, and `elsewhere-non-software` only decide which agents to dispatch. Describe the mode to the user in the topic's own words.
-6. **Warn and proceed when grounding fails.**
-7. **Show the user the cost line before dispatching.**
+## 边界
 
-The **focus hint** is any optional context this run was invoked with, from the user or from a calling skill. The rest of this skill calls it `{focus_hint}`.
+1. **构思之前先进行基础研究。** 没有脱离存储库的建议。
+2. **生成许多，批评所有，仅解释幸存者。** 在批评任何一个之前生成完整的候选者列表。拒绝是明确的并且有理由；这可不是一个乐观的排名。
+3. **让用户进行头脑风暴以采取行动。**切勿从构思输出跳到计划。
+4. **切勿针对身份不明的主题进行调度。** 通过当前工具列表中已有的主持人阻止提问工具进行询问（按功能匹配，而不是按主持人特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。如果列表中没有此类工具，或者真正的问题调用错误，请在用户可见的表面上提供编号的选项。永远不要默默地跳过一个问题。让“给我惊喜”成为一个真正的选项，同时选择干净退出的“取消”。不要询问解决方案的方向、限制、受众、语气或成功标准； `ce-brainstorm`问这些。如果提出的问题超过 3 个，那么构思就是错误的工作流程。
+5. **切勿打印内部分类标签。** 标签 `repo-grounded`、`elsewhere-software` 和 `elsewhere-non-software` 仅决定调度哪些代理。用主题自己的话向用户描述该模式。
+6. **接地失败时发出警告并继续。**
+7. **在交付前向用户显示成本线。**
+
+**焦点提示** 是调用此运行时使用的任何可选上下文，来自用户或调用技能。该技能的其余部分称为`{focus_hint}`。
 
 
-## Artifact Root
+## 神器根
 
-Artifacts go under `<root>/ideation/`, and learnings are read from `<root>/solutions/`. Resolve `<root>` only when you are about to compose one of those paths, and never before the mode is classified — an elsewhere or no-repo run writes to a temp directory and never needs it. Pass a subagent the resolved path, not the config.
+产物在 `<root>/ideation/` 下，学习内容从 `<root>/solutions/` 读取。仅当您要编写这些路径之一时才解析 `<root>`，并且永远不要在模式分类之前解析 - 其他地方或无存储库运行写入临时目录并且永远不需要它。向子代理传递已解析的路径，而不是配置。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Phase 0: Resume and Scope
+## 第 0 阶段：简历和范围
 
-Both reads this phase names are required, even when the subject, mode, and format look clear. Those two references define the resume check, the format decision, and the scope classification. Nothing here is resolved before reading them.
+即使主题、模式和格式看起来很清楚，都需要读取此阶段名称。这两个参考定义了简历检查、格式决策和范围分类。在阅读它们之前，这里什么都没有解决。
 
-**Output mode is exclusive.** A run produces HTML (`.html`) or markdown (`.md`), never both. Precedence runs from a request in this prompt, through a stated user preference and config (`ideate_output:`), down to the `html` default; a headless run resolves the format the same way, with no pipeline override.
+**输出模式是独占的。** 一次运行会生成 HTML (`.html`) 或 markdown (`.md`)，但绝不会同时生成两者。优先级从该提示中的请求开始，通过规定的用户首选项和配置 (`ideate_output:`)，直至`html` 默认值；无头运行以相同的方式解析格式，没有管道覆盖。
 
-Read `references/output-mode.md` whenever a format is resolved. The read is required. It defines each step of the decision, and the 30-day recent-work check that decides whether this run updates an existing doc instead of writing a new one.
+每当格式被解析时读取`references/output-mode.md`。需要阅读。它定义了决策的每个步骤，以及 30 天的近期工作检查，该检查决定此运行是否更新现有文档而不是编写新文档。
 
 <!-- ce-config-layers:start -->
-**Resolve ordinary CE yaml keys from the two repo files.**
+**解析两个存储库文件中的普通 CE yaml 密钥。**
 
-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
+- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
+- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
 <!-- ce-config-layers:end -->
 
-**Non-software routing.** A topic that is not about software runs elsewhere-mode grounding rather than the repo scan. It then follows `references/universal-ideation.md` in place of Phase 2's frames and the Phase 5 menu. The deliverable is still written automatically.
+**非软件路由。** 与软件无关的主题在其他地方运行，而不是回购扫描。然后它跟随 `references/universal-ideation.md` 代替第 2 阶段的框架和第 5 阶段的菜单。可交付成果仍然是自动编写的。
 
-**The Phase 0 checks.** `references/scope-gates.md` defines every Phase 0 check, plus what changes in surprise-me and tactical runs. Ask when the subject is not identifiable. `go deep` beats a tactical signal.
+**第 0 阶段检查。** `references/scope-gates.md` 定义每个第 0 阶段检查，以及惊喜和战术运行中的变化。当无法识别主题时询问。 `go deep` 击败战术信号。
 
-## Phase 1: Mode-Aware Grounding
+## 第 1 阶段：模式感知接地
 
-Read `references/grounding.md` before dispatching any grounding agent. The read is required. That reference defines every dispatch in this phase, including the routing test that runs *before* either dispatch block. Grounding runs in parallel, in the **foreground**.
+在派遣任何接地代理之前请阅读`references/grounding.md`。需要阅读。该引用定义了此阶段中的每个调度，包括在任一调度块*之前*运行的路由测试。接地在**前台**并行运行。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-Scratch lives beneath the effective user's private CE root: `/tmp/compound-engineering-<uid>` when that is usable, else the validated `$TMPDIR` fallback, and never `.context/`. Generate one 8-hex `<run-id>` and reuse it for the cache and for every checkpoint.
+Scratch 位于有效用户的私有 CE 根目录下：可用时为 `/tmp/compound-engineering-<uid>`，否则为经过验证的 `$TMPDIR` 回退，并且永远不会为 `.context/`。生成一个 8 十六进制 `<run-id>` 并将其重新用于缓存和每个检查点。
 
-## Phase 1.5: Topic-Surface Decomposition
+## 阶段 1.5：主题表面分解
 
-Before frames are dispatched, decompose the topic into 3-5 orthogonal **axes** — what aspects of the subject to think about. Read `references/decomposition.md`. Surprise-me mode is the only case that skips this phase. That file's own criteria decide whether a subject is too small to split, so make that judgment after the read. Append the axis list, or the skip reason, to the grounding summary under `Topic axes`.
+在发送帧之前，将主题分解为 3-5 个正交的**轴**——要考虑主题的哪些方面。阅读`references/decomposition.md`。惊喜模式是唯一跳过此阶段的情况。该文件自己的标准决定主题是否太小而无法拆分，因此请在阅读后进行判断。将轴列表或跳过原因附加到`Topic axes`下的基础摘要中。
 
-## Phase 2: Divergent Ideation
+## 第二阶段：发散思维
 
-Read `references/divergent-ideation.md` before building any dispatch prompt. The fleet, the frames, and the generation rules live only there. When its merge, synthesis, and axis-coverage steps are complete, continue with `references/post-ideation-workflow.md`, which it names as the next required read.
+在构建任何调度提示之前请阅读`references/divergent-ideation.md`。舰队、框架和生成规则只存在于那里。当其合并、综合和轴覆盖步骤完成后，继续 `references/post-ideation-workflow.md`，它将其命名为下一个必需的读取。

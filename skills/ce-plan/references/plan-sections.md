@@ -1,498 +1,197 @@
-# Plan Sections
+# 计划部分
 
-This reference describes what makes a great implementation plan. It does NOT
-prescribe how the plan looks on the page — rendering is handled by the
-format-specific references (`markdown-rendering.md`, `html-rendering.md`).
+本参考资料描述了如何制定出色的实施计划。它没有规定计划在页面上的外观 - 渲染由特定于格式的引用（`markdown-rendering.md`，`html-rendering.md`）处理。
 
-## The outcome
+## 结果
 
-A great plan enables three audiences to act:
+一个伟大的计划可以让三个受众采取行动：
 
-- **The implementing agent** (`ce-work` or a human) starts from an informed
-  baseline — the decisions everything else rests on are named, research breadcrumbs orient
-  their own investigation, unit boundaries are clear. The plan gives the
-  implementer a starting point, not a substitute for their own investigation.
-- **The reviewer** identifies the decisions everything else rests on and the boundaries
-  of what's being changed in one pass.
-- **The future reader** (anyone returning months later) traces why the work
-  was done, what shaped it, and where the artifacts live.
+- **实施代理**（`ce-work`或人类）从知情的基线开始——其他一切都依赖的决策被命名，研究面包屑引导他们自己的调查，单位边界是明确的。该计划为实施者提供了一个起点，但不能替代他们自己的调查。
+- **审查者** 一次性确定其他所有内容所依赖的决策以及正在更改的内容的边界。
+- **未来的读者**（任何几个月后回来的人）都会追溯这项工作的完成原因、它的形成因素以及文物的所在地。
 
-A section belongs only when it serves one of these audiences. Omit padding.
+仅当一个版块服务于这些受众之一时，该版块才属于该版块。省略填充。
 
-## Unified plan artifact contract
+## 统一计划产物合约
 
-`ce-plan` writes the canonical compound-engineering plan artifact. The same
-artifact may begin as a requirements-only skeleton from `ce-brainstorm` and
-later be enriched by `ce-plan`; it is still one plan file moving through
-planning stages, not a requirements doc plus a separate implementation doc.
+`ce-plan` 编写规范的复合工程计划产物。相同的产物可能从 `ce-brainstorm` 开始作为仅限需求的骨架，然后通过 `ce-plan` 进行丰富；它仍然是一个经历规划阶段的计划文件，而不是一份需求文档加上一份单独的实施文档。
 
-When the artifact is meant to be consumed by implementation agents, use:
+当产物打算由实施代理使用时，请使用：
 
-- **`artifact_contract: ce-unified-plan/v1`** — declares this contract.
-- **`product_contract_source`** — where the Product Contract came from:
-  `ce-brainstorm`, `ce-plan-bootstrap`, `legacy-requirements`, or another
-  explicit source string when a repo has a specialized producer.
-- **`execution`** — `code` for implementation plans, `knowledge-work` for
-  non-code deliverables. Absence remains legacy-compatible and means `code`
-  only for older plans without `artifact_contract`.
+- **`artifact_contract: ce-unified-plan/v1`** — 声明本合同。
+- **`product_contract_source`** — 产品合约的来源：`ce-brainstorm`、`ce-plan-bootstrap`、`legacy-requirements`，或当存储库有专门的生产者时的其他显式源字符串。
+- **`execution`** — `code` 用于实施计划，`knowledge-work` 用于非代码可交付成果。缺席仍然与旧版兼容，意味着 `code` 仅适用于没有 `artifact_contract` 的旧计划。
 
-Determine whether a plan can be executed from its contents. The Product Contract, Planning Contract, Implementation Units, Verification Contract, and Definition of Done must give the executor enough direction, with no launch-blocking question remaining. Mark open questions as blocking or deferred; deferred implementation details do not prevent work. A Product Contract without sufficient planning needs enrichment.
+从计划内容判断计划能否执行。产品合同、规划合同、实施单元、验证合同和完成定义必须为执行者提供足够的指导，不存在任何启动阻塞问题。将未解决的问题标记为阻止或推迟；推迟实施细节并不妨碍工作。没有充分规划的产品合同需要充实。
 
-Do not write a readiness or execution-status field. When updating an older artifact, remove `artifact_readiness` from its frontmatter or visible HTML metadata. An old readiness label does not establish completeness or override a blocker. Plans carry no `status` field and no mutable execution lifecycle.
+不要写入就绪或执行状态字段。更新较旧的产物时，从其 frontmatter 或可见 HTML 元数据中删除 `artifact_readiness`。旧的就绪标签不会建立完整性或覆盖阻塞项。计划没有 `status` 字段，也没有可变的执行生命周期。
 
-Approach-plans, answer-seeking outputs, and universal-planning outputs remain outside this software implementation contract unless they contain the full contract above. Route non-code deliverables by their contents and `execution: knowledge-work`.
+方法计划、寻求答案的输出和通用规划输出仍不属于本软件实施合同的范围，除非它们包含上述完整合同。按内容和 `execution: knowledge-work` 路由非代码可交付成果。
 
-## Section ID Registry
+## 部分 ID 注册表
 
-Unified artifacts use these stable logical sections. Markdown uses the
-heading text; HTML uses matching visible headings and anchor IDs. Downstream
-skills grep or anchor-scan for these names before reading large bodies.
+统一的产物使用这些稳定的逻辑部分。 Markdown 使用标题文本； HTML 使用匹配的可见标题和锚点 ID。下游技能在读取大型正文之前，通过 grep 或锚定扫描来查找这些名称。
 
-| Logical section | Markdown heading | HTML id | Reader use |
+| 逻辑部分 | Markdown标题 | HTML ID | 读者使用 |
 |---|---|---|---|
-| Goal Capsule | `## Goal Capsule` | `goal-capsule` | Objective (outcome), Means (chosen approach), authority hierarchy, and stop conditions |
-| Product Contract | `## Product Contract` | `product-contract` | Requirements, actors, flows, acceptance examples, product scope |
-| Product Requirements | `### Requirements` under Product Contract | `product-requirements` | Requirement extraction for review and implementation trace |
-| Planning Contract | `## Planning Contract` | `planning-contract` | KTDs, technical design, assumptions, sequencing |
-| Implementation Units | `## Implementation Units` | `implementation-units` | U-ID work packets for execution |
-| Verification Contract | `## Verification Contract` | `verification-contract` | Repo-specific test commands and quality gates |
-| Definition of Done | `## Definition of Done` | `definition-of-done` | Global and per-unit completion criteria |
-| Appendix | `## Appendix` | `appendix` | Long research, raw notes, or supporting detail |
+| 目标胶囊 | `## Goal Capsule` | `goal-capsule` | 目标（结果）、手段（选择的方法）、权限等级和停止条件 |
+| 产品合同 | `## Product Contract` | `product-contract` | 需求、参与者、流程、验收示例、产品范围 |
+| 产品要求 | 产品合同下`### Requirements` | `product-requirements` | 提取需求以进行审查和实施跟踪 |
+| 规划合同 | `## Planning Contract` | `planning-contract` | KTD、技术设计、假设、排序 |
+| 实施单位 | `## Implementation Units` | `implementation-units` | 用于执行的U-ID工作包 |
+| 验证合同 | `## Verification Contract` | `verification-contract` | 特定于存储库的测试命令和质量门 |
+| 完成的定义 | `## Definition of Done` | `definition-of-done` | 全局和每单元完成标准 |
+| 附录 | `## Appendix` | `appendix` | 长时间的研究、原始笔记或支持细节 |
 
-Requirements-only artifacts are kept light: a Goal Capsule and the Product
-Contract. They must not point implementers at absent Planning Contract,
-Implementation Units, Verification Contract, or Definition of Done sections.
-`ce-plan` adds those implementation sections when it enriches to
-implementation-ready. Implementation-ready artifacts include the full registry
-above, except Appendix remains optional.
+仅限需求的产物保持轻量：目标胶囊和产品合同。他们不得向实施者指出缺少的规划合同、实施单位、验证合同或完成定义部分。 `ce-plan` 在丰富到可实施时添加这些实施部分。实施就绪的产物包括上面的完整注册表，但附录仍然是可选的。
 
-### Wayfinding: map before reading (size-aware)
+### 寻路：先读地图（大小感知）
 
-The document does not carry a reading guide; consuming skills own the reading
-algorithm. A **short** plan — a lightweight or requirements-only artifact that
-fits in a screen or two — can just be read in full; that is cheaper and simpler
-than scanning and ranging. But an implementation-ready unified plan is often
-long, and HTML output (also supported) is more verbose still, so for anything
-beyond short, do **not** load the entire artifact to find your way around.
-Build a section map first, then read only the ranges the task needs:
+该文件没有附有阅读指南；消费技能拥有阅读算法。 **短**计划——一个轻量级或仅满足需求的产物，适合一两个屏幕——可以完整阅读；这比扫描和测距更便宜、更简单。但是，准备好实施的统一计划通常很长，并且 HTML 输出（也支持）更加冗长，因此对于超出简短内容的任何内容，不要**加载整个产物来找到解决办法。首先构建剖面图，然后仅读取任务所需的范围：
 
-- **Markdown:** scan headings to get the section and unit map — e.g.
-  `rg -n '^#{1,3} ' <plan>` (top-level sections plus `### U<N>.` units).
-- **HTML:** scan the heading elements (`<h1>`–`<h3>`) and their anchor ids;
-  match on the section name and ignore the wrapper tags.
+- **Markdown：** 扫描标题以获取部分和单元图 - 例如`rg -n '^#{1,3} ' <plan>`（顶级部分加上 `### U<N>.` 单元）。
+- **HTML：** 扫描标题元素（`<h1>`–`<h3>`）及其锚点 ID；匹配节名称并忽略包装标签。
 
-In both formats the section **names and anchor ids are the stable contract**
-from the Section ID Registry above (`Goal Capsule`/`goal-capsule`,
-`Verification Contract`/`verification-contract`, `### U<N>.` units, …). Wayfind
-against those registry names, not a brittle tag/format pattern, so the
-instruction survives rendering changes. After mapping, read metadata, then only
-the sections the task needs — e.g. Goal Capsule, the active U-ID plus its cited
-R/F/AE/KTD, Verification Contract, and Definition of Done. Read the Appendix or
-unrelated units only when a section you are already reading cites them.
+在这两种格式中，部分**名称和锚点 ID 都是来自上述部分 ID 注册表的稳定契约**（`Goal Capsule`/`goal-capsule`、`Verification Contract`/`verification-contract`、`### U<N>.` 单位，...）。 Wayfind 针对这些注册表名称，而不是脆弱的 tag/format 模式，因此该指令在渲染更改后仍然存在。映射后，读取元数据，然后仅读取任务需要的部分 - 例如目标胶囊、活动 U-ID 及其引用的 R/F/AE/KTD、验证合同和完成定义。仅当您已经阅读的部分引用了附录或不相关的单元时，才阅读它们。
 
-## Whether a plan file is warranted
+## 计划文件是否有保证
 
-SKILL.md's Output Contract gate decides this at intake, before any research: Direct and Chat brief results stay in chat (`references/output-contracts.md`); a Durable run writes the file this reference describes.
+SKILL.md 的输出合约门在任何研究之前在摄入时决定这一点：直接和聊天简要结果保留在聊天中（`references/output-contracts.md`）；持久运行写入此参考描述的文件。
 
-## Implementation-ready hard floor
+## 准备实施的硬地板
 
-When an implementation-ready software plan is warranted, these sections are
-present. They carry the contracts downstream consumers depend on.
+当保证实施就绪的软件计划时，就会出现这些部分。他们承担着下游消费者所依赖的合同。
 
-- **Goal Capsule** — objective, means (only when an approach is fixed),
-  authority hierarchy, stop conditions, execution profile (including
-  whether the work ships as one PR or several), and who
-  finishes and ships the work. This is the fastest way for an executor to avoid drifting from
-  the plan. A reader who has not read the rest of the plan must be able to
-  hold the Objective as the goal. Remaining-true constraints live on their
-  owning R-IDs (the R-IDs that state them), not as extra Objective clauses — user-checkable is not a
-  license to pack them onto the Objective. An Objective that is only
-  understandable after later sections is not yet the Objective, even when a
-  user could check the outcome and a different implementation would still
-  serve it. The **Objective** is always the outcome: what is true for users
-  or operators afterwards, phrased so it would still read as the goal under
-  a different implementation. It sits outside the component being changed,
-  which is a question of who can check it rather than of which nouns it
-  uses: an outcome someone outside that component can verify without knowing
-  its internals is an Objective even when that component is what changed,
-  and one only its internals can settle is not the Objective however
-  outcome-shaped its wording; the registry above decides where it does
-  belong. The usual failure is an objective about the component's own
-  execution — the wall-clock it no longer holds, the runtime it no longer
-  consumes, what stays isolated inside it — which only its internals settle.
-  Infrastructure and refactor work has such an objective too: the reason
-  that component's behavior mattered to someone. The chosen approach is the
-  **Means**, its own line whenever the request or the plan has fixed one —
-  never invented for outcome-only work. It is a linked projection under the
-  one-owner rule below: one line naming the approach and citing the KTD or
-  Key Decision that owns it (`Means: … (KTD2)`), never a restatement of that
-  owner's mechanism. Test: if the implementation changed, would the
-  Objective still be the goal, and could a reader who does not know the
-  changed component's internals tell whether it was met? No to the first
-  makes it a Means. No to the second means it is stated at the component's
-  level, and the Objective is whatever depended on that component. When a
-  request supplies only its approach ("move X out of A into B"), that is the
-  Means; the Objective is the outcome it serves, derived from the request's
-  motivation, the project's stated problem, or asked for — never the approach
-  restated.
-- **Product Contract** — product scope and behavior. Contains Summary, Problem
-  Frame, Requirements with stable R-IDs, and any material Actors, Flows,
-  Acceptance Examples, Success Criteria, Scope Boundaries, Dependencies,
-  Outstanding Questions, and Sources. This replaces the separate requirements
-  artifact in new brainstorm-to-plan flows.
-- **Planning Contract** — the implementation-facing decisions: Key Technical
-  Decisions, high-level design, assumptions, implementation constraints,
-  sequencing, and research that shapes how the Product Contract will be built.
-- **Implementation Units** (with stable U-IDs) — discrete work packets sized so
-  each is independently executable. Each unit names Goal, Requirements,
-  Files, Approach, Test Scenarios, and Verification. `ce-work` and other
-  executors consume these units. When the work ships as several PRs, the
-  units are grouped by PR. Each group has a `Waits on:` line. For each PR it
-  waits on, the line says whether that PR only has to merge first or has to
-  merge or deploy before the group can start. It also names any deployment
-  that must be live before the group merges.
-  - **Unit Index (large plans only, ~10+ units).** When the plan has roughly
-    ten or more units, open the section with a compact navigation table — one
-    row per unit: **U-ID · one-line title · files touched · depends-on**. It
-    lets an executor map units to files and resolve dependency order without
-    scanning every unit body. It is a **navigation aid only**: the unit bodies
-    stay authoritative, it carries nothing beyond those four fields (no
-    approach, tests, or rationale), and `files touched` is the key/primary
-    paths, not an exhaustive restatement. **Omit it below ~10 units** — there
-    the per-unit `Dependencies`/`Files` (and any sequencing or dependency
-    diagram) already suffice, and an index would be ceremony.
-- **Verification Contract** — repo-specific commands and quality gates,
-  including which tests prove the plan, when `release:validate` applies, and
-  what behavioral skill evaluation is required. Avoid generic "run tests"
-  language when the repo has concrete commands. When the goal is
-  optimization-shaped (build time, latency, coverage, bundle size), express a
-  measurable threshold as the exit criterion (e.g., "p95 latency < 200ms",
-  "build time reduced 30%") and consider routing to `ce-optimize` — a metric
-  target is a sharper done signal for a long-running goal than a boolean check.
-- **Definition of Done** — global and per-unit done criteria. This is the
-  completion contract an executor checks before declaring the work done. Include
-  a cleanup criterion: a long autonomous run accumulates dead-end and
-  experimental code from approaches that did not pan out; declaring done
-  requires that abandoned-attempt code is removed, not left in the diff.
+- **目标胶囊** — 目标、手段（仅当方法固定时）、权限层次结构、停止条件、执行概况（包括工作是作为一个PR还是多个）以及谁完成和发送工作。这是执行者避免偏离计划的最快方法。尚未阅读计划其余部分的读者必须能够将目标作为目标。剩余真实约束存在于其所属的 R-ID（声明它们的 R-ID）上，而不是作为额外的 Objective 子句 — 用户可检查并不是将它们打包到 Objective 上的许可证。只有在后面的部分之后才能理解的目标还不是目标，即使用户可以检查结果并且不同的实现仍然可以服务于它。 **目标**始终是结果：事后对用户或操作员来说是正确的，措辞如此，在不同的实现下它仍然会被视为目标。它位于正在更改的组件之外，这是一个谁可以检查它的问题，而不是它检查哪些名词的问题
+  使用：该组件之外的人可以在不知道其内部结构的情况下验证的结果是一个目标，即使该组件发生了变化，并且只有其内部结构可以确定的一个结果不是目标，无论其措辞如何影响结果；上面的注册表决定了它的所属位置。通常的失败是关于组件自身执行的目标 - 它不再保留挂钟，它不再消耗运行时，它内部保持隔离的内容 - 只有它的内部才能解决。基础设施和重构工作也有这样的目标：组件的行为对某人很重要的原因。所选择的方法是**手段**，只要请求或计划固定了一个方法，它就有自己的路线——从来不是为了只注重结果的工作而发明的。它是以下一所有者规则下的链接投影：一行命名该方法并引用拥有该方法的 KTD 或关键决策 (`Means: … (KTD2)`)，绝不会重述该所有者的机制。测试：如果实现发生变化，目标仍然是目标吗？不知道更改后的组件内部结构的读者能否判断是否满足了目标？对第一个的否定使它成为一种手段。对第二个“否”意味着它是在组件级别上声明的，并且目标是依赖于该组件的任何内容。当请求仅提供其方法（“将 X 从 A 移至 B”）时，即
+  方法;目标是它所服务的结果，源自请求的动机、项目所陈述的问题或要求，而不是重述的方法。
+- **产品合同** — 产品范围和行为。包含摘要、问题框架、稳定 R-ID 的要求以及任何材料参与者、流程、验收示例、成功标准、范围边界、依赖性、未决问题和来源。这取代了新的头脑风暴计划流程中的单独需求产物。
+- **规划合同** — 面向实施的决策：关键技术决策、高层设计、假设、实施限制、排序和研究，决定如何构建产品合同。
+- **实施单元**（具有稳定的 U-ID）——离散工作包的大小，因此每个工作包都可以独立执行。每个单元都指定目标、要求、文件、方法、测试场景和验证。 `ce-work`和其他执行者消耗这些单位。当作品作为多个 PRs 交付时，单位按 PR 分组。每组有一条`Waits on:`线。对于它等待的每个 PR，该行表示 PR 是否只需首先合并，或者必须在组开始之前合并或部署。它还命名在组合并之前必须处于活动状态的任何部署。
+  - **单位索引（仅限大型计划，约 10 个以上单位）。** 当计划大致有
+    十个或更多单位，用紧凑的导航表打开该部分 - 一个
+    每单元行：**U-ID·单行标题·接触的文件·取决于**。它
+    让执行器将单元映射到文件并解析依赖顺序，而无需
+    扫描每一个单位的身体。它只是**导航辅助**：单位主体
+    保持权威性，除了这四个领域之外，它没有任何内容（没有
+    方法、测试或基本原理），`files touched` 是key/primary
+    路径，而不是详尽的重述。 **在 ~10 个单位以下省略它** — 那里
+    每个单元`Dependencies`/`Files`（以及任何排序或依赖性
+    图）已经足够了，索引就很仪式了。
+- **验证合同** - 特定于存储库的命令和质量门，包括哪些测试证明了计划、何时适用`release:validate`以及需要哪些行为技能评估。当存储库具有具体命令时，避免使用通用的“运行测试”语言。当目标是优化型的（构建时间、延迟、覆盖范围、包大小）时，将可测量的阈值表示为退出标准（例如，“p95 延迟 < 200ms”，
+  “构建时间减少了 30%”）并考虑路由到 `ce-optimize` — 与布尔检查相比，度量目标是长期运行目标的更清晰的完成信号。
+- **完成的定义** — 全局和每单位完成标准。这是执行者在宣布工作完成之前检查的竣工合同。包括一个清理标准：长时间的自主运行会从没有成功的方法中积累死胡同和实验代码；声明完成需要删除放弃的尝试代码，而不是留在差异中。
 
-## Include when material
+## 包括材料时
 
-These sections are present when they carry information that isn't covered
-elsewhere. The test is not "is this a substantial plan?" — it is
-*"does this specific plan have content this section would surface?"* Filling
-a section with placeholder prose is worse than omitting it.
+当这些部分包含其他地方未涵盖的信息时，就会出现这些部分。测试的不是“这是一个实质性的计划吗？” - 它是*“这个具体计划是否有本节将要呈现的内容？”*用占位符散文填充一个部分比省略它更糟糕。
 
-The first five entries below carry the Product Contract's product framing —
-what is being built and why. Later entries mix Product Contract subsections
-(Scope Boundaries, Open Questions, Acceptance Examples, Sources) with
-Planning Contract ones; the hard floor above remains authoritative for which
-section sits under which contract. Problem Frame is unconditional; each of the other four is included when its own test says so. A plan
-that skips all four conditional framing entries has usually inherited its
-framing from an upstream Product Contract — check before concluding none of
-them apply.
+下面的前五个条目包含产品合同的产品框架——正在构建什么以及为什么。后来的条目将产品合同小节（范围边界、开放问题、验收示例、来源）与规划合同小节混合在一起；上面的硬地板对于哪个部分属于哪个合同仍然具有权威性。问题框架是无条件的；当其自己的测试如此时，其他四个中的每一个都被包括在内。跳过所有四个条件框架条目的计划通常从上游产品合同继承其框架 - 在得出它们都不适用的结论之前进行检查。
 
-- **Problem Frame** — the hard floor above contains it unconditionally, so
-  this entry governs its depth, never whether to include it. Give it
-  paragraphs when motivation isn't obvious from Summary alone; keep it to a
-  line or two when the motivation was settled upstream and more would only
-  echo the origin document. Backward-looking / situational. Does NOT restate
-  the proposal; the remedy lives in Summary.
+- **问题框架** — 上面的硬地板无条件地包含它，所以这个条目控制它的深度，而不是是否包含它。当动机仅从摘要中不明显时，给它段落；当动机在上游解决时，将其保留为一两行，更多内容只会呼应原始文档。向后看/情境。不重述提案；补救措施就在摘要中。
 
-- **Key Decisions** — include when the plan carries product-level choices
-  that constrain the Requirements below, whether made during planning (scope
-  narrowings, defaults chosen against a real alternative, framing the user
-  picked) or inherited from an upstream Product Contract, which Phase 0.3
-  requires carrying forward with its rationale. Each entry is a provenance
-  index entry, not a second statement of the rule: the decision in bold, at
-  most one line of rationale, and exact `Governs R5, R7` links when it
-  constrains specific requirements. The normative text lives on the governed
-  Rs. Session-settled annotations follow the rules under "ID and content
-  rules" below. Distinct from Planning Contract's Key Technical Decisions,
-  which record how-level choices; a product decision belongs here, and a KTD
-  cites it rather than mirroring it. Skip only when no such
-  choice exists on any side: every requirement follows directly from the
-  request, any upstream Product Contract weighed no alternatives, and the
-  session settled none. A `session-settled:` decision always keeps the
-  section — plan-write and the routing table both require its labeled entry
-  to live here.
+- **关键决策** - 包括计划何时进行限制以下要求的产品级选择，无论是在计划期间做出的（范围缩小、针对实际替代方案选择的默认值、构建用户选择的框架）还是从上游产品合同继承，阶段 0.3 要求继续推进其基本原理。每个条目都是出处索引条目，而不是规则的第二条语句：粗体的决定，最多一行理由，当它限制特定要求时，精确的`Governs R5, R7`链接。规范性文本以受管制的卢比为基础。会话解决的注释遵循下面的“ID 和内容规则”下的规则。与规划合同的关键技术决策不同，后者记录了如何级别的选择；产品决策属于此处，KTD 引用它而不是镜像它。仅当任何一方都不存在此类选择时才跳过：每个要求都直接来自请求，任何上游产品合同都没有权衡任何替代方案，并且会议没有达成任何协议。 `session-settled:` 决策始终保留该部分 — 计划写入和路由表都需要其标记条目驻留在此处。
 
-- **Success Criteria** — include when there are quality / metric / handoff
-  signals that Requirements don't already carry: quantitative metrics ("p95
-  latency under 200ms"), qualitative criteria ("the agent's output reads as
-  one voice"), process / handoff quality ("ce-doc-review can act on this
-  without follow-ups"). Skip when Requirements ARE the success criteria
-  (every R is "done when the R is true"). Requirements that describe an
-  approach rather than an outcome are not success criteria; then include at
-  least one criterion that would show the Goal Capsule Objective was reached.
+- **成功标准** — 包括需求尚未包含的质量/指标/切换信号：定量指标（“p95 延迟低于 200 毫秒”）、定性标准（“代理的输出读取为一个声音”）、流程/切换质量（“ce-doc-review 可以对此采取行动，无需后续行动”）。当需求是成功标准时跳过（每个 R 都是“当 R 为真时完成”）。描述方法而不是结果的要求不是成功标准；然后至少包括一项标准，表明目标胶囊目标已达到。
 
-- **Actors** — include when the work has multi-party behavior (multiple
-  humans, agents, or systems meaningfully involved) that the units must
-  honor. Skip for single-actor work and for plans whose change is internal
-  to one component — most implementation plans skip this.
+- **参与者** - 包括当工作具有单位必须尊重的多方行为（有意义地涉及多个人、代理或系统）时。跳过单参与者工作以及更改在一个组件内部的计划 - 大多数实施计划都会跳过这一点。
 
-- **Key Flows** — include when the work has multi-step behavior whose
-  sequencing the units must preserve. Skip when the change is not
-  flow-shaped, or when Requirements and Acceptance Examples together already
-  prevent downstream invention of paths — again, most implementation plans
-  skip this.
+- **关键流程** — 包括工作具有多步骤行为且单元必须保留其顺序的情况。当变更不是流形时，或者当需求和验收示例一起已经阻止了下游路径的发明时，请跳过——同样，大多数实施计划都会跳过这一点。
 
-- **High-Level Technical Design** — include when the technical approach has
-  shape that prose alone doesn't carry well: architecture across components,
-  sequencing across processes, state machines, branching gates.
-  Visualizations (component topology, sequence, swim lane, flowchart,
-  data-flow) typically live here. Skip when the approach is a one-paragraph
-  pattern application that the prose itself conveys.
+- **高级技术设计** - 包括当技术方法已经成型时，仅靠散文无法很好地实现：跨组件的架构、跨流程的排序、状态机、分支门。可视化（组件拓扑、序列、泳道、流程图、数据流）通常位于此处。当该方法是散文本身传达的单段落模式应用时，请跳过。
 
-- **Scope Boundaries** — include when scope is contested, when there are
-  tempting non-goals worth naming explicitly, or when "deferred for later"
-  needs distinguishing from "outside the product's identity." Skip when scope
-  is obvious from Requirements alone.
+- **范围边界** - 包括何时范围存在争议，何时存在值得明确命名的诱人的非目标，或者何时“推迟到以后”需要与“产品身份之外”区分开来。当仅从需求来看范围就很明显时，请跳过。
 
-- **Open Questions** — include when there are genuinely unresolved items that
-  block planning or implementation. Skip when the plan is complete; an empty
-  "Open Questions: none" section signals false uncertainty.
+- **开放性问题** — 包括何时存在真正未解决的项目阻碍规划或实施。计划完成后跳过；一个空的
+  “未解决的问题：无”部分表明了虚假的不确定性。
 
-- **System-Wide Impact** — include when the change affects cross-cutting
-  concerns (data lifecycles, auth boundaries, performance characteristics, cardinal
-  rules, shared infrastructure, agent/tool parity, prompt context, shared
-  workspaces). Skip for changes localized to one component where the impact is
-  self-evident.
+- **系统范围的影响** — 包括更改何时影响横切关注点（数据生命周期、身份验证边界、性能特征、基本规则、共享基础设施、agent/tool奇偶校验、提示上下文、共享工作区）。跳过局部于某个组件的更改，因为其影响是不言而喻的。
 
-- **Risks & Dependencies** — include when there are real risks worth flagging
-  (external service changes, version pins under churn, behavioral assumptions
-  worth highlighting) or material upstream dependencies. Skip for low-risk
-  localized work.
+- **风险和依赖性** - 包括何时存在值得标记的真正风险（外部服务更改、流失的版本引脚、值得强调的行为假设）或重大上游依赖性。跳过低风险的本地化工作。
 
-- **Acceptance Examples** — include when any requirement has a state-dependent
-  or conditional shape ("When X, Y") where the prose alone leaves ambiguity
-  about edge cases. Skip when all requirements are unconditional and
-  unambiguous.
+- **验收示例** — 包括任何需求具有依赖于状态或条件的形状（“当 X，Y 时”），其中单独的散文留下了关于边缘情况的模糊性。当所有要求都是无条件且明确的时，请跳过。
 
-- **Documentation / Operational Notes** — include when documentation,
-  monitoring, runbooks, or rollout steps need explicit notes. Skip when the
-  work is purely internal and uses existing operational scaffolding without
-  modification.
+- **文档/操作注释** — 包括文档、监控、操作手册或部署步骤需要明确注释的情况。当工作纯粹是内部的并且使用现有的操作脚手架而不进行修改时，请跳过。
 
-- **Sources / Research** — include the research that orients the implementer
-  or justifies the choices the plan rests on. The test: *"if I were the implementer
-  reading this cold, would this breadcrumb help me make better choices?"*
-  Yes → include (code locations like `services/convex/reports.ts:174-176`,
-  external docs, RFCs, constraints, prior plans — the category is inclusive,
-  not enumerated). A record of the planning process itself (reading the
-  user's prompt, glancing at obvious entry points, restating prose) → omit. Put it inline next to the
-  KTD or unit it justifies, or in a dedicated section — both shapes work.
-  A constraint adopted from a Compound Pack file is cited inline as
-  `(pack: <id>, <path within the pack>)` after the requirement, KTD, constraint,
-  or risk it shaped. The path is relative to the pack's own directory, so it
-  is stable for path- and git-sourced packs alike. Cite the pack text; do not
-  restate it. That marker is reserved for pack files; `<root>/solutions/`
-  learnings keep the ordinary path citation, so a reader can tell a
-  prescriptive pack rule from a retrospective learning.
+- **来源/研究** — 包括为实施者提供指导或证明计划所依据的选择合理性的研究。测试：*“如果我是读这篇文章的实施者，这个面包屑会帮助我做出更好的选择吗？”*是→包括（代码位置，如`services/convex/reports.ts:174-176`、外部文档、RFC、约束、先前计划 - 该类别是包容性的，而不是枚举）。规划过程本身的记录（阅读用户的提示、浏览明显的入口点、重述散文）→ 省略。将其内联放在 KTD 或它所证明的单位旁边，或者放在专用部分中 - 两种形状都可以。从Compound Pack文件采用的约束在其形成的需求、KTD、约束或风险之后被内联引用为 `(pack: <id>, <包内的路径>)`。该路径是相对于包自己的目录的，因此对于路径和 git 来源的包来说它都是稳定的。引用包文本；不要重述。该标记是为包文件保留的； `<root>/solutions/`学习保留了普通的路径引用，因此读者可以从回顾性学习中区分出规定性包规则。
 
-## Prototype sources
+## 原型来源
 
-When a kept prototype informed this artifact, record its absolute run-directory path in Sources and identify `decisions.md` and the selected screens or states relevant to the requirements. Label the citation machine-local and best effort while the original checkout or temporary directory exists. State in the citation that a missing prototype is not a blocker and the artifact's requirements govern any disagreement. Do not copy the prototype or capsule into the repository. An undone overlay has no surviving prototype to cite.
+当保存的原型通知此产物时，在源中记录其绝对运行目录路径并识别`decisions.md`以及与需求相关的所选屏幕或状态。当原始签出目录或临时目录存在时，将引文机标记为本地和尽力而为。在引文中指出，丢失的原型并不构成阻碍，任何分歧均由产物的要求决定。不要将原型或胶囊复制到存储库中。未完成的覆盖层没有幸存的原型可供引用。
 
-## Agent agency
+## 代理机构
 
-The catalog is a floor, not a ceiling. When the plan's content doesn't fit
-any catalog section, introduce a new one — don't force the content into a
-section it doesn't belong in. Content drives section choices, not vice
-versa.
+目录是地板，而不是天花板。当计划的内容不适合任何目录部分时，引入一个新的内容 - 不要强迫内容进入不属于的部分。内容驱动部分选择，反之亦然。
 
-The agent also picks per artifact:
+代理还选择每个产物：
 
-- Whether Problem Frame merges into Summary — legacy and non-unified plans
-  only. Any `ce-unified-plan/v1` artifact keeps both headings regardless of
-  plan depth: the hard floor names them separately and downstream consumers
-  anchor on them. (Scoped by artifact contract, not by depth — a `Lightweight`
-  plan can still be implementation-ready.)
-- Sub-groupings (Requirements by capability, KTDs by component, Units phased
-  into milestones). When the work ships as several PRs, the PR groups are the
-  only grouping of units
-- How much detail each section carries
-- Whether HTD has one diagram, several, or none — and whether visualizations
-  live in HTD or embedded in other sections
+- 问题框架是否合并到摘要中——仅限遗留和非统一计划。无论计划深度如何，任何`ce-unified-plan/v1`产物都会保留两个标题：硬地板将它们单独命名，下游消费者锚定它们。 （按产物合同确定范围，而不是按深度 - `Lightweight` 计划仍然可以实施。）
+- 子分组（按功能划分的要求、按组件划分的 KTD、分阶段进入里程碑的单元）。当作品作为多个 PRs 交付时，PR 组是唯一的单位分组
+- 每个部分包含多少细节
+- HTD 是否有一个图表、多个图表或没有图表 - 以及可视化是否存在于 HTD 中或嵌入到其他部分中
 
-## Prose economy
+## 散文经济
 
-"Include when material" sizes *which* sections appear; this sizes *how the kept
-prose reads*. A section can be material and still be written loosely — the
-failure mode is a material section padded into a wall of text where
-contradictions hide and the implementing agent loses the thread. A deep plan
-earns length through coverage (more units, more traced requirements, real
-risks), never through wordiness around that coverage.
+“包括材料”尺寸*哪些*部分出现；这个大小*保存的散文如何阅读*。一个部分可以是实质性的，但仍然可以松散地编写——失败模式是一个被填充到文本墙中的实质性部分，其中隐藏了矛盾，并且实施代理失去了线索。深入的计划通过覆盖范围（更多的单位、更多可追踪的要求、真正的风险）来赢得长度，而不是通过围绕该覆盖范围的冗长内容。
 
-Write every kept section through the `ce-noslop` skill.
+通过`ce-noslop`技能写出每个保留的部分。
 
-Hold every kept section to these:
+将每个保留的部分保存到这些：
 
-- **Lead with the decision or outcome.** Put the conclusion first, then the
-  reason, then background; keep one claim plus its support per paragraph. Don't
-  bury a Key Technical Decision, the chosen scope, an open blocker, or a unit
-  goal beneath its rationale. This does not override section roles — Summary
-  stays proposal-only, Problem Frame stays motivation-only and never restates
-  the remedy.
-- **A Summary is a handful of sentences**, not one sentence with five
-  semicolons and four parentheticals. A KTD's rationale is the reason that
-  decided it, not every reason.
-- **A requirement or unit is one sentence of intent plus at most one
-  qualifier.** When it would specify two outcomes ("either A or B, the
-  implementer decides"), state the intent and send the fork to Open Questions —
-  don't write both arms in full inside the item.
+- **以决定或结果为主导。** 首先提出结论，然后是原因，最后是背景；每段保留一项主张及其支持。不要将关键技术决策、选定的范围、开放的阻碍因素或单位目标隐藏在其基本原理之下。这不会覆盖部门角色 - 摘要仅保留建议，问题框架仅保留动机并且从不重述补救措施。
+- **摘要是几个句子**，而不是一个带有五个分号和四个括号的句子。 KTD 的基本原理是决定它的原因，而不是所有原因。
+- **一个需求或单元是一个意图句子加上最多一个限定词。**当它指定两个结果（“A 或 B，实施者决定”）时，请陈述意图并将叉子发送到开放问题 - 不要在项目中完整地写出两个分支。
 
-Precision is not padding: keep file paths, IDs, dates, domain terms,
-conditionals, and exact thresholds verbatim; when a concrete anchor is knowable
-from the work already done, use it instead of a vague abstraction. Economy
-targets the connective tissue around precision, never the precision itself.
+精度不是填充：逐字保留文件路径、ID、日期、域术语、条件和精确阈值；当从已经完成的工作中可以得知具体的锚点时，请使用它而不是模糊的抽象。经济的目标是围绕精度的结缔组织，而不是精度本身。
 
-**Resolve in place; don't stratify.** When deepening, a doc-review pass, or a
-later decision supersedes earlier text, rewrite or remove the original — don't
-leave it standing as strikethrough or stack a separate "resolutions" layer on
-top of it. Version control holds the history. Stacked strata double the reading
-surface and hide which text is live.
+**解决到位；不要分层。** 当深化时，文档审查通过或后来的决定取代了早期的文本，重写或删除原始文本 - 不要将其保留为删除线或在其顶部堆叠一个单独的“决议”层。版本控制保存历史。堆叠的层使阅读表面加倍，并隐藏哪些文本是实时的。
 
-**One owner per rule; cite, don't restate.** A normative rule — a gate, cap,
-threshold, protocol, or output contract — is stated in full at exactly one
-owning entry: product behavior on its R-ID; an implementation choice on its
-KTD. Every other layer cites the owning ID and adds only what is local to
-it — a unit's Approach carries unit-local deltas (files, sequencing,
-patterns), never a re-derivation of the protocol its cited Rs and KTDs own.
-Linked projections are allowed (an AE restating behavior under
-`Covers R…`, a Flow citing the Rs it sequences). **Unlinked sibling
-restatement** — the same rule written out again in a KTD, Scope bullet, or
-Approach with no ID link — is the defect: each copy drifts independently.
-When linked layers disagree, authority is typed: the **R wins on product
-behavior**; the **KTD wins on implementation mechanism** within its cited R
-constraints; a unit overrides neither; AEs and Flows illustrate and
-sequence, never amend.
+**每条规则一名所有者；引用，不要重述。** 规范性规则——门限、上限、阈值、协议或输出契约——在一个拥有条目中得到完整说明：R-ID 上的产品行为；其 KTD 上的实施选择。其他每个层都引用所属 ID，并且仅添加本地的内容 - 单元的方法携带单元本地增量（文件、排序、模式），而不是其引用的 Rs 和 KTD 拥有的协议的重新派生。允许链接投影（AE 重述`Covers R…` 下的行为，引用 Rs it 序列的 Flow）。 **未链接的兄弟重述** - 在 KTD、范围项目符号或没有 ID 链接的方法中再次写出相同的规则 - 是缺陷：每个副本独立漂移。当链接层意见不一致时，就会形成权威：**R 在产品行为上获胜**； **KTD 在其引用的 R 约束范围内赢得了实施机制**；一个单位不凌驾于任何一个之上； AE 和流程说明和排序，切勿修改。
 
-**Bind external authorities; don't summarize them.** When a requirement,
-KTD, or unit adopts an external document (a field guide, spec, standard),
-state the commitment, cite the path, and record only this work's deltas. A
-multi-sentence summary of the cited document is restatement of an owner that
-lives outside the doc.
+**约束外部权威；不要总结它们。** 当需求、KTD 或单位采用外部文档（现场指南、规范、标准）时，说明承诺、引用路径并仅记录该工作的增量。所引用文档的多句摘要是对居住在文档之外的所有者的重述。
 
-**Named test, run before the plan is declared written:** could the implementer
-find a contradiction in each section in one pass? Could a colleague who was
-not in the session say what this work is after the Objective alone? A sentence
-carrying more than one parenthetical, a sentence chaining more than two
-semicolons, an item specifying two outcomes, or a rule stated in full in more than one section
-fails the test — split it (a semicolon chain becomes a list), defer it, or
-replace the duplicate with its owning ID.
+**命名测试，在计划声明为写入之前运行：**实施者能否一次性找到每个部分的矛盾？没有参加会议的同事能否仅在目标之后说说这项工作是什么？带有多个括号的句子、链接两个以上分号的句子、指定两个结果的项目或在多个部分中完整说明的规则都无法通过测试 - 将其拆分（分号链变成列表）、推迟它或用其所属 ID 替换重复项。
 
-## Plan metadata fields
+## 规划元数据字段
 
-Every plan carries a small set of stable metadata fields that downstream
-tooling depends on. The contract is format-independent: in markdown these
-fields appear as YAML frontmatter at the top of the file; in HTML they
-appear as visible text placed as `references/html-rendering.md` describes.
-Field names and semantics are the same across both formats
-so consumers can locate them without knowing which format produced the
-plan.
+每个计划都带有下游工具所依赖的一小组稳定的元数据字段。合约与格式无关：在 Markdown 中，这些字段在文件顶部显示为 YAML frontmatter；在 HTML 中，它们显示为可见文本，如 `references/html-rendering.md` 所描述的那样放置。两种格式的字段名称和语义都是相同的，因此消费者可以在不知道哪种格式生成计划的情况下找到它们。
 
-### Required
+### 必需的
 
-- **`title`** — the plan's descriptive name with a ` - Plan` suffix
-  (e.g., `Highlighter Tool - Plan`), matching the H1 (markdown) or document
-  `<h1>` (HTML) so file metadata and visible heading don't drift. Stable
-  across planning stages (it is a plan at every stage). Do not put a
-  conventional-commit prefix (`feat:`/`fix:`) in the title — the `type` field
-  carries that classification.
-- **`type`** — conventional-commit-prefix-aligned classification (`feat`,
-  `fix`, `refactor`, `chore`, `docs`, `perf`, `test`, etc.). Carries the
-  intent the eventual commit message should reflect.
-- **`date`** — creation date in ISO 8601 (`YYYY-MM-DD`), ASCII digits only.
+- **`title`** — 计划的描述性名称，带有 ` - Plan` 后缀（例如 `Highlighter Tool - Plan`），与 H1（markdown）或文档 `<h1>` (HTML) 匹配，因此文件元数据和可见标题不会漂移。跨规划阶段稳定（这是每个阶段的计划）。不要在标题中放置常规提交前缀 (`feat:`/`fix:`) - `type` 字段携带该分类。
+- **`type`** — 常规提交前缀对齐分类（`feat`、`fix`、`refactor`、`chore`、`docs`、`perf`、`test` 等）。携带最终提交消息应反映的意图。
+- **`date`** — ISO 8601 (`YYYY-MM-DD`) 格式的创建日期，仅限 ASCII 数字。
 
-Plans carry **no `status` field** — a plan is a decision artifact, not a
-tracked work item. `ce-work` does not mutate the plan at ship time;
-whether a plan shipped is derived from git, not stored in the doc. Do not
-add a `status` field or an `active → completed` lifecycle.
+计划**没有 `status` 字段** - 计划是决策产物，而不是跟踪的工作项目。 `ce-work` 不会在交付时改变计划；交付的计划是否源自 git，而不是存储在文档中。不要添加 `status` 字段或 `active → completed` 生命周期。
 
-### Optional but well-known
+### 可选但众所周知
 
-These fields are not required, but when set they have fixed names and
-semantics so downstream tooling can rely on them:
+这些字段不是必需的，但设置后它们具有固定的名称和语义，因此下游工具可以依赖它们：
 
-- **`origin`** — repo-relative path to an upstream brainstorm requirements
-  doc (e.g., `docs/brainstorms/2026-05-12-pagination-requirements.md`).
-  Set when planning from an upstream brainstorm; carried for traceability
-  and re-resolved when `ce-plan` re-deepens.
-- **`deepened`** — ISO 8601 date marking the first time the confidence
-  check substantively strengthened the plan. Presence affects Phase 0.1
-  resume fast-path logic (see `references/deepening-workflow.md`).
-- **`execution`** — execution domain for downstream routing: `code`
-  (the default when absent) or `knowledge-work`. `ce-work`'s input triage
-  reads this: a plan marked `execution: knowledge-work` routes to the
-  non-code carve-out (read sources, synthesize, produce a deliverable —
-  skipping the branch/test/commit/CI lifecycle); absent or `code` routes
-  to the normal code path. Written by `ce-plan`'s approach-altitude flow
-  (`references/approach-altitude.md`) when a non-code deliverable is
-  persisted for execution.
+- **`origin`** — 上游头脑风暴需求文档的存储库相对路径（例如，`docs/brainstorms/2026-05-12-pagination-requirements.md`）。在上游头脑风暴计划时设定；进行追溯并在`ce-plan`重新加深时重新解析。
+- **`deepened`** — ISO 8601 日期标志着首次置信度检查实质性地加强了该计划。存在会影响阶段 0.1 恢复快速路径逻辑（请参阅`references/deepening-workflow.md`）。
+- **`execution`** — 下游路由的执行域：`code`（不存在时的默认值）或`knowledge-work`。 `ce-work` 的输入分类是这样的：标记为 `execution: knowledge-work` 的计划路由至非代码剥离（读取源代码、综合、生成可交付成果 - 跳过 branch/test/commit/CI 生命周期）；不存在或 `code` 路由到正常的代码路径。由 `ce-plan` 的接近高度流程 (`references/approach-altitude.md`) 编写，当非代码可交付成果被持久执行时。
 
-Field names are stable across plan revisions — never rename a field or
-repurpose its semantics. Agents composing new plans MUST use these exact
-names; adding new fields is fine, but renaming `origin` to `source` or
-`date` to `created` breaks the downstream consumers above.
+字段名称在计划修订中保持稳定 - 切勿重命名字段或重新调整其语义。制定新计划的代理必须使用这些确切的名称；添加新字段很好，但是将`origin`重命名为`source`或`date`重命名为`created`会破坏上面的下游消费者。
 
-## ID and content rules
+## ID和内容规则
 
-These apply regardless of rendering format.
+无论渲染格式如何，这些都适用。
 
-- **Stable IDs.** R-IDs (Requirements), U-IDs (Implementation Units),
-  KTD-IDs (Key Technical Decisions, implementation-ready plans), A-IDs
-  (if the plan has Actors), F-IDs (if it has Flows), AE-IDs (if it has
-  Acceptance Examples). IDs are stable across plan revisions — never renumber to "clean
-  up gaps."
-- **Plain prefix.** `R1.`, `U1.`, `KTD1.` as bullet prefixes. Do not bold;
-  the prefix is visually distinctive on its own.
-- **KTD-IDs on implementation-ready plans.** Number Key Technical Decisions
-  (`KTD1.`, next unused number, same never-renumber rule as U-IDs) in newly
-  authored implementation-ready plans, and in an existing plan whenever a
-  KTD is added, split, or first cited by a unit. Untouched unnumbered KTDs
-  in legacy plans stay as they are — readable by label, no mass renumbering.
-- **File paths** follow the policy in `references/output-mode.md`.
-- **No record of the planning process.** No "captured at Phase X" notes, no `## Next Steps`
-  pointing to the next skill, no italic provenance lines. Engineering process
-  metadata belongs in commit messages and tool output, not the artifact.
-- **Session-settled annotations on KTDs.** A Key Technical Decision that
-  records a decision settled in the invoking conversation carries an inline
-  annotation on its entry:
-  `(session-settled: user-directed — chosen over <alternative>: <one-line reason>)`.
-  Exactly two classes: `user-directed` (the user chose against or between
-  surfaced options) and `user-approved` (the agent proposed with the tradeoff
-  surfaced; the user assented). An agent never labels its own unexamined
-  proposal. A KTD that makes the how-level choice instantiating a labeled
-  Product Contract Key Decision inherits the label and cites the decision's
-  governed R-IDs. Do **not** create a KTD that merely mirrors a Product Key
-  Decision with no new technical choice — the Key Decision plus its
-  `Governs R…` links already own that content. The annotation is
-  self-contained — decision, rejected alternative, and one-line reason
-  readable without the conversation — and lives inline on the entry: no
-  sidecar files, no frontmatter registry, no numeric weights, no lifecycle
-  field. Like a `(see origin: <path>)` citation, it is decision provenance,
-  not a record of the planning process — review passes must not strip it. A consumer that
-  does not recognize the annotation treats the entry as a normal KTD.
-- **Group Requirements by concern when they span distinct logical areas.**
-  The trigger is distinct concerns, not item count — even four requirements
-  benefit from grouping if they cover three different topics. Skip grouping
-  only when all requirements are genuinely about the same thing; a long flat
-  list is a smell that subgroups were missed. Group by capability (e.g.,
-  "Packaging", "Migration and compatibility", "Contributor workflow"), not by
-  the order requirements were discussed. R-IDs stay continuous across groups
-  (R1, R2 in the first group; R3, R4 in the second; never restart at R1 per
-  group).
+- **稳定的 ID。** R-ID（要求）、U-ID（实施单元）、KTD-ID（关键技术决策、实施就绪计划）、A-ID（如果计划有参与者）、F-ID（如果有流程）、AE-ID（如果有验收示例）。 ID 在计划修订过程中保持稳定 - 永远不会为了“消除差距”而重新编号。
+- **普通前缀。** `R1.`、`U1.`、`KTD1.` 作为项目符号前缀。不要大胆；前缀本身在视觉上就很独特。
+- **实施就绪计划上的 KTD-ID。** 在新编写的实施就绪计划中以及每当单元添加、拆分或首次引用 KTD 时在现有计划中对关键技术决策（`KTD1.`，下一个未使用的编号，与 U-ID 相同的永不重新编号规则）进行编号。遗留计划中未触及的未编号 KTD 保持原样 — 可通过标签读取，无需大规模重新编号。
+- **文件路径**遵循`references/output-mode.md`中的策略。
+- **没有规划过程的记录。**没有“在X阶段捕获”的注释，没有指向下一个技能的`## Next Steps`，没有斜体出处线。工程流程元数据属于提交消息和工具输出，而不是产物。
+- **KTD 上的会话解决注释。** 记录调用会话中解决的决策的关键技术决策在其条目上带有内联注释：`(session-settled: user-directed — chosen over <alternative>: <one-line reason>)`。恰好有两类：`user-directed`（用户选择反对或在浮出的选项之间做出选择）和`user-approved`（代理提出的权衡浮出水面；用户同意）。代理人永远不会给自己未经审查的提案贴上标签。进行实例化标记的产品合同关键决策的方式级别选择的 KTD 继承该标签并引用该决策的受管 R-ID。 **不要**创建一个仅反映产品密钥决策而没有新的技术选择的 KTD — 密钥决策及其 `Governs R…` 链接已经拥有该内容。注释是独立的——决策、被拒绝的替代方案和单行原因无需对话即可读取——并且内嵌在条目上：没有 sidecar 文件、没有 frontmatter 注册表、没有数字权重、没有生命周期字段。就像`(see origin: <path>)`引用一样，它是决策来源，而不是规划过程的记录——审查通过不得剥夺它。无法识别注释的消费者会将条目视为普通的 KTD。
+- **当需求跨越不同的逻辑区域时，按关注点对需求进行分组。**触发因素是不同的关注点，而不是项目计数——如果覆盖三个不同的主题，即使是四个需求也可以从分组中受益。仅当所有需求真正涉及同一事物时才跳过分组；长长的单调列表是一种被忽略的子组的味道。按能力分组（例如，
+  “打包”、“迁移和兼容性”、“贡献者工作流程”），不按顺序要求进行讨论。 R-ID 在各组之间保持连续（第一组中为 R1、R2；第二组中为 R3、R4；每组绝不在 R1 处重新启动）。
 
-## Rendering
+## 渲染
 
-The format-specific references describe how to render these sections in each
-output format:
+特定于格式的参考描述了如何以每种输出格式呈现这些部分：
 
-- **Markdown rendering:** `references/markdown-rendering.md`
-- **HTML rendering:** `references/html-rendering.md`
+- **Markdown 渲染：** `references/markdown-rendering.md`
+- **HTML渲染：** `references/html-rendering.md`
 
-This reference (`plan-sections.md`) is about WHAT the plan contains;
-rendering references are about HOW each format presents it. The plan is
-written in one format — markdown OR HTML, never both — based on the
-resolved output mode. The section catalog is the same regardless of
-format.
+该引用文档 (`plan-sections.md`) 是关于计划包含的内容；渲染参考是关于每种格式如何呈现它的。该计划是根据解析的输出模式以一种格式编写的 - markdown 或 HTML，而不是两者兼而有之。无论格式如何，节目录都是相同的。

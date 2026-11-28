@@ -1,11 +1,11 @@
 ---
-title: <One sentence stating what must always, or never, happen>
+title: "<一句话说明什么必须总是发生，或者永远不会发生>"
 applies_when:
-  - <a situation in the words a task would use, e.g. adding a page that needs server data>
-  - <a second situation, e.g. adding or changing an endpoint the app's own pages consume>
+  - <任务使用的词语中的情况，例如添加需要服务器数据的页面>
+  - <第二种情况，例如添加或更改应用程序自己的页面使用的端点>
 tags: [<topic>, <component>]
 ---
 
-<Replace this paragraph with the rule. Say what to do, what not to do, and the one exception if there is one. Keep it prescriptive and short enough to quote whole; a planning or review agent reads it only when a condition above matches the work in front of it.>
+<将此段落替换为规则。说出该做什么、不该做什么，以及如果有的话例外的情况。保持规范性和足够短以引用全文；仅当上述条件与前面的工作匹配时，计划或审核代理才会阅读它。>
 
-Layout reminder, delete once the rule is written: only top-level `.md` files with `title` and `applies_when` are discovered as rules; `README.md` is this pack's description, never a rule; subfolders are storage for the evidence and data a rule points at.
+布局提醒，规则写入后删除：仅发现具有`title`和`applies_when`的顶级`.md`文件作为规则； `README.md`是这个包的描述，从来都不是规则；子文件夹是规则指向的证据和数据的存储。

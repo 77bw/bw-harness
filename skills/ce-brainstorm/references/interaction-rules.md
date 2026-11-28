@@ -1,34 +1,34 @@
-# Core Principles, Interaction Rules, and Output Guidance
+# 核心原则、交互规则、输出指引
 
-Read this before the first question of any brainstorm, including the non-software route.
+在任何头脑风暴的第一个问题（包括非软件路线）之前阅读本文。
 
-## Core Principles
+## 核心原则
 
-1. **Assess scope first** - Match the amount of ceremony to the size and ambiguity of the work.
-2. **Be a thinking partner** - Suggest alternatives, challenge assumptions, and explore what-ifs instead of only extracting requirements.
-3. **Resolve product decisions here** - User-facing behavior, scope boundaries, and success criteria belong in this workflow. Detailed implementation belongs in planning.
-4. **Keep implementation out of the Product Contract by default** - Do not include libraries, schemas, endpoints, file layouts, or code-level design unless the brainstorm itself is inherently about a technical or architectural change.
-5. **Right-size the artifact** - Simple work gets a compact requirements-only unified plan or brief alignment. Larger work gets a fuller Product Contract. Do not add ceremony that does not help planning.
-6. **Apply YAGNI to carrying cost, not coding effort** - Prefer the simplest approach that delivers meaningful value. Avoid speculative complexity and hypothetical future-proofing. Polish or delight the user did not ask for is an option to offer, not a default.
-7. **Do not turn coverage into decomposition** - For software brainstorms, treat named devices, providers, and data sources as coverage requirements, not automatically as separate integration workstreams. Split them only when a shared access path cannot satisfy a named requirement. Leave connector selection to planning unless that choice materially changes product scope or behavior.
-8. **Keep one coherent work unit per artifact** - When a request contains independently valuable outcomes that can be planned and delivered separately, choose one as the current focus before deep exploration. Preserve how the surrounding work is currently understood without turning tentative future areas into requirements for this plan.
+1. **首先评估范围** - 将仪式的数量与工作的规模和模糊性相匹配。
+2. **成为一个有思想的合作伙伴** - 提出替代方案、挑战假设并探索假设，而不仅仅是提取需求。
+3. **在此处解决产品决策** - 面向用户的行为、范围边界和成功标准属于此工作流程。具体实施属于规划。
+4. **默认情况下将实现排除在产品合同之外** - 不要包含库、模式、端点、文件布局或代码级设计，除非头脑风暴本身本质上是关于技术或架构变更的。
+5. **调整产物的大小** - 简单的工作可以获得紧凑的仅需求统一计划或简短的调整。更大的工作可以获得更完整的产品合同。不要添加无助于计划的仪式。
+6. **将 YAGNI 应用于承载成本，而不是编码工作** - 更喜欢能够提供有意义价值的最简单方法。避免推测的复杂性和假设的面向未来的能力。用户未要求的润色或愉悦是提供的选项，而不是默认设置。
+7. **不要将覆盖范围转化为分解** - 对于软件头脑风暴，将命名设备、提供商和数据源视为覆盖范围要求，而不是自动将其视为单独的集成工作流。仅当共享访问路径无法满足命名要求时才拆分它们。将连接器选择留给规划，除非该选择会实质性改变产品范围或行为。
+8. **每个产物保留一个连贯的工作单元** - 当请求包含可以单独计划和交付的独立有价值的结果时，请在深入探索之前选择一个作为当前焦点。保留当前对周围工作的理解，而不将暂定的未来领域转变为该计划的要求。
 
-## Interaction Rules
+## 互动规则
 
-These rules apply to every brainstorm, including the universal (non-software) flow routed to `references/universal-brainstorming.md`.
+这些规则适用于每次头脑风暴，包括路由到 `references/universal-brainstorming.md` 的通用（非软件）流程。
 
-1. **Ask one question at a time** - One question per turn, even when sub-questions feel related. Stacking several questions in a single message produces diluted answers; pick the single most useful one and ask it.
-2. **Prefer single-select multiple choice** - Use single-select when choosing one direction, one priority, or one next step.
-3. **Use multi-select rarely and intentionally** - Use it only for compatible sets such as goals, constraints, non-goals, or success criteria that can all coexist. If prioritization matters, follow up by asking which selected item is primary.
-4. **Default to the host's blocking question tool** — use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. These tools include a free-text fallback, so well-chosen options scaffold the answer without confining it. This default holds for opening and elicitation questions too, not only narrowing. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question. **Exception — visual-probe gate:** if the next decision is a shape, behavior, or layout question that does not meet Rule 7, the visual-probe gate in `references/visual-probes.md` takes precedence.
-5. **Use an open-ended question only when the question is genuinely open** - Drop the blocking tool when the answer is inherently narrative, when presented options would steer a diagnostic or introspective answer, or when you cannot write 3-4 genuinely distinct, plausibly-correct options without padding. The test: if you'd be straining to fill the option slots, the question is open — ask it open-ended. Rule 1 still applies: one question per turn.
-6. **Open-ended questions earn their place only when they're specific enough to elicit a substantive answer** - Apply Rule 5 silently: just ask the question, never narrate the form choice. The question must give the user something concrete to anchor on. Good: *"What's the most concrete thing someone's already done about this — paid for it, built a workaround, quit a tool over it?"* — it names what counts as an answer. Too thin: *"What's your take?"* — nothing to bite into, and framings that imply a short answer ("briefly", yes/no) waste the open question the same way.
-7. **Offer `ce-prototype` when the decision is expensive to unravel.** This skill states the routing test once, here; every other site in this skill cites it. The test: committing an approach would be expensive to unravel — later planning and implementation will treat it as given — **and** neither talk nor a cheap one-decision sketch can settle it. A purely visual decision qualifies on the same terms as a behavioral one: finish and motion are dimensions a rough sketch strips by definition, so a question turning on them is already past the sketch tier. Unravel cost is a precondition, not decoration — a decision that is cheap to reverse does not escalate, however visual it is. Offer once — when you recognize that bar, not at a fixed phase. Do not offer for routine UI that follows an existing pattern (adding a known button, placing a standard control), and do not offer for a visual choice that follows an existing token, type scale, or component-library pattern. On accept, invoke `ce-prototype` via the host's normal skill-invocation mechanism, passing the named question, the surface, any hard constraints, and any artifact path; do not build it here. On decline, continue here; do not re-offer unless the decision itself changes.
-8. **Ask only for user decisions** — Look up answers available in the repository, existing research, or other reachable sources. A lookup in progress does not delay unrelated questions. The user decides unresolved product direction, preferences, and scope. Choose technical details from project evidence within the request instead of asking the user to choose them.
+1. **一次问一个问题** - 每轮一个问题，即使子问题感觉相关。在一条消息中堆叠多个问题会产生稀释的答案；选择最有用的一个并询问它。
+2. **首选单选多项选择** - 在选择一个方向、一个优先级或一个下一步时使用单选。
+3. **很少有意地使用多选** - 仅将其用于兼容的集合，例如可以共存的目标、约束、非目标或成功标准。如果优先级很重要，请询问哪个所选项目是主要的。
+4. **默认为主机的阻塞问题工具** — 使用当前工具列表中已有的主机的阻塞问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。这些工具包括自由文本后备功能，因此精心挑选的选项可以在不限制答案的情况下支撑答案。这种默认设置也适用于开放问题和启发问题，而不仅仅是缩小范围。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项。永远不要默默地跳过这个问题。 **例外 — 视觉探测门：** 如果下一个决策是不满足规则 7 的形状、行为或布局问题，则`references/visual-probes.md` 中的视觉探测门优先。
+5. **仅当问题真正开放时才使用开放式问题** - 当答案本质上是叙述性的，当提供的选项将引导诊断或内省的答案时，或者当你无法在没有填充的情况下写出 3-4 个真正不同的、看似正确的选项时，请放弃阻止工具。测试：如果你很难填补选项空缺，那么这个问题就是开放式的——开放式地提问。规则 1 仍然适用：每回合一个问题。
+6. **只有当开放式问题足够具体以引出实质性答案时，它们才有意义** - 默默地应用规则 5：只提出问题，切勿叙述形式选择。这个问题必须给用户提供一些具体的依据。好：*“有人对此做过的最具体的事情是什么 - 支付费用，建立解决方案，放弃一个工具？”* - 它列出了算作答案的内容。太薄弱：*“你的看法是什么？”*——没有什么可深入的，而暗示简短答案的框架（“简短地”，yes/no）同样浪费了开放性问题。
+7. **当决定的解开成本很高时，提供`ce-prototype`。**此技能在此说明一次路由测试；该技能中的所有其他网站都会引用它。测试：提交一种方法来解决它的成本很高——以后的规划和实施将把它视为给定的——**而且**无论是谈话还是廉价的单项决策草图都无法解决它。纯粹的视觉决策与行为决策具有相同的条件：根据定义，完成和动作是粗略草图条的尺寸，因此涉及它们的问题已经超出了草图层。解开成本是先决条件，而不是装饰——一个成本低廉的决定不会升级，无论它有多么直观。提供一次——当你认识到那个栏时，而不是在固定的阶段。不要提供遵循现有模式的常规 UI（添加已知按钮、放置标准控件），并且不要提供遵循现有标记、类型比例或组件库模式的视觉选择。接受时，通过主机的正常技能调用机制调用`ce-prototype`，传递指定问题、表面、任何硬约束和任何产物路径；不要在这里建造它。下降时，继续这里；除非决定本身发生变化，否则不要重新报价。
+8. **仅询问用户决策** - 查找存储库、现有研究或其他可访问来源中可用的答案。正在进行的查找不会延迟不相关的问题。用户决定未解决的产品方向、偏好和范围。从请求中的项目证据中选择技术细节，而不是要求用户选择它们。
 
-9. **Recommend what the user's goal needs, and nothing it does not.** Offering ideas the user did not ask for is part of being a thinking partner; what you recommend is what gets built when the user says "your call." Recommend adding scope, a safeguard, or a process the user did not name only when the goal behind the request is not actually met without it (what they are trying to achieve, not only the words they used), or when leaving it out lets harm land before anyone would catch it. An idea that would be expensive or hard to add later (stored data, a shared interface, money, security) but that neither of those requires is worth putting to the user as an explicit choice, without recommending it. Offer any other idea as a non-default option, or list it with the synthesis's deferred items instead of spending a question on it. A recommendation never narrows something the user asked for. This rule governs what you recommend and commit, not what you ask: questions that help the user understand their problem, including whether a related area should be part of this work, are still the job.
-10. When a question is a yes/no or a batch confirm, word it so that agreeing accepts the recommendation. Numbered choices stay numbered choices.
+9. **推荐用户目标需要的东西，而不是不需要的东西。**提供用户没有要求的想法是成为有思想的合作伙伴的一部分；当用户说“你的决定”时，你推荐的就是构建的。建议添加范围、保护措施或用户未命名的流程，仅当请求背后的目标没有实际满足时（他们试图实现的目标，而不仅仅是他们使用的词语），或者在将其排除在外时，让人们在任何人发现之前就造成伤害。一个想法会很昂贵或很难在以后添加（存储的数据、共享接口、金钱、安全性），但这些都不需要，不值得将其作为明确的选择提供给用户而不推荐它。提供任何其他想法作为非默认选项，或者将其与综合的延迟项目一起列出，而不是在其上花费问题。推荐永远不会缩小用户要求的范围。这条规则管理你推荐和提交的内容，而不是你提出的问题：帮助用户理解他们的问题的问题，包括相关领域是否应该成为这项工作的一部分，仍然是工作。
+10. 当问题是 yes/no 或批量确认时，请用措辞表达同意并接受建议。编号选择保留编号选择。
 
-## Output Guidance
+## 输出指导
 
-- **Prioritize decision-relevant detail** - Preserve the facts, tradeoffs, and caveats needed for the next decision; trim introductions, repetition, and optional background first.
+- **优先考虑与决策相关的细节** - 保留下一个决策所需的事实、权衡和注意事项；首先修剪介绍、重复和可选背景。

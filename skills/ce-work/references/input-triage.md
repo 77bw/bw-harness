@@ -1,52 +1,52 @@
-# Input Triage
+# 输入分类
 
-Read this before classifying the invocation, discovering a plan, or deciding whether normal implementation may begin. It covers resolving the source, parsing the mode token and its optional carriers, recognizing a recovery request, classifying plan readiness, discovering the latest plan, and deciding how a bare prompt enters. Return to the main `SKILL.md` flow: the resolved source, the execution class, which side runs the shipping steps (this skill standalone, or the caller), and any typed engine or recovery binding. Do not perform implementation writes here.
+在对调用进行分类、发现计划或决定是否可以开始正常实施之前，请阅读本文。它包括解析源、解析模式令牌及其可选载体、识别恢复请求、对计划准备情况进行分类、发现最新计划以及决定如何进入裸提示。返回主 `SKILL.md` 流程：已解析的源、执行类、哪一侧运行运输步骤（该技能独立或调用者）以及任何类型化引擎或恢复绑定。不要在此处执行实现写入。
 
-## Input Document
+## 输入文件
 
-The **input document** for this run is the input this skill was invoked with — present in the current prompt or conversation, whether the user provided it directly or a calling skill passed it (e.g. `lfg` in `mode:return-to-caller`, which passes a plan path or a work statement). It may be a plan or spec path, a `mode:` token followed by a path, or a bare work prompt. This reference calls it `<input_document>`; if nothing was provided, treat `<input_document>` as blank.
+此运行的 **输入文档** 是调用此技能的输入 - 存在于当前提示或对话中，无论是用户直接提供还是调用技能传递它（例如 `mode:return-to-caller` 中的 `lfg`，它传递计划路径或工作语句）。它可能是一个计划或规范路径、一个 `mode:` 标记后跟一个路径，或者一个简单的工作提示。该引用文档称其为`<input_document>`；如果未提供任何内容，请将 `<input_document>` 视为空白。
 
-Invocation origin is not observable or relevant: apply the same source-resolution rules whether the user invoked `ce-work` explicitly or the host selected it automatically.
+调用源不可观察或相关：无论用户显式调用 `ce-work` 还是主机自动选择它，都应用相同的源解析规则。
 
-## Artifact Root
+## 神器根
 
-This skill discovers plans under `<root>/plans/`. Resolve `<root>` when you first compose a `<root>/` path (per the block below), never before you need it. A write to `<root>/...` and a read of `<root>/solutions/` both count as composing a `<root>/` path, so either one triggers resolution; only a run that touches no `<root>/` path at all -- a scratch-only or no-repo flow -- skips it; pass the resolved path to any subagent, not the config.
+该技能发现`<root>/plans/`下的计划。当您第一次编写 `<root>/` 路径（根据下面的块）时，请解决 `<root>`，永远不要在您需要它之前。对 `<root>/...` 的写入和对 `<root>/solutions/` 的读取都算作组成 `<root>/` 路径，因此任一都会触发解析；只有根本不触及 `<root>/` 路径的运行（仅暂存或无回购流程）才会跳过它；将解析的路径传递给任何子代理，而不是配置。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Recovery and Control Grammar
+## 恢复和控制语法
 
-**Recovery activation comes first.** Before normal plan, path, blank-input, or bare-prompt classification, interpret whether the user is semantically asking to resume, inspect status, reap, or clean up an existing external implementation run and has supplied its run id. This is intent recognition, not verb-only matching. Validate the id with the controller's safe-id contract: `^[A-Za-z0-9._-]{1,128}$` and at least one non-period character. When this direct recovery intent is present, read `references/cross-model-execution.md`, use that run id as authoritative for the requested controller operation, and return the observed state or blocker. Recovery must not dispatch a new worker, select a new route, fall through to latest-plan discovery, or run the shipping steps of either mode. When every unit is already cleaned, **completed recovery is read-only reconciliation**: Do not rerun test, build, format, install, generation, or `verify-run`; report the stored unit and plan-wide verification receipts. If recovery intent is clear but the run id is missing, request the id instead of guessing or classifying the text as new work.
+**首先恢复激活。** 在正常计划、路径、空白输入或裸提示分类之前，解释用户是否在语义上要求恢复、检查状态、收获或清理现有的外部实现运行并提供其运行 ID。这是意图识别，而不是仅动词匹配。使用控制器的安全 ID 合约验证 ID：`^[A-Za-z0-9._-]{1,128}$` 和至少一个非句点字符。当存在此直接恢复意图时，读取`references/cross-model-execution.md`，使用该运行 ID 作为请求的控制器操作的权威，并返回观察到的状态或阻塞项。恢复不得派遣新工作人员、选择新路线、陷入最新计划发现或运行任一模式的运输步骤。当每个单元都已清理完毕时，**完成的恢复是只读协调**：不要重新运行测试、构建、格式化、安装、生成或`verify-run`；报告存储的单位和计划范围的验证收据。如果恢复意图明确但缺少运行 ID，请请求 ID，而不是猜测文本或将文本分类为新作品。
 
-**Otherwise, parse a leading mode token.** If `<input_document>` begins with `mode:return-to-caller` (or the legacy aliases `mode:caller-owned-tail` / `caller:lfg`), strip that token before anything else and enter **Return-to-Caller Mode**: implement and locally verify only, then return the structured summary defined in `references/return-to-caller.md` instead of running the standalone shipping tail (final simplify, review, PR, CI). Before the plan path, accept up to two optional carriers (extra tokens that carry a binding or a run id) in this fixed order: first one compact JSON object prefixed exactly `implementation_engine:`, then one run id prefixed exactly `implementation_run:`. Fully validate and normalize both before any workspace action. The engine object must contain exactly four fields: `mode` is `prefer` or `require`; `target` is `codex`, `claude`, `grok`, `cursor`, `composer`, `opencode`, `antigravity`, or `pi`; `model` is a string pin or `null`; and `source` is a non-empty caller-visible provenance string. The run carrier is accepted only for return-to-caller recovery and must satisfy the safe-id contract above. Reject malformed JSON, missing/extra fields, invalid field types or values, an unsafe run id, an out-of-order carrier, or a duplicate carrier. The entire remaining string is the plan path, or a work statement the caller already sized. A statement takes the **Bare prompt** path below and is executed, never routed back to `ce-plan`. Where that path would ask the user something or send the work to `ce-plan`, return `status: blocked` instead. A mode token or carrier with nothing following is an error; report it instead of treating control data as a bare prompt. Without either optional carrier, the original `mode:return-to-caller <plan-path>` form is unchanged and standing configuration remains eligible.
+**否则，解析前导模式令牌。** 如果`<input_document>`以`mode:return-to-caller`（或旧别名`mode:caller-owned-tail`/`caller:lfg`）开头，则在其他任何内容之前剥离该令牌并进入**返回调用者模式**：仅实现和本地验证，然后返回`references/return-to-caller.md`中定义的结构化摘要，而不是运行独立的交付收尾（最终简化，审查， PR、CI）。在计划路径之前，按以下固定顺序接受最多两个可选载体（携带绑定或运行 id 的额外令牌）：第一个紧凑的 JSON 对象，前缀恰好为 `implementation_engine:`，然后一个运行 id 前缀恰好为 `implementation_run:`。在进行任何工作区操作之前，对两者进行充分验证和标准化。引擎对象必须恰好包含四个字段：`mode`是`prefer`或`require`； `target`是`codex`、`claude`、`grok`、`cursor`、`composer`、`opencode`、`antigravity`或`pi`； `model`是串针或`null`； `source` 是一个非空的调用者可见的出处字符串。运行载体仅用于返回调用者恢复，并且必须满足上面的安全 ID 合同。拒绝格式错误的 JSON、missing/extra 字段、无效的字段类型或值、不安全的运行 ID、无序载体或重复的载体。整个剩余的字符串是计划路径，或者调用者已经调整大小的工作语句。语句采用下面的**裸提示**路径并执行，而不会路由回 `ce-plan`。如果该路径会询问用户某些信息或将工作发送到 `ce-plan`，则返回 `status: blocked`。后面没有任何内容的模式令牌或载体是一个错误；报告它，而不是把控制数据当作一个简单的提示。如果没有任何可选载体，原始 `mode:return-to-caller <plan-path>` 形式不会改变，并且站立配置仍然合格。
 
-When `implementation_run:<safe-id>` is present, recovery wins over ordinary input classification: read `references/cross-model-execution.md`, use `resume --run-id <safe-id>` as the authoritative entrypoint, and return the normal Return-to-Caller summary after reconciliation. Preserve the supplied `implementation_engine` binding when present. Do not resolve a different route, redispatch, reimplement, rerun completed verification, or start a second run of the shipping steps the caller owns.
+当`implementation_run:<safe-id>`存在时，恢复优于普通输入分类：读取`references/cross-model-execution.md`，使用`resume --run-id <safe-id>`作为权威入口点，并在协调后返回正常的Return-to-Caller摘要。保留提供的 `implementation_engine` 绑定（如果存在）。请勿解析不同的路线、重新分派、重新实施、重新运行已完成的验证或启动调用者拥有的运输步骤的第二次运行。
 
-When a valid `implementation_engine:` binding is present without recovery, **pre-controller discovery is read-only**. Do not run baseline, test, build, format, install, or generation commands in the canonical checkout before resolving the binding and initializing the external controller: those commands can create ignored or untracked artifacts before the controller records its clean starting point. Limit triage to reads such as metadata, source, configuration, branch, status, and command-availability probes. If a non-read probe is genuinely required to decide whether the route can start, run it only with artifact suppression and prove the canonical Git snapshot is byte-for-byte unchanged before continuing; otherwise stop with a route blocker.
+当存在有效的 `implementation_engine:` 绑定且未恢复时，**预控制器发现是只读的**。在解析绑定和初始化外部控制器之前，不要在规范签出中运行基线、测试、构建、格式化、安装或生成命令：这些命令可能会在控制器记录其干净的起点之前创建被忽略或未跟踪的产物。将分类限制为读取，例如元数据、源、配置、分支、状态和命令可用性探测。如果确实需要非读探测来决定路由是否可以启动，则仅在产物抑制的情况下运行它，并在继续之前证明规范的 Git 快照逐字节不变；否则用路线拦截器停止。
 
-**Resolve a session-carried plan before blank or bare-prompt classification.** When the current request is continuation language such as "proceed" and the conversation identifies exactly one current plan for this work — a plan/spec path or an in-conversation brief from `ce-plan` — that was authored, selected, or accepted, treat it as `<input_document>`. A brief enters as a bare prompt with `source_kind: prompt`. If multiple session plans are plausible, ask which one; do not choose by recency. Do not replace a concrete new work request with an unrelated earlier plan. This rule depends only on visible conversation state, never on whether invocation was explicit or automatic.
+**在空白或直接分类之前解决会话携带的计划。** 当当前请求是诸如“继续”之类的延续语言并且对话准确地标识了该工作的一个当前计划 - plan/spec 路径或来自 `ce-plan` 的对话中简报 - 已创作、选择或接受，请将其视为 `<input_document>`。使用 `source_kind: prompt` 输入简短的提示。如果多个会议计划可行，询问哪一个；不要根据新近度来选择。不要用不相关的早期计划替换具体的新工作请求。该规则仅取决于可见的对话状态，而不取决于调用是显式的还是自动的。
 
-## Source Classification
+## 来源分类
 
-Determine how to proceed based on what was provided in `<input_document>` after any mode token is stripped.
+在剥离任何模式令牌后，根据 `<input_document>` 中提供的内容确定如何继续。
 
-**Tracker reference** (`<input_document>` passes a ticket reference such as `#123`, `ABC-123`, or an issue URL): read that ticket through whatever interface the tracker exposes and state its title to the user before any implementation or investigation starts, including the bare-prompt scan. If the title cannot be read, say that instead of guessing one, and ask for the ticket's content when the input alone does not define the work. When no reference was passed, there is no ticket to state: do not invent one.
+**跟踪器参考**（`<input_document>`传递票证参考，例如`#123`、`ABC-123`或问题URL）：通过跟踪器公开的任何接口读取该票证，并在任何实施或调查开始（包括裸提示扫描）之前向用户说明其标题。如果无法阅读标题，请说出来，而不是猜测标题，并在输入本身无法定义作品时询问门票的内容。当没有引用被传递时，就没有任何声明：不要发明一个。
 
-**Plan document** (input is a file path to an existing plan or specification): resolve the canonical document before classification. Follow an explicit supersession notice to its canonical path only when the linked document's contents establish that it represents the same requested work; otherwise stop for clarification. Then inspect its contents, using a section map for long documents. Metadata describes the artifact; an old readiness label is not execution authority.
+**计划文档**（输入是现有计划或规范的文件路径）：在分类之前解析规范文档。仅当链接文档的内容确定它代表相同的请求工作时，才遵循其规范路径的明确取代通知；否则停止澄清。然后使用长文档的剖面图检查其内容。元数据描述产物；旧的就绪标签不是执行权限。
 
-- A non-code deliverable, including `execution: knowledge-work`, follows `references/non-code-execution.md` instead of the code workflow.
-- A Product Contract without enough implementation direction needs `ce-plan` enrichment. An approach-only or answer-seeking document is not an implementation plan.
-- Proceed only when the intended code work, scope, and verification are sufficiently defined and no launch-blocking question remains. For unified plans, inspect the Product Contract, Planning Contract, Implementation Units, Verification Contract, and Definition of Done. Judge legacy plans and saved briefs by the same sufficiency condition without requiring unified headings.
-- Verify material existing prerequisites for the active work against the repository before implementation. If the plan depends on something that is unavailable or contradicts current code, resolve it within the agreed scope or return the blocker; do not invent a substitute that changes the contract. Explicitly planned additions need not exist yet. Deferred implementation details remain the executor's work.
+- 非代码可交付成果（包括 `execution: knowledge-work`）遵循 `references/non-code-execution.md` 而不是代码工作流程。
+- 没有足够实施方向的产品合同需要 `ce-plan` 丰富。仅提供方法或寻求答案的文件不是实施计划。
+- 仅当预期的代码工作、范围和验证已充分定义并且不存在启动阻止问题时才继续。对于统一计划，检查产品合同、计划合同、实施单位、验证合同和完成定义。通过相同的充分性条件判断遗留计划和保存的概要，无需统一标题。
+- 在实施之前，验证存储库中活动工作的现有先决条件。如果计划依赖于不可用的东西或与当前代码相矛盾，请在约定的范围内解决它或返回阻塞项；不要发明改变合同的替代品。明确计划的添加还不需要存在。推迟的实施细节仍然是执行者的工作。
 
-Then continue using the reader strategy in `references/work-intake.md`. Do not require a metadata repair before working from an otherwise sufficient plan.
+然后继续使用`references/work-intake.md`中的读者策略。在按照其他足够的计划进行工作之前，不需要进行元数据修复。
 
-**Blank invocation latest-plan discovery:** when `<input_document>` is blank, glob `<root>/plans/*.md` and `<root>/plans/*.html` and inspect the newest candidate's contents using the same canonical resolution and classification. If same-basename format siblings have no clear canonical path, ask which to use. Do not silently skip a newer incomplete or non-code artifact to execute an older plan; ask for an explicit path or `ce-plan` enrichment.
+**空白调用最新计划发现：**当`<input_document>`为空时，glob `<root>/plans/*.md`和`<root>/plans/*.html`并使用相同的规范分辨率和分类检查最新候选者的内容。如果相同基名格式的同级没有明确的规范路径，请询问使用哪个。不要默默地跳过较新的不完整或非代码产物来执行较旧的计划；要求明确的路径或`ce-plan`丰富。
 
-**Bare prompt** (input is a description of work, not a file path): read `references/work-intake.md` and follow its scan-and-route steps. Trivial work (1-2 files, no behavioral change) must skip only the task list, then pass the mandatory engine-before-write gate in `SKILL.md` (resolve the engine before the first write) before implementing directly, with no unit execution loop. Do not treat an unclear prompt as permission to hand work to an external worker. If discovery cannot state a concrete goal, bounded scope, and authoritative verification, clarify or route to `ce-plan` before sending any work to a cross-model worker.
+**裸提示**（输入是工作描述，而不是文件路径）：读取 `references/work-intake.md` 并按照其扫描和路由步骤进行操作。琐碎的工作（1-2个文件，没有行为改变）必须仅跳过任务列表，然后在直接实现之前通过`SKILL.md`中的强制engine-before-write门（在第一次写入之前解析引擎），没有单元执行循环。不要将不明确的提示视为允许将工作交给外部员工。如果发现无法说明具体目标、有限范围和权威验证，请在将任何工作发送给跨模型工作人员之前进行澄清或路由至`ce-plan`。

@@ -1,74 +1,76 @@
 ---
 name: ce-doc-review
-description: Review requirements, plans, or specs with role-specific lenses. Use when the user wants to improve an existing planning document.
+description: "使用特定于角色的视角来审查需求、计划或规格。当用户想要改进现有计划文档时使用。"
 argument-hint: "[mode:non-interactive] [path/to/document.{md,html}]"
 ---
 
-# Document Review
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Help the author finish a sound document they can use to carry out the agreed work. Find problems that would change that work's outcome or materially hinder execution, and resolve them within the authority already given. Judge the document by whether it guides correct work, not by how much detail it contains. Serious consequences warrant attention even when the defect is small. An adequate document needs no changes.
+# 文件审查
 
-Reviewer personas supply evidence; the judgment is yours. Check their claims against the whole document, project facts, and settled decisions. Correct proven errors that prevent an existing decision from being carried out, within the edit authority and reviewer requirements the synthesis reference states. Return only worthwhile improvements still needing permission, consequential choices or essential information only the user can supply, and useful observations.
+帮助作者完成一份完善的文档，他们可以用它来完成约定的工作。发现会改变工作结果或严重阻碍执行的问题，并在已授予的权限内解决它们。判断文档的标准是它是否能指导正确的工作，而不是它包含多少细节。即使缺陷很小，严重的后果也值得关注。一份足够的文件不需要改变。
 
-**Done when:** every selected reviewer has returned or is named as failed in Coverage, retained findings have a verified consequence for the agreed work, and every authorized correction assigned to Apply has been made and checked. Report that final state through the interactive approval or decision process, or return it as structured text in non-interactive mode.
+审稿人角色提供证据；判断由你决定。根据整个文件、项目事实和已达成的决定检查他们的主张。在综合参考规定的编辑权限和审查者要求范围内，纠正妨碍现有决策执行的已证实的错误。仅返回仍需要许可的有价值的改进、只有用户可以提供的相应选择或基本信息以及有用的观察结果。
 
-## Interactive mode rules
+**完成时间：** 每个选定的审查者都已返回或在覆盖范围中被指定为失败，保留的调查结果对商定的工作具有经过验证的结果，并且分配给“应用”的每项授权更正均已进行并检查。通过交互式批准或决策过程报告最终状态，或以非交互式模式将其作为结构化文本返回。
 
-**Read `references/modes.md` before anything else.** It defines how the mode is detected, the non-interactive argument contract, and the question-tool rules: match the host's blocking question tool already in the current tool list (never call a user-facing question tool to discover it), pre-load it at the top of the interactive flow if it is listed but unloaded, and fall back to a numbered list only when the harness genuinely lacks one.
+## 交互模式规则
 
-Either way, a question that calls for a user decision calls the tool or falls back loudly. Narrating it as plain text is a bug.
+**先阅读`references/modes.md`。**它定义了如何检测模式、非交互式参数契约和问题工具规则：匹配当前工具列表中已有的主机阻塞问题工具（永远不要调用面向用户的问题工具来发现它），如果已列出但已卸载，则将其预加载到交互式流程的顶部，并且仅当宿主确实缺少一个编号列表时才回退到编号列表。
 
-## Artifact Root
+无论哪种方式，需要用户做出决定的问题都会调用该工具或大声回退。将其叙述为纯文本是一个错误。
 
-Resolve `<root>` **only** in the no-path interactive branch, which discovers the most recent plan under `<root>/plans/`. Every other run reads the document at the path it was handed. So an absolute-path or non-interactive review — `/tmp/plan.md`, possibly outside any repo — never depends on a repo root or a CE config it does not need.
+## 神器根
+
+在无路径交互分支中解析`<root>` **only**，这会发现`<root>/plans/`下的最新计划。每隔一次运行都会在传递的路径上读取文档。因此，绝对路径或非交互式审查 - `/tmp/plan.md`，可能在任何存储库之外 - 永远不会依赖于它不需要的存储库根或 CE 配置。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Phase 1: Get and Analyze Document
+## 第 1 阶段：获取并分析文档
 
-**Read `references/document-intake.md` now.** It covers how the document is obtained in each mode, what to do and say when no document is found, and the classification signals.
+**立即阅读`references/document-intake.md`。** 涵盖了每种模式下如何获取文档、未找到文档时要做什么和说什么以及分类信号。
 
-Two of its rules apply to every later step.
+它的两条规则适用于后面的每个步骤。
 
-**Verify before any dispatch.** Every resolved path must be readable on disk. If one is not, dispatch **no** personas: reviewers read from the filesystem, so they cannot reach a path that exists only on an unchecked-out branch (issue #925).
+**在任何分派之前进行验证。** 每个解析的路径都必须在磁盘上可读。如果不是，则调度 **no** 角色：审查者从文件系统读取，因此他们无法到达仅存在于未签出分支上的路径（问题＃925）。
 
-**Classify by content, not readiness labels or file path.** A unified artifact with only a Product Contract is **`unified-requirements`**; missing implementation sections are expected. Any implementation planning makes it **`unified-plan`**, including incomplete or blocked planning that needs review. Other artifacts use the legacy `requirements` / `plan` split.
+**按内容分类，而不是就绪标签或文件路径。** 仅具有产品合同的统一产物是 **`unified-requirements`**；预计会缺少实施部分。任何实施计划都会使其**`unified-plan`**，包括需要审查的不完整或受阻的计划。其他产物使用旧的 `requirements` / `plan` 分割。
 
-HTML unified artifacts take the same routes. Every fix lands in the document's native format; never insert markdown into HTML. That reference covers ID-bearing items. Pass the classification to each persona in the `{document_type}` slot.
+HTML 统一产物采用相同的路线。每个修复都以文档的本机格式进行；切勿将 markdown 插入 HTML。该引用文档涵盖带有 ID 的物品。将分类传递给 `{document_type}` 槽中的每个角色。
 
-## Phase 2: Announce and Dispatch Personas
+## 第 2 阶段：公告和分发角色
 
-Skip dispatch only when the completed-review reuse condition in `references/document-intake.md` passes; continue with that evidence at Phase 3.
+仅当`references/document-intake.md`中的已完成审核复用条件通过时才跳过调度；在第三阶段继续使用该证据。
 
-**Read `references/persona-selection.md`** for each conditional persona's activation signals and the announcement format. Two of those signals over-activate on plausible evidence: the sensitive-data bound on `security-lens-reviewer`, and the challenge-surface bar on `adversarial-document-reviewer`. Then read **`references/dispatch.md`** for payload variables, slicing, model tiering, and reviewer-failure handling. For a plan, **`references/depth.md`** then decides lite or full review and owns the lite pass.
+**阅读`references/persona-selection.md`**了解每个条件角色的激活信号和公告格式。其中两个信号在似是而非的证据上过度激活：`security-lens-reviewer`上的敏感数据绑定，以及`adversarial-document-reviewer`上的挑战表面栏。然后阅读 **`references/dispatch.md`** 了解有效负载变量、切片、模型分层和审查者失败处理。对于计划，**`references/depth.md`** 然后决定精简版或全面审查并拥有精简版通行证。
 
-The team is `coherence-reviewer` and `feasibility-reviewer` always, plus each activated conditional persona. Announce the team briefly before any dispatch, and stay quiet while reviewers run.
+团队始终是`coherence-reviewer`和`feasibility-reviewer`，加上每个激活的条件角色。在任何派遣之前简要宣布团队，并在审稿人运行时保持安静。
 
-Dispatch generic subagents with **bounded parallelism** through the platform's subagent primitive. Give each one its `references/personas/<reviewer-name>.md` as `references/dispatch.md` describes. Never dispatch a standalone agent by type or name.
+通过平台的子代理原语以**有限并行性**调度通用子代理。按照 `references/dispatch.md` 的描述，给每个人一个`references/personas/<reviewer-name>.md`。切勿按类型或名称分派独立代理。
 
-A capacity rejection is backpressure, not reviewer failure: wait and retry. If capacity cannot recover and selected reviewers remain undispatched, collect and clean up any started cross-model jobs as `references/cross-model-review.md` describes, then stop as incomplete without synthesis, fixes, or a success handoff. Preserve collected outcomes and report which reviewers completed, failed, or could not run, and why.
+容量拒绝是背压，而不是审查者失败：等待并重试。如果容量无法恢复并且选定的审查者仍未被派遣，请按照 `references/cross-model-review.md` 的描述收集并清理所有已启动的跨模型作业，然后在没有综合、修复或成功移交的情况下因不完整而停止。保留收集的结果并报告审查者完成、失败或无法运行的内容以及原因。
 
-### Cross-Model Judgment Pass
+### 跨模型判断通过
 
-Run this pass if any of the **conditional judgment trio** was activated: `adversarial-document-reviewer`, `product-lens-reviewer`, `security-lens-reviewer`. Follow `references/cross-model-review.md`, which defines the whole pass: confirming the host, the one target and route used for the whole document, the disclosure before anything leaves the machine, and how peers are launched, collected, and folded in.
+如果激活了**条件判断三重奏**中的任何一个：`adversarial-document-reviewer`、`product-lens-reviewer`、`security-lens-reviewer`，则运行此过程。遵循`references/cross-model-review.md`，它定义了整个过程：确认主机、整个文档使用的单一目标和路由、任何东西离开机器之前的披露，以及如何启动、收集和折叠对等点。
 
-The pass is additive and non-blocking: a failure or timeout stops nothing and is named in Coverage. The checkout's `cross_model_review_mode` setting is checked first and can skip the pass with a named reason. Filter recipients only when `CROSS_MODEL_PEERS` is set — unset means unfiltered, not unsanctioned. Never silently change an explicit model or recipient.
+该传递是附加的且非阻塞的：失败或超时不会停止任何操作，并在覆盖率中命名。首先检查结帐的 `cross_model_review_mode` 设置，并且可以通过指定原因跳过该通行证。仅当设置 `CROSS_MODEL_PEERS` 时才过滤收件人 - 未设置表示未过滤，而不是未批准。永远不要默默地改变明确的模型或接受者。
 
-## Phases 3-5: Synthesis, Presentation, and Next Action
+## 第 3-5 阶段：综合、演示和下一步行动
 
-Wait until every dispatched agent has returned, including any cross-model `<reviewer-name>-<provider>.json` returns. Then read `references/synthesis-and-presentation.md`. It defines synthesis, how each finding is routed by confidence and fix class, fix application, the non-interactive result format, and the handoff to the routing question. When promoting agreement, only an artifact with `independence_verified: true` counts as an independent reviewer.
+等待所有已派遣的代理返回，包括所有跨模型 `<reviewer-name>-<provider>.json` 返回。然后阅读`references/synthesis-and-presentation.md`。它定义了综合、如何按置信度和修复类别路由每个发现、修复应用程序、非交互式结果格式以及路由问题的切换。在促进共识时，只有具有 `independence_verified: true` 的产物才算作独立审查者。
 
-**Interactive mode only.** Read `references/walkthrough.md` for the routing question, the per-finding walk-through, and the completion report. Read `references/bulk-preview.md` for the preview behind the walk-through's auto-resolve. Load neither before review evidence is complete, whether newly collected or validly reused, and a non-interactive run never loads them at all — it stops at the structured review result.
+**仅限交互模式。** 请阅读 `references/walkthrough.md` 了解路线问题、每个发现的演练和完成报告。请阅读 `references/bulk-preview.md` 了解演练自动解析背后的预览。在审核证据完成之前，无论是新收集的还是有效重复使用的，都不会加载，并且非交互式运行根本不会加载它们 - 它会在结构化审核结果处停止。
 
 ---
 
-Read or pass only the persona prompts the current review selected, each to its own reviewer. The template and schema the dispatch payload fills:
+仅阅读或传递角色提示当前选定的审阅，每个审查者都有其自己的审查者。调度有效负载填充的模板和架构：
 
 @./references/subagent-template.md
 

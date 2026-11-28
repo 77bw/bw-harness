@@ -1,96 +1,95 @@
-# Phase 2.5 and the Discoverability Check
+# 阶段 2.5 和可发现性检查
 
-### Phase 2.5: Selective Refresh Check
+### 阶段 2.5：选择性刷新检查
 
-After writing the lesson's form, decide whether this new solution is evidence that older docs should be refreshed.
+写完课程的表格后，确定这个新解决方案是否是应该刷新旧文档的证据。
 
-A refresh is **not** a default follow-up. Use it selectively when the new learning suggests an older learning or pattern doc may now be inaccurate.
+刷新**不是**默认的后续操作。当新的学习表明旧的学习或模式文档现在可能不准确时，有选择地使用它。
 
-It makes sense to run a refresh when one or more of these are true:
+当其中一项或多项成立时，运行刷新是有意义的：
 
-1. A related learning or pattern doc recommends an approach that the new fix now contradicts
-2. The new fix clearly supersedes an older documented solution
-3. The current work involved a refactor, migration, rename, or dependency upgrade that likely invalidated references in older docs
-4. A pattern doc now looks overly broad, outdated, or no longer supported by the refreshed reality
-5. The Related Docs Finder surfaced high-confidence refresh candidates in the same problem space
-6. The Related Docs Finder reported **moderate overlap** with an existing doc, so there may be consolidation opportunities that benefit from a focused review
+1. 相关的学习或模式文档推荐了一种新修复方法现在与之相矛盾的方法
+2. 新的修复明显取代了旧的记录解决方案
+3. 当前的工作涉及重构、迁移、重命名或依赖项升级，这可能会使旧文档中的引用无效
+4. 模式文档现在看起来过于宽泛、过时，或者不再受到更新的现实的支持
+5. 相关文档查找器在同一问题空间中显示了高置信度的刷新候选者
+6. 相关文档查找器报告与现有文档**适度重叠**，因此可能存在受益于重点审查的整合机会
 
-It does **not** make sense to run a refresh when:
+在以下情况下运行刷新**没有**意义：
 
-1. No related docs were found
-2. Related docs still appear consistent with the new learning
-3. The overlap is superficial and does not change prior guidance
-4. Refresh would require a broad historical review with weak evidence
+1. 没有找到相关文档
+2. 相关文档仍然与新学习的内容一致
+3. 重叠是表面的，不会改变先前的指导
+4. 刷新需要在证据薄弱的情况下进行广泛的历史回顾
 
-Use these rules:
+使用这些规则：
 
-- If there is **one obvious stale candidate**, run a refresh after the lesson's form is written, by following `references/refresh/overview.md` with that narrow scope hint in place of this run's arguments, then continue this capture. That refresh follows its own references' write rules rather than this capture's Write boundary
-- If there are **multiple candidates in the same area**, ask the user whether to run a targeted refresh for that module, category, or pattern set
-- If context is already tight or you are in lightweight mode, do not expand into a broad refresh automatically; instead recommend a refresh as the next step with a scope hint
-- **In non-interactive mode**, never start a refresh and never ask the user. Put the recommended scope hint in the terminal report's "Refresh recommendation" line and let the caller decide
+- 如果存在**一个明显陈旧的候选者**，请在编写课程表单后运行刷新，方法是在 `references/refresh/overview.md` 后面使用窄范围提示代替此运行的参数，然后继续此捕获。该刷新遵循其自己的引用的写入规则，而不是此捕获的写入边界
+- 如果**同一区域有多个候选**，询问用户是否对该模块、类别或模式集运行目标刷新
+- 如果上下文已经很紧张或者您处于轻量级模式，请不要自动扩展为广泛刷新；相反，建议下一步使用范围提示进行刷新
+- **在非交互模式下**，永远不要开始刷新，也永远不要询问用户。将推荐范围提示放在终端报告的“刷新推荐”行中，让调用者决定
 
-**User-runnable refresh rendering.** When recommending a refresh rather than running it, default to `/ce-compound refresh <scope>`; use `$ce-compound refresh <scope>` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
+**用户可运行的刷新渲染。** 当建议刷新而不是运行刷新时，默认为 `/ce-compound refresh <scope>`；仅当活动主机为 Codex 或明确记录以美元为前缀的技能调用时才使用 `$ce-compound refresh <scope>`。仅将调用呈现为内联代码并仅输出一种形式。
 
-When running or recommending a refresh, be explicit about the scope to pass. Prefer the narrowest useful scope:
+运行或建议刷新时，请明确要传递的范围。优先选择最窄的有用范围：
 
-- **Specific file** when one learning or pattern doc is the likely stale artifact
-- **Module or component name** when several related docs may need review
-- **Category name** when the drift is concentrated in one solutions area
-- **Pattern filename or pattern topic** when the stale guidance lives in `<root>/solutions/patterns/`
+- **特定文件** 当一个学习或模式文档可能是过时的产物时
+- **模块或组件名称**当多个相关文档可能需要审查时
+- **类别名称** 当漂移集中在一个解决方案区域时
+- **当过时指导位于 `<root>/solutions/patterns/` 时，模式文件名或模式主题**
 
-Examples:
+示例：
 
 - `release-please-version-drift-recovery`
 - `payments`
 - `performance-issues`
 - `critical-patterns`
 
-A single scope hint may still expand to multiple related docs when the change is cross-cutting within one domain, category, or pattern area.
+当更改在一个域、类别或模式区域内横切时，单个范围提示仍可能扩展到多个相关文档。
 
-Do not run a refresh without a scope unless the user explicitly wants a broad sweep.
+除非用户明确想要进行广泛的扫描，否则不要在没有范围的情况下运行刷新。
 
-Always write the lesson's form first. Refresh is a targeted maintenance follow-up, not a prerequisite for documentation.
+始终先写下课程的形式。刷新是有针对性的维护后续工作，而不是记录的先决条件。
 
-### Discoverability Check
+### 可发现性检查
 
-After the lesson's form is written and the refresh decision is made, check whether the project's instruction files would lead an agent to discover and search `<root>/solutions/` before starting work in a documented area. This runs every time. The knowledge store only compounds value when agents can find it.
+编写课程表格并做出更新决定后，请检查项目的说明文件是否会引导代理在记录区域开始工作之前发现并搜索`<root>/solutions/`。每次都会运行这个。只有当代理能够找到知识存储时，它才具有复合价值。
 
-1. Identify which root-level instruction files exist (AGENTS.md, CLAUDE.md, or both). Read the file(s) and determine which holds the substantive content — one file may just be a shim that `@`-includes the other (e.g., `CLAUDE.md` containing only `@AGENTS.md`, or vice versa). The substantive file is the assessment and edit target; ignore shims. If neither file exists, skip this check entirely.
-2. Assess whether an agent reading the instruction files would learn three things:
-   - That a searchable knowledge store of documented solutions exists
-   - Enough about its structure to search effectively (category organization, YAML frontmatter fields like `module`, `tags`, `problem_type`)
-   - When to search it (before implementing features, debugging issues, or making decisions in documented areas — learnings may cover bugs, best practices, workflow patterns, or other institutional knowledge)
+1. 识别存在哪些根级指令文件（AGENTS.md、CLAUDE.md或两者）。读取文件并确定哪个文件包含实质性内容 - 一个文件可能只是 `@` 包含另一个文件的垫片（例如，`CLAUDE.md` 仅包含 `@AGENTS.md`，反之亦然）。实质性文件是评估和编辑的目标；忽略垫片。如果两个文件都不存在，则完全跳过此检查。
+2. 评估阅读说明文件的代理是否会学到三件事：
+   - 存在记录解决方案的可搜索知识库
+   - 足够了解其结构以便有效搜索（类别组织、YAML frontmatter 字段，如 `module`、`tags`、`problem_type`）
+   - 何时搜索它（在实现功能、调试问题或在记录区域做出决策之前 - 学习内容可能涵盖错误、最佳实践、工作流程模式或其他机构知识）
 
-   This is a semantic assessment, not a string match. The information could be a line in an architecture section, a bullet in a gotchas section, spread across multiple places, or expressed without ever using the exact path `<root>/solutions/`. Use judgment. If an agent would reasonably discover and use the knowledge store after reading the file, the check passes.
+   这是语义评估，而不是字符串匹配。这些信息可以是架构部分中的一行、陷阱部分中的一个项目符号、分布在多个位置，或者在不使用确切路径`<root>/solutions/`的情况下表达。运用判断力。如果代理在读取文件后合理地发现并使用知识存储，则检查通过。
 
-3. If the spirit is already met, no action is needed; move on.
-4. If not:
-   a. Based on the file's existing structure, tone, and density, identify where a mention fits naturally. Before creating a new section, check whether the information could be a single line in the closest related section: an architecture tree, a directory listing, a documentation section, or a conventions block. A line added to an existing section is almost always better than a new headed section. Only add a new section as a last resort when the file has clear sectioned structure and nothing is even remotely related.
-   b. Draft the smallest addition that communicates the three things. Match the file's existing style and density. The addition should describe the knowledge store itself, not the plugin. An agent without the plugin should still find value in it.
+3. 如果精神已经满足了，就不需要采取任何行动；继续前行。
+4. 如果不：
+   一个。根据文件的现有结构、语气和密度，确定自然提及的内容。在创建新部分之前，检查信息是否可以是最接近的相关部分中的单行：体系结构树、目录列表、文档部分或约定块。添加到现有部分的行几乎总是比新的标题部分更好。仅当文件具有清晰的分段结构并且没有任何内容远程相关时，才添加新部分作为最后的手段。 b.起草传达这三件事的最小补充。匹配文件的现有样式和密度。添加内容应该描述知识存储本身，而不是插件。没有插件的代理仍然应该发现它的价值。
 
-      Keep the tone informational, not imperative. Express timing as description, not instruction, for example "relevant when implementing or debugging in documented areas" rather than "check before implementing or debugging." Imperative directives like "always search before implementing" cause redundant reads when a workflow already includes a dedicated search step. The goal is awareness: agents learn the folder exists and what is in it, then use their own judgment about when to consult it.
+      保持信息性的语气，而不是命令性的语气。将计时表达为描述，而不是指令，例如“在记录区域中实现或调试时相关”而不是“在实现或调试之前检查”。当工作流已经包含专用搜索步骤时，诸如“始终在实施之前进行搜索”之类的命令性指令会导致冗余读取。目标是意识：代理了解文件夹的存在以及其中的内容，然后根据自己的判断何时查阅它。
 
-      **Substitute the concrete root in what you write.** The examples below show `<root>/solutions/`, but the instruction file is read by agents without this plugin (and by people), who cannot resolve `<root>`. When you insert the text, replace `<root>` with the resolved concrete path, never the literal placeholder. That path is the actual artifact directory, which is the default `docs` root's `solutions/` unless a `docs_root` is configured.
+      **替换您编写的内容中的具体根。** 下面的示例显示`<root>/solutions/`，但指令文件由没有此插件的代理（以及由人）读取，他们无法解析`<root>`。插入文本时，请将 `<root>` 替换为已解析的具体路径，而不是文字占位符。该路径是实际的产物目录，除非配置了 `docs_root`，否则它是默认的 `docs` 根的 `solutions/`。
 
-      Examples of calibration (not templates; adapt to the file):
+      校准示例（不是模板；适应文件）：
 
-      When there is an existing directory listing or architecture section, add a line:
+      当存在现有目录列表或体系结构部分时，添加一行：
       ```
-      <root>/solutions/  # documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (module, tags, problem_type)
+      <root>/solutions/ # 针对过去问题（错误、最佳实践、工作流程模式）的记录解决方案，按类别通过YAML frontmatter（模块、标签、problem_type）进行组织
       ```
 
-      When nothing in the file is a natural fit, a small headed section is appropriate:
+      当文件中没有任何内容不合适时，小标题部分是合适的：
       ```
       ## Documented Solutions
 
-      `<root>/solutions/` — documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.
+      `<root>/solutions/` — 记录了过去问题（错误、最佳实践、工作流程模式）的解决方案，按类别通过 YAML frontmatter（`module`、`tags`、`problem_type`）进行组织。在记录区域中实施或调试时相关。
       ```
-   c. In full interactive mode, explain to the user why this matters. Agents working in this repo (including fresh sessions, other tools, or collaborators without the plugin) will not know to check `<root>/solutions/` unless the instruction file mentions it. Show the proposed change and where it would go, then get consent before making the edit through the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability. Do not search for another host's tool name. Fall back to presenting the proposal in the host's user-visible chat only when no blocking tool exists in the harness or the call errors (e.g., Codex edit modes), not because a schema load is required. Never silently skip the question. In lightweight mode (interactive or non-interactive), output a one-liner note and move on. In full non-interactive mode, **do not edit instruction files**. Report the gap in the terminal report as `Instruction-file edit: gap noted, not applied` (non-interactive scope is capturing the lesson, not project configuration, not project-config edits; a human-invoked interactive run applies the edit with consent)
+   c.在完全交互模式下，向用户解释为什么这很重要。在此存储库中工作的代理（包括新会话、其他工具或没有插件的协作者）将不知道检查`<root>/solutions/`，除非指令文件提到它。显示提议的更改及其去向，然后在通过当前工具列表中已有的主机阻止问题工具进行编辑之前获得同意（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配工具但未加载，请使用主机的工具发现原语来加载该功能。不要搜索其他主机的工具名称。仅当宿主中不存在阻止工具或调用错误（例如，Codex编辑模式）时，才回退到在主持人的用户可见聊天中呈现提案，而不是因为需要架构加载。永远不要默默地跳过这个问题。在轻量级模式（交互式或非交互式）下，输出一行注释并继续。在完全非交互模式下，**不要编辑指令文件**。将终端报告中的差距报告为`Instruction-file edit: gap noted, not applied`（非交互式范围是捕获教训，而不是项目配置，不是项目配置编辑；人工调用的交互式运行在同意的情况下应用编辑）
 
-5. **If `CONCEPTS.md` exists at repo root, run a parallel discoverability check for it.** Assess whether the instruction file would lead an agent to discover the project's shared domain vocabulary. Use the same workflow as the `<root>/solutions/` check above: same target file, same edit-placement judgment, same consent-then-edit interaction shape per mode. A line in an existing section is almost always better than a new headed section. Example calibration when nothing else fits:
+5. **如果解析的词汇表存在，则对其运行并行可发现性检查。** 评估指令文件是否会引导代理发现项目的共享域词汇表。使用与上面的 `<root>/solutions/` 检查相同的工作流程：相同的目标文件、相同的编辑位置判断、每个模式相同的同意然后编辑交互形状。现有部分中的线条几乎总是比新的有头部分更好。当没有其他适合时的校准示例：
 
    ```
-   CONCEPTS.md  # shared domain vocabulary (entities, named processes, status concepts) — relevant when orienting to the codebase or discussing domain concepts
+   <actual GLOSSARY-MAP.md 或词汇路径> # 共享领域词汇（实体、命名进程、状态概念）——在面向代码库或讨论领域概念时相关
    ```
 
-   **Skip this step entirely if `CONCEPTS.md` does not exist.** Never nag for an artifact the project has not adopted. When skipped, this step produces no output and no edit.
+   **如果 `GLOSSARY.md` 不存在，则完全跳过此步骤。** 永远不要抱怨项目尚未采用的产物。跳过时，此步骤不会产生输出，也不会进行编辑。

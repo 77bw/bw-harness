@@ -1,18 +1,18 @@
-# Cross-Model Execution Contract
+# 跨模型执行合约
 
-Read this reference only when `references/execution-engines.md` finds an applicable external route, or when you are recovering an existing external run. It defines how the host picks one fixed route, what authority the external worker gets, when native fallback is allowed, how requested and actual identity are kept apart, what the run record must contain, and how one unit moves through the controller one transaction at a time. The host drives the bundled controller, detached runner, and adapter; no worker response or process exit can substitute for controller and Git evidence.
+仅当 `references/execution-engines.md` 找到适用的外部路线或恢复现有外部运行时才阅读此参考资料。它定义了主机如何选择一条固定路线、外部工作人员获得什么权限、何时允许本机回退、如何将请求的身份和实际身份分开、运行记录必须包含什么，以及一个单元如何一次通过控制器移动一个事务。主机驱动捆绑的控制器、分离的运行器和适配器；任何工作人员响应或进程退出都无法替代控制器和Git证据。
 
-When this file records that the run leaves the host, that record is the egress: sending repository content, or the authority to change it, to an external process. When this file records a receipt, that is a fact the controller wrote, not something the worker or the host inferred.
+当此文件记录运行离开主机时，该记录就是出口：将存储库内容或更改它的权限发送到外部进程。当此文件记录收据时，这是控制器写入的事实，而不是工作人员或主机推断的内容。
 
-## Interpret route intent and standing configuration
+## 解释路线意图和站立配置
 
-`references/execution-engines.md` decides whether an external route applies and which source has authority. This section turns that source into ordered candidates.
+`references/execution-engines.md` 决定外部路由是否适用以及哪个来源有权限。本节将该来源转变为有序候选者。
 
-A live request such as "use Codex" is preference-strength by default. Interpret unambiguous strict intent such as "must use Codex" or "only use Codex" as requirement-strength; intent is the contract, not any single keyword. The resolved mode is `prefer` or `require`. Requirement strength fixes the requested external identity while that route is viable; it never authorizes another external recipient and does not turn route unavailability into a blocker.
+默认情况下，诸如“use Codex”之类的实时请求是偏好强度。将明确的严格意图（例如“必须使用Codex”或“仅使用Codex”）解释为要求强度；意图是契约，而不是任何单个关键字。解析的模式是`prefer`或`require`。当该路线可行时，需求强度固定所请求的外部身份；它从不授权其他外部接收者，也不会将路由不可用变成阻塞。
 
-Live or contextual intent may name one route or an ordered fallback list (for example, "prefer Cursor with Grok, then Codex"). Preserve that order and normalize each harness/model candidate with the same rules as standing configuration. A typed caller binding remains a single already-selected candidate; do not widen its exact four-field grammar into a list.
+实时或上下文意图可以命名一条路线或有序后备列表（例如，“首选带有 Grok 的 Cursor，然后是 Codex”）。保留该顺序并使用与站立配置相同的规则对每个 harness/model 候选者进行标准化。键入的调用者绑定仍然是单个已选择的候选者；不要将其精确的四域语法扩展为列表。
 
-Standing configuration uses one mode plus an ordered route list. Resolve `work_engine_mode` and `work_engine_preferences` independently from the two repo files (`config.local.yaml` then `config.yaml`); a present local list, including `[]`, replaces the team list. Do not pick one file for the whole group.
+常设配置使用一种模式加上有序路由列表。独立于两个存储库文件解析`work_engine_mode`和`work_engine_preferences`（`config.local.yaml`然后`config.yaml`）；当前的本地列表（包括 `[]`）取代了团队列表。不要为整个组选择一个文件。
 
 ```yaml
 work_engine_mode: prefer
@@ -28,166 +28,166 @@ work_engine_effort:
 ```
 
 - `work_engine_mode`: `off | prefer | require`
-- `work_engine_preferences`: one or more ordered candidate objects
+- `work_engine_preferences`：一个或多个有序候选对象
 - `harness`: `codex | claude | grok | cursor | opencode | antigravity | pi`
-- optional `model`: a model id or family understood by that harness; omission means its configured default
-- optional `work_engine_effort`: a map from harness to the reasoning effort its external worker runs at, written in that harness's own levels (Antigravity takes `low | medium | high`); a harness left out keeps its default
+- 可选 `model`：该宿主理解的型号 ID 或系列；省略表示其配置的默认值
+- 可选`work_engine_effort`：从宿主到其外部工作人员运行的推理工作的映射，以该宿主自己的级别编写（反重力需要`low | medium | high`）；留下的宿主保持其默认值
 
-Do not put CLI commands or flags in configuration. The list expresses implementation intent; the skill's adapter recipes and local inspection determine how to invoke it. Composer is therefore `{ harness: cursor, model: composer }`, while `{ harness: cursor }` means Cursor's configured default.
+不要在配置中放置 CLI 命令或标志。该清单表达了实施意图；该技能的适配器配方和本地检查决定如何调用它。因此 Composer 是 `{ harness: cursor, model: composer }`，而 `{ harness: cursor }` 表示 Cursor 的默认配置。
 
-Normalize a qualified candidate to the controller's fixed route: Codex -> `codex`, Claude -> `claude`, native Grok -> `grok-cli`, Cursor with no model -> `cursor`, a Composer-family Cursor model -> `composer`, a Grok-family Cursor model -> `grok-cursor`, another explicit Cursor model -> `cursor` with that controller-authorized model selector, OpenCode -> `opencode`, Antigravity -> `antigravity`, and Pi -> `pi`. A model selector is data, never shell syntax; if it cannot be represented by the fixed adapter's safe model token, the candidate is unavailable. A Cursor model selector is one of Cursor's own model ids, which may end in a bracketed preset such as `grok-4.7[context=256k,reasoning_effort=high,fast=true]`; record that id as the requested model, since Cursor routes take no separate effort. With no model pin, `grok-cursor` requests that high/fast Grok preset and `composer` requests `composer-2.5[fast=true]`. The `antigravity` route runs only `gemini-*` models, because Antigravity also serves other vendors' models. An Antigravity candidate with no model becomes two exact candidates in this order: `gemini-4-argon`, then `gemini-3.8-flash`. Accounts differ in which Gemini models they offer, and once `init` records a model the run cannot change it, so the preflight model check below settles which one runs. A configured Antigravity model stays exact like any other pin.
+将合格候选标准化为控制器的固定路线：Codex -> `codex`，Claude -> `claude`，原生 Grok -> `grok-cli`，无模型的 Cursor -> `cursor`，Composer 系列 Cursor 模型 -> `composer`，Grok 系列 Cursor 模型 -> `grok-cursor`，另一个显式 Cursor 模型 -> `cursor` 以及控制器授权的模型选择器、OpenCode -> `opencode`、Antigravity -> `antigravity` 和 Pi -> `pi`。模型选择器是数据，而不是 shell 语法；如果它不能由固定适配器的安全模型令牌表示，则候选者不可用。 Cursor 模型选择器是 Cursor 自己的模型 ID 之一，它可能以括号中的预设结尾，例如 `grok-4.7[context=256k,reasoning_effort=high,fast=true]`；将该 id 记录为请求的模型，因为游标路线不需要单独的工作。在没有模型引脚的情况下，`grok-cursor` 请求high/fast Grok 预设，`composer` 请求`composer-2.5[fast=true]`。 `antigravity`路线仅运行`gemini-*`型号，因为Antigravity也服务于其他供应商的型号。没有模型的反重力候选者按以下顺序成为两个精确的候选者：`gemini-4-argon`，然后`gemini-3.8-flash`。帐户的不同之处在于他们提供的 Gemini 模型，一旦 `init` 记录了模型，运行就无法更改它，因此下面的预检模型检查会确定运行哪个模型。配置好的反重力模型与任何其他引脚一样保持完全相同。
 
-`work_engine_effort` resolves on its own under the same two-file rule, and a present local map replaces the team map. It requests an effort for every candidate of that harness, including a candidate a caller binding or live intent selected, and it applies whatever `work_engine_mode` says. A candidate that cannot run at the effort requested for it is unavailable before any work is sent, the same as any other unavailable candidate, and nothing runs at a different effort than the one requested. The adapter script owns which levels each route accepts; ask it at preflight rather than judging the value yourself. A candidate that collapses to native execution runs at the session's own effort, so say that the configured effort was not applied. A value that is not a harness map requests nothing: say once that it was ignored and continue with each route's default.
+`work_engine_effort` 在相同的两文件规则下自行解析，并且当前的本地地图替换团队地图。它要求该工具的每个候选者都做出努力，包括调用者绑定或选择的实时意图的候选者，并且它应用`work_engine_mode`所说的任何内容。无法按照请求的工作量运行的候选者在发送任何工作之前都是不可用的，与任何其他不可用的候选者相同，并且没有任何内容以与请求的工作量不同的努力运行。适配器脚本拥有每个路由接受的级别；在飞行前询问，而不是自己判断价值。折叠到本机执行的候选者依靠会话自己的努力运行，因此可以说未应用配置的工作。不是宿主地图的值不会请求任何内容：一旦它被忽略，就继续使用每条路线的默认值。
 
-An enabled mode without a valid candidate list is unavailable rather than guessed. When the list is exhausted, both `prefer` and `require` disclose every attempted route and reason once, then continue natively on the current harness and session model. A required route is never replaced by another unrequested external recipient. Standing configuration supplies defaults, not permission to change recipient or broaden authority.
+没有有效候选列表的启用模式是不可用的，而不是猜测的。当列表耗尽时，`prefer`和`require`都会公开每条尝试的路线和原因一次，然后在当前的宿主和会话模型上继续本机。所需的路由永远不会被另一个未经请求的外部接收者替换。常设配置提供默认值，而不是更改收件人或扩大权限的权限。
 
-## Resolve one requested route
+## 解析一条请求的路线
 
-Use only these targets: `codex`, `claude`, `grok`, `cursor`, `composer`, `opencode`, `antigravity`, and `pi`. Keep five identity facts separate in every disclosure and receipt: target, harness/intermediary route, requested model, actual model, and receipt status.
+仅使用以下目标：`codex`、`claude`、`grok`、`cursor`、`composer`、`opencode`、`antigravity` 和 `pi`。在每次披露和收据中分别保留五个身份事实：目标、harness/intermediary路线、请求的型号、实际型号和收据状态。
 
-**Fixed controller route tokens:** record exactly `codex`, `claude`, `grok-cli`, `cursor`, `composer`, `grok-cursor`, `opencode`, `antigravity`, or `pi` in the egress record the controller stores. `grok-cli` maps target `grok` to its native harness; `grok-cursor` maps target `grok` through intermediary `cursor`. These controller tokens are exact values, not descriptive labels.
+**固定控制器路由令牌：** 在控制器存储的出口记录中准确记录 `codex`、`claude`、`grok-cli`、`cursor`、`composer`、`grok-cursor`、`opencode`、`antigravity` 或 `pi`。 `grok-cli` 将目标 `grok` 映射到其原生宿主； `grok-cursor`通过中介`cursor`映射目标`grok`。这些控制器标记是精确值，而不是描述性标签。
 
-- `cursor` means the Cursor harness with its configured default model.
-- `composer` means a Composer-family model through Cursor.
-- `grok` prefers its fixed native route; a Grok model through Cursor is a different intermediary and must be separately permitted and recorded.
-- `pi` means the Pi coding agent with its configured default model unless a `provider/model` pin names one, such as `anthropic/claude-opus-5-5`.
+- `cursor` 表示光标宿主及其配置的默认模型。
+- `composer` 表示通过 Cursor 的 Composer 系列模型。
+- `grok`更喜欢其固定的原生路线；通过 Cursor 的 Grok 模型是一个不同的中介，必须单独允许和记录。
+- `pi` 表示 Pi 编码代理及其配置的默认模型，除非 `provider/model` 引脚指定了一个，例如 `anthropic/claude-opus-5-5`。
 
-When a standing preference lists candidates in order, preflight them in that order without sending anything out. Skip a candidate only when its harness and requested/default model are equivalent to the current host, or when observed evidence shows it is unavailable. An explicit different model in the same harness is still a distinct candidate. After skipping a candidate, record why and continue to the next candidate. Attempt the documented adapter recipe first. Local CLI help or version information may refine a compatible mapping, but only inside the same sanctioned harness/model family and only if the fixed adapter still enforces every restriction. An explicit model pin cannot become another model. When `work_engine_effort` requests an effort for the candidate's harness, preflight also asks the adapter whether that route can run at it. The effort is data, never shell syntax, the same as a model selector: only a plain token that starts with a letter or digit and continues with letters, digits, `-`, or `_` may appear in a command, and any other value makes the candidate unavailable without running anything. Ask with this skill's bundled script by its absolute path under the skill directory, because it is not on `PATH`: `CROSS_MODEL_EFFORT_OVERRIDE='<token>' "<skill-dir>/scripts/cross-model-work.sh" --emit-adapter <route>`. Exit 2 naming the effort means the route cannot run at it, and the candidate is unavailable with that reason. A script that cannot be found or run is a broken preflight to report, not evidence about the route. For each `antigravity` candidate, also run `"<skill-dir>/scripts/cross-model-work.sh" --check-model antigravity <model>` before `init`. It opens an Antigravity session for that model and sends no prompt. Exit 0 means the account offers the model. Exit 2 means the candidate is unavailable, with the reason on stderr (for example, the models the account does offer, or a missing Google sign-in); continue to the next candidate. The first qualified candidate becomes the one fixed recipient.
+当常设偏好按顺序列出候选人时，请按该顺序对他们进行预检，而无需发送任何内容。 仅当候选者的宿主和 requested/default 模型与当前主机等效时，或者观察到的证据表明该候选者不可用时，才跳过该候选者。 同一宿主中的显式不同模型仍然是不同的候选者。 跳过一个候选后，记录原因并继续下一个候选。 首先尝试记录的适配器配方。 本地CLI帮助或版本信息可以细化兼容映射，但仅限于同一认可的harness/model系列内，并且仅当固定适配器仍然强制执行所有限制时。 显式模型引脚不能成为另一个模型。 当 `work_engine_effort` 请求为候选人的宿主付出努力时，预检还会询问适配器该路线是否可以在其上运行。 工作量是数据，而不是 shell 语法，与模型选择器相同：只有以字母或数字开头并以字母、数字、`-` 或 `_` 继续的普通标记可能出现在命令中，任何其他值都会使候选者在不运行任何内容的情况下不可用。 通过该技能的捆绑脚本在技能目录下的绝对路径来询问，因为它不在`PATH`：`CROSS_MODEL_EFFORT_OVERRIDE='<token>' "<skill-dir>/scripts/cross-model-work.sh" --emit-adapter <route>`上。 出口 2 命名工作量意味着该路线无法在该处运行，因此候选人无法参加。 无法找到或运行的脚本是需要报告的损坏的预检，而不是有关路线的证据。 对于每个`antigravity`候选者，也在`init`之前运行`"<skill-dir>/scripts/cross-model-work.sh" --check-model antigravity <model>`。 它会打开该模型的反重力会话并且不发送提示。 Exit 0 表示该账户提供该模型。 Exit 2 表示候选人无法联系，原因在 stderr 上（例如，该帐户提供的型号，或缺少 Google 登录）；继续下一个候选人。 第一个合格的候选人成为唯一的固定接收者。
 
-Every route reaches its agent through a supported acpx version, run with `npx`, so each needs Node 22.13 or newer, `npx`, and `jq` besides its own agent CLI. When one is missing, npm cannot fetch acpx, an acpx config file replaces the route's agent launch, or the agent rejects the model before the prompt, the adapter sends nothing and publishes an unavailable receipt whose reason starts `transport unavailable (pre-egress, `. Handle it like any other unavailable route.
+每个路由都通过受支持的 acpx 版本到达其代理，并使用 `npx` 运行，因此除了自己的代理 CLI 之外，每个路由还需要 Node 22.13 或更高版本、`npx` 和 `jq`。如果缺少一个，则 npm 无法获取 acpx，acpx 配置文件会替换路由的代理启动，或者代理在提示之前拒绝模型，适配器不发送任何内容并发布不可用的收据，其原因从 `transport unavailable (pre-egress, ` 开始。像处理任何其他不可用的路线一样处理它。
 
-Before egress, you may keep moving down the list after a candidate is proven unavailable. After dispatch starts, the adapter receives one fixed recipient and must never switch recipients, providers, or intermediaries internally. A different recipient requires a separately resolved and recorded attempt, and only after the first attempt reaches an authoritative terminal or reaped state; it is never an in-flight fallback.
+在离开之前，在候选人被证明不可用后，您可以继续在列表中向下移动。调度开始后，适配器接收一个固定接收者，并且绝不能在内部切换接收者、提供者或中介。不同的接收者需要单独解析和记录尝试，并且仅在第一次尝试到达权威终端或收获状态之后；它绝不是飞行中的后备方案。
 
-Disclose any compatible model alias or substitution, and never relabel an unverified served model.
+公开任何兼容的模型别名或替换，并且切勿重新标记未经验证的服务模型。
 
-If a target asks for the same-host default with no distinct serving route or model, collapse to native execution. Record the target as requested and native as actual; do not create an external job merely to call the current host's default model through itself.
+如果目标要求相同主机默认值，但没有不同的服务路由或模型，则崩溃到本机执行。按要求记录目标，按实际记录本机；不要仅仅为了通过自身调用当前主机的默认模型而创建外部作业。
 
-## Apply preference or requirement strength
+## 应用偏好或要求强度
 
-Cross-model implementation routes are write- and shell-capable. Never request broader host permissions merely to make one reachable. If the current host boundary makes a route unavailable, apply the native fallback for its resolved mode instead of escaping that boundary.
+跨模型实现路线是可写的和可 shell 的。切勿仅仅为了使主机可达而请求更广泛的主机权限。如果当前主机边界使路由不可用，请为其解析模式应用本机后备，而不是转义该边界。
 
-**Preference-strength (`prefer`):** attempt the fixed route in both direct and automatic workflows. If preflight proves it unavailable, continue with native execution and prominently report requested versus actual route/model plus the observed `fallback_reason`.
+**偏好强度（`prefer`）：**在直接和自动工作流程中尝试固定路线。如果预检证明它不可用，则继续本机执行并突出报告请求与实际 route/model 加上观察到的 `fallback_reason`。
 
-**Requirement-strength (`require`):** keep the requested external identity fixed while the route is viable. If preflight proves it unavailable, disclose the reason once and continue on the current harness and session model without prompting, erroring, elevating the host boundary, or substituting another external recipient. A started attempt is not preflight-unavailable: no fallback begins until it reaches an authoritative terminal or reaped state.
+**需求强度（`require`）：**在路由可行时保持请求的外部身份固定。如果预检证明它不可用，请公开原因一次，然后继续使用当前的宿主和会话模型，而不会提示、出错、提升主机边界或替换其他外部接收者。开始的尝试并非预检不可用：在到达权威终端或收获状态之前不会开始回退。
 
-## Sanction before egress
+## 出境前制裁
 
-Before repository content or bounded mutation authority leaves the host, disclose and durably record:
+在存储库内容或有界突变权限离开主机之前，披露并持久记录：
 
-- the binding `source` that authorizes external execution;
-- the fixed recipient, provider, harness route, and every intermediary;
-- the repository/unit material exposed, including the bounded source/unit packet, workspace content, and any cited local prototype artifacts the worker may read;
-- the caller restrictions and which are adapter-enforced versus cooperative; and
-- that linked worktree isolation contains accidental concurrent mutation but is not an OS security sandbox.
+- 授权外部执行的绑定`source`；
+- 固定的接收者、提供者、利用路线以及每个中介；
+- 暴露的repository/unit材料，包括有界的source/unit数据包、工作区内容以及工作人员可能读取的任何引用的本地原型产物；
+- 调用者限制以及适配器强制执行与合作的限制；和
+- 链接的工作树隔离包含意外并发突变，但不是操作系统安全沙箱。
 
-Treat a required restriction the adapter cannot enforce as route unavailable; apply `prefer` or `require` instead of weakening it silently. This record is route-specific.
+将适配器无法强制执行的所需限制视为路由不可用；应用`prefer`或`require`，而不是默默地削弱它。该记录是特定于路线的。
 
-No route currently confines the worker to its workspace, so every route records `restriction_posture: cooperative`, and a run that requires enforced confinement finds every route unavailable. The worker runs with every permission request approved, as the same OS user. What each route still limits, observed through acpx 0.19.4:
+当前没有路线将工作人员限制在其工作空间中，因此每条路线都会记录 `restriction_posture: cooperative`，并且需要强制限制的运行会发现每条路线都不可用。工作线程以同一操作系统用户的身份运行，每个权限请求均获得批准。通过 acpx 0.19.4 观察到，每条路线仍然有哪些限制：
 
-| Route | Limits that hold |
+| 路线 | 保持的极限 |
 |---|---|
-| `codex` | Shell commands run in Codex's `workspace-write` sandbox: no network, `.git` read-only, no writes outside the workspace and temp dirs. Codex's own auto-review can still approve a file edit outside the workspace. |
-| `grok-cli` | File edits through acpx stay inside the workspace. Shell commands are unconfined. |
-| `claude` | None beyond the packet. It runs with `--safe-mode`, so the checkout's project settings and hooks do not apply. |
-| `cursor`, `composer`, `grok-cursor`, `opencode` | None beyond the packet. |
-| `antigravity` | None beyond the packet. It runs in Antigravity's `auto_edit` mode with a private settings home, so the user's own Antigravity or Gemini settings, skills, and API keys do not apply. |
-| `pi` | None beyond the packet. Pi asks no permission before running its tools. It runs with `--no-approve`, so the checkout's Pi settings, extensions, and skills do not apply. |
+| `codex` | Shell 命令在 Codex 的 `workspace-write` 沙箱中运行：无网络，`.git` 只读，在工作区和临时目录之外不进行写入。 Codex自己的自动审查仍然可以批准工作区之外的文件编辑。 |
+| `grok-cli` | 通过 acpx 进行的文件编辑保留在工作区中。 Shell 命令不受限制。 |
+| `claude` | 没有超出数据包的范围。它以 `--safe-mode` 运行，因此结帐的项目设置和挂钩不适用。 |
+| `cursor`, `composer`, `grok-cursor`, `opencode` | 没有超出数据包的范围。 |
+| `antigravity` | 没有超出数据包的范围。它在反重力的`auto_edit`模式下运行，具有私人设置主页，因此用户自己的反重力或双子座设置、技能和API键不适用。 |
+| `pi` | 没有超出数据包的范围。 Pi 在运行其工具之前不会请求任何许可。它以 `--no-approve` 运行，因此结帐的 Pi 设置、扩展和技能不适用。 |
 
-Any retry that changes a recipient or intermediary requires a newly resolved and recorded job.
+任何更改收件人或中介的重试都需要新解决和记录的作业。
 
-## Bound worker authority
+## 绑定工人权限
 
-The worker receives one unit, one workspace, one fixed recipient, and only inherited authority. It may narrow scope or authority, never broaden either. Its packet grants no canonical commit, push, PR, shipping, recipient-switch, fallback, peer scheduling, or scope-expansion authority.
+工人获得一个单位、一个工作空间、一个固定的接受者，并且只能继承权力。它可能会缩小范围或权威，但永远不会扩大。它的数据包不授予规范提交、推送、PR、运输、接收者切换、回退、对等调度或范围扩展权限。
 
-An external worker may edit only inside its controller-owned detached worktree. Do not instruct it to run `git add`, `git commit`, or another Git index write. Leave the completed working tree uncommitted; the host snapshots the tree. Codex's `workspace-write` shell sandbox cannot write the linked-worktree Git admin dir, because the index lives in the shared Git common dir outside the workspace. Worker commits are never required. When the worker finishes, the controller turns the complete working tree into an isolated transport commit for the host to inspect. Only the host may apply output to the canonical checkout, run authoritative verification, create a host-only canonical commit, or continue into the shipping steps that follow implementation, whether `ce-work` runs those itself or returns them to a caller.
+外部工作人员只能在其控制器拥有的分离工作树内进行编辑。不要指示它运行 `git add`、`git commit` 或另一个 Git 索引写入。将已完成的工作树保留为未提交；主机对树进行快照。 Codex 的 `workspace-write` shell 沙箱无法写入链接工作树 Git 管理目录，因为索引位于工作区外部的共享 Git 公共目录中。永远不需要工人提交。当工作程序完成时，控制器将完整的工作树转换为独立的传输提交，以供主机检查。只有主机可以将输出应用于规范结帐，运行权威验证，创建仅主机规范提交，或继续执行实施后的运输步骤，无论`ce-work`运行这些本身还是将它们返回给调用者。
 
-A Codex `workspace-write` packet must also treat socket binds, OS permission checks, and peer-credential probes as host-owned. Preserve the host command and observed result; do not treat a sandbox `EPERM` as proof the host lacks the capability.
+Codex`workspace-write`数据包还必须将套接字绑定、操作系统权限检查和对等凭据探测视为主机拥有的。保存主机命令和观察结果；不要将沙箱`EPERM`视为主机缺乏能力的证据。
 
-Ordinary synchronous native units stay in the active checkout. Ordinary native subagent isolation remains harness-owned. Only the external cross-model controller may create detached sibling worktrees under its private run root; this exception does not authorize `ce-work` to create worktrees for native execution. An active checkout that is already a linked worktree does not disable this route: the controller registers another detached **sibling** through the shared Git common directory under `/tmp/compound-engineering-<effective-uid>/ce-work/<run-id>/`, never a nested worktree beneath the active checkout.
+普通同步本机单元保持在活动结账状态。普通的本机子代理隔离仍然由宿主拥有。只有外部跨模型控制器可以在其私有运行根下创建分离的同级工作树；此异常不会授权 `ce-work` 创建用于本机执行的工作树。已经是链接工作树的主动签出不会禁用此路由：控制器通过`/tmp/compound-engineering-<effective-uid>/ce-work/<run-id>/`下的共享Git公共目录注册另一个分离的**兄弟**，而不是主动签出下的嵌套工作树。
 
-## Preserve route and lifecycle receipts
+## 保留路线和生命周期收据
 
-Direct runs and return-to-caller runs record the same facts, even though what they say to the user and what shipping steps follow differ:
+直接运行和返回呼叫者运行记录相同的事实，尽管它们对用户说的话以及遵循的运输步骤不同：
 
-- `implementation_engine_binding`: resolved `mode`, `target`, `model`, and `source`;
-- `requested_route` and `actual_route`, including every intermediary;
-- `requested_model`, `actual_model`, and served-model receipt status;
-- `requested_effort` or `null`; served effort is never verified, so report it as `unverified`;
-- `fallback_reason` or `null`;
-- `source_kind` (`plan` or `prompt`) and its controller-recorded digest;
-- `run_id` and per-unit `unit_receipts` that distinguish process terminal state, integration, authoritative verification, host canonical commit, and cleanup;
-- `plan_checkpoint`: a disclosed host commit only when the resolved selected plan was the sole canonical dirt;
-- `blockers`; and
-- `recovery_path` for preserved inspectable state.
+- `implementation_engine_binding`：解决了`mode`、`target`、`model`、`source`；
+- `requested_route`和`actual_route`，包括每个中介；
+- `requested_model`、`actual_model`和服务模型收货状态；
+- `requested_effort`或`null`；服务努力从未得到验证，因此将其报告为 `unverified`；
+- `fallback_reason`或`null`；
+- `source_kind`（`plan`或`prompt`）及其控制器记录的摘要；
+- `run_id`和每单元`unit_receipts`区分进程终端状态、集成、权威验证、主机规范提交和清理；
+- `plan_checkpoint`：仅当已解决的所选计划是唯一的规范污垢时才公开主机提交；
+- `blockers`；和
+- `recovery_path` 用于保留可检查状态。
 
-Never infer success from detached-process completion alone. The run receipt is complete only after every required unit reaches its host-owned canonical state. A plan-only checkpoint is disclosed to the direct user or returned to an automatic caller; unrelated dirt never receives an implicit checkpoint and instead makes the external route unavailable.
+切勿仅从独立流程的完成情况来推断成功。仅当每个所需单元达到其主机拥有的规范状态后，运行收据才完成。仅计划检查点会向直接用户公开或返回给自动调用者；不相关的污垢永远不会收到隐式检查点，而是使外部路由不可用。
 
-## Build a source for bare-prompt work
+## 为即时工作构建源代码
 
-A formal plan is not required when Phase 0 (Input Triage) has already judged a bare prompt concrete enough to execute. Before controller initialization, write one bounded implementation brief directly to OS temp outside the repository. The brief is a distilled statement of what the worker is allowed to do, not a transcript: never include raw conversation history, unrelated session context, credentials, or speculative scope.
+当阶段 0（输入分类）已经判断出一个简单的提示足以执行时，不需要正式的计划。在控制器初始化之前，将一份有界实现概要直接写入存储库外部的 OS temp。简报是对工作人员可以做什么的精炼陈述，而不是文字记录：绝不包括原始对话历史记录、不相关的会话上下文、凭证或推测范围。
 
-Populate these headings with concrete evidence from the request and Phase 0 discovery:
+使用来自请求和第 0 阶段发现的具体证据填充这些标题：
 
-- `Request` — the current implementation request, paraphrased only to remove unrelated conversation;
-- `Goal` — one observable outcome;
-- `Scope` — expected files or areas of the code, and discovered patterns/tests;
-- `Acceptance and verification` — behavior and authoritative checks that prove completion;
-- `Constraints and exclusions` — inherited restrictions, non-goals, and unresolved boundaries; and
-- `Units` — use one conservative `P1` unit by default; create more only when discovery establishes distinct goals, dependencies, expected files, and verification without guessing.
+- `Request` — 当前的实现请求，仅解释为删除不相关的对话；
+- `Goal` — 一个可观察的结果；
+- `Scope` — 预期的文件或代码区域，并发现patterns/tests；
+- `Acceptance and verification` — 证明完成的行为和权威检查；
+- `Constraints and exclusions` — 继承的限制、非目标和未解决的边界；和
+- `Units` — 默认使用一个保守的`P1`单位；仅当发现建立了不同的目标、依赖关系、预期文件和验证而无需猜测时才创建更多。
 
-If any of Goal, bounded Scope, or Acceptance and verification cannot be populated, do not initialize the controller or send anything out. Return to Phase 0 clarification or planning. Compute the brief's SHA-256, call controller `init` with `--prompt-brief <temp-path> --prompt-digest <sha256>`, and use the controller-owned private copy and digest thereafter. The caller's temp path is never authoritative after initialization. Invocation origin does not change this contract.
+如果无法填充“目标”、“有界范围”或“接受和验证”中的任何一个，则不要初始化控制器或发送任何内容。返回到阶段 0 澄清或规划。计算摘要的 SHA-256，使用 `--prompt-brief <temp-path> --prompt-digest <sha256>` 调用控制器 `init`，然后使用控制器拥有的私有副本和摘要。初始化后，调用者的临时路径永远不具有权威性。调用来源不会改变本合同。
 
-## Serial external-unit protocol
+## 串行外部单元协议
 
-Run this protocol from the host checkout for one ready unit at a time. Resolve each bundled script from this skill's directory. The host remains the orchestrator throughout; the external CLI only authors the bounded unit. Use `git -C <canonical-checkout>` for every host Git operation; never rely on the shell's current directory after resolving or running a bundled script.
+从主机检查一次运行此协议以检查一个就绪单元。解析该技能目录中的每个捆绑脚本。主持人自始至终都是协调者；外部CLI仅创建有界单元。对每个主机Git操作使用`git -C <canonical-checkout>`；解析或运行捆绑脚本后，切勿依赖 shell 的当前目录。
 
-**Visibility and stop invariant:** use separate host tool calls and invoke only one state-changing controller transition per call until terminal scope inspection. Never generate or run a shell script that spans `start` through waiting or integration, spans multiple units, loops over the external runtime, or conditionally continues into another transition. `start` must return before supervision. Cap each runner wait at 60 seconds, then sync and publish progress in later host tool calls. After scope inspection, use the controller's single fail-stop `integrate` transaction; do not manually chain its internal Git/controller transitions. A nonzero controller, runner, verification, or Git exit ends that host tool call; inspect controller status and enter its prescribed restoration or recovery path before any later transition.
+**可见性和停止不变性：** 使用单独的主机工具调用，并且每次调用仅调用一个状态更改控制器转换，直到终端范围检查。切勿生成或运行通过等待或集成跨越 `start`、跨越多个单元、在外部运行时循环或有条件继续到另一个转换的 shell 脚本。 `start` 必须在监督前返回。每个运行程序的等待时间上限为 60 秒，然后在以后的主机工具调用中同步和发布进度。范围检查后，使用控制器的单一故障停止`integrate`事务；不要手动链接其内部 Git/controller 转换。非零控制器、运行器、验证或Git出口结束主机工具调用；检查控制器状态并在任何后续转换之前输入其规定的恢复或恢复路径。
 
-When set, `CE_WORK_RUNS_ROOT` is the parent CE Work directory containing all `<run-id>/` directories, not an individual run directory.
+设置后，`CE_WORK_RUNS_ROOT` 是包含所有 `<run-id>/` 目录的父 CE 工作目录，而不是单个运行目录。
 
-1. **Resolve, preflight, and sanction.** Apply the authority-and-scope resolution in `execution-engines.md`. For an ordered standing preference, skip a candidate equivalent to the current host and preflight each remaining candidate until the first qualifies; record every rejected candidate and reason. Verify the fixed adapter and caller restrictions, then disclose the authorizing source, the route and its intermediaries, the material exposed, and which restrictions are enforced versus cooperative. The controller `init` egress object uses the exact plural keys `route`, `intermediaries`, and `restrictions`: direct `codex`, `claude`, `grok-cli`, `cursor`, `opencode`, and `antigravity` routes use `intermediaries: []`, while `composer` and `grok-cursor` use `intermediaries: ["cursor"]`. When an effort was requested for the fixed recipient, add it to that egress object as `effort` and name it in the disclosure. The controller records it at `init` and writes it into every attempt's authorization, so each unit, retry, and resume of the run uses the recorded value; do not resolve it again from config after `init`. If all candidates are unavailable, both `prefer` and `require` disclose the attempted routes and reasons once, then continue natively on the current harness and session model without starting an external controller run.
-2. **Establish the durable source and clean canonical state.** Initialize the private run with `unit-workspace.py` `init`; the controller creates `/tmp/compound-engineering-<effective-uid>/ce-work/<run-id>` itself (under `$TMPDIR/compound-engineering-<effective-uid>/` instead when `/tmp` cannot host a writable private root, as in a sandbox that only allowlists `$TMPDIR`; `unit-workspace.py` resolves that itself). Do not pre-create the run directory. For a repository plan, pass `--plan <path> --plan-digest <sha256>`; the selected plan may be the only dirty path, and `unit-workspace.py` `checkpoint-plan` records that exact plan-only checkpoint. That exact plan-only state is checkpointable, not a route blocker. For a bounded prompt brief, pass `--prompt-brief <temp-path> --prompt-digest <sha256>`; the controller copies it into private run state, and the canonical checkout must already be clean because no repository source is eligible for checkpointing. Only checkpoint failure or unrelated dirt makes the route unavailable. Re-read canonical repository, branch, HEAD, source kind/digest, and cleanliness before preparing a unit.
-   Once `init` returns `READY`, the engine decision is closed for that unit. The next implementation path is `prepare` then the fixed-author start, or a blocker that preserves the returned recovery path. Expected latency, orchestration cost, or a later judgment that native work would be simpler is not route unavailability and never authorizes canonical writes. Native implementation becomes eligible only through the controller's `claim-fallback` check described later under "Resume and fallback exactly once".
-3. **Prepare one bounded unit packet.** For a plan, include only the Goal Capsule, Definition of Done, active unit, relevant Verification Contract rows, cited R/F/AE/KTD excerpts, any Product Contract Key Decision whose exact `Governs R…` links name the active unit's cited R-IDs, inherited restrictions, expected files, evidence strategy, and explicit exclusions. Include the active unit's prototype source citations with their qualifications about locality, availability, and the authority of requirements. Instruct the worker to inspect accessible, explicitly cited prototype decisions and selected screens or states before implementing the affected behavior, including when those sources are in another worktree. Keep edits and tests inside the assigned workspace. For a prompt brief, include only the matching P-unit's Goal, Scope, Acceptance and verification, Constraints and exclusions, expected files, and evidence strategy. For either source, also include the text and citation of each Compound Pack rule matched to the unit's files (`references/work-intake.md`), given as team rules to honor that never widen the unit or its authority. Do not expose the whole plan, prompt brief, or conversation by default. Write the packet source directly to OS temp outside the canonical checkout, such as a source file beneath the controller-returned recovery path; never draft it inside the repository and move or copy it later. Call `unit-workspace.py` `prepare` with that packet source path, unit id, recorded base, dependencies, wave fields, and the activity kind the route qualifies for (`incremental` or `hard-only`). Every route streams its ACP session, so `incremental` is the default. Use only the controller-returned `attempt_id`, controller-owned `packet_path`, and computed `packet_digest` for dispatch; never substitute the caller's source path, a caller-computed digest, or an assumed attempt name.
-   `prepare` refuses only on unrelated dirt or a moved HEAD; the size and shape of the canonical checkout's git-ignored inventory (installed dependencies, virtualenvs, build caches, symlinks) never make the route unavailable.
-4. **Start one fixed author.** The controller-issued authorization schema binds `run_id`, `unit_id`, and `attempt_id` to the fixed route/model/intermediary and packet contract. Call `peer-job-runner.py` `start --no-sweep --input-digest <controller-packet-digest>` with skill `ce-work`; the runner label must equal the unit id exactly, without the attempt id or another suffix, and `--result-path` must be `<controller-result-dir>/implementation-result.json`. Both `--input-digest` and the adapter's expected-packet argument must use the exact `packet_digest` returned by `prepare`; omitting the runner flag or recomputing/substituting either value makes the job ineligible for `record-job`. The runner and controller share the same root automatically: `CE_WORK_RUNS_ROOT` wins when set, otherwise both derive CE Work state from `CE_PEER_JOBS_ROOT`. Set `CE_PEER_HARD_SECS=7200` on every production CE Work runner start rather than relying on the shared runner default. Set `CE_PEER_IDLE_SECS=600` for route-qualified `incremental` activity and `CE_PEER_IDLE_SECS=0` for `hard-only` or otherwise untrustworthy activity. The 600-second window resets on progress and detects a stall; it is not a wall-clock maximum. Its production worker command is `cross-model-work.sh <authorization_path> <workspace> <unit-packet> <expected-packet-sha256> <result-dir>`; invoke the returned adapter path directly as the first worker argv, without a `bash`, `sh`, or `env` prefix, and pass only the controller-returned `authorization_path`, never a caller-supplied route string or an ambient model or effort override. The runner exports its controller-visible job id to the worker. Before prompt construction or external CLI start, the adapter must pass that runner-exported job id and obtain controller `authorize-dispatch` success by calling `unit-workspace.py` `authorize-dispatch`. That success reads the actual runner metadata and exact worker argv, rejecting a shell prefix or substituted adapter before anything is sent out, then atomically binds that job id to the exact attempt before egress along with the authorization digest, workspace, packet path and digest, and result directory while revalidating the controller-owned exact route, model, and intermediary contract. A second job for the attempt is refused. A missing or refused handshake, including hand-authored or cross-attempt authorization, means nothing is sent out. Model pins and the requested effort come only from the authorized projection. The adapter's `--emit-adapter` mode remains introspection only and never authorizes production dispatch. Capture the returned job id immediately with `unit-workspace.py` `record-job`, using the controller-returned `attempt_id` verbatim; this idempotently confirms the same validated binding. Never hold one host tool call open for the external runtime and never let the adapter select another recipient.
-5. **Observe without steering.** Interleave runner `status --skill ce-work` or `wait --skill ce-work --max-secs 60` calls with separate `unit-workspace.py` `sync-job` calls; every bare-job-id runner `status`, `wait`, `result`, or `reap` call must carry `--skill ce-work` under the same `CE_WORK_RUNS_ROOT` / `CE_PEER_JOBS_ROOT` selection used at start. Report unit, route, elapsed time, latest meaningful activity, the activity kind in effect, and terminal state after each cycle. When a unit's activity cannot be trusted to show progress within the idle window, `hard-only` is the normal posture: disable idle timeout, retain the universal hard cap, and never infer failure or fallback merely from absent incremental activity. A live or temporarily unreachable attempt is still authoritative: do not start fallback or duplicate work. Reap only through the explicit controller/runner path and retain its workspace.
-6. **Terminalize complete Git output.** On authoritative `done`, call `unit-workspace.py` `terminalize`. Require its pinned synthetic transport commit to have the recorded base as sole parent and the complete final workspace tree. In a later host call, inspect the actual transport diff, changed paths, binary/mode/rename/delete evidence, adapter result, packet expected scope, and any scope-expansion request. A generated byproduct or any unexplained difference between actual transport paths, expected scope, and the worker's evidence is unexpected scope: preserve it for host resolution and do not take the integration lock.
-7. **Integrate through the fail-stop controller transaction.** After the separate scope-inspection call accepts the complete transport, invoke `unit-workspace.py integrate --run-id <run-id> --unit-id <unit-id> --commit-message <message> --verification-summary <summary> [--allowed-head <recorded-head>] -- <verification-command-and-argv>`. Pass a simple Verification Contract command as direct argv. If it contains shell syntax such as `$(...)`, a pipe, `&&`, a redirect, or a glob, invoke an explicit shell with pipe-failure handling on the first attempt, for example `-- bash -o pipefail -c 'test "$(cat delegated.txt)" = "expected"'`; quoting `$(...)` as a direct argument does not expand it. Do not manually chain or conditionally reproduce this transaction.
-8. **Let `integrate` perform every canonical change.** It performs `unit-workspace.py` `integration-acquire`, `unit-workspace.py` `preflight`, `git cherry-pick --no-commit`, `unit-workspace.py` `mark-applied`, authoritative canonical verification with Python bytecode disabled, exact canonical-state reconciliation, `unit-workspace.py` `mark-verified`, one host-owned commit, and `unit-workspace.py` `mark-committed`. For a wave it also records `wave-advance`; after a reconciled commit it performs `unit-workspace.py` `cleanup` and `unit-workspace.py` `integration-release`.
-9. **Treat its outcome as authoritative.** Capture the authoritative command's exit status directly; never infer a pass from stdout. Any change to tracked state — HEAD, branch, index, or status-visible paths — fails reconciliation. Git-ignored state is not part of that proof. The controller inventories ignored entries by metadata before and after verification and discloses `changed`, `removed`, and `created` counts with a bounded path sample as `ignored_state` in every verification receipt and return body. It never copies, restores, or deletes ignored files, so a verification command that mutates a cache or a local database changes only what native units already could. Ignored files the command creates stay in place. Empty ignored directories are not inventoried. `.env`-class files and local databases receive no protection from a misbehaving verification command. Verification and clean-state reconciliation happen before `mark-verified`. A rejected verification or a failed pre-commit controller/Git step forbids the commit, calls `unit-workspace.py` `restore`, proves exact pre-fold equality, and releases the lock before fallback, retry, or another unit. If exact restoration cannot be proven, it retains the lock, workspace, transport ref, and recovery path. A crash after the canonical commit remains resumable evidence and must not be redispatched.
-10. **Run the source-wide checks through the controller.** After every external unit is committed and cleaned, invoke `unit-workspace.py verify-run --run-id <run-id> --verification-summary <summary> -- <verification-command-and-argv>` for the plan-wide Verification Contract gates or the prompt brief's authoritative checks. Do not run those final commands directly in the canonical checkout or hide their status behind a later command. `verify-run` starts only from a clean canonical snapshot, captures the command's exit status directly with Python bytecode disabled, restores tracked state to the exact starting snapshot, discloses ignored-state divergence as `ignored_state` per step 9, and records a durable receipt. A failing check retains its private log and blocks the return to the caller or the shipping steps even after cleanup succeeds.
+1. **解决、预检和制裁。** 应用`execution-engines.md`中的权限和范围决议。对于有序的站立优先，跳过与当前主持人相当的候选者，并对剩余的每个候选者进行预检，直到第一个符合资格；记录每个被拒绝的候选人及其原因。验证固定适配器和调用者限制，然后公开授权源、路由及其中介、暴露的材料以及强制执行哪些限制与合作。控制器`init`出口对象使用精确的复数键`route`、`intermediaries`和`restrictions`：直接`codex`、`claude`、`grok-cli`、`cursor`、`opencode`和`antigravity`路由使用`intermediaries: []`，而`composer` 和`grok-cursor` 使用`intermediaries: ["cursor"]`。当为固定接收者请求工作时，将其添加到该出口对象作为 `effort` 并在披露中命名。控制器将其记录在`init`并将其写入每次尝试的授权中，因此运行的每个单元、重试和恢复都使用记录的值； `init`之后不要再次从配置中解析它。如果所有候选者都不可用，`prefer`和`require`都会公开尝试的路线和原因一次，然后继续在当前宿主和会话模型上本地运行，而无需启动外部控制器运行。
+2. **建立持久源和干净的规范状态。** 使用 `unit-workspace.py` `init` 初始化私有运行；控制器创建 `/tmp/compound-engineering-<effective-uid>/ce-work/<run-id>` 本身（当 `/tmp` 无法托管可写私有根时，在 `$TMPDIR/compound-engineering-<effective-uid>/` 下创建，就像在仅允许列入 `$TMPDIR` 的沙箱中；`unit-workspace.py` 自行解决）。不要预先创建运行目录。对于存储库计划，请传递`--plan <path> --plan-digest <sha256>`；所选计划可能是唯一的脏路径，并且`unit-workspace.py``checkpoint-plan`记录了该确切的仅计划检查点。确切的仅计划状态是可检查点的，而不是路线阻塞者。对于有界提示简报，请传递 `--prompt-brief <temp-path> --prompt-digest <sha256>`；控制器将其复制到私有运行状态，并且规范签出必须已经是干净的，因为没有存储库源符合检查点条件。只有检查点故障或不相关的污垢才会导致路线不可用。在准备单元之前重新阅读规范存储库、分支、HEAD、源kind/digest和清洁度。
+   一旦`init`返回`READY`，该单元的引擎决策将关闭。下一个实现路径是`prepare`，然后是固定作者启动，或者是保留返回的恢复路径的阻塞项。预期的延迟、编排成本或稍后判断本机工作会更简单并不是路由不可用，也不会授权规范写入。本机实现仅通过控制器的 `claim-fallback` 检查才合格，稍后在“恢复和回退一次”下进行描述。
+3. **准备一个有界单元包。** 对于计划，仅包含目标胶囊、完成定义、活动单元、相关验证合同行、引用的 R/F/AE/KTD 摘录、任何产品合同关键决策（其确切的 `Governs R…` 链接命名活动单元引用的 R-ID、继承的限制、预期文件、证据策略和显式排除）。 包括活动单元的原型源引用及其有关位置、可用性和需求权威性的资格。 指示工作人员在实施受影响的行为之前检查可访问的、明确引用的原型决策和选定的屏幕或状态，包括当这些源位于另一个工作树中时。 将编辑和测试保留在指定的工作空间内。 对于提示概要，仅包括匹配的 P 单元的目标、范围、验收和验证、约束和排除、预期文件和证据策略。 对于任一来源，还包括与单位文件 (`references/work-intake.md`) 匹配的每个Compound Pack规则的文本和引文，作为团队规则给出，以遵守绝不扩大单位或其权限的规则。 默认情况下，不要暴露整个计划、提示简报或对话。 将数据包源直接写入规范检出之外的操作系统临时文件，例如控制器返回的恢复路径下的源文件；切勿在存储库中起草它并稍后移动或复制它。 使用数据包源路径、单元 ID、记录库、依赖性、波场以及路由符合的活动类型（`incremental` 或 `hard-only`）调用 `unit-workspace.py` `prepare`。 每个路由都会传输其 ACP 会话，因此 `incremental` 是默认值。 仅使用控制器返回的`attempt_id`、控制器拥有的`packet_path`和计算的`packet_digest`进行调度；切勿替换调用者的源路径、调用者计算的摘要或假定的尝试名称。
+   `prepare` 仅拒绝不相关的污垢或移动的 HEAD；规范结账的 git-ignored inventory（已安装的依赖项、virtualenvs、构建缓存、符号链接）的大小和形状永远不会使路由不可用。
+4. **启动一个固定作者。** 控制器发布的授权模式将`run_id`、`unit_id`和`attempt_id`绑定到固定的route/model/intermediary和数据包合约。 使用技能`ce-work`呼叫`peer-job-runner.py``start --no-sweep --input-digest <controller-packet-digest>`；跑步者标签必须与单位 ID 完全相同，没有尝试 ID 或其他后缀，并且 `--result-path` 必须是 `<controller-result-dir>/implementation-result.json`。 `--input-digest` 和适配器的预期数据包参数都必须使用 `prepare` 返回的确切 `packet_digest`；省略运行者标志或 recomputing/substituting 任一值都会使作业不符合 `record-job` 的条件。 运行器和控制器自动共享相同的根：设置时`CE_WORK_RUNS_ROOT`获胜，否则都从`CE_PEER_JOBS_ROOT`派生CE工作状态。 在每个生产 CE 工作运行器启动时设置 `CE_PEER_HARD_SECS=7200`，而不是依赖共享运行器默认值。 为符合路由条件的 `incremental` 活动设置 `CE_PEER_IDLE_SECS=600`，为 `hard-only` 或其他不可信活动设置 `CE_PEER_IDLE_SECS=0`。 600 秒窗口会根据进度重置并检测到停顿；这不是挂钟最大值。 其生产工人命令为`cross-model-work.sh <authorization_path> <workspace> <unit-packet> <expected-packet-sha256> <result-dir>`；直接调用返回的适配器路径作为第一个工作程序argv，没有`bash`，`sh`或`env`前缀，并且仅传递控制器返回的`authorization_path`，从不传递调用者提供的路由字符串或环境模型或工作覆盖。 运行程序将其控制器可见的作业 ID 导出给工作程序。 在提示构建或外部CLI启动之前，适配器必须传递运行器导出的作业ID并通过调用`unit-workspace.py``authorize-dispatch`获得控制器`authorize-dispatch`成功。 该成功读取实际的运行程序元数据和确切的工作程序argv，在发送任何内容之前拒绝 shell 前缀或替换的适配器，然后将该作业 ID 原子地绑定到出口之前的确切尝试以及授权摘要、工作空间、数据包路径和摘要以及结果目录，同时重新验证控制器拥有的确切路由、模型和中间契约。 尝试的第二份工作被拒绝。 握手丢失或被拒绝，包括手工编写或交叉尝试授权，意味着不会发送任何内容。 型号引脚和要求的工作量仅来自授权的投影。 适配器的`--emit-adapter`模式仅保持内省，从不授权生产调度。 立即使用 `unit-workspace.py` `record-job` 捕获返回的作业 ID，逐字使用控制器返回的 `attempt_id`；这幂等地确认了相同的经过验证的绑定。 切勿为外部运行时打开一个主机工具调用，也切勿让适配器选择另一接收者。
+5. **无需转向即可观察。** 将跑步者 `status --skill ce-work` 或 `wait --skill ce-work --max-secs 60` 调用与单独的 `unit-workspace.py` `sync-job` 调用交错；每个裸作业 ID 运行程序 `status`、`wait`、`result` 或 `reap` 调用必须在启动时使用的相同 `CE_WORK_RUNS_ROOT` / `CE_PEER_JOBS_ROOT` 选择下携带 `--skill ce-work`。报告单位、路线、经过的时间、最新有意义的活动、有效的活动类型以及每个周期后的最终状态。当无法信任某个单元的活动在空闲窗口内显示进度时，`hard-only` 是正常状态：禁用空闲超时，保留通用硬上限，并且永远不要仅从缺少增量活动来推断失败或回退。实时或暂时无法访问的尝试仍然具有权威性：不要开始后备或重复工作。仅通过显式 controller/runner 路径进行收获并保留其工作空间。
+6. **终止完整的Git输出。** 在权威`done`上，调用`unit-workspace.py``terminalize`。要求其固定的合成传输提交将记录的基础作为唯一父级和完整的最终工作区树。在稍后的主机调用中，检查实际传输差异、更改的路径、binary/mode/rename/delete证据、适配器结果、数据包预期范围以及任何范围扩展请求。生成的副产品或实际传输路径、预期范围和工作人员证据之间任何无法解释的差异都是意外范围：将其保留用于主机解析，并且不采用集成锁。
+7. **通过故障停止控制器事务进行集成。** 在单独的范围检查调用接受完整传输后，调用 `unit-workspace.py integrate --run-id <run-id> --unit-id <unit-id> --commit-message <message> --verification-summary <summary> [--allowed-head <recorded-head>] -- <verification-command-and-argv>`。将简单的验证合约命令作为直接 argv 传递。如果它包含 shell 语法，例如 `$(...)`、管道、`&&`、重定向或 glob，则在第一次尝试时调用具有管道失败处理的显式 shell，例如 `-- bash -o pipefail -c 'test "$(cat delegated.txt)" = "expected"'`；引用 `$(...)` 作为直接参数不会扩展它。不要手动链接或有条件地复制此交易。
+8. **让 `integrate` 执行每个规范更改。** 它执行 `unit-workspace.py` `integration-acquire`、`unit-workspace.py` `preflight`、`git cherry-pick --no-commit`、`unit-workspace.py` `mark-applied`、禁用 Python 字节码的权威规范验证、精确规范状态协调、 `unit-workspace.py` `mark-verified`，一项主机拥有的提交，以及 `unit-workspace.py` `mark-committed`。对于波浪，它还记录 `wave-advance`；协调提交后，它执行 `unit-workspace.py` `cleanup` 和 `unit-workspace.py` `integration-release`。
+9. **将其结果视为权威。** 直接捕获权威命令的退出状态；永远不要从标准输出推断出传递。对跟踪状态的任何更改（HEAD、分支、索引或状态可见路径）都会失败协调。 Git-忽略状态不是该证明的一部分。控制器清单忽略验证之前和之后的元数据条目，并在每个验证收据和返回正文中公开 `changed`、`removed` 和 `created` 计数，其中有界路径样本为 `ignored_state`。它从不复制、恢复或删除被忽略的文件，因此改变缓存或本地数据库的验证命令只会更改本机单元已经可以更改的内容。该命令创建的忽略文件保留在原处。不会清点被忽略的空目录。 `.env` 类文件和本地数据库不会受到行为不当的验证命令的保护。验证和干净状态协调发生在 `mark-verified` 之前。被拒绝的验证或失败的预提交controller/Git步骤将禁止提交，调用`unit-workspace.py``restore`，证明精确的预折叠相等性，并在回退、重试或其他单元之前释放锁定。如果无法证明精确恢复，它将保留锁、工作空间、传输引用和恢复路径。规范提交后的崩溃仍然是可恢复的证据，并且不得重新发送。
+10. **通过控制器运行源范围检查。** 提交并清理每个外部单元后，调用 `unit-workspace.py verify-run --run-id <run-id> --verification-summary <summary> -- <verification-command-and-argv>` 进行计划范围验证合同门或提示简报的权威检查。不要直接在规范结帐中运行这些最终命令或将其状态隐藏在以后的命令后面。 `verify-run`仅从干净的规范快照开始，在禁用Python字节码的情况下直接捕获命令的退出状态，将跟踪状态恢复到确切的起始快照，按照步骤9将忽略状态分歧公开为`ignored_state`，并记录持久收据。即使清理成功后，失败的检查也会保留其私有日志并阻止返回给调用者或传送步骤。
 
-Report every transition in the direct commentary or in the structured return to the caller: resolved source kind, route, plan checkpoint when applicable, dispatch, activity, terminal result, transport/scope inspection, integration, restoration if any, authoritative verification, canonical commit, cleanup, blocker, and recovery path. The serial protocol does not authorize parallel waves or automatic redispatch; those require the checks in the next two sections.
+在直接注释或结构化返回中向调用者报告每个转换：解析的源类型、路线、计划检查点（如果适用）、调度、活动、最终结果、transport/scope检查、集成、恢复（如果有）、权威验证、规范提交、清理、阻塞项和恢复路径。串行协议不授权并行波或自动重调度；这些需要在接下来的两节中进行检查。
 
-## Parallel external-wave protocol
+## 并行外波协议
 
-Use a wave only after the always-loaded Parallel Safety Check proves the ready units independent across dependencies, declared files, shared contracts/interfaces, migrations, lockfiles, generated, registry, or config files, environment singletons, and expected merge cost. Uncertainty selects serial execution. The host stays the scheduler: workers cannot add peers, broaden the wave, or change their own dependencies. Cap the wave at 3-5 workers.
+仅在始终加载的并行安全检查证明就绪单元独立于依赖项、声明的文件、共享 contracts/interfaces、迁移、锁定文件、生成的、注册表或配置文件、环境单例和预期合并成本之后，才使用 Wave。不确定性选择串行执行。主机仍然是调度程序：工作人员无法添加对等点、扩大波幅或更改自己的依赖关系。将工人数量限制在 3-5 名。
 
-1. Record one wave id, dependency order, and **one recorded wave base** from a clean canonical checkout. Prepare every member from that same base with distinct controller-owned workspaces. Synchronous native work remains in the active checkout; every concurrent worker is isolated.
-2. Start the fixed-route jobs concurrently, observe them without steering, and terminalize every worker into its base-parented synthetic transport commit **before the first fold-in**. If any worker has not terminalized, integrate none. Inspect all actual transport inventories before mutation; same-path changes stop the wave, while shared-interface or other semantic contention returns to host resolution even when paths differ.
-3. Integrate results sequentially in dependency order under the canonical integration lock. The first unit preflights against the wave base. A clean textual apply is not semantic compatibility: inspect scope, run that unit's authoritative verification against the advancing canonical tree, and create one host-owned canonical commit.
-4. While that unit's lock is still held, call `unit-workspace.py` `wave-advance` with its exact recorded canonical commit. The controller accepts only the manifest-confirmed commit whose parent is the recorded pre-fold HEAD, then adds it to later siblings as one of the **exact earlier host-owned canonical commits**. Clean and release the completed unit before acquiring the next sibling's lock.
-5. For each later result, pass only the current exact recorded wave commit to `preflight`. Unknown HEAD movement blocks. Even when three-way application is clean, repeat actual-scope inspection, semantic revalidation, authoritative verification, and a separate host commit. A transport commit is never merged or committed directly.
-6. Conflict, scope expansion, semantic collision, test failure, or commit failure enters the serial protocol's exact restoration while the lock remains held. No sibling, retry, or fallback starts until restoration is proven and the lock is released; affected dependents remain queued. After readiness is recomputed, unaffected siblings may continue. The affected unit requires explicit host resolution, re-dispatch on the new base, or serial fallback; never blind-merge a colliding or stale result.
-7. Repeated collision, broad unplanned edits, or inability to prove exact restoration disables more waves for the run. Preserve inspectable workspaces and refs; failure of one unit does not discard an unaffected sibling, but it never authorizes a dependent unit early.
+1. 从干净的规范检查中记录一个波 ID、依赖顺序和**一个记录的波基础**。让来自同一基地的每个成员都拥有不同的控制器拥有的工作空间。同步本机工作仍处于活动结账状态；每个并发工作人员都是隔离的。
+2. 同时启动固定路线作业，在没有转向的情况下观察它们，并在第一次折叠之前将每个工作人员终端化到其基础父级合成传输提交中。如果任何工作人员尚未终止，则不进行集成。在突变前检查所有实际运输库存；相同路径的更改会阻止浪潮，而即使路径不同，共享接口或其他语义争用也会返回到主机解析。
+3. 在规范积分锁下按依赖顺序顺序积分结果。第一个单元对着波浪基地进行预飞。干净的文本应用不是语义兼容性：检查范围，针对前进的规范树运行该单元的权威验证，并创建一个主机拥有的规范提交。
+4. 当该单元的锁仍然被持有时，使用其准确记录的规范提交来调用 `unit-workspace.py` `wave-advance`。控制器仅接受清单确认的提交，其父级是记录的预折叠HEAD，然后将其添加到后面的同级，作为**精确的早期主机拥有的规范提交**之一。在获取下一个同级的锁之前清理并释放已完成的单元。
+5. 对于后面的每个结果，仅将当前准确记录的波形提交传递给`preflight`。未知的HEAD运动块。即使三向应用程序是干净的，也要重复实际范围检查、语义重新验证、权威验证和单独的主机提交。传输提交永远不会直接合并或提交。
+6. 冲突、范围扩展、语义冲突、测试失败或提交失败都会在锁保持保留的情况下进入串行协议的精确恢复。在证明恢复并释放锁之前，不会启动同级、重试或回退；受影响的家属仍在排队。重新计算准备情况后，未受影响的兄弟姐妹可以继续。受影响的单元需要明确的主机解析、在新基地上重新调度或串行回退；切勿盲目合并冲突或过时的结果。
+7. 重复的碰撞、广泛的计划外编辑或无法证明精确的恢复会导致更多的波次无法运行。保留可检查的工作空间和引用文档；一个单元的故障不会丢弃未受影响的同级单元，但它永远不会提前授权依赖单元。
 
-## Resume and fallback exactly once
+## 恢复和回退一次
 
-When the caller supplies a run id directly or through return-to-caller `implementation_run:<safe-id>`, use `unit-workspace.py` `resume --run-id <id>` and treat that id as authoritative. This recovery step happens before ordinary input classification and must not dispatch new work. Without a supplied run id, a plan-backed run must use `resume --repo <canonical-checkout> --plan-digest <selected-plan-digest>` for discovery; never infer or select a run id by listing the shared run root. Prompt-backed runs require their disclosed run id; do not rediscover them from conversation text or a caller temp path. Resume only a single unfinished plan-backed run matching repository identity, branch, and plan digest; if several match, list the matching run ids and recovery paths and block selection rather than choosing one. Do not dispatch a new third run while matching unfinished state remains ambiguous. An unsafe or foreign-mode manifest is a blocker, not a candidate to skip.
+当调用者直接或通过返回调用者`implementation_run:<safe-id>`提供运行ID时，使用`unit-workspace.py``resume --run-id <id>`并将该ID视为权威。此恢复步骤发生在普通输入分类之前，并且不得分派新工作。如果没有提供的运行 ID，计划支持的运行必须使用 `resume --repo <canonical-checkout> --plan-digest <selected-plan-digest>` 进行发现；切勿通过列出共享运行根来推断或选择运行 ID。提示支持的运行需要其公开的运行 ID；不要从对话文本或呼叫者临时路径中重新发现它们。仅恢复与存储库身份、分支和计划摘要匹配的单个未完成的计划支持的运行；如果有多个匹配，则列出匹配的运行 ID 和恢复路径并阻止选择，而不是选择一个。当匹配未完成状态仍然不明确时，不要调度新的第三次运行。不安全或外部模式清单是一个障碍，而不是可以跳过的候选者。
 
-When all units are terminal (`cleaned` or `native-completed`) and a successful plan-wide verification receipt already exists, the completed run is observation-only. Build the structured return from the manifest and stored receipts; recovery must not rerun a Verification Contract gate, call `verify-run`, or execute test/build/format/install/generation commands merely to reconfirm completed evidence. A missing required receipt is a reported recovery blocker, not permission to improvise a loose verification step.
+当所有设备均处于终端状态（`cleaned` 或 `native-completed`）并且已存在成功的计划范围验证收据时，已完成的运行仅是观察。根据清单和存储的收据构建结构化退货；恢复不得仅仅为了重新确认已完成的证据而重新运行验证合约门、调用`verify-run`或执行test/build/format/install/generation命令。缺少所需的收据是报告的恢复障碍，而不是临时松散验证步骤的许可。
 
-Resume reconciles durable evidence, but must not redispatch, reapply, recommit, or run either owning tail (the standalone shipping steps or the caller's). It may adopt exactly one matching unbound runner job, monitor a recorded live job, terminalize authoritative `done` output, continue an interrupted exact restoration, or record a verified canonical commit whose parent and tree match the pre-fold evidence. A transport ref written before its manifest row is reusable only when its sole parent and final tree match. Preflight records the expected post-apply tree and changed-path set: an exact match may reconcile an apply that landed before its manifest row, while unknown dirt blocks without destructive restoration.
+恢复协调持久证据，但不得重新发送、重新申请、重新提交或运行任何拥有的尾部（独立的运输步骤或调用者的）。它可以采用恰好一个匹配的未绑定运行器作业，监视记录的实时作业，终止权威`done`输出，继续中断的精确恢复，或记录其父级和树与预折叠证据匹配的经过验证的规范提交。仅当其唯一父级树与最终树匹配时，在其清单行之前写入的传输引用才可重用。预检记录预期的应用后树和更改路径集：精确匹配可以协调在其清单行之前落地的应用，而未知的污垢块则无需破坏性恢复。
 
-Use the controller's `status`, `reap`, and `cleanup` operations for preserved work. Loss of contact leaves a recorded job live until runner evidence becomes terminal or an explicit reap records termination. Cleanup is idempotent after an interrupted worktree removal. Explicit abandonment requires the exact transport SHA, or the exact terminal job id when a failed/reaped attempt produced no transport.
+使用控制器的 `status`、`reap` 和 `cleanup` 操作来保存工作。失去联系会使记录的作业继续存在，直到跑步者证据成为最终状态或明确的收获记录终止。中断工作树删除后的清理是幂等的。显式放弃需要准确的传输 SHA，或者当 failed/reaped 尝试未产生任何传输时需要准确的终端作业 ID。
 
-After exact restoration, exact abandonment cleanup, and integration-lock release, re-dispatch a corrected unit under the same scalar `run_id` by calling `prepare` with a fresh `attempt_id`. Preserve the earlier attempt receipts; do not mint another run id or represent one logical run as a list of run ids. The controller refuses a retry that changes the unit's recorded dependency or wave/base contract.
+在精确恢复、精确废弃清理和集成锁释放之后，通过使用新的`attempt_id`调用`prepare`，在相同标量`run_id`下重新调度更正的单元。保留之前的尝试收据；不要创建另一个运行 ID 或将一个逻辑运行表示为运行 ID 列表。控制器拒绝更改单元记录的依赖关系或wave/base合同的重试。
 
-Post-start fallback is a separate atomic check. After authoritative failure, timeout, `died-without-result`, or exact restoration and lock release, disclose the unavailable route once and call `unit-workspace.py` `claim-fallback` before native implementation. The first `prefer` or `require` claim authorizes exactly one fallback on the current harness and session model; `FALLBACK_ALREADY_AUTHORIZED` means do not start it again. Requirement strength prevents external recipient substitution while the route is viable, but never turns an unavailable route into an error or user-choice gate. A live job or successful unreconciled output refuses the claim. If integration began, no retry, sibling, or fallback claim is eligible until exact restoration is recorded and the canonical checkout still equals that snapshot. After the claimed native implementation is committed and locally verified, call `unit-workspace.py` `complete-fallback` with the accepted HEAD, a SHA-256 digest of the local verification evidence, and a bounded summary; both `prefer` and `require` claims can complete. `FALLBACK_COMPLETED` closes that unit only, after the controller has removed its workspace and transport ref. If that cleanup is interrupted or blocked after completion is recorded, `resume` finishes it. Once every unit is terminal, run the plan-wide Verification Contract through `verify-run`; do not report the run complete until the controller returns `RUN_VERIFIED` and stores its successful receipt.
+启动后回退是一个单独的原子检查。权威失败、超时、`died-without-result`、精确恢复、释放锁后，公开一次不可用路由，并在原生实现前调用`unit-workspace.py``claim-fallback`。第一个 `prefer` 或 `require` 声明仅授权当前宿主和会话模型的一个回退； `FALLBACK_ALREADY_AUTHORIZED`表示不再启动。当路由可行时，需求强度可以防止外部接收者替换，但永远不会将不可用的路由变成错误或用户选择门。现场工作或成功的未调节输出拒绝该声明。如果集成开始，则在记录精确恢复并且规范签出仍然等于该快照之前，没有重试、同级或后备声明符合资格。在提交并本地验证所声明的本机实现后，使用已接受的 HEAD、本地验证证据的 SHA-256 摘要和有界摘要调用 `unit-workspace.py` `complete-fallback`； `prefer`和`require`索赔均可完成。 `FALLBACK_COMPLETED` 仅在控制器移除其工作空间和传输引用后关闭该单元。如果记录完成后清理被中断或阻塞，`resume` 会完成它。一旦每个单元都达到终点，通过`verify-run`运行计划范围的验证合同；在控制器返回 `RUN_VERIFIED` 并存储其成功接收之前，不要报告运行完成。
 
-## Preserve tail ownership
+## 保留尾部所有权
 
-The engine changes only who writes the implementation. A standalone invocation resumes `ce-work`'s quality and shipping workflow after local implementation. `mode:return-to-caller` returns implementation and local-verification receipts with `standalone_shipping_skipped: true`; it never runs the simplify, review, PR, or CI steps that belong to the caller. External workers never inherit either set of shipping steps.
+引擎只改变编写实现的人。本地实施后，独立调用可恢复 `ce-work` 的质量和交付流程。 `mode:return-to-caller`使用`standalone_shipping_skipped: true`返回实施和本地验证收据；它从不运行属于调用者的简化、审查、PR或CI步骤。外部工作人员永远不会继承任何一组运输步骤。
 
-**A successful controller `init` locks that unit to the selected cross-model engine.** From that point, advance it through this controller protocol or return blocked with its recovery path. Never reclassify it as trivial, abandon it for speed, or implement it natively unless the protocol later returns an explicit fallback authorization.
+**成功的控制器 `init` 将该单元锁定到选定的跨模型引擎。** 从那时起，通过此控制器协议推进它或通过其恢复路径返回阻塞。永远不要将其重新分类为微不足道，为了速度而放弃它，或在本机实现它，除非协议稍后返回显式后备授权。

@@ -1,16 +1,16 @@
-# Refresh repo config files
+# 刷新 repo 配置文件
 
-Read this from Step 5a of `references/repo-fixes.md`. It applies when the health report says `config.yaml` was written from an older template, a config file still sets a retired setting, or `config.local.yaml` is a full copy of the old local template.
+从 `references/repo-fixes.md` 的步骤 5a 中阅读此内容。当运行状况报告显示 `config.yaml` 是从旧模板写入、配置文件仍然设置已停用的设置或 `config.local.yaml` 是旧本地模板的完整副本时，它适用。
 
-**Outcome:** each flagged file follows the current template's layout and guidance. Every setting that still does something keeps its exact value, and every change carries a one-line reason a user can read.
+**结果：** 每个标记的文件都遵循当前模板的布局和指导。每个仍然执行某些操作的设置都会保留其确切值，并且每个更改都带有用户可以阅读的一行原因。
 
-The person running setup usually cannot judge what an upstream template change means for their file. So make every reconciliation decision yourself, and ask one question per file, not one per setting.
+运行安装程序的人员通常无法判断上游模板更改对其文件意味着什么。因此，您自己做出每一项协调决定，并针对每个文件提出一个问题，而不是针对每个设置提出一个问题。
 
-**Safe direction:** when the script's complaint names an entry in your own changes file, correct that entry and draft again once. Otherwise, if the script refuses the file, verification still reports a difference, or no Python interpreter runs, leave the file untouched. Say in the summary what happened and what would let the refresh run.
+**安全方向：**当脚本的投诉在您自己的更改文件中指定一个条目时，请更正该条目并再次草稿一次。否则，如果脚本拒绝该文件，验证仍然会报告差异，或者没有 Python 解释器运行，请保持文件不变。在摘要中说明发生了什么以及什么会让刷新运行。
 
-## The script
+## 剧本
 
-`scripts/config-refresh.py` does every step that has one right answer: classifying settings, drafting the rebuilt file, ranking typo candidates, and checking the result against the original on disk. Run each command as its own shell call:
+`scripts/config-refresh.py` 执行有一个正确答案的每一步：对设置进行分类、起草重建文件、对候选拼写错误进行排名以及根据磁盘上的原始结果检查结果。将每个命令作为其自己的 shell 调用运行：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing the ce-setup SKILL.md>";
@@ -18,33 +18,33 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 "$PY" "$SKILL_DIR/scripts/config-refresh.py" draft --layer tracked
 ```
 
-- `draft --layer tracked|local [--changes FILE]` writes a rebuilt copy to a temp directory and prints JSON. The JSON includes the draft and changes paths, the changes it recorded, each retired and unrecognized setting, the team comments it could not tie to a setting, the verification result, and a diff. `action: none` means the file is already current.
-- `verify --layer L --draft D --changes C` re-reads both files and names the first difference the changes do not explain.
-- `apply --layer L --draft D --changes C` verifies again, then replaces the file.
+- `draft --layer tracked|local [--changes FILE]` 将重建的副本写入临时目录并打印 JSON。 JSON 包括草稿和更改路径、记录的更改、每个已停用和无法识别的设置、团队评论它无法与设置关联、验证结果和差异。 `action: none` 表示该文件已经是最新的。
+- `verify --layer L --draft D --changes C` 重新读取两个文件并命名更改未解释的第一个差异。
+- `apply --layer L --draft D --changes C`再次验证，然后替换文件。
 
-The draft already removes each retired setting the registry marks `remove`, with the registry's reason. Do not edit the draft by hand. Write your decisions to a changes file and run `draft` again with `--changes`; only changes recorded there pass verification.
+该草案已经删除了每个已退役的设置注册表标记`remove`，并附有注册表的原因。不要手动编辑草稿。将您的决定写入更改文件并使用 `--changes` 再次运行 `draft`；只有那里记录的更改才能通过验证。
 
-## Your decisions
+## 你的决定
 
-The changes file is `{"changes": [...]}`. Every entry needs a `reason`, written for the user:
+更改文件为`{"changes": [...]}`。每个条目都需要一个 `reason`，为用户编写：
 
-- `{"type": "remove", "key": K}` drops a retired setting.
-- `{"type": "migrate", "key": K, "value": V}` writes a retired setting's value to its registry target.
-- `{"type": "rename", "from": K, "to": T}` renames an unrecognized setting to one of its typo candidates.
-- `{"type": "comment-remove", "line": TEXT}` drops one team comment.
-- `{"type": "comment-move", "line": TEXT, "key": K}` places one team comment above setting K.
+- `{"type": "remove", "key": K}` 放弃退休设置。
+- `{"type": "migrate", "key": K, "value": V}` 将已停用设置的值写入其注册表目标。
+- `{"type": "rename", "from": K, "to": T}` 将无法识别的设置重命名为其中一个拼写错误候选者。
+- `{"type": "comment-remove", "line": TEXT}` 删除了一条团队评论。
+- `{"type": "comment-move", "line": TEXT, "key": K}` 将一个团队评论置于设置 K 之上。
 
-When the file holds the same comment text more than once, add `"lineno": N` to a comment entry to name which occurrence you mean.
+当文件多次包含相同的注释文本时，请将 `"lineno": N` 添加到注释条目以命名您所指的出现次数。
 
-Decide each one this way:
+按如下方式决定每一项：
 
-- **A retired setting with a migration.** A migration never overrides a setting that is already active and would win. When the draft reports `target_winning`, record `remove`, and give a reason that names the setting that superseded it. Otherwise record `migrate` with the value the registry maps to. Word the reason as the behavior change the team gets, not as a rename.
-- **An unrecognized setting.** Rename it only when it is plainly a typo of its top candidate, with the same kind of value. Otherwise leave it. The draft keeps it in a marked section at the end of the file, and the summary names it. Never remove one; it may come from a newer plugin or a teammate.
-- **A team comment the draft could not place.** It also lands in the marked section. Move it above the setting it describes. Remove it only when it is plainly about a setting this refresh removed. When unsure, leave it where it is.
-- **A current setting's value never changes**, including `docs_root` and invalid values. Steps 6a and 6b repair those afterwards, on the refreshed file.
+- **带有迁移的已停用设置。** 迁移永远不会覆盖已经处于活动状态并会获胜的设置。当草稿报告`target_winning`时，记录`remove`，并给出取代它的设置的原因。否则，将 `migrate` 记录为注册表映射到的值。将原因表述为团队的行为变化，而不是重命名。
+- **无法识别的设置。** 仅当它明显是其顶级候选的拼写错误且具有相同类型的值时才重命名它。否则就留下吧。草稿将其保留在文件末尾的标记部分中，并在摘要中对其进行命名。切勿移除一个；它可能来自较新的插件或队友。
+- **草稿无法放置的团队评论。**它也会出现在标记部分。将其移至其描述的设置上方。仅当它明显与此刷新删除的设置有关时才将其删除。如果不确定，请将其留在原处。
+- **当前设置的值永远不会改变**，包括`docs_root`和无效值。步骤 6a 和 6b 随后在刷新的文件上修复这些内容。
 
-## Approving and writing
+## 批准并撰写
 
-`config.yaml` is rebuilt on the current template. `config.local.yaml` loses retired settings and gets migrations. A full copy of the old local template is cut down to the settings and team comments it holds. Values never move between the two files.
+`config.yaml` 在当前模板上重建。 `config.local.yaml` 失去退休设置并进行迁移。旧本地模板的完整副本被缩减为其中包含的设置和团队注释。值永远不会在两个文件之间移动。
 
-In an interactive run, show the list of changes with their reasons, and offer the diff. Then ask one yes or no question for each file. On yes, run `apply` with the draft and changes paths the last `draft` printed. On no, write nothing. Re-run the health check afterwards. A refreshed file reports as current, and running setup again drafts nothing.
+在交互式运行中，显示更改列表及其原因，并提供差异。然后对每个文件问一个是或否问题。如果是，则使用草稿运行 `apply` 并更改最后打印的 `draft` 的路径。不，什么也不写。之后重新运行健康检查。刷新的文件报告为当前文件，再次运行安装程序不会起草任何内容。

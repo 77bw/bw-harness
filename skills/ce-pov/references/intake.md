@@ -1,61 +1,61 @@
-# Establish the Frame Before Grounding
+# 接地前先建立框架
 
-Settle the question before gathering decision-specific evidence. SKILL.md defines how to interact with the user and how to return to the caller.
+在收集决策特定证据之前解决问题。 SKILL.md定义如何与用户交互以及如何返回调用者。
 
-If the request belongs to another skill, finish intake by routing it there. Send understanding questions to `ce-explain` with the subject and intended use. For other work outside this skill’s scope, return the route identified in `references/boundaries.md`. Do not issue a verdict or continue to tiering, selection, or evidence gathering. If the named capability is unavailable, report that limitation to the caller.
+如果请求属于其他技能，则通过将其路由到那里来完成接收。将理解问题连同主题和预期用途发送至`ce-explain`。对于本技能范围之外的其他工作，请返回`references/boundaries.md`中标识的路线。不要做出裁决或继续分层、选择或收集证据。如果指定的功能不可用，请向调用者报告该限制。
 
-Every settled POV applies the reversibility tier and selection escape hatch below. A clear frame can proceed directly to those checks; an ambiguous one follows the skill body's interaction rule before decision-specific research.
+每个已确定的 POV 都会应用下面的可逆层和选择逃生舱口。一个清晰的框架可以直接进行这些检查；模糊性在具体决策研究之前遵循技能主体的交互规则。
 
-## Output mode and warm invocations
+## 输出模式和热调用
 
-By default this skill writes no document. Deliver the POV to its consumer. A requested write-up uses Phase 4 (Deliver and return); do not read rendering instructions for an ordinary answer.
+默认情况下，该技能不写入任何文档。将 POV 交付给其消费者。请求的撰写使用阶段 4（交付和返回）；不要阅读普通答案的渲染说明。
 
-A **warm** invocation is a mid-session second opinion, with the question sitting in the conversation or absent. On one, read `references/invocation.md`, and take only the *question and claims-to-verify* from the conversation, never grounding.
+**热情**调用是在会议中提出第二意见，问题存在于对话中或不存在。其中之一，阅读`references/invocation.md`，并仅从对话中获取*问题和要验证的声明*，切勿接地。
 
-## Why this check exists
+## 为什么存在此检查
 
-The same subject supports very different verdicts. A link to a new sign-in method could mean "should we **adopt** it?", "should we **migrate** to it, and how costly?", "how does it **compare** to what we have?", or "I just have a **question** about it." Guessing "migrate" sends all three scouts after migration cost and answers a question the user never asked. The frame determines what the scouts look for, so settle it first.
+同一主题支持截然不同的判决。指向新登录方法的链接可能意味着“我们应该**采用**它吗？”、“我们应该**迁移**到它吗？成本有多高？”、“它与我们拥有的**相比**如何？”或“我只是有一个关于它的**问题**”。猜测“迁移”会在迁移成本后发送所有三个侦察兵，并回答用户从未问过的问题。框架决定了球探寻找什么，所以先解决它。
 
-## Step 1 — Orient on what was provided (cheap, pre-grounding)
+## 第 1 步——定位所提供的内容（便宜、预先接地）
 
-- **A bare link** → fetch it lightly (one fetch) to learn what the thing *is*; name it. If you cannot fetch it (no web tool, paywalled), return the missing subject information under the skill body's interaction rule.
-- **A bare topic or name** → recognize it from your own knowledge; a single search only if you genuinely can't place it.
-- **A document path** → read its headings to learn its purpose and shape; do not review it for findings yet.
-- **An approach set** → identify the options already on the table; do not invent additional options during orientation.
-- **A paste or provided context** → read it.
+- **一个裸链接** → 轻轻地获取它（一次获取）以了解该东西*是什么*；命名它。如果您无法获取它（没有网络工具，付费墙），请在技能体的交互规则下返回缺少的主题信息。
+- **一个简单的主题或名称** → 根据你自己的知识识别它；仅当您确实无法放置时才进行一次搜索。
+- **文档路径** → 阅读其标题以了解其用途和形状；还没有审查它的发现。
+- **一套方法** → 确定已经摆在桌面上的选项；不要在培训期间发明额外的选项。
+- **粘贴或提供的上下文** → 阅读它。
 
-This is orientation, not grounding — keep it to one read/fetch. The project and external grounding (the scouts) come *after* the frame is set.
+这是定向，而不是接地——将其保持为 1 read/fetch。项目和外部接地（侦察）是在框架设置之后进行的。
 
-## Step 2 — Determine the POV intent
+## 第 2 步 — 确定 POV 意图
 
-The subject is usually recoverable; the **intent** is the ambiguous part. Classify it:
+对象通常是可恢复的； **意图**是不明确的部分。对其进行分类：
 
-- **Adopt** — use this new capability (net-new, or no incumbent)?
-- **Migrate / replace** — switch *from an incumbent* to this?
-- **Compare** — how does it stack up vs. what we have or the alternatives (no switch implied)?
-- **Exposure** — is this (a CVE, deprecation, or ecosystem change) *our problem*?
-- **Document-take** — what is the holistic take on this document: its strengths, risks, and bottom line, rather than a findings review?
-- **Approach-set** — which of the supplied approaches fits this project, and why, or are the options honestly viable either way?
-- **Explainer** — the requested result is understanding. Route to `ce-explain`, preserving the question and intended use.
+- **采用** — 使用这个新功能（全新的，或没有现有的）？
+- **迁移/替换** — *从现任*切换到此？
+- **比较** — 它与我们现有的或替代方案（不暗示切换）相比如何？
+- **暴露** - 这是（CVE、弃用或生态系统变化）*我们的问题*吗？
+- **文件记录** — 对该文件的整体看法是什么：它的优势、风险和底线，而不是调查结果审查？
+- **方法集** - 所提供的哪种方法适合该项目，为什么，或者这些选项是否真正可行？
+- **解释器** — 所要求的结果是理解。路由到`ce-explain`，保留问题和预期用途。
 
-## Step 3 — Resolve the frame
+## 第 3 步 — 解决框架问题
 
-Resolve shorthand from the active conversation when one referent fits. A clear subject and intent need no confirmation. When competing readings would materially change the judgment, investigate what can be established and return **Blocked — missing context** with the remaining information needed, under the skill body's interaction rule. Do not start research or a panel on an invented question.
+当一个参考对象合适时，从活跃的对话中解决速记问题。明确的主题和意图无需确认。当相互竞争的读数会实质上改变判断时，请调查可以建立的内容，并根据技能主体的交互规则返回**已阻止 - 缺少上下文**以及所需的剩余信息。不要就一个虚构的问题开始研究或小组讨论。
 
-Uncertainty that does not affect the decision need not stop a recommendation supported by evidence. You may state a supported assumption if it does not invent a product commitment or choose an unresolved user preference. Still obtain any required approval before sending information to an unexpected external recipient or acting outside existing permission.
+不影响决策的不确定性不必阻止有证据支持的建议。如果它没有发明产品承诺或选择未解决的用户偏好，您可以陈述受支持的假设。在将信息发送给意外的外部收件人或在现有权限之外采取行动之前，仍需获得任何必要的批准。
 
-An understanding request belongs to `ce-explain`; no reversibility tier, selection workup, or verdict is required on that route.
+理解请求属于`ce-explain`；该路线不需要可逆性层、选择检查或判决。
 
-## Tier, sizing, and the selection hatch
+## 层、尺寸和选择舱口
 
-These two decide **every** invocation, however clear the frame already was.
+这两者决定**每**调用，无论框架已经多么清晰。
 
-**Apply the selection escape hatch** (the rule that stops this skill from judging a field it would have to invent). If the input is a *selection* over a field ("what should we use for auth?"), it belongs here only when the realistic field is bounded (roughly five or fewer real candidates) and the criteria are knowable. If judging the field would require inventing options, or the criteria are unclear, **stop**. Return a Hold that explains what is missing and identifies the skill that can resolve it. Use `ce-bakeoff` to develop competing solutions to a defined brief, `ce-ideate` to explore an open opportunity field, or `ce-brainstorm` to bring out goals and criteria. Bake-off selects and synthesizes its own result. A subsequent POV is an optional second opinion. Continuing through that route follows the follow-up authority check in `references/followup.md`.
+**应用选择逃生舱口**（阻止该技能判断其必须发明的字段的规则）。如果输入是对某个字段的“选择”（“我们应该使用什么进行身份验证？”），则仅当实际字段有界（大约五个或更少的真实候选者）并且标准已知时，它才属于此处。如果判断该领域需要发明选择，或者标准不明确，**停止**。返回保留，解释缺少的内容并确定可以解决该问题的技能。使用`ce-bakeoff`针对已定义的概要开发竞争性解决方案，使用`ce-ideate`探索开放的机会领域，或使用`ce-brainstorm`提出目标和标准。 Bake-off 选择并合成自己的结果。随后的 POV 是可选的第二意见。继续沿着该路线进行`references/followup.md`中的后续权限检查。
 
-**Classify the reversibility tier — three levels.** Infer it from project signals:
+**对可逆性层进行分类 - 三个级别。** 从项目信号中推断出来：
 
-- **Tier 1 — two-way door:** a dependency, lint rule, or config; trivially reversible.
-- **Tier 2 — one-way but bounded:** a data store, an internal API/contract, or a migration whose blast radius stays inside this codebase.
-- **Tier 3 — one-way and high-stakes:** a security, legal, or privacy surface; a public API/contract; or an irreversible data migration.
+- **第 1 层 — 双向门：** 依赖项、lint 规则或配置；微不足道的是可逆的。
+- **第 2 层 — 单向但有界：** 数据存储、内部 API/contract 或爆炸半径位于此代码库内的迁移。
+- **第 3 层 — 单向且高风险：** 安全、法律或隐私表面；公共API/contract；或不可逆的数据迁移。
 
-The tier determines how much investigation and verification to do, not the answer’s format. Tier 1 uses a combined grounding pass. Tier 2 adds all three scouts and an alternatives pass. Tier 3 adds deep external research and precedent search. Explain the stakes when they affect the recommendation. Do not run a Tier-3 workup on a trivially reversible `npm i`, or hand a security-surface decision the moderate Tier-2 treatment.
+层级决定了要进行多少调查和验证，而不是答案的格式。第 1 层使用组合接地通道。第 2 层添加了所有三个侦察兵和一个替代通行证。第三层增加了深入的外部研究和先例搜索。解释影响推荐的利害关系。不要对可逆的 `npm i` 进行第 3 层处理，或将安全表面决策交给温和的第 2 层处理。
