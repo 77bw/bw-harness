@@ -1,37 +1,37 @@
-# Phase 2: assembly, write, vocabulary, grounding
+# 第二阶段：组装、写作、词汇、基础
 
-### Phase 2: Assembly & Write
+### 第 2 阶段：汇编和写入
 
 <sequential_tasks>
 
-**WAIT for all Phase 1 inputs to complete before proceeding.** Those inputs are your classification and body draft, the Related Docs Finder, and, in Full mode, the internal session-history flow, which may have stopped at the probe with `no relevant prior sessions`. Session history is a Phase 1 input even though it runs in the orchestrator rather than as a public skill.
+**等待所有第 1 阶段输入完成，然后再继续。** 这些输入是您的分类和正文草稿、相关文档查找器，以及在完整模式下的内部会话历史记录流，该流可能已在带有 `no relevant prior sessions` 的探测处停止。会话历史记录是第一阶段输入，尽管它在协调器中运行而不是作为公共技能运行。
 
-The orchestrating agent (main conversation) performs these steps:
+编排代理（主对话）执行以下步骤：
 
-1. **Collect Phase 1 results from the run artifacts.** For each Phase 1 subagent, `Read` its artifact file under `{run_dir}/` (`related.json`, and `session-history.md` when session history ran). The artifact holds the subagent's full output. **Fall back to the subagent's inline return only when its artifact file is absent or empty** (e.g., `{run_id}` did not resolve, or the subagent failed to write). The artifact is authoritative when present. Reading it is what keeps the workflow working through the issue #956 summary-collapse, where the inline return is only an executive summary.
-2. **Check the overlap assessment** from the Related Docs Finder before deciding what to write:
+1. **从运行产物中收集阶段 1 结果。** 对于每个阶段 1 子代理，`Read` 其产物文件在 `{run_dir}/` 下（当会话历史记录运行时，`related.json` 和 `session-history.md`）。该产物保存子代理的完整输出。 **仅当其产物文件不存在或为空时才回退到子代理的内联返回**（例如，`{run_id}`未解析，或子代理写入失败）。该产物在存在时具有权威性。阅读它可以使工作流程在问题#956摘要崩溃中继续运行，其中内联返回只是执行摘要。
+2. **在决定写什么之前，从相关文档查找器中检查重叠评估**：
 
-   | Overlap | Action |
+   | 重叠 | 行动 |
    |---------|--------|
-   | **Pack-covered** — `related.json`'s `pack_overlap` says a declared pack rule already prescribes this | **Do not create a learning that restates the rule.** Interactive: report the rule with its citation `(pack: <id>, <path within the pack>)` and ask (blocking question tool) — refine the pack rule in place (writable packs only; see the destination step below for writability), capture only the repo-specific nuance as a learning that cites the rule, or skip. Non-interactive: write nothing and end with `Documentation skipped — covered by pack rule (pack: <id>, <path within the pack>)`. |
-   | **High** — existing doc covers the same problem, root cause, and solution | **Update the existing doc** with fresher context (new code examples, updated references, additional prevention tips) rather than creating a duplicate. The existing doc's path and structure stay the same. |
-   | **Moderate** — same problem area but different angle, root cause, or solution | **Create the new doc** normally. Flag the overlap for the refresh check in `references/refresh-and-discoverability.md` to recommend consolidation review. |
-   | **Low or none** | **Create the new doc** normally. |
+   | **包覆盖** — `related.json` 的 `pack_overlap` 表示声明的包规则已经规定了这一点 | **不要创建重申规则的学习。** 交互式：用其引用 `(pack: <id>, <包内的路径>)` 报告规则并询问（阻止问题工具） - 就地细化包规则（仅限可写包；请参阅下面的目标步骤以了解可写性），仅捕获特定于存储库的细微差别作为引用规则的学习，或跳过。非交互式：什么都不写，以`Documentation skipped — covered by pack rule (pack: <id>, <包内的路径>)`结尾。 |
+   | **高** — 现有文档涵盖相同的问题、根本原因和解决方案 | **使用更新的上下文（新的代码示例、更新的参考、其他预防提示）更新现有文档**，而不是创建重复的文档。现有文档的路径和结构保持不变。 |
+   | **中等** — 相同的问题领域，但角度、根本原因或解决方案不同 | **正常创建新文档**。在 `references/refresh-and-discoverability.md` 中标记刷新检查的重叠，以建议合并审核。 |
+   | **低或无** | **正常创建新文档**。 |
 
-   The reason to update rather than create: two docs describing the same problem and solution will inevitably drift apart. The newer context is fresher and more trustworthy, so fold it into the existing doc rather than creating a second one that immediately needs consolidation.
+   更新而不是创建的原因：描述相同问题和解决方案的两个文档将不可避免地出现分歧。新的上下文更新鲜、更值得信赖，因此将其合并到现有文档中，而不是创建第二个需要立即合并的文档。
 
-   When updating an existing doc, preserve its file path and frontmatter structure. Update the solution, code examples, prevention tips, and any stale references. Add a `last_updated: YYYY-MM-DD` field to the frontmatter. Do not change the title unless the problem framing has materially shifted.
+   更新现有文档时，保留其文件路径和 frontmatter 结构。更新解决方案、代码示例、预防提示和任何过时的参考。在 frontmatter 中添加一个 `last_updated: YYYY-MM-DD` 字段。除非问题框架发生重大变化，否则不要更改标题。
 
-3. **Incorporate session history findings** (if available). When the internal session-history flow returned relevant prior-session context:
-   - Fold investigation dead ends and failed approaches into the **What Didn't Work** section (bug track) or **Context** section (knowledge track)
-   - Use cross-session patterns to enrich the **Prevention** or **Why This Matters** sections
-   - Tag session-sourced content with "(session history)" so its origin is clear to future readers
-   - If findings are thin or "no relevant prior sessions," proceed without session context
-4. **Decide the destination before assembling.** This step applies to the learning `references/form.md` left to write. The destination fixes two things every later step uses, the output path and the frontmatter shape, so settle it here, once. The default is a learning: the existing doc's path when step 2 chose to update, otherwise `<root>/solutions/[category]/[filename].md`, in the shape of `assets/resolution-template.md` and `references/schema.yaml`. **Offer a pack destination (interactive Full mode only)** when both of these hold: the capture is prescriptive-shaped, meaning it states a standing always/never rule rather than narrating an incident, and at least one resolved pack root is **writable** (its `roots` entry has no `url`/`ref` keys, so it is a path source rather than a git cache). Ask via the blocking question tool where it lands: `<root>/solutions/` (default), a named writable pack, or scaffold a new pack (create the directory and append the entry to `.compound-engineering/config.yaml`'s `packs:` list; this is the one config write this skill may make, and only here). A pack destination is `<pack dir>/<kebab-case of the title>.md`, at the pack's top level, because discovery reads rules only there. Write it in the shape of a rule: `title` plus a situational `applies_when` list, prescriptive prose, and no bug-track fields (`symptoms`, `root_cause`, `severity`). Git-sourced roots render in the options as `(upstream: manual)` and are never written. Incident-shaped captures, and every non-interactive run, skip the offer: the default destination stands.
-5. Assemble the complete markdown file in the destination's shape from your draft and the collected pieces, then validate its YAML frontmatter: a learning against `references/schema.yaml`, a pack rule against the rule shape (`title` present, `applies_when` a non-empty list). The YAML-safety quoting rule for array items (see `references/yaml-schema.md` > YAML Safety Rules) applies to both.
-6. Create the destination's directory if needed (`mkdir -p`)
-7. Write the file at the destination path
-8. **Validate parser-safety of the written frontmatter** to catch silent-corruption issues the prose rules miss: malformed `---` delimiter lines, unquoted ` #` in scalar values (silent comment truncation), and unquoted `: ` in scalar values (silent mapping confusion). The bundled validator ships **inside the skill bundle**; set `SKILL_DIR` to the absolute path of the directory containing this SKILL.md and run it against the destination path through an existence guard so platforms that cannot locate the script fall back to a manual check instead of silently skipping the protection:
+3. **纳入会话历史记录结果**（如果有）。当内部会话历史记录流返回相关的先前会话上下文时：
+   - 将调查死胡同和失败的方法折叠到**什么不起作用**部分（错误跟踪）或**上下文**部分（知识跟踪）
+   - 使用跨会话模式来丰富 **预防** 或 **为什么这很重要** 部分
+   - 使用“（会话历史记录）”标记会话来源的内容，以便未来的读者清楚其来源
+   - 如果发现很薄弱或“没有相关的先前会话”，则在没有会话上下文的情况下继续
+4. **组装前先确定目的地。**此步骤适用于剩下要写的学习`references/form.md`。目标会修复每个后续步骤使用的两件事：输出路径和 frontmatter 形状，因此在这里解决一次。默认是学习：第2步选择更新时现有文档的路径，否则为`<root>/solutions/[category]/[filename].md`，形状为`assets/resolution-template.md`和`references/schema.yaml`。 **提供包目标（仅限交互式完整模式）**，当这两者都成立时：捕获是规定性的，这意味着它声明了一个常设的always/never规则而不是叙述一个事件，并且至少一个已解析的包根是**可写的**（其`roots`条目没有`url`/`ref`键，因此它是路径源而不是git缓存）。通过阻塞问题工具询问其所在位置：`<root>/solutions/`（默认），命名的可写包，或搭建一个新包（创建目录并将条目附加到`.compound-engineering/config.yaml`的`packs:`列表；这是此技能可能进行的一个配置，并且仅在此处）。包的目的地是`<pack dir>/<标题kebab-case>.md`，位于包的顶层，因为发现仅在那里读取规则。以规则的形式编写它：`title`加上情境`applies_when`列表、规范性散文，并且没有错误跟踪字段（`symptoms`、`root_cause`、`severity`）。源自 Git 的根在选项中呈现为 `(upstream: manual)` 并且从未被写入。事件形状的捕获和每次非交互式运行都会跳过该优惠：默认目标站。
+5. 根据您的草稿和收集的片段，将完整的 Markdown 文件组装到目标形状中，然后验证其 YAML frontmatter：针对 `references/schema.yaml` 的学习，针对规则形状的打包规则（`title` 存在，`applies_when` 非空列表）。数组项的 YAML 安全引用规则（请参阅 `references/yaml-schema.md` > YAML 安全规则）对两者都适用。
+6. 如果需要，创建目标目录 (`mkdir -p`)
+7. 将文件写入目标路径
+8. **验证书面前文的解析器安全性**以捕获散文规则遗漏的静默损坏问题：格式错误的 `---` 分隔符行、标量值中未加引号的 ` #`（静默注释截断）以及标量值中未加引号的 `: `（静默映射混乱）。捆绑的验证器在技能包内交付**；将 `SKILL_DIR` 设置为包含此 SKILL.md 的目录的绝对路径，并通过存在保护针对目标路径运行它，以便无法找到脚本的平台回退到手动检查，而不是默默地跳过保护：
 
    ```bash
    SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -43,45 +43,43 @@ The orchestrating agent (main conversation) performs these steps:
    fi
    ```
 
-   - **If the script ran:** exit 0 means parser-safe; exit 1 means stderr names the offending field(s). Quote the value(s), re-write the doc, and re-run until exit 0. Do not declare success while validation fails.
-   - **If the script did not run** (else branch): apply the validator's checks by hand, matching its exact scope. Checking more broadly risks edits the validator would not require. Fix any violation by quoting the whole value before continuing:
-     1. The opening and closing frontmatter delimiters are each a line whose content is `---` (trailing whitespace is fine; `----` or `---extra` is not a valid delimiter).
-     2. For each **top-level** mapping entry (`key: value`, no leading indentation) whose value is **not already quoted or structured** (does not start with `"`, `'`, `[`, `{`, `|`, or `>`): the value must contain no unquoted ` #` (space then hash; YAML treats it as a comment and silently truncates) and no unquoted `: ` (colon then space; strict YAML may read it as a nested mapping). Quote the whole value if either appears.
-     Nested values, array items, and already-quoted values are out of scope here (array-item quoting is handled by the schema/YAML-safety step above). Then state in the completion output that the bundled script validator was unavailable on this platform and the checks were applied manually.
+   - **如果脚本运行：** exit 0 表示解析器安全； exit 1 表示 stderr 命名有问题的字段。引用值，重写文档，然后重新运行直到 exit 0。验证失败时不要声明成功。
+   - **如果脚本未运行**（else 分支）：手动应用验证器的检查，匹配其确切范围。更广泛地检查风险会导致验证器不需要进行编辑。在继续之前通过引用整个值来修复任何违规：
+     1. 开头和结尾的 frontmatter 分隔符各为一行，其内容为 `---`（尾随空格即可；`----` 或 `---extra` 不是有效的分隔符）。
+     2. 对于每个**顶级**映射条目（`key: value`，无前导缩进），其值**尚未被引用或结构化**（不以`"`、`'`、`[`、`{`、`|`或`>`开头）：该值必须不包含未引用的` #`（空格然后散列； YAML 将其视为注释并默默截断），并且没有未加引号的 `: ` （冒号然后空格；严格的 YAML 可能会将其读取为嵌套映射）。如果其中任何一个出现，请引用整个值。
+     嵌套值、数组项和已引用的值超出了此处的范围（数组项引用由上面的 schema/YAML-safety 步骤处理）。然后在完成输出中声明捆绑脚本验证器在此平台上不可用，并且检查是手动应用的。
 
-   The validator does not enforce schema rules and does not flag YAML reserved-indicator characters (those produce loud parser errors downstream rather than silent corruption, so they are out of scope). It uses the Python 3 standard library only (no PyYAML or other deps).
+   验证器不强制执行架构规则，也不标记 YAML 保留指示符字符（这些字符会在下游产生响亮的解析器错误，而不是无声损坏，因此它们超出了范围）。它仅使用 Python 3 标准库（无 PyYAML 或其他依赖项）。
 
-When creating a new doc, preserve the section order from `assets/resolution-template.md` unless the user explicitly asks for a different structure.
+创建新文档时，保留从 `assets/resolution-template.md` 开始的节顺序，除非用户明确要求不同的结构。
 
 </sequential_tasks>
 
-### Phase 2.4: Vocabulary Capture
+### 阶段 2.4：词汇捕获
 
-**First, read `references/concepts-vocabulary.md`.** This is unconditional. Do not pre-judge from memory that nothing qualifies. The reference's criteria are non-obvious, and qualifying terms often live in the surrounding conversation rather than the new doc itself. Reading the reference is what makes the rest of the phase possible.
+**首先，阅读`references/concepts-vocabulary.md`。**这是无条件的。不要根据记忆预先判断没有任何内容合格。引用文档的标准并不明显，限定术语通常存在于周围的对话中，而不是新文档本身。阅读参考资料使本阶段的其余部分成为可能。
 
-Then, applying those criteria, scan the new doc, if one was written, **and** the surrounding conversation for qualifying domain terms. If `CONCEPTS.md` exists at repo root, this phase may add, refine, fold, and scrub, as those are defined under **The supported mutations** in that reference; retiring and deleting belong to a refresh. If it does not exist and at least one qualifying term came up, create it.
+然后，应用这些标准，扫描新文档（如果已编写），**和**周围的对话以查找合格的域术语。如果已解析的上下文词汇表存在，则此阶段可以添加、细化、折叠和擦除，如该引用文档中的 **支持的突变** 中定义的那样；退役和删除都属于刷新。如果它不存在并且至少出现了一个限定术语，请创建它。
 
-**Verify behavior assertions against source before writing them.** When an entry asserts how code behaves (states, transitions, limits, semantics), Read the defining source at the current tree first. An entry drafted from a session-level summary is exactly how wrong semantics enter the glossary. Phase 2.45 re-checks these entries, but the cheap fix is to not write the error.
+**在编写行为断言之前，根据源代码验证行为断言。** 当条目断言代码的行为方式（状态、转换、限制、语义）时，首先读取当前树中的定义源。从会话级摘要起草的条目正是错误语义进入词汇表的方式。阶段 2.45 重新检查这些条目，但廉价的修复方法是不写入错误。
 
-**Seed the learning's area at creation; do not write a lone term.** Creating `CONCEPTS.md` when it is absent is expected. When `CONCEPTS.md` does not yet exist, alongside the term that came up also seed the core domain nouns of the area this learning touched, following the **Seed goal** and **Scope of a seed** rules in `references/concepts-vocabulary.md`. The seed is scoped to the learning's area (the modules and domain the fix touched) and defines only terms investigated here. It does not reach for repo-wide nouns. This anchors the new term so it does not dangle against undefined siblings. A repo-wide concept map is a refresh's bootstrap path, not this one.
+**在创建学习领域时播种；不要写一个单独的术语。** 当 `GLOSSARY.md` 不存在时，预计会创建它。当`GLOSSARY.md`尚不存在时，除了出现的术语之外，还会按照`references/concepts-vocabulary.md`中的**种子目标**和**种子范围**规则播种本次学习所涉及领域的核心领域名词。种子的范围仅限于学习领域（修复所涉及的模块和领域），并且仅定义此处研究的术语。它不涉及回购范围的名词。这锚定了新术语，因此它不会与未定义的兄弟姐妹发生冲突。存储库范围的概念图是刷新的引导路径，而不是这个。
 
-**At creation, hold the qualifying bar conservatively for borderline terms.** A borderline term, or a class/table/file name dressed up as an entity, waits for a later run. Clear core nouns are seeded; borderline ones wait. The conservatism is about quality, not count; updates to an existing file follow the normal criteria.
+**在创建时，保守地保留边界术语的限定栏。** 边界术语或伪装成实体的 class/table/file 名称等待稍后运行。明确的核心名词是种子；边缘人等待。保守主义注重的是质量，而不是数量；对现有文件的更新遵循正常标准。
 
-**When bootstrapping the file, start with this preamble under the `# Concepts` heading**, then add the qualifying entries below it:
+**引导时，使用`references/concepts-vocabulary.md`中命名的共享上下文标题和语言条目格式**；仅添加在所选上下文中合格的术语。
 
-> Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound captures and refreshes learnings; direct edits are fine. Glossary only, not a spec or catch-all.
+**刷新本次学习所涉及区域的连贯邻域。** 检查*连贯邻域*（在 `references/concepts-vocabulary.md` 中定义，及其边界）此运行是否添加、编辑或折叠了任何内容。找不到限定项的运行仍然会使其邻域正确；这是防止审计之间违规行为累积的通行证。在该邻域内，做三件事：修复词汇表违规（实现细节 - 文件路径、类名、函数签名、当前配置值）、刷新学习证据显示已经发生漂移的条目、折叠邻居已经将其全部含义带入该邻居的条目，重新指向交叉引用它的术语。彻底淘汰条目属于刷新，刷新会进行调查；此运行折叠或保持站立。范围：仅限邻居，从不进行完整文件审核；仅根据现有证据采取行动；如果判断邻居需要进行调查，则该学习没有进行，请将其标记为刷新，而不是根据猜测进行编辑。测试：附近的每个条目是否仍然包含读者需要的标题，并且与本学习的术语一致地阅读？更广泛的审计是刷新的工作。
 
-**Refresh the coherence neighborhood of the area this learning touched.** Inspect that *coherence neighborhood* (defined, with its bounds, in `references/concepts-vocabulary.md`) whether or not this run added, edited, or folded anything. A run that finds no qualifying term still leaves its neighborhood correct; that is the pass that keeps violations from accumulating between audits. Within that neighborhood, do three things: fix glossary violations (implementation specifics — file paths, class names, function signatures, current-config values), refresh entries the learning's own evidence shows have drifted, and fold an entry whose whole meaning a neighbor already carries into that neighbor, repointing the terms that cross-reference it. Retiring an entry outright belongs to a refresh, which investigates; this run folds or leaves standing. Bounds: neighborhood only, never a full-file audit; act only on evidence already in hand; if judging a neighbor would require investigation this learning did not do, flag it for a refresh rather than editing on a guess. The test: does every entry in the neighborhood still hold a heading a reader needs, and read consistently with this learning's terms? Broader audit is a refresh's job.
+在成功输出中向 `GLOSSARY.md` 报告此运行的结果。仅当文件是运行找到的逐字节文件时，“词汇捕获：已扫描，无限定术语”才是正确的；任何改变都会报告其计数，无论是哪一步发生的。不要默默地跳过任何一个。未报告的`GLOSSARY.md`变化正是这条线的存在所要防止的，可见的扫描无结果记录是引用文档被查阅的证据。
 
-Report what this run did to `CONCEPTS.md` in the success output. "Vocabulary capture: scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. Do not silently skip either one. An unreported `CONCEPTS.md` change is exactly what this line exists to prevent, and the visible scan-and-no-result record is the evidence that the reference was consulted.
+**在每种模式下静默应用编辑。不要以交互式、轻量级或非交互式方式提示用户。** 词汇捕获是复合的副作用，而不是用户每次运行时做出的决定。轻量级模式通过 `references/lightweight.md` 中自己的单遍步骤实现此目的，并运行该引用定义的 **仅更新** 版本。
 
-**Apply edits silently in every mode. Do not prompt the user in interactive, lightweight, or non-interactive.** Vocabulary capture is a side effect of compounding, not a decision the user makes per run. Lightweight mode reaches this through its own single-pass step in `references/lightweight.md`, and runs an **update-only** version, which that reference defines.
+### 阶段 2.45：接地验证
 
-### Phase 2.45: Grounding Validation
+该文档（以及阶段 2.4 中的任何`GLOSSARY.md`条目）即将成为永久的、值得信赖的知识。在树复合之前验证它对树的主张。 **现在阅读`references/grounding-validation.md`。** 它包含裁决规则和验证人提示；以下步骤只是触发器。
 
-The doc (and any `CONCEPTS.md` entries from Phase 2.4) is about to become permanent, trusted knowledge. Validate its claims against the tree before it compounds. **Read `references/grounding-validation.md` now.** It holds the adjudication rules and the validator prompt; the steps below are only the trigger.
-
-1. **Mechanical claims check (every mode, including non-interactive).** Optionally run `git fetch --quiet` first (best-effort; skip silently offline, because the network is never a correctness dependency). Then run the bundled validator against the written doc:
+1. **机械声明检查（每种模式，包括非交互式）。** 可以选择首先运行 `git fetch --quiet` （尽力而为；默默地离线跳过，因为网络永远不是正确性依赖项）。然后针对书面文档运行捆绑的验证器：
 
    ```bash
    SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -93,35 +91,35 @@ The doc (and any `CONCEPTS.md` entries from Phase 2.4) is about to become perman
    fi
    ```
 
-   Exit 0 means nothing flagged. Exit 1 means flags to **adjudicate, not auto-fix**. Each flagged path, SHA, link, or scaffold pattern is fixed, annotated as historical, or confirmed intentional per the reference's adjudication table. A doc may legitimately cite a path deleted by the very fix it documents; a flag is a question, not a failure. If the script cannot be resolved on this platform, apply the reference's manual checklist and say so in the output. Never silently skip.
+   退出 0 表示没有任何标记。退出 1 表示标记为 **裁决，而不是自动修复**。每个标记的路径、SHA、链接或脚手架模式都是固定的，注释为历史的，或根据参考的裁决表确认有意的。文档可以合法地引用由修复它文档删除的路径；旗帜是一个问题，而不是失败。如果无法在此平台上解析脚本，请应用参考的手动检查表并在输出中说明。永远不要默默地跳过。
 
-2. **Semantic grounding validator (Full mode, including non-interactive Full; lightweight skips it).** Dispatch one read-only generic subagent built from the prompt template in the reference, covering the written doc plus any `CONCEPTS.md` entries added or edited this run. It verifies code-behavior claims by quoting the defining source line, merge-state claims against remote truth (`gh` primary, git reachability fallback), and internal completeness of countable assertions. Apply its verdicts per the reference (fix contradicted claims from the quoted evidence; soften or drop unverifiable ones; mark offline merge-state checks as degraded), then re-run the mechanical check if the body changed.
+2. **语义基础验证器（完整模式，包括非交互式完整；轻量级跳过它）。** 调度一个根据参考中的提示模板构建的只读通用子代理，覆盖书面文档以及本次运行添加或编辑的任何 `GLOSSARY.md` 条目。它通过引用定义源代码行、针对远程事实的合并状态声明（`gh`主要、git可达性回退）以及可数断言的内部完整性来验证代码行为声明。根据参考应用其判决（修复引用证据中相互矛盾的主张；软化或删除无法验证的主张；将离线合并状态检查标记为降级），然后在主体发生变化时重新运行机械检查。
 
-## What It Creates
+## 它创造了什么
 
-**Organized documentation:**
+**组织文档：**
 
-- File: `<root>/solutions/[category]/[filename].md`, or `<pack dir>/<kebab-case of the title>.md` when the destination step routed an interactive capture into a writable pack
+- 文件：`<root>/solutions/[category]/[filename].md`，或 `<pack dir>/<标题kebab-case>.md`（当目标步骤将交互式捕获路由到可写包时）
 
-**Categories auto-detected from problem** (default layout; an established directory taxonomy under `<root>/solutions/` wins over this list):
+**从问题中自动检测的类别**（默认布局；`<root>/solutions/`下已建立的目录分类胜过此列表）：
 
-Bug track:
-- build-errors/
-- test-failures/
-- runtime-errors/
-- performance-issues/
-- database-issues/
-- security-issues/
-- ui-bugs/
-- integration-issues/
-- logic-errors/
+错误追踪：
+- 构建错误/
+- 测试失败/
+- 运行时错误/
+- 性能问题/
+- 数据库问题/
+- 安全问题/
+- 用户界面错误/
+- 整合问题/
+- 逻辑错误/
 
-Knowledge track:
-- architecture-patterns/ — architectural or structural patterns (agent/skill/pipeline/workflow shape decisions)
-- design-patterns/ — reusable non-architectural design approaches (content generation, interaction patterns, prompt shapes)
-- tooling-decisions/ — language, library, or tool choices with durable rationale
-- conventions/ — team-agreed way of doing something, captured so it survives turnover
-- workflow-issues/
-- developer-experience/
-- documentation-gaps/
-- best-practices/ — fallback only, use when no narrower knowledge-track value applies
+知识轨迹：
+- Architecture-patterns/ — 建筑或结构模式（agent/skill/pipeline/workflow形状决策）
+- design-patterns/ — 可重用的非架构设计方法（内容生成、交互模式、提示形状）
+- tooling-decisions/ — 具有持久理由的语言、库或工具选择
+- conventions/——团队商定的做事方式，被捕获以便在更替后得以生存
+- 工作流程问题/
+- 开发者经验/
+- 文档差距/
+- 最佳实践/——仅后备，当不适用更窄的知识轨迹值时使用

@@ -1,15 +1,15 @@
-# Verify the selected approach
+# 验证所选方法
 
-Report selected only when evidence supports the synthesized approach's feasibility, its decisive advantages, and the guarantees requested in the brief. The coordinator owns this decision even when the independent judge recommends selection. Verification applies to the final artifact, including adaptations, rather than to the candidates' reputations or agreement.
+仅当有证据支持综合方法的可行性、其决定性优势以及简报中要求的保证时，才会选择报告。即使独立法官建议选择，协调员也拥有这一决定。验证适用于最终的产物，包括改编，而不是候选人的声誉或协议。
 
-Challenge the final mechanism, including anything you introduced after judging: what concrete example would break a required guarantee or overturn the choice? Work through that example at the requested fidelity and check the result. For a stateful algorithm, trace actual states and quantities through a consequential execution timeline; for other artifacts, use a concrete case that exercises the claimed behavior. Show the decisive check and its result, not just a statement that verification passed. Failure to find a counterexample alone is not proof.
+挑战最终机制，包括您在判断后引入的任何内容：什么具体例子会打破所需的保证或推翻选择？按照要求的保真度完成该示例并检查结果。对于有状态算法，通过相应的执行时间线跟踪实际状态和数量；对于其他产物，请使用执行所声明行为的具体案例。显示决定性检查及其结果，而不仅仅是验证通过的声明。单独找不到反例并不能证明。
 
-A premise is decision-critical if its failure could invalidate a required guarantee, feasibility, or the decisive advantage. Apply that test to premises inherited from the brief and judge as well as your own synthesis.
+如果一个前提的失败可能会使所需的保证、可行性或决定性优势失效，那么它就是决策关键的。将该测试应用于从摘要和判断以及您自己的综合中继承的前提。
 
-For each decision-critical premise, identify the supporting implementation evidence or authoritative source actually inspected during this run. Source code can show that a service is called or a guarantee is assumed; it cannot establish the service's external contract. A citation label, remembered documentation, or an unverified judge assertion does not supply evidence. Use available authorized source access to resolve the gap within budget before settling for unknown.
+对于每个决策关键前提，确定支持实施证据或在本次运行期间实际检查的权威来源。源代码可以显示调用了某个服务或假设了一个保证；它无法建立服务的外部合同。引文标签、记住的文档或未经验证的法官断言不能提供证据。在解决未知问题之前，使用可用的授权来源访问来解决预算内的差距。
 
-If decision-critical support remains absent or contradicted, return unresolved and name the dependency and its effect. A provisional preference may accompany that result, but cannot be reported as a selected winner. Remaining experiments or human evaluation may be deferred only when their outcomes cannot invalidate the selection at the requested fidelity. Do not implement merely to strengthen a planning verdict.
+如果决策关键支持仍然不存在或存在矛盾，则返回未解决的问题并命名依赖关系及其影响。该结果可能会附带一个临时偏好，但不能报告为选定的获胜者。仅当其结果不能使所要求的保真度的选择无效时，才可以推迟剩余的实验或人工评估。不要仅仅为了强化规划结论而实施。
 
-When evidence changes a premise, correct the shared record and reassess affected candidates and the synthesis. If existing artifacts cannot resolve the resulting choice, use the remaining recovery budget for fresh development and independent assessment of the changed comparison. Otherwise return unresolved. Disclosing a weaker guarantee does not satisfy the original brief, and a caveat cannot preserve a verdict whose reasoning failed.
+当证据改变前提时，更正共享记录并重新评估受影响的候选人和综合。如果现有产物无法解决最终的选择，请使用剩余的恢复预算进行新的开发并对更改后的比较进行独立评估。否则返回未解决。披露较弱的保证并不能满足最初的要求，并且警告不能保留推理失败的判决。
 
-Return the checks actually performed and their supporting sources alongside any remaining evidence needs. The outcome, claimed guarantees, and evidence status must agree: do not claim all premises verified while leaving a decision-critical dependency unverified.
+返回实际执行的检查及其支持来源以及任何剩余的证据需求。结果、声称的保证和证据状态必须一致：不要声称所有前提都经过验证，而决策关键依赖项未经验证。

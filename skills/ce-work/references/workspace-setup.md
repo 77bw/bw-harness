@@ -1,27 +1,27 @@
-# Workspace Setup
+# 工作区设置
 
-Read this after input triage identifies code work and before any branch move, implementation edit, worker dispatch, or commit. It covers choosing a writable checkout, clarifying the plan, placing the branch, recording what was already in progress before work began, handling a unit that must edit an already-dirty file, and setting up the task list. Return to the main `SKILL.md` flow: the canonical checkout, the branch, the pre-work paths and commits, the exclusions, and the task state.
+在输入分类识别代码工作之后以及在任何分支移动、实现编辑、工作人员调度或提交之前阅读此内容。它包括选择可写结帐、澄清计划、放置分支、记录工作开始前已经进行的工作、处理必须编辑已经脏文件的单元以及设置任务列表。返回主 `SKILL.md` 流程：规范结帐、分支、预工作路径和提交、排除和任务状态。
 
-## Writable Checkout
+## 可写结账
 
-Repo-local implementation writes require a writable checkout. Before treating the current working directory as the project, confirm it is a git checkout you can edit. If this session has no writable checkout, but the user named a repository and the harness exposes a remote repo-work surface with a writable checkout, run the implementation work on that surface and treat that checkout as the canonical workspace for verification, commits, and handoff. Otherwise skip repo-local writes and report that no writable checkout is available; do not synthesize file changes from a non-repo scratch directory.
+存储库本地实现写入需要可写签出。在将当前工作目录视为项目之前，请确认它是一个可以编辑的 git checkout。如果此会话没有可写签出，但用户命名了存储库，并且工具公开了具有可写签出的远程存储库工作界面，则在该界面上运行实现工作，并将该签出视为用于验证、提交和移交的规范工作区。否则跳过 repo-local 写入并报告没有可写的签出可用；不要从非存储库临时目录合成文件更改。
 
-## Prepare the Work
+## 准备工作
 
-1. **Read Plan and Clarify** _(skip for a bare prompt)_ — read `references/work-intake.md` for how to size the read, what to pull from the plan, and when to stop and ask. Treat the plan as a decision artifact, not an execution script: ask anything unclear before implementing rather than after. **Do not edit the plan body during execution** — progress lives in git commits and the task tracker, and legacy `- [ ]` / `- [x]` marks or a `status:` field are not state.
+1. **阅读计划并澄清** _（跳过一个简单的提示）_ — 阅读 `references/work-intake.md` 了解如何调整阅读大小、从计划中提取什么以及何时停下来询问。将计划视为决策产物，而不是执行脚本：在实施之前而不是之后询问任何不清楚的问题。 **不要在执行期间编辑计划主体** - 进度存在于 git 提交和任务跟踪器中，并且遗留的 `- [ ]` / `- [x]` 标记或 `status:` 字段不是状态。
 
-2. **Setup Environment**
+2. **设置环境**
 
-   Two things must hold before the first edit: the work lands on a feature branch, and nothing the user did not offer up gets committed or published by this run. Neither is a question for the user. A branch move is a one-command undo, so do it and say so in one line.
+   在第一次编辑之前必须满足两件事：工作落在功能分支上，并且用户未提供的任何内容都不会在这次运行中提交或发布。这对用户来说都不是问题。分支移动是一项单命令撤消，因此请在一行中执行并说明。
 
-   **Branch.** Determine the default branch from `origin/HEAD`. If that is unavailable, use the host's repository-metadata capability; when the available interface is GitHub CLI, run `gh repo view --json defaultBranchRef`. Otherwise use `main` or `master` when one exists. Read the current branch with `git branch --show-current`.
+   **分支。** 从`origin/HEAD`确定默认分支。如果不可用，请使用主机的存储库元数据功能；当可用接口为GitHubCLI时，运行`gh repo view --json defaultBranchRef`。否则，当存在 `main` 或 `master` 时，请使用它。使用 `git branch --show-current` 读取当前分支。
 
-   If you are on the default branch, detached, or cannot tell, create a feature branch named from the plan or work description. When a remote default exists, run `git fetch origin <default>` first. Base the new branch on the fetched `origin/<default>` when `HEAD` has no commits beyond it; base it on `HEAD` when local commits must stay visible to the idempotency check and the shipping check, or when there is no remote. After the branch move, run `git branch --show-current` again and treat that result as authoritative. When branch safety remains uncertain, use a spare branch and never make incremental commits on the real default.
+   如果您位于默认分支、分离或无法区分，请创建一个根据计划或工作描述命名的功能分支。当存在远程默认值时，首先运行 `git fetch origin <default>`。当 `HEAD` 没有超出它的提交时，将新分支基于获取的 `origin/<default>`；当本地提交必须对幂等性检查和传送检查保持可见时，或者当没有远程提交时，将其基于`HEAD`。分支移动后，再次运行 `git branch --show-current` 并将该结果视为权威。当分支安全性仍不确定时，请使用备用分支，并且切勿对实际默认分支进行增量提交。
 
-   Otherwise continue on the invoked branch without renaming it or asking. Use a worktree only when the user asked for one this session (`ce-worktree`) or when `references/multi-pr-delivery.md` builds a PR group in its own checkout or session, and commit on the default branch only when the user explicitly authorized that in this session.
+   否则，继续调用调用的分支，而不重命名它或询问。仅当用户在此会话中请求一个工作树 (`ce-worktree`) 或当 `references/multi-pr-delivery.md` 在其自己的签出或会话中构建PR 组时才使用工作树，并且仅当用户在此会话中明确授权时才在默认分支上提交。
 
-   **Pre-work scope.** Before editing, record `git status --short --untracked-files=all` (the user's in-progress files) and whether `HEAD` carries commits not on the remote default (`git log origin/<default>..HEAD`; "unknown" without a remote). Nothing in that set is yours to commit or publish. It rides along on the branch move untouched: no stash, no question, no effect on naming. Enforce this without asking the user to choose:
-   - Incremental commits stage only work-owned files and are path-limited, so untouched WIP never enters a commit; the standalone handoff passes every pre-work file this run did not commit as `exclude:<paths>`, and ships locally via `ce-commit` when pre-existing unpushed commits are on the branch (`references/shipping-workflow.md`).
-   - A unit that must edit a file that was already dirty is the one case a commit cannot separate. Ask once, at the first commit that would include such a file, and cover every such file in that one question: commit those files with the user's edits included, or leave them uncommitted (an exclusion for the rest of the run, named in the final summary as unshipped). In Return-to-Caller Mode do not ask and do not edit the file — return `status: blocked` naming it, so the user's WIP stays intact and commit-or-stash-and-rerun is a clean recovery.
+   **开始前的工作范围。** 在编辑之前，记录`git status --short --untracked-files=all`（用户正在进行的文件）以及`HEAD`是否携带不在远程默认值上的提交（`git log origin/<default>..HEAD`；没有远程时“未知”）。该集中没有任何内容是您可以提交或发布的。它沿着分支移动不受影响：没有隐藏，毫无疑问，对命名没有影响。强制执行此操作而不要求用户选择：
+   - 增量提交仅阶段化工作拥有的文件并且受到路径限制，因此未触及的 WIP 永远不会进入提交；独立切换会传递此运行未提交为 `exclude:<paths>` 的每个预工作文件，并在分支 (`references/shipping-workflow.md`) 上存在预先存在的未推送提交时通过 `ce-commit` 在本地传送。
+   - 必须编辑已经脏的文件的单元是提交无法分离的一种情况。在第一次提交时询问一次，将包含此类文件，并涵盖该问题中的每个此类文件：提交包含用户编辑的这些文件，或者将它们保留为未提交（其余运行的排除项，在最终摘要中命名为未交付）。在返回调用者模式下，不询问也不编辑文件 - 返回 `status: blocked` 命名它，因此用户的 WIP 保持不变，并且提交或存储并重新运行是一个干净的恢复。
 
-3. **Create Task List** _(skip if triage already built one or routed as Trivial)_ — use the platform's task-tracking capability when available (`TaskCreate`/`TaskUpdate`/`TaskList` in Claude Code, `update_plan` in Codex, or the equivalent elsewhere), and follow `references/work-intake.md` for how tasks are derived, named, and ordered. If no such capability exists, continue without simulating a task list in chat.
+3. **创建任务列表** _（如果分类已经构建或路由为琐碎则跳过）_ — 使用平台的任务跟踪功能（如果可用）（Claude Code中的`TaskCreate`/`TaskUpdate`/`TaskList`，Codex中的`update_plan`，或其他地方的同等功能），并按照`references/work-intake.md`了解如何派生、命名和排序任务。如果不存在此类功能，请继续而不在聊天中模拟任务列表。

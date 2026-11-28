@@ -1,149 +1,149 @@
-# Synthesis Summary
+# 综合总结
 
-**Synthesis ≠ unified plan artifact.** The synthesis is NOT a preview, draft, or substitute for the requirements-only unified plan — it's the scope checkpoint that doc-write consumes as input. The Product Contract itself is written in Phase 3 from the confirmed synthesis. Both the synthesis and the Product Contract stay scope-only — implementation detail (file paths, code shapes, exact error wording) is downstream (ce-plan's job), not the Product Contract.
+**综合≠统一计划产物。**综合不是预览、草稿，也不是仅满足需求的统一计划的替代品 - 它是 doc-write 作为输入使用的范围检查点。产品合同本身是在已确认的综合的第三阶段编写的。综合和产品合同都仅限于范围——实现细节（文件路径、代码形状、准确的错误措辞）位于下游（ce-plan的工作），而不是产品合同。
 
-**Two-stage shape: internal draft, then chat-time scoping synthesis.** The synthesis is composed in two stages. Stage 1 is an internal three-bucket draft (Stated / Inferred / Out of scope) the agent uses to think comprehensively about scope. Stage 2 is the scoping synthesis presented to the user — shaped like what two product collaborators would confirm before writing a PRD, not like a comprehensive audit and not like a one-line preview. The user only sees stage 2. The internal draft still informs the doc body through the "Doc shape after confirmation" section below, which says where each bucket lands; it just doesn't reach the user verbatim. This split exists because the comprehensive audit shape produced too much detail for the user to actually weigh in on, even when the granularity rules were followed.
+**两阶段形状：内部草案，然后聊天时范围综合。** 综合分两个阶段组成。第一阶段是内部三桶草案（陈述/推断/超出范围），代理用于全面考虑范围。第 2 阶段是向用户呈现的范围综合——其形状类似于两个产品协作者在编写 PRD 之前确认的内容，而不是像全面审核，也不像单行预览。用户只能看到第 2 阶段。内部草稿仍然通过下面的“确认后的文档形状”部分告知文档正文，该部分说明每个桶落地的位置；它只是没有逐字到达用户。存在这种分裂的原因是，即使遵循粒度规则，全面的审计形状也会产生太多细节，让用户无法实际权衡。
 
-**Three-bucket structure is the internal draft, not the user-facing artifact.** It does its scope-thinking job during stage 1 and dissolves when Phase 3 writes the doc: Stated content informs Requirements, success signals from either bucket inform Success Criteria, Inferred content informs Key Decisions, Out-of-scope content informs Scope Boundaries. The doc has no parallel `## Synthesis` section — only the scoping synthesis prose embeds, as `## Summary`. See "Doc shape after confirmation" below for the routing.
+**三桶结构是内部草案，而不是面向用户的产物。** 它在第 1 阶段完成范围思考工作，并在第 3 阶段编写文档时消失：规定的内容告知需求，来自任一桶的成功信号告知成功标准，推断的内容告知关键决策，超出范围的内容告知范围边界。该文档没有并行的 `## Synthesis` 部分 - 只有范围综合散文嵌入，如 `## Summary`。布线请参见下面的“确认后的文档形状”。
 
-This content is loaded when Phase 2.5 (Synthesis Summary) runs — after Phase 2 (approaches chosen) and before Phase 3 (write the requirements-only unified plan). The synthesis is the user's last opportunity to correct the agent's interpretation before the artifact lands. It serves two purposes: synthesis confirmation (the user agreed to many individual things in dialogue but never saw the whole) and a transition checkpoint ("about to write the Product Contract").
+此内容在阶段 2.5（综合摘要）运行时加载 - 在阶段 2（选择的方法）之后和阶段 3（编写仅需求的统一计划）之前。合成是用户在产物落地之前纠正代理解释的最后机会。它有两个目的：综合确认（用户在对话中同意许多单独的事情，但从未看到整体）和转换检查点（“即将编写产品合同”）。
 
-Runs for **all tiers** including Lightweight. Skip Phase 2.5 entirely on the Phase 0.1b non-software (universal-brainstorming) route. The skill is interactive by design — brainstorming requires dialogue with a synchronous user. There is no non-interactive mode; if an automated workflow needs a Product Contract without dialogue, the right move is to write the unified plan artifact from context directly, not to invoke `ce-brainstorm`.
-
----
-
-## Stage 1: internal three-bucket draft
-
-The internal draft is structured in three labeled buckets. Items may appear in two buckets when meaningfully both — flag the inclusion-then-exclusion as Inferred so the reasoning is captured.
-
-- **Stated** — what the user said directly (in the original prompt, prior conversation, dialogue answers, approach selection in Phase 2). Items here have explicit user-language anchors.
-- **Inferred** — what the agent assumed to fill gaps. Scope boundaries the user never explicitly named, success criteria extrapolated from intent, technical assumptions made because the brief interview didn't probe them. The Inferred bucket is where the user's corrections matter most — items here are the agent's bets.
-- **Out of scope** — deliberately excluded items. Adjacent work the agent considered but decided not to include, refactors, nice-to-haves, future-work items. Making exclusions explicit lets the agent spot anything that should actually be included.
-
-A session-settled decision (per `references/settled-decisions.md`) is **Stated with provenance** — record it in the Stated bucket with its class, rejected alternative, and one-line reason, never in Inferred: it is the user's confirmed choice, not an agent bet.
-
-This draft is internal. Do not paste it verbatim into chat. Compose it as a thinking step, then derive stage 2 from it.
+适用于**所有级别**，包括轻量级。在阶段 0.1b 非软件（通用头脑风暴）路线上完全跳过阶段 2.5。该技能在设计上是交互式的——头脑风暴需要与同步用户对话。没有非交互模式；如果自动化工作流程需要没有对话的产品合同，正确的做法是直接从上下文编写统一计划产物，而不是调用`ce-brainstorm`。
 
 ---
 
-## Stage 2: the chat-time scoping synthesis
+## 第一阶段：内部三斗吃水
 
-The scoping synthesis is what the user actually sees. Its job is to let the user check, in one read, whether you understood them: the problem they are trying to solve, what will be built, and which calls they might want to change. Write it in your own words from your understanding, the way a collaborator would play a discussion back before writing it up ("So the real problem is X. We're building Y, deferring Z, and I'm assuming W. Sound right?"). Show what you understood and what you assumed, not what the user said. Replaying their answers back ("you said X, then you said Y") shows recall rather than understanding, and they just lived through it.
+内部草稿由三个带标签的桶构成。当有意义时，项目可能会出现在两个存储桶中 - 将包含然后排除标记为推断，以便捕获推理。
 
-Start with the synthesis itself, with no process narration or repo findings above it. It contains, in this order:
+- **陈述**——用户直接所说的内容（在原始提示、之前的对话、对话答案、第二阶段的方法选择中）。这里的项目有明确的用户语言锚点。
+- **推断** — 代理假设可以填补空白。用户从未明确命名的范围边界，成功标准是从意图和技术假设中推断出来的，因为简短的采访没有探究它们。推断桶是用户的修正最重要的地方——这里的项目是代理的赌注。
+- **超出范围** — 故意排除的项目。代理考虑过但决定不包括的相邻工作、重构、必备品、未来工作项目。明确排除可以让代理发现任何实际应该包含的内容。
 
-- **The problem** — 1–2 sentences, as prose: who has the problem, what it costs them now, and what will be true when it is solved. State the goal behind the request, not the feature restated. When the user never said why, say what you inferred so they can correct it.
-- **What we're building** — 1–3 sentences of prose on the shape that emerged, forward-looking and in plain words. Say what the thing is and how it holds together, not the requested features listed back; the choices the user made in dialogue show up here as part of that description. Shape only; the requirements belong in the doc.
-- **Carrying forward:** lines only for session-settled decisions carried in from before this skill started (an earlier conversation or a passed brief) — one line each, `Carrying forward: <decision> over <rejected alternative> — <one-line reason>.` These are statements, never questions or call-outs. Decisions the user made in this skill's own dialogue get no line; the shape already reflects them.
-- **Call outs** — flat bullets for what the user has not already seen stated this way: bets you made without asking, deferrals the user did not explicitly make, and consequences of combining the user's answers that they are unlikely to have tracked. A call-out is not a question you could have asked during dialogue; if one reads that way, the dialogue missed it, so say so plainly.
+会话结算的决策（根据`references/settled-decisions.md`）是**声明出处** - 将其与其类别、拒绝的替代方案和单行原因一起记录在声明存储桶中，而绝不会在推断中：它是用户确认的选择，而不是代理的赌注。
 
-Leave out anything the user cannot judge without reading code (file paths, names, data shapes, exact wording), mechanical choices with no real alternative, and anything the prose already says. Keep each bullet to one sentence a collaborator would say aloud, with no nested bullets. Include only what the user needs to know to judge whether the requirements are right: your understanding of the problem and the shape, and the decisions or assumptions that would change what gets built if they were wrong. Everything else belongs in the doc. A larger scope means naming those decisions at a higher level, not adding lines. Omit an empty section rather than padding it. On a Deep scope, zero call-outs usually means consequences of the user's answers were filtered out as "already implied"; look again before emitting. Write the synthesis through the `ce-noslop` skill.
+该草案是内部草案。不要将其逐字粘贴到聊天中。将其作为一个思考步骤，然后从中导出阶段 2。
 
-If a question genuinely cannot be defaulted, resolve it before presenting the synthesis, then integrate the answer. Never present the synthesis with open questions beside it, since the user then has no clear way to respond.
+---
 
-End with a confirmation that names what actually happens next, so the user knows what is coming and can interrupt without ambiguity. When a doc is expected — the common case — that is the artifact write: *"Confirm and I'll write the requirements-only plan next, drawing on our dialogue and this synthesis. Or tell me what to change — even something I captured correctly earlier is fair game to revise."*
+## 第二阶段：聊天时间范围综合
 
-When a doc is already ruled out — the user declined one, or `brainstorm-sections.md`'s "Decide whether a doc is warranted at all" criteria plainly hold — name where the decisions actually go instead, which is whichever of that rule's alternatives *this run* established (`ce-plan`, the user's commit message, `<root>/solutions/`): *"Confirm and we're done here — the scope above carries straight into [the destination the dialogue established]. Or tell me what to change."* When the dialogue named none, drop the clause rather than picking one: *"Confirm and we're done here — no doc, as you asked. Or tell me what to change."*
+范围综合是用户实际看到的。它的作用是让用户一读就检查你是否理解他们：他们试图解决的问题、将构建什么以及他们可能想要更改哪些调用。根据你的理解，用你自己的话来写它，就像合作者在写它之前回放讨论一样（“所以真正的问题是 X。我们正在构建 Y，推迟 Z，我假设 W。听起来对吗？”）。显示您的理解和假设，而不是用户所说的。重播他们的答案（“你说 X，然后你说 Y”）显示的是回忆而不是理解，他们只是经历了这一切。
 
-Do not hardcode a destination. This phase writes no commit message and hands off at Phase 4, so asserting a downstream action the run will not take is the same overreach as promising the doc. Phase 3, not this phase, decides whether a doc is warranted, so promising the write here makes a user who already declined a doc decline it a second time.
+从综合本身开始，上面没有过程叙述或回购结果。它按以下顺序包含：
 
-Ask for the confirmation open-ended, without an `AskUserQuestion` menu. Per Interaction Rule 5(a) in `references/interaction-rules.md`, an option menu would steer the user's feedback toward the parts the menu lists.
+- **问题** — 1-2 句话，作为散文：谁遇到了问题，他们现在付出了什么代价，以及问题解决后会发生什么。陈述请求背后的目标，而不是重申的功能。当用户从未说出原因时，请说出您的推断，以便他们可以纠正。
+- **我们正在构建的东西** — 1-3 句散文，呈现出已经出现的形状，具有前瞻性且用简单的语言表达。说出它是什么以及它如何组合在一起，而不是列出后面所要求的功能；用户在对话中做出的选择作为描述的一部分显示在此处。仅形状；要求属于文档。
+- **结转：** 仅适用于从该技能开始之前（之前的对话或通过的简报）进行的会话解决决策的行 - 每行一行，`Carrying forward: <decision> over <rejected alternative> — <one-line reason>.` 这些是陈述，而不是问题或标注。用户在该技能自己的对话中做出的决定没有台词；形状已经反映了它们。
+- **标注** — 对用户尚未看到的内容进行平铺直述，如下所示：您在没有询问的情况下进行的投注，用户未明确进行的延期，以及组合用户不太可能跟踪的答案的后果。呼叫不是您可以在对话期间提出的问题；如果你这样读，对话就错过了，所以直白地说出来。
 
-Example, for a notification-mute feature after a Standard dialogue:
+忽略用户在不阅读代码的情况下无法判断的任何内容（文件路径、名称、数据形状、准确的措辞）、没有真正替代方案的机械选择以及散文已经说过的任何内容。将每个项目符号保留为合作者会大声说出的一个句子，没有嵌套的项目符号。仅包括用户需要了解的内容来判断需求是否正确：您对问题和形状的理解，以及如果错误的话将改变所构建内容的决策或假设。其他所有内容都属于文档。更大的范围意味着在更高的级别上命名这些决策，而不是添加行。省略空白部分而不是填充它。在深度范围内，零标注通常意味着用户答案的结果被过滤为“已暗示”；发射前再看一遍。通过`ce-noslop`技能写综合。
+
+如果一个问题确实无法默认，请在提出综合之前解决它，然后整合答案。切勿在综合报告旁边附加开放性问题，因为这样用户就没有明确的回应方式。
+
+以确认结束，指出接下来实际发生的事情，这样用户就知道接下来会发生什么，并且可以毫不含糊地打断。当需要文档时（常见情况），这就是产物写入：*“确认，我接下来将根据我们的对话和综合来编写仅需求的计划。或者告诉我要更改什么 - 即使我之前正确捕获的内容也是公平的修改游戏。”*
+
+当一个文档已经被排除时 - 用户拒绝了一个文档，或者`brainstorm-sections.md`的“确定文档是否有保证”标准明确地保留 - 命名决策实际进行的位置，这是该规则的替代方案*此运行*建立的（`ce-plan`，用户的提交消息，`<root>/solutions/`）：*“确认，我们就完成了 - 上面的范围直接进入[对话的目的地”或者告诉我要改变什么。”*当对话没有提到任何一个时，删除条款而不是选择一个：*“确认，我们就完成了 - 没有文档，正如你所要求的。”*
+
+不要对目的地进行硬编码。此阶段不写入任何提交消息并在第 4 阶段移交，因此断言运行不会采取的下游操作与承诺文档相同。第 3 阶段（而不是这个阶段）决定文档是否有保证，因此承诺在此处写入会使已经拒绝文档的用户再次拒绝该文档。
+
+要求确认是开放式的，没有 `AskUserQuestion` 菜单。根据 `references/interaction-rules.md` 中的交互规则 5(a)，选项菜单会将用户的反馈引导至菜单列出的部分。
+
+例如，对于标准对话后的通知静音功能：
 
 ```
-**The problem:** The support team gets paged at 3 AM by noisy channels they can't act on until morning, and today the only fix is deleting the rule.
+**问题：** 支持团队在凌晨 3 点收到嘈杂的频道的寻呼，他们直到早上才可以采取行动，今天唯一的解决办法是删除该规则。
 
-**What we're building:** Per-channel mute on notification rules, with a 24h preset. The mute lives on the rule and survives rule edits.
+**我们正在构建的内容：** 每个通道的通知规则静音，预设 24 小时。静音者遵循规则并在规则编辑后继续存在。
 
 **Call outs:**
-- A mute also silences @mentions routed through that rule; I'm assuming that's wanted
-- Presence-based mute and quiet-hours schedules are deferred
-- Deleting a rule silently loses its mute; I'm assuming no warning is needed
+- 静音也会使通过该规则路由的@提及静音；我假设这是想要的
+- 基于状态的静音和安静时间计划被推迟
+- 静默删除规则会失去其静音性；我假设不需要警告
 
-Confirm and I'll write the requirements-only plan next, drawing on our dialogue and this synthesis. Or tell me what to change.
+确认后，我将根据我们的对话和综合，编写接下来的仅满足需求的计划。或者告诉我要改变什么。
 ```
 
-### Path A vs Path B: the gate that fires the confirmation question
+### 路径 A 与路径 B：触发确认问题的大门
 
-Phase 2.5 has two presentation modes, decided by **two signals**: (1) was any blocking question asked before Phase 2.5? AND (2) what tier did Phase 0.3 classify the scope as? Blocking questions include Phase 0.3 scope disambiguation, Phase 1.3 collaborative dialogue probes, and Phase 2 approach selection (when a menu is shown). Internal classification, Phase 1.1 scan, and Phase 1.2 pressure test are not blocking questions — they don't count.
+阶段 2.5 有两种呈现模式，由**两个信号**决定：（1）阶段 2.5 之前是否提出任何阻塞问题？并且 (2) 第 0.3 阶段将范围划分为哪一层？阻塞问题包括阶段 0.3 范围消歧、阶段 1.3 协作对话探究和阶段 2 方法选择（当显示菜单时）。内部分类、第 1.1 阶段扫描和第 1.2 阶段压力测试不是阻塞问题——它们不算数。
 
-- **Path A — no blocking questions were asked AND tier is Lightweight**: announce and continue without waiting. Emit "What we're building" prose only (no other sections, no confirmation question). That paragraph is the result; proceed to Phase 3 doc-write in the same turn only when `phase-0.md`'s Lightweight rule says a file is warranted. Do NOT end the turn waiting for acknowledgment. The user can revise after the paragraph or the doc lands if the shape is wrong.
-- **Path B — at least one blocking question was asked, OR tier is Standard / Deep-feature / Deep-product**: the full scoping synthesis above, followed by a confirmation question. Two scenarios lead to Path B: (a) the user invested answer-time during dialogue, or (b) the user pre-loaded substantive scope content (Phase 0.2 fast-path with a richly-specified opening prompt). Either way, the substance deserves a real checkpoint. The confirmation question is unconditional even when there are no call-outs.
+- **路径 A — 没有提出任何阻碍性问题，并且级别为轻量级**：宣布并继续，无需等待。仅发出“我们正在构建什么”的散文（没有其他部分，没有确认问题）。那一段就是结果；仅当 `phase-0.md` 的轻量级规则表明文件是有保证的时，才在同一轮中继续进行第 3 阶段文档写入。不要结束等待确认的转弯。如果形状错误，用户可以在段落或文档落地后进行修改。
+- **路径 B — 至少提出一个阻塞问题，或层是标准/深层特征/深层产品**：上面的完整范围综合，然后是确认问题。有两种情况导致路径 B：（a）用户在对话期间投入回答时间，或（b）用户预先加载实质性范围内容（阶段 0.2 快速路径，具有丰富指定的打开提示）。不管怎样，这种物质值得真正的检查点。即使没有标注，确认问题也是无条件的。
 
-**Why the tier guard exists.** Phase 0.2's fast path is designed for two very different cases — a tight one-line prompt that needs no dialogue ("fix the typo on line 47"), and a richly pre-loaded brainstorm context that ALSO needs no dialogue because the user pre-stated everything (e.g., handing off accumulated decisions from a prior session for a brainstorm doc backfill). Without a tier guard, both route to Path A, and the richly-loaded case gets a 1-sentence checkpoint for what may be 20+ items worth of scope. Tier-classifying Phase 0.3 distinguishes these cases — pre-loaded substance makes the tier Standard or Deep, which then routes to Path B and produces the full scoping synthesis the substance deserves. Do not simplify the rule back to a single "no questions asked" signal — that was a real defect that produced one-sentence syntheses on Deep-tier pre-loads.
+**为什么存在层保护。** 第 0.2 阶段的快速路径是针对两种截然不同的情况而设计的 - 一种紧凑的单行提示，不需要对话（“修复第 47 行上的拼写错误”），以及一个丰富的预加载头脑风暴上下文，也不需要对话，因为用户预先说明了一切（例如，将先前会话中积累的决策移交给头脑风暴文档回填）。如果没有层防护，两者都会路由到路径 A，并且负载丰富的箱子会获得 1 句话检查点，其范围可能超过 20 件物品。层分类阶段 0.3 区分了这些情况 - 预加载的物质使层成为标准层或深层层，然后路由到路径 B 并生成物质应有的完整范围综合。不要将规则简化回单个“不问问题”信号——这是一个真正的缺陷，会在深层预加载上产生一句话综合。
 
-Path A is the same announce-and-continue behavior the Phase 0.2 fast path already uses, but only when the substance genuinely warrants 1–3 sentences. Path B is the default for every other interactive invocation.
+路径 A 与阶段 0.2 快速路径已经使用的“宣布并继续”行为相同，但前提是内容真正需要 1-3 个句子。路径 B 是所有其他交互式调用的默认路径。
 
-### Path A template (no questions were asked — typically Phase 0.2 short-circuit)
+### 路径 A 模板（没有提出任何问题 — 通常是阶段 0.2 短路）
 
 ```
-Proposing: [1–3 line shape — what we are building, in plain words].
+提议：[1-3 线形状——用简单的话来说，我们正在构建什么]。
 
-No open decisions — [when a file was earned: writing the requirements-only plan now | otherwise: that is the result; these decisions go to <where the dialogue established>]. Interrupt if the shape is wrong.
+没有公开的决定 - [当获得文件时：立即编写仅要求的计划 |否则：这就是结果；这些决定将提交给<建立对话的地方>]。如果形状错误则中断。
 ```
 
-When a file is warranted, proceed to Phase 3 doc-write in the same turn — do NOT end the turn waiting for an acknowledgment; otherwise present Phase 4's handoff. The "interrupt if wrong" affordance means the user can revise after the result lands, not before.
+当文件得到保证时，在同一回合中继续进行第 3 阶段文档写入 — 不要结束等待确认的回合；否则呈现第 4 阶段的切换。 “错误则中断”功能意味着用户可以在结果出现之后而不是之前进行修改。
 
 ---
 
-## Re-present after revision; write only on confirm
+## 修改后重新呈现；仅在确认时写入
 
-A revision is not a confirmation. After any user revision (even a trivially-understood swap like "move deferred item X back into scope"), integrate the change, re-present the revised scoping synthesis with the change reflected, and wait for explicit confirmation before writing the doc. The loop is:
+修订并非确认。在任何用户修订之后（即使是像“将延迟项目 X 移回范围”这样的简单理解的交换），集成更改，重新呈现修订后的范围综合以及反映的更改，并在编写文档之前等待明确的确认。循环是：
 
-1. Present scoping synthesis → user responds
-2. User confirms → write the doc
-3. User revises → integrate, re-present revised scoping synthesis, return to step 1
+1. 当前范围界定综合 → 用户响应
+2. 用户确认 → 编写文档
+3. 用户修改 → 整合，重新呈现修改后的范围综合，返回步骤 1
 
-The doc is written only on explicit confirm or after the user picks "proceed" at the blocking question that is asked when the same item has been revised twice (see below). The confirmation step is what makes the scoping synthesis **confirmed** rather than "agent's last proposal" — never write immediately after a revision, even when the revision is small enough that the agent feels it understood.
-
----
-
-## Soft-cut on circularity (not iteration count)
-
-Track which scoping synthesis items the user touched per round. That blocking question is asked **only when the same item is revised twice** (or a third-round revision targets an item already revised in round two). New-item revisions across rounds proceed without limit — revising different aspects of a wrong scoping synthesis is exactly what the mechanism should support.
-
-**Identity across rounds is by decision dimension, not surface wording or section.** A revision may cause stage 2 to re-derive — the same underlying decision can come back rephrased, merged with another bullet, or moved to a different section (e.g., what was a Trade-off in round one becomes a Call-out in round two after the user pushed back). "Same item" means the same underlying decision regardless of which section currently holds it. When a re-cut collapses multiple prior bullets into one, the new combined bullet inherits the "touched" status of any of its constituents — the blocking question is asked if any underlying decision was already revised once before.
-
-When that condition is met, use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name) with two options:
-
-- `Proceed and write the requirements-only plan`
-- `Hold off — keep discussing before the doc`
-
-Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to a numbered list on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip.
+该文档仅在明确确认时或在用户在同一项目被修改两次时询问的阻止问题中选择“继续”后编写（见下文）。确认步骤是使范围界定综合**确认**而不是“代理的最后提案”的原因 - 永远不要在修订后立即编写，即使修订足够小以至于代理认为可以理解。
 
 ---
 
-## Self-redirect
+## 圆度软切割（不是迭代计数）
 
-If the user response indicates they're in the wrong skill or want a different workflow (e.g., "this is too small, just use `ce-work`" or "this needs more thought, let me brainstorm differently"):
+跟踪用户每轮触摸了哪些范围合成项目。 **仅当同一项目被修订两次**（或第三轮修订针对已在第二轮中修订的项目）时，才会提出该阻塞问题。跨轮的新项目修改不受限制地进行——修改错误范围综合的不同方面正是该机制应该支持的。
 
-- Stop ce-brainstorm
-- Suggest the alternative skill the user appears to want (e.g., `ce-work`, `ce-debug`)
-- Offer to load it in-session
-- Do not push back or argue — the user's redirect signal is the deliberate choice
+**各轮之间的同一性取决于决策维度，而不是表面措辞或部分。**修订可能会导致第 2 阶段重新推导 - 相同的基本决策可能会重新措辞、与另一个项目符号合并或移动到不同的部分（例如，在用户推回后，第一轮中的权衡变成了第二轮中的调出）。 “相同项目”是指相同的基本决策，无论当前哪个部分持有该决策。当重新剪切将多个先前的项目符号折叠成一个时，新的组合项目符号继承了其任何组成部分的“触及”状态 - 询问是否有任何基本决策之前已经修改过一次的阻塞问题。
 
-This support exists because the scoping synthesis is an honest checkpoint. If the user discovers the skill choice was wrong by reading the scoping synthesis, redirecting is the right move.
+当满足该条件时，使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配），有两个选项：
+
+- `继续并写入仅包含需求的计划`
+- `暂不写文档，继续讨论`
+
+当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号列表。永远不要默默地跳过。
 
 ---
 
-## Doc shape after confirmation
+## 自重定向
 
-After user confirmation (or after the user chooses "proceed" at that blocking question), Phase 3 writes the requirements-only unified plan. The internal draft does NOT carry into the artifact as a `## Synthesis` section. Only the "What we're building" prose embeds, as `## Summary` inside the Product Contract. Internal-draft content dissolves into the Product Contract's body sections:
+如果用户响应表明他们的技能错误或想要不同的工作流程（例如，“这太小了，只需使用 `ce-work`”或“这需要更多思考，让我以不同的方式进行头脑风暴”）：
 
-| Internal-draft element | Where it goes in the doc |
+- 停止ce-brainstorm
+- 建议用户似乎想要的替代技能（例如，`ce-work`、`ce-debug`）
+- 提供在会话中加载它
+- 不要反驳或争论——用户的重定向信号是经过深思熟虑的选择
+
+这种支持的存在是因为范围综合是一个诚实的检查点。如果用户通过阅读范围综合发现技能选择是错误的，那么重定向是正确的举措。
+
+---
+
+## 确认后的文档形状
+
+用户确认后（或用户在该阻塞问题上选择“继续”后），第 3 阶段编写仅满足需求的统一计划。内部草稿不会作为 `## Synthesis` 部分进入产物。只有“我们正在构建的内容”嵌入在产品合同中，如 `## Summary`。内部草案内容融入产品合同的正文部分：
+
+| 内拔模元件 | 它在文档中的位置 |
 |---|---|
-| "What we're building" prose | `## Summary` (1–3 lines, forward-looking, what's proposed) |
-| "The problem" as confirmed | `## Problem Frame` — the confirmed problem anchors that section's narrative, expanded rather than copied |
-| Stated bullets | `## Requirements` (numbered R-IDs, full detail) and where relevant `## Problem Frame` for narrative context |
-| Inferred bullets | `## Key Decisions` (with rationale) — bets the user accepted in dialogue become decisions in the doc. |
-| Out-of-scope bullets | `## Scope Boundaries` |
-| Success signals (Stated or Inferred) | `## Success Criteria` when its catalog entry applies — quality, metric, or handoff signals the Requirements don't already carry. This row **overrides** the generic Stated and Inferred rows for those items: a success signal routes here *instead of* to Requirements or Key Decisions, never to both. |
+| “我们正在建设什么”散文 | `## Summary`（1–3 行，前瞻性，建议内容） |
+| 已确认的“问题” | `## Problem Frame` — 已确认的问题锚定了该部分的叙述，是扩展而不是复制 |
+| 指定项目符号 | `## Requirements`（编号 R-ID，完整详细信息）以及与叙述上下文相关的`## Problem Frame` |
+| 推断子弹 | `## Key Decisions`（有基本原理）——用户在对话中接受的赌注将成为文档中的决定。 |
+| 超出范围的子弹 | `## Scope Boundaries` |
+| 成功信号（陈述或推断） | `## Success Criteria` 当其目录条目适用时 - 要求尚未包含的质量、指标或交接信号。该行**覆盖**这些项目的通用规定行和推断行：成功信号在此处路由*而不是*到需求或关键决策，而不是两者。 |
 
-The chat-time call-outs dissolve by kind: choices and bets the user confirmed become `## Key Decisions`, and deferrals become `## Scope Boundaries`.
+聊天时的提示按类型消失：用户确认的选择和赌注变为`## Key Decisions`，延期变为`## Scope Boundaries`。
 
-Session-settled decisions are the exception to the Stated → Requirements row: each routes to `## Key Decisions` carrying its `session-settled:` annotation — a user-confirmed choice, never softened into an inferred bet or recorded as an assumption. This holds equally when the artifact is written from context without dialogue.
+会话解决的决策是“规定→要求”行的例外：每个路由都携带其`session-settled:`注释到`## Key Decisions`——用户确认的选择，永远不会软化为推断的赌注或记录为假设。当产物是根据上下文编写而没有对话时，这同样适用。
 
-No italic capture-context note (e.g., "Captured at Phase 2.5..."). It would leak engineering process into an artifact whose readers do not need that signal.
+没有斜体捕获上下文注释（例如，“在第 2.5 阶段捕获...”）。它将工程过程泄漏到读者不需要该信号的产物中。
 
-The doc's `## Summary` and `## Problem Frame` must serve distinct purposes — see `references/brainstorm-sections.md` "Discipline: Summary vs Problem Frame" for the rules.
+该文档的`## Summary`和`## Problem Frame`必须服务于不同的目的——有关规则，请参阅`references/brainstorm-sections.md`“学科：摘要与问题框架”。

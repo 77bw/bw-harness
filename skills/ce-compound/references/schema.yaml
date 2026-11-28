@@ -1,21 +1,21 @@
-# Documentation schema for learnings written by ce-compound
-# Treat this as the canonical frontmatter contract for compounded learnings.
+# ce-compound 编写的学习文档架构
+# 将其视为复合学习的规范前沿契约。
 #
-# The schema has two tracks based on problem_type:
-#   Bug track  — problem_type is a defect or failure (build_error, test_failure, etc.)
-#   Knowledge track — problem_type is guidance or practice (best_practice, workflow_issue, etc.)
+# 该模式有两个基于 problem_type 的轨道：
+# Bug 跟踪 — problem_type 是缺陷或故障（build_error、test_failure 等）
+# 知识轨迹——problem_type是指导或练习（best_practice、workflow_issue等）
 #
-# Both tracks share the same required core fields. The tracks differ in which
-# additional fields are required vs optional (see track_rules below).
+# 两个轨道共享相同的所需核心字段。曲目的不同之处在于
+# 附加字段是必填字段还是可选字段（请参阅下面的track_rules）。
 
-# Contract version for tools that load this file at a pinned ref (compound-cli).
-# Bump only when the file's shape changes, not when values are added.
+# 在固定引用 (compound-cli) 处加载此文件的工具的合同版本。
+# 仅当文件形状发生变化时才进行凹凸，而不是在添加值时进行凹凸。
 schema_version: 1
 
 # --- Track classification ---------------------------------------------------
 tracks:
   bug:
-    description: "Defects, failures, and errors that were diagnosed and fixed"
+    description: "已诊断和修复的缺陷、故障和错误"
     problem_types:
       - build_error
       - test_failure
@@ -27,7 +27,7 @@ tracks:
       - integration_issue
       - logic_error
   knowledge:
-    description: "Practices, patterns, conventions, decisions, workflow improvements, and documentation"
+    description: "实践、模式、惯例、决策、工作流程改进和文档"
     problem_types:
       - best_practice
       - documentation_gap
@@ -42,12 +42,12 @@ tracks:
 required_fields:
   module:
     type: string
-    description: "Module or area affected"
+    description: "受影响的模块或区域"
 
   date:
     type: string
     pattern: '^\d{4}-\d{2}-\d{2}$'
-    description: "Date documented (YYYY-MM-DD)"
+    description: "记录日期 (YYYY-MM-DD)"
 
   problem_type:
     type: enum
@@ -69,7 +69,7 @@ required_fields:
       - design_pattern
       - tooling_decision
       - convention
-    description: "Primary category — determines track (bug vs knowledge). Prefer the narrowest applicable value; best_practice is the fallback when no narrower knowledge-track value fits."
+    description: "主要类别 - 确定轨道（错误与知识）。优先选择最窄的适用值； best_practice 是当没有更窄的知识轨道值适合时的后备。"
 
   component:
     type: string
@@ -89,7 +89,7 @@ required_fields:
       - testing_framework
       - documentation
       - tooling
-    description: "Component or area involved. Open vocabulary: choose it per the corpus-first rule in yaml-schema.md (corpus value for this area, most-used spelling when the corpus disagrees, suggested_values only when no doc covers the area; corpus values reused as spelled). A newly chosen suggested_values fallback is lowercase, underscore-separated."
+    description: "涉及的组件或区域。开放词汇：根据yaml-schema.md中的语料库优先规则选择它（该区域的语料库值，当语料库不一致时最常用的拼写，suggested_values仅当没有文档覆盖该区域时；语料库值按拼写重复使用）。新选择的 suggested_values 后备是小写，下划线分隔。"
 
   severity:
     type: enum
@@ -98,7 +98,7 @@ required_fields:
       - high
       - medium
       - low
-    description: "Impact severity"
+    description: "影响严重程度"
 
 # --- Track-specific rules ----------------------------------------------------
 track_rules:
@@ -108,7 +108,7 @@ track_rules:
         type: array[string]
         min_items: 1
         max_items: 5
-        description: "Observable symptoms such as errors or broken behavior"
+        description: "可观察到的症状，例如错误或破坏行为"
       root_cause:
         type: string
         suggested_values:
@@ -126,7 +126,7 @@ track_rules:
           - inadequate_documentation
           - missing_tooling
           - incomplete_setup
-        description: "Fundamental technical cause of the problem. Open vocabulary, corpus-first rule as for component, matched by the cause itself rather than the area."
+        description: "问题的根本技术原因。开放词汇，成分优先规则，由原因本身而不是领域来匹配。"
       resolution_type:
         type: enum
         values:
@@ -140,18 +140,18 @@ track_rules:
           - documentation_update
           - tooling_addition
           - seed_data_update
-        description: "Type of fix applied"
+        description: "应用的修复类型"
 
   knowledge:
     optional:
       applies_when:
         type: array[string]
         max_items: 5
-        description: "Conditions or situations where this guidance applies"
+        description: "本指南适用的条件或情况"
       symptoms:
         type: array[string]
         max_items: 5
-        description: "Observable gaps or friction that prompted this guidance (optional for knowledge track)"
+        description: "促成本指南的可观察差距或摩擦（知识轨道可选）"
       root_cause:
         type: string
         suggested_values:
@@ -169,7 +169,7 @@ track_rules:
           - inadequate_documentation
           - missing_tooling
           - incomplete_setup
-        description: "Underlying cause, if there is a specific one (optional for knowledge track). Open vocabulary, corpus-first rule as for component, matched by the cause itself rather than the area."
+        description: "根本原因（如果有特定原因）（知识轨道可选）。开放词汇，成分优先规则，由原因本身而不是领域来匹配。"
       resolution_type:
         type: enum
         values:
@@ -183,63 +183,63 @@ track_rules:
           - documentation_update
           - tooling_addition
           - seed_data_update
-        description: "Type of change, if applicable (optional for knowledge track)"
+        description: "变更类型（如果适用）（知识轨道可选）"
 
 # --- Fields optional for BOTH tracks ----------------------------------------
 optional_fields:
   title:
     type: string
-    description: "Clear problem or guidance title; the resolution templates write it on every new doc"
+    description: "明确的问题或指导标题；解决方案模板将其写入每个新文档中"
 
   category:
     type: string
-    description: "The solutions subdirectory the doc lives in; the resolution templates write it on every new doc"
+    description: "文档所在的解决方案子目录；解决方案模板将其写入每个新文档中"
 
   status:
     type: enum
     values:
       - stale
-    description: "Set only by a learnings refresh that could not confirm the doc still holds. Learnings researchers still surface the doc, labeled stale with its stale_reason. A later refresh that settles the doc removes status, stale_reason and stale_date."
+    description: "仅通过学习刷新来设置，无法确认该文档是否仍然有效。学习研究人员仍然显示该文档，并用 stale_reason 标记为过时。稍后刷新解决文档会删除状态、stale_reason 和 stale_date。"
 
   stale_reason:
     type: string
-    description: "What the refresh found that left the doc unsettled; present only with status: stale"
+    description: "刷新发现了什么让文档感到不安；仅存在状态：陈旧"
 
   stale_date:
     type: string
     pattern: '^\d{4}-\d{2}-\d{2}$'
-    description: "Date the doc was marked stale (YYYY-MM-DD); present only with status: stale"
+    description: "文档被标记为过时的日期 (YYYY-MM-DD)；仅存在状态：陈旧"
 
   related_components:
     type: array[string]
-    description: "Other components involved"
+    description: "涉及的其他组件"
 
   tags:
     type: array[string]
     max_items: 8
-    description: "Search keywords, lowercase and hyphen-separated"
+    description: "搜索关键字，小写且连字符分隔"
 
   retire_when:
     type: string
-    description: "The change outside the repo that would retire this learning, and how a refresh can check for it without changing the repo, e.g. \"example-org/sdk#1234 closed as fixed in a released sdk version; check the issue and the sdk release notes\". Set it only when the guidance holds just while something outside the repo holds: an open upstream bug, a tool or platform version, a dependency's behavior. Omit it otherwise. A verification that needs a repo change, such as removing a workaround and rerunning CI, belongs in the body as the step before removal."
+    description: "存储库外部的更改将取消此学习，以及刷新如何在不更改存储库的情况下检查它，例如\\“example-org/sdk#1234 已在已发布的 sdk 版本中修复为已关闭；检查问题和 sdk 发行说明\\”。仅当指南成立且存储库外部的某些内容成立时才设置它：开放的上游错误、工具或平台版本、依赖项的行为。否则省略它。需要更改存储库的验证（例如删除解决方法并重新运行 CI）属于删除之前的步骤。"
 
 # --- Fields optional for bug track only -------------------------------------
 bug_optional_fields:
   framework_version:
     type: string
-    description: "Framework or runtime name and version the bug was observed on, e.g. \"rails 7.1.2\" or \"node 22.4.0\". Only relevant for bug-track docs."
+    description: "观察到错误的框架或运行时名称和版本，例如“rails 7.1.2”或“节点 22.4.0”。仅与错误跟踪文档相关。"
 
 # --- Backward compatibility --------------------------------------------------
-# Docs created before the track system was introduced may have bug-track
-# fields (symptoms, root_cause, resolution_type) on knowledge-type
-# problem_types. These are valid legacy docs:
+# 在引入跟踪系统之前创建的文档可能存在错误跟踪
+# 知识类型字段（症状、root_cause、resolution_type）
+# problem_types。这些是有效的遗留文档：
 #   - Bug-track fields present on a knowledge-track doc are harmless. Do not
-#     strip them during refresh unless the doc is being rewritten for other reasons.
+# 在刷新期间删除它们，除非文档因其他原因被重写。
 #   - When creating NEW docs, follow the track rules above.
-# Docs written before component/root_cause became open vocabulary may carry
-# values from the earlier closed list (rails_*, hotwire_turbo, missing_include,
+# 在component/root_cause成为开放词汇之前编写的文档可能会携带
+# 先前关闭列表中的值 (rails_*, hotwire_turbo, missing_include,
 # ...) or a rails_version field. They stay valid; the corpus-first rule means a
-# repo whose docs consistently use those values keeps using them.
+# 其文档始终使用这些值的存储库将继续使用它们。
 
 # --- Validation rules --------------------------------------------------------
 validation_rules:

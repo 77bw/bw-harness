@@ -1,47 +1,47 @@
-# Invocation Contexts
+# 调用上下文
 
-Read this for a **warm** invocation (SKILL.md Phase 0, Frame and Classify). The method is one method; warm changes *where the question comes from* and *how much ceremony is warranted*, not the workflow.
+阅读本文以进行 **热** 调用（SKILL.md 阶段 0、框架和分类）。方法是一种方法；热烈的变化*问题从何而来*和*需要多少仪式*，而不是工作流程。
 
-## Cold vs warm
+## 寒冷与温暖
 
-- **Cold** — the user opens with an explicit external question at session start. Run the full method at the warranted tier.
-- **Warm** — `ce-pov` is dropped into a live session ("weigh in", "give me your POV on this") and the question lives in the surrounding conversation, or is absent.
+- **冷** — 用户在会话开始时以明确的外部问题打开。在保证层运行完整方法。
+- **温暖** — `ce-pov` 被放入实时会话中（“权衡”，“给我你对此的观点”），并且问题存在于周围的对话中，或者不存在。
 
-## What warm takes from the conversation: the question only
+## 谈话中的温暖之处：仅问题
 
-The conversation supplies the **question** and the **claims-to-verify** — *nothing else*. It is **not** grounding. The biggest failure here is consensus laundering: twenty turns of you and the agent mutually assuming "we must migrate off X" quietly become "grounding," and the result is a confident verdict that ratifies chat fiction.
+对话提供了**问题**和**需要验证的声明**——*没有其他*。它**不是**接地。这里最大的失败是共识洗白：你和代理二十次相互假设“我们必须从 X 迁移”悄悄地变成“接地”，结果是一个自信的判决，批准了聊天小说。
 
-So every input is labeled by where it came from, and only verified buckets satisfy the grounding check (see `references/method.md`):
+因此，每个输入都按其来源进行标记，并且只有经过验证的存储桶才能满足接地检查（参见`references/method.md`）：
 
-| Bucket | Counts as grounding? |
+| 桶 | 算不算接地气？ |
 |---|---|
-| Observed project facts (from a scout dossier or a host bounded read of the authoritative source) | Yes |
-| Verified external facts (from a scout dossier or a host bounded read of the authoritative source) | Yes |
-| Conversation claims | No — frame and hypotheses until a scout or a bounded inline read of the authoritative source corroborates |
-| Unconfirmed assumptions | No — shown to the user to confirm or deny |
+| 观察到的项目事实（来自侦察档案或主机有限阅读的权威来源） | 是的 |
+| 已验证的外部事实（来自侦察档案或权威来源的主机限制阅读） | 是的 |
+| 对话声明 | 否——框架和假设，直到侦察员或权威来源的有限内联阅读证实 |
+| 未经证实的假设 | 否 — 向用户显示以确认或拒绝 |
 
-If the conversation says "we have 40 call-sites on X," the project-grounding scout — or the host's own bounded read, when the sites are already located — must confirm that against the codebase before it counts. **Warm adds no evidentiary weight.** It brings out the question and hypotheses; the independent grounding is still done by scouts or bounded reads of the source, never by the conversation itself. The same invalidation rule applies, with no warm exemption.
+如果对话说“我们在 X 上有 40 个调用站点”，则项目落地侦察（或主机自己的有限读取，当站点已经定位时）必须在计数之前根据代码库进行确认。 **温暖不增加证据权重。**它提出了问题和假设；独立的基础仍然是通过侦察或对来源的有限阅读来完成的，而不是通过对话本身来完成的。适用相同的无效规则，但没有温暖的豁免。
 
-## Establishing the question (frame gate)
+## 建立问题（框架门）
 
-The frame gate is the check that the question is settled before research starts. A warm invocation with **no explicit question**, or a materially ambiguous one, goes through it in `references/intake.md`: resolve the decision from context and evidence, and return essential missing context to the caller. Rendering a confident POV on the wrong question is the warm-mode failure that check prevents. **Skip the check** when the user named the question ("ce-pov: should we use X?"); a mandatory confirm on every warm run is the bureaucratic ritual the skill avoids.
+框架门是在研究开始之前问题得到解决的检查。 **没有明确问题**的热情调用，或者实质上模棱两可的问题，会在`references/intake.md`中进行：根据上下文和证据做出决定，并将基本缺失的上下文返回给调用者。在错误的问题上呈现自信的 POV 是检查可以防止的热模式故障。 **当用户命名问题时跳过检查**（“ce-pov：我们应该使用 X 吗？”）；每次热跑时的强制确认是该技能避免的官僚仪式。
 
-Short references are intentional: "on the approach," "these options," or "the three options presented" resolve from the active conversation when one referent fits. Return missing context to the caller when competing meanings would materially change the POV and the conversation cannot distinguish them. `oracle` requests immediate panel convergence; explicit peer names in the same invocation select those exact participants and override oracle discovery and its automatic cap. `Cursor` means the Cursor harness's configured default/Auto model; `Composer` means a Composer model reached through Cursor, not an alias for Cursor.
+简短的参考是有意为之的：当一个参考对象合适时，“关于方法”、“这些选项”或“提出的三个选项”可以从活跃的对话中解决。当相互竞争的含义会严重改变 POV 并且对话无法区分它们时，将缺失的上下文返回给呼叫者。 `oracle` 要求小组立即收敛；同一调用中的显式对等名称选择那些确切的参与者并覆盖 oracle 发现及其自动上限。 `Cursor`表示Cursor宿主配置的default/Auto型号； `Composer` 表示通过 Cursor 到达的 Composer 模型，而不是 Cursor 的别名。
 
-A warm panel request (a "summons" in `references/cross-model-panel.md`) that names an already-formed position to oracle — the host's prior POV or the user's own view — is the prior-opinion subject case (see `references/cross-model-panel.md` Section 1), not a revision prompt: the position ships as the subject and peers form their own verdict. A follow-up panel request after pushback re-enters the panel with a fresh round before any position change is emitted.
+一个温暖的小组请求（`references/cross-model-panel.md`中的“召唤”）向判定依据机命名一个已经形成的立场——主持人先前的 POV 或用户自己的观点——是事先意见主题案例（参见`references/cross-model-panel.md`第 1 节），而不是修订提示：该立场随着主题和同行形成自己的裁决而发布。在发出任何位置变化之前，在推回重新进入面板后发出新一轮的后续面板请求。
 
-## Be more adversarial than cold — operationalized
+## 更具对抗性而非冷漠——可操作性
 
-The conversation's momentum pulls toward agreement, and a second opinion that rubber-stamps is worthless. "More adversarial" is not an attitude; it is two concrete rules:
+谈话的势头逐渐达成一致，另一种观点认为橡皮图章毫无价值。 “更具对抗性”不是一种态度，而是一种态度。这是两个具体规则：
 
-1. Run an **explicit disconfirming-evidence pass** on each conversation claim the verdict depends on: try to refute it from the grounded evidence (scout dossiers or bounded inline reads) before accepting it.
-2. **Never upgrade a grade on conversation momentum alone.** If the only thing pushing toward Adopt is that the room already wants it, that is not grounding, and the grade does not move.
+1. 对判决所依赖的每个对话主张运行**明确的反证证据通过**：在接受之前尝试从有根据的证据（侦察档案或有界内联阅读）中反驳它。
+2. **永远不要仅凭对话动力来提升等级。**如果推动采用的唯一因素是房间已经想要它，那么这不是基础，等级也不会改变。
 
-## Guest output contract
+## 客座输出合同
 
-Warm is a guest, not a host:
+温暖是客人，不是主人：
 
-- Consult a peer only when the warm invocation explicitly requests one; never make a proactive panel offer mid-session.
-- Output a **requested POV only** — no reframing of the host session, no taking over the brainstorm.
-- The POV is the last thing this skill writes. It ends this skill, not the turn. The host session's next step follows it.
-- **Skip the capture offer** unless the user asks — a mid-session interjection should not push a durable-record decision.
+- 仅当热调用明确请求时才咨询对等方；切勿在会议中主动提出小组提议。
+- 输出**仅请求的 POV** — 不重新组织主持人会话，不接管头脑风暴。
+- POV 是该技能最后写入的内容。它结束了该技能，而不是回合。主机会话的下一步随之而来。
+- **跳过捕获提议**，除非用户要求 - 会话中途插入不应推动持久记录决策。

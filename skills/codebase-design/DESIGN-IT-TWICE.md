@@ -1,44 +1,44 @@
-# Design It Twice
+# 设计两次
 
-When the user wants to explore alternative interfaces for a chosen deepening candidate, use this parallel sub-agent pattern. Based on "Design It Twice" (Ousterhout): your first idea is unlikely to be the best.
+当用户想要探索所选深化候选者的替代界面时，请使用此并行子代理模式。基于“两次设计”（Ousterhout）：您的第一个想法不太可能是最好的。
 
-Uses the vocabulary in [SKILL.md](SKILL.md): **module**, **interface**, **seam**, **adapter**, **leverage**.
+使用 [SKILL.md](SKILL.md) 中的词汇：**模块**、**接口**、**接缝**、**适配器**、**杠杆**。
 
-## Process
+## 过程
 
-### 1. Frame the problem space
+### 1. 构建问题空间
 
-Before spawning sub-agents, write a user-facing explanation of the problem space for the chosen candidate:
+在生成子代理之前，为所选候选者编写一个面向用户的问题空间解释：
 
-- The constraints any new interface would need to satisfy
-- The dependencies it would rely on, and which category they fall into (see [DEEPENING.md](DEEPENING.md))
-- A rough illustrative code sketch to ground the constraints, not a proposal, just a way to make the constraints concrete
+- 任何新接口都需要满足的约束
+- 它依赖的依赖项，以及它们属于哪个类别（请参阅[DEEPENING.md](DEEPENING.md)）
+- 一个粗略的说明性代码草图，用于奠定约束的基础，而不是提案，只是使约束具体化的一种方法
 
-Show this to the user, then immediately proceed to Step 2. The user reads and thinks while the sub-agents work in parallel.
+将其展示给用户，然后立即继续步骤 2。用户阅读并思考，同时子代理并行工作。
 
-### 2. Spawn sub-agents
+### 2. 生成子代理
 
-Spawn 3+ sub-agents in parallel, each with a fresh context window. Each must produce a **radically different** interface for the deepened module.
+并行生成 3 个以上子代理，每个子代理都有一个新的上下文窗口。每个都必须为深化的模块产生一个**完全不同的**界面。
 
-Prompt each sub-agent with a separate technical brief (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam). The brief is independent of the user-facing problem-space explanation in Step 1. Give each agent a different design constraint:
+向每个子代理提供单独的技术简介（文件路径、耦合详细信息、[DEEPENING.md](DEEPENING.md) 中的依赖项类别、接缝后面的内容）。该概要独立于步骤 1 中面向用户的问题空间解释。为每个代理提供不同的设计约束：
 
-- Agent 1: "Minimize the interface: aim for 1–3 entry points max. Maximise leverage per entry point."
-- Agent 2: "Maximise flexibility: support many use cases and extension."
-- Agent 3: "Optimise for the most common caller: make the default case trivial."
-- Agent 4 (if applicable): "Design around ports & adapters for cross-seam dependencies."
+- 代理 1：“最小化界面：最多瞄准 1-3 个入场点。最大化每个入场点的杠杆。”
+- 代理 2：“最大限度地提高灵活性：支持许多用例和扩展。”
+- 代理 3：“针对最常见的调用者进行优化：使默认情况变得微不足道。”
+- 代理 4（如果适用）：“围绕跨接依赖的端口和适配器进行设计。”
 
-Include both [SKILL.md](SKILL.md) vocabulary and GLOSSARY.md vocabulary in the brief so each sub-agent names things consistently with the architecture language and the project's domain language.
+在摘要中包含 [SKILL.md](SKILL.md) 词汇和 GLOSSARY.md 词汇，以便每个子代理以与架构语言和项目领域语言一致的方式命名事物。
 
-Each sub-agent outputs:
+每个子代理输出：
 
-1. Interface (types, methods, params, plus invariants, ordering, error modes)
-2. Usage example showing how callers use it
-3. What the implementation hides behind the seam
-4. Dependency strategy and adapters (see [DEEPENING.md](DEEPENING.md))
-5. Trade-offs: where leverage is high, where it's thin
+1. 接口（类型、方法、参数、以及不变量、排序、错误模式）
+2. 展示调用者如何使用它的用法示例
+3. 接缝背后隐藏着什么实施
+4. 依赖策略和适配器（参见[DEEPENING.md](DEEPENING.md)）
+5. 权衡：哪里杠杆高，哪里杠杆低
 
-### 3. Present and compare
+### 3. 呈现并比较
 
-Present designs sequentially so the user can absorb each one, then compare them in prose. Contrast by **depth** (leverage at the interface), **locality** (where change concentrates), and **seam placement**.
+按顺序呈现设计，以便用户可以吸收每一种设计，然后以散文形式进行比较。通过**深度**（界面上的杠杆作用）、**局部性**（变化集中的地方）和**接缝位置**进行对比。
 
-After comparing, give your own recommendation: which design you think is strongest and why. If elements from different designs would combine well, propose a hybrid. Be opinionated: the user wants a strong read, not a menu.
+比较后，给出你自己的建议：你认为哪种设计最强以及为什么。如果不同设计的元素可以很好地结合在一起，那么建议混合。固执己见：用户想要的是强有力的阅读，而不是菜单。

@@ -1,18 +1,18 @@
-# Scope selection and triage
+# 范围选择和分类
 
-Find all `.md` files under `<root>/solutions/`, excluding `README.md` files and anything under `_archived/` (if `_archived/` exists, flag it in the report as legacy to clean up). READMEs are excluded as review *candidates* only: whenever an action deletes, renames, moves, consolidates, or replaces a doc a catalog README lists, update that README's rows mechanically as part of the action's cleanup.
+查找 `<root>/solutions/` 下的所有 `.md` 文件，不包括 `README.md` 文件和 `_archived/` 下的所有内容（如果 `_archived/` 存在，请在报告中将其标记为遗留文件以进行清理）。自述文件仅被排除为审查*候选*：每当操作删除、重命名、移动、合并或替换目录README列出的文档时，作为操作清理的一部分，自动更新README的行。
 
-Words that describe the run rather than name a doc, category, module, or keyword are not a scope hint: an operation word (`refresh`, `audit`, `check`), a cleanup or drift-only request, or a mode token. Remove them first; the remainder is the hint, and an empty remainder means the whole store.
+描述运行而不是命名文档、类别、模块或关键字的单词不是范围提示：操作单词（`refresh`、`audit`、`check`）、清理或仅漂移请求或模式令牌。先把它们去掉；余数是提示，余数为空表示整个商店。
 
-If a scope argument was provided, narrow with the first strategy that produces results: subdirectory name → frontmatter (`module`/`component`/`tags`) → filename → content keyword. No matches: ask the user to clarify (interactive) or report the miss and exit (non-interactive).
+如果提供了范围参数，则使用产生结果的第一个策略进行缩小：子目录名称→ frontmatter（`module`/`component`/`tags`）→文件名→内容关键字。没有匹配项：要求用户澄清（交互式）或报告未命中并退出（非交互式）。
 
-If the store is empty, report:
+如果商店空无一人，请报告：
 
 ```text
-No candidate docs found in <root>/solutions/.
-Run /ce-compound after solving problems to start building your knowledge base.
+在 <root>/solutions/ 中找不到候选文档。
+解决问题后运行 /ce-compound 开始构建你的知识库。
 ```
 
-For a broad sweep (9+ docs), triage before deep investigation: read all frontmatter, cluster by module/category, spot-check whether primary referenced files still exist, and start with the highest-impact cluster (interactive: confirm the starting area with the user; non-interactive: process all clusters in impact order). Review individual learning docs before the pattern docs that depend on them — stale learnings make a pattern look more valid than it is. If the user named a pattern doc, you may start there, but inspect its supporting learnings before changing it.
+对于广泛的扫描（9+文档），在深入调查之前进行分类：阅读所有frontmatter，按module/category聚类，抽查主要引用文件是否仍然存在，并从影响最大的聚类开始（交互式：与用户确认起始区域；非交互式：按影响顺序处理所有聚类）。在查看依赖于单个学习文档的模式文档之前先查看单个学习文档 — 过时的学习会使模式看起来比实际情况更有效。如果用户指定了模式文档，您可以从那里开始，但在更改之前检查其支持知识。
 
-Render that last line for the active harness: `/ce-compound` by default, `$ce-compound` on Codex or another host documenting dollar-prefixed skill invocation. Print one form only.
+渲染活动宿主的最后一行：默认为`/ce-compound`，`$ce-compound`在Codex或另一个记录美元前缀技能调用的主机上。仅打印一份表格。

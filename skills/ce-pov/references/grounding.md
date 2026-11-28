@@ -1,22 +1,22 @@
-# Grounding the POV (Phase 1 machinery)
+# POV 接地（第一阶段机械）
 
-Read this before dispatching scouts. It defines how the Ground step (SKILL.md Phase 1) runs: which model each scout uses, where scratch files go, what each scout receives, which scouts run at each tier, and how grounded facts are kept apart from unconfirmed ones.
+在派遣侦察兵之前请阅读本文。它定义了地面步骤（SKILL.md阶段1）如何运行：每个侦察兵使用哪个模型，临时文件去哪里，每个侦察兵收到什么，哪些侦察兵在每层运行，以及如何将扎实的事实与未经证实的事实分开。
 
-## Model Tiers
+## 模型层
 
-Dispatch is tiered by task shape, never hardcoded to a model name:
+调度按任务形状分层，从不硬编码为模型名称：
 
-- **Extraction tier** — the project-grounding scout and the precedent-&-activity scout: search-and-quote work. Use the platform's cheapest capable model when the harness exposes a known override; otherwise inherit.
-- **Generation tier** — the external-evidence researcher: web/docs retrieval and entailment checking. Use the platform's mid-tier model when a known override exists; otherwise inherit.
-- **Ceiling tier** — the final assessment stays with the agent running `ce-pov`, even when another agent delegated the task to it. That agent checks whether the evidence is sufficient, weighs skeptical findings, and produces the required result. Research subagents gather evidence; they do not make this final assessment.
+- **提取层** — 项目基础侦察和先例与活动侦察：搜索和引用工作。当宿主暴露已知的覆盖时，使用平台最便宜的型号；否则继承。
+- **一代层** — 外部证据研究人员：web/docs 检索和蕴含检查。当存在已知覆盖时，使用平台的中间层模型；否则继承。
+- **上限** — 最终评估仍保留在运行 `ce-pov` 的代理上，即使另一个代理将任务委托给它也是如此。该代理人检查证据是否充分，权衡可疑的发现，并产生所需的结果。研究分员收集证据；他们不进行最终评估。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-**When per-agent models cannot be chosen.** If the platform's subagent mechanism cannot select a model per agent, dispatch every scout on the inherited model and keep their read budgets. Cost control then comes from the read budgets and the tier-sensitive scout count, not from tiering.
+**当无法选择每个代理模型时。** 如果平台的子代理机制无法为每个代理选择模型，请在继承的模型上分派每个侦察器并保留其读取预算。成本控制来自读取预算和层敏感的侦察计数，而不是来自分层。
 
-When a scout dispatch is rejected, first check whether an agent launched. If the rejection was a bad argument before launch, correct it once. If the platform is out of capacity, leave the work queued. If a launch still fails after the correction, gather that scout's bounded evidence inline and lower the verdict's stated confidence.
+当侦察派遣被拒绝时，首先检查代理是否启动。如果在发布之前拒绝是一个糟糕的论点，请纠正一次。如果平台容量不足，则让工作排队。如果更正后发射仍然失败，请在线收集侦察员的有限证据并降低判决的置信度。
 
-Create the scratch dir once, and reuse the echoed path for every scout this run:
+创建一次临时目录，并为这次运行的每个侦察兵重复使用回显路径：
 
 ```bash
 SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
@@ -30,18 +30,18 @@ SCRATCH_DIR="$SCRATCH_ROOT/ce-pov/$(openssl rand -hex 4)";
 echo "$SCRATCH_DIR";
 ```
 
-**Scoping applies on both paths.** Use the project's active instructions already in context. If the candidate cannot be scoped from the frame and existing context, allow one targeted root or workspace probe. This holds whether this phase dispatches scouts or resolves the facts with bounded inline reads.
+**范围适用于两条路径。** 使用上下文中已有的项目活动指令。如果无法从框架和现有上下文中确定候选者的范围，请允许一个目标根或工作区探测。这决定了该阶段是否派遣侦察员或通过有界内联读取来解决事实。
 
-**Every scout prompt carries the same context.** A fresh subagent does not inherit this conversation, so fill the persona files' `{subject}` / `{scratch-dir}` placeholders at dispatch. Pass each scout the framed question (subject + intent), the named incumbent and the reversibility tier, and the resolved `<scratch-dir>` path, plus any user-supplied links for the external researcher. A scout seeded with only its generic persona grounds "some external thing" and can produce an empty or unfocused dossier.
+**每个侦察提示都带有相同的上下文。** 新的子代理不会继承此对话，因此请在调度时填充角色文件的 `{subject}` / `{scratch-dir}` 占位符。向每个侦察员传递框架问题（主题 + 意图）、指定的现任者和可逆性层、已解决的 `<scratch-dir>` 路径，以及用户为外部研究人员提供的任何链接。一个侦察员只用其通用角色来播种“一些外部事物”，并且可以产生空洞或没有重点的档案。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-**Which scouts run depends on the tier.** For **Tier 1** (reversible), run a single combined grounding pass: seed one subagent with `references/agents/project-grounding-scout.md` covering the candidate-specific project facts (incumbent, call-sites) at a tight read budget, and one with `references/agents/external-evidence-researcher.md`. Skip the standalone precedent scout; on this tier the project-grounding scout's **prior-decision scan** (`<root>/solutions/`, ADRs, design docs) is the precedent check, so it must run. For **Tier 2/3**, dispatch all three scouts in parallel:
+**哪个侦察兵运行取决于层。** 对于 **第 1 层**（可逆），运行单个组合的基础传递：在紧张的读取预算下使用 `references/agents/project-grounding-scout.md` 覆盖特定于候选人的项目事实（现有的、呼叫站点）的种子一个子代理，以及使用 `references/agents/external-evidence-researcher.md` 的种子。跳过独立的先例侦察；在这一层，项目落地侦察的**事先决策扫描**（`<root>/solutions/`、ADR、设计文档）是先例检查，因此它必须运行。对于**第2/3**，并行派遣所有三名侦察兵：
 
-- **project-grounding scout** (extraction tier) — read `references/agents/project-grounding-scout.md` and seed a generic subagent with it. Run the **candidate-specific** slice fresh: the named incumbent for *this* candidate, its call-sites/footprint, incumbent-pain, exact runtime or framework constraints that materially affect compatibility, and the project/candidate/dependency license check. Do not start with generic shape discovery; the project floor (the minimum verified project evidence a verdict needs, defined in `references/method.md`) still requires a freshly verified call-site and current compatibility evidence.
-- **precedent-&-activity scout** (extraction tier) — read `references/agents/precedent-activity-scout.md` and seed a generic subagent with it. Always run its **local-doc precedent pass** (`<root>/solutions/`, ADRs, design docs — file reads, no tools needed); only its tracker/PR portion depends on a reachable tracker and is skipped, with a note, when those interfaces aren't reachable. Do **not** skip the whole scout for missing tracker access; that would drop the only path that finds a prior local adopt/reject decision.
-- **external-evidence researcher** (generation tier) — read `references/agents/external-evidence-researcher.md` and seed a generic subagent with it; it runs only when web tools are reachable. **Scale its brief to the tier so Tier 3's deeper workup is real, not nominal.** At **Tier 3**, seed it with a deeper brief: a wider source net, a larger read budget, and *mandatory* two-source corroboration on every claim the verdict depends on (at Tier 3 a single-source claim cannot anchor the verdict). **Tier 2** uses the persona's standard budget and its prefer-two-sources default.
+- **项目基础侦察**（提取层）- 读取 `references/agents/project-grounding-scout.md` 并用它播种通用子代理。新鲜地运行 **特定于候选者的** 切片：*此* 候选者的指定现任者、其 call-sites/footprint、现任者的痛苦、对兼容性产生重大影响的确切运行时或框架约束，以及 project/candidate/dependency 许可证检查。不要从发现通用形状开始；项目底层（判决所需的最低验证项目证据，在`references/method.md`中定义）仍然需要新验证的调用站点和当前的兼容性证据。
+- **先例和活动侦察**（提取层）- 读取 `references/agents/precedent-activity-scout.md` 并用它播种通用子代理。始终运行其**本地文档先行通道**（`<root>/solutions/`、ADR、设计文档 - 文件读取，无需工具）；只有它的 tracker/PR 部分依赖于可到达的跟踪器，并且当这些接口不可到达时会被跳过，并带有注释。 **不要**因为缺少跟踪器访问而跳过整个侦察过程；这将丢弃找到先前本地adopt/reject决策的唯一路径。
+- **外部证据研究员**（生成层）- 读取 `references/agents/external-evidence-researcher.md` 并用它播种通用子代理；它仅在可访问 Web 工具时运行。 **将其概要扩展到该层，以便第 3 层的更深入的检查是真实的，而不是名义上的。**在 **第 3 层**，为其播下更深入的概要：更广泛的源网络、更大的阅读预算以及对判决所依赖的每个声明的*强制性*双源证实（在第 3 层，单一来源声明无法锚定判决）。 **第 2 层** 使用角色的标准预算及其首选的双源默认值。
 
-**Skip work only when nothing can reach it.** Skip a scout, or a portion of one, only when it has **no reachable interface at all**. The project-grounding scout and the precedent scout's local-doc pass are file reads and always run; the tracker/PR reads and the external researcher need tools and are skipped when those tools are absent. Let a scout that loses a tool mid-run report "unavailable" itself. Never block on a missing interface. Record it and let it lower the verdict's stated confidence, or fail the external floor in Phase 2 (Verify Grounding) when the external leg is entirely absent.
+**仅当没有任何东西可以到达它时才跳过工作。**仅当它**根本没有可到达的接口**时才跳过侦察器或侦察器的一部分。项目落地 scout 和先例 scout 的本地文档传递是文件读取并始终运行； tracker/PR 读取和外部研究人员需要工具，并且当这些工具不存在时会被跳过。让在运行中丢失工具的侦察兵报告其本身“不可用”。切勿阻塞丢失的接口。记录下来并让它降低判决的置信度，或者当外腿完全不存在时，在第 2 阶段（验证接地）中使外部地板失败。
 
-**Sort every fact by where it came from** using the returned dossiers and your own bounded inline-read observations, and keep the groups separate for Phase 2 (Verify Grounding): *observed-project-facts* and *verified-external-facts* count as grounding; *conversation-claims* and *unconfirmed-assumptions* from a warm invocation do not count until a scout or a bounded inline read of the authoritative source corroborates them. Read dossiers from their paths on demand; do not pull their bulk into this context.
+**使用返回的档案和您自己的有界内联读取观察结果，对每个事实进行排序**，并在第 2 阶段（验证基础）中将各组分开：*观察到的项目事实*和*验证的外部事实*算作基础；来自热调用的*对话声明*和*未确认的假设*在侦察或权威源的有界内联读取证实它们之前不会计入。按需阅读他们路径中的档案；不要把他们的大部分都拉到这个环境中。

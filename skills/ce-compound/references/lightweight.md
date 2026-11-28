@@ -1,62 +1,62 @@
-# Lightweight mode
+# 轻量级模式
 
-### Lightweight Mode
+### 轻量级模式
 
 <critical_requirement>
-**Single-pass alternative — same artifact type, reduced research and validation.**
+**单通道替代方案 - 相同的产物类型，减少研究和验证。**
 
-This mode skips parallel subagents entirely. The orchestrator performs all work in a single pass and chooses the form the same way, but omits cross-referencing, duplicate detection, session-history research, and semantic grounding validation.
+此模式完全跳过并行子代理。协调器一次性执行所有工作，并以相同的方式选择表单，但省略交叉引用、重复检测、会话历史研究和语义基础验证。
 
-Non-interactive mode enters Lightweight only when explicitly invoked with `depth:lightweight`; otherwise it defaults to Full for backward compatibility.
+非交互模式仅在使用`depth:lightweight`显式调用时才进入轻量级；否则默认为 Full 以实现向后兼容性。
 </critical_requirement>
 
-The orchestrator (main conversation) performs ALL of the following in one sequential pass:
+协调器（主对话）在一个顺序传递中执行以下所有操作：
 
-1. **Extract from conversation**: Identify the problem and solution from conversation history. Also scan the "user's auto-memory" block injected into your system prompt, if present (Claude Code only). Use any relevant notes as supplementary context alongside conversation history. Tag any memory-sourced content incorporated into the final doc with "(auto memory [claude])". Before asserting how code behaves (enum values, status semantics, limits, defaults), Read the defining line at the current tree. Soften or attribute any claim you cannot verify. Cite PR numbers over bare commit SHAs, and phrase unmerged fixes as pending
-2. **Classify**: Read `references/schema.yaml` and `references/yaml-schema.md`, then determine track (bug vs knowledge), category, and filename. Sample existing docs under `<root>/solutions/` and choose `component`, `root_cause`, and the directory under the corpus-first rule in `references/yaml-schema.md` (it names what each is matched on and when the suggested defaults apply)
-3. **Write minimal doc**: Read `references/form.md` first and write what it chooses. When no learning remains, write no doc and continue at step 4. Before writing a doc, check whether the exact proposed `<root>/solutions/[category]/[filename].md` path exists. If it exists, read it: update it only when it covers the same problem, preserving its path and frontmatter structure and adding `last_updated: YYYY-MM-DD`; otherwise choose a distinct, descriptive filename and re-check that exact path is absent before writing. This is exact-path collision handling only — do not run Full mode's semantic overlap research or dispatch subagents. Create or update the doc using the appropriate track template from `assets/resolution-template.md`, with:
-   - YAML frontmatter with track-appropriate fields, applying the YAML-safety quoting rule for array items (see `references/yaml-schema.md` > YAML Safety Rules)
-   - Bug track: Problem, root cause, solution with key code snippets, one prevention tip
-   - Knowledge track: Context, guidance with key examples, one applicability note
-4. **Vocabulary capture (update-only)**: if `CONCEPTS.md` exists at repo root, read `references/concepts-vocabulary.md`, then scan any new doc and the conversation for qualifying terms and add, refine, fold, or scrub entries silently, within the criteria and coherence-neighborhood bounds that reference states. If `CONCEPTS.md` does not exist, defer creation to a Full run, which is the run that seeds the file. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined, 1 folded" or "scanned, no qualifying terms"). If this run changed `CONCEPTS.md` at all (added, refined, folded, or scrubbed) and the project's active instructions and conventions already in your context do not mention it, add the discoverability tip to the output below. Lightweight only **tips**; it does not edit instruction files. An interactive Full run makes that edit after consent; non-interactive Full also only tips and reports.
-5. **Read-only discoverability check**: Using the project's active instructions and conventions already in your context, assess whether they point agents to `<root>/solutions/` against the three criteria under **Discoverability Check** in `references/refresh-and-discoverability.md`. Do not open, offer to edit, or edit instruction files; Lightweight only reports the result. Record one of:
-   - `no gap` when active project instructions point agents to the knowledge store
-   - `gap noted — instruction-file tip emitted` when active project instructions exist but do not mention it
-   - `not applicable — no active project instructions` when no project instructions are active; emit no discoverability tip
-6. **Mechanical claims check**: when a doc was written, run `scripts/validate-doc-claims.py` against the written doc exactly as in `references/assembly.md` Phase 2.45 step 1 (same `SKILL_DIR` anchor, same adjudicate-not-auto-fix rule; read `references/grounding-validation.md` for the adjudication table when it flags anything). Lightweight skips only the semantic validator subagent, not this deterministic check.
-7. **Frontmatter parser-safety check**: when a doc was written, validate the written doc exactly as in `references/assembly.md` Phase 2 step 8, using the same bundled-script existence guard and manual fallback checklist. Fix any violation and repeat the check; do not report success until the written frontmatter is parser-safe.
-8. **Skip specialized agent reviews** (`references/enhancement.md`) and the semantic grounding validator (`references/assembly.md` Phase 2.45 step 2) to conserve context
+1. **对话摘录**：从对话历史记录中找出问题和解决方案。还要扫描注入到系统提示符中的“用户自动记忆”块（如果存在）（仅限Claude Code）。使用任何相关注释作为对话历史记录的补充上下文。使用“（自动记忆[claude]）”标记合并到最终文档中的任何源自记忆的内容。在断言代码的行为方式（枚举值、状态语义、限制、默认值）之前，请阅读当前树中的定义行。弱化或归因任何您无法核实的主张。在裸提交 SHA 上引用 PR 数字，并将未合并的修复表述为待处理
+2. **分类**：读取`references/schema.yaml`和`references/yaml-schema.md`，然后确定轨迹（错误与知识）、类别和文件名。对 `<root>/solutions/` 下的现有文档进行采样，然后选择 `component`、`root_cause` 以及 `references/yaml-schema.md` 中语料库优先规则下的目录（它指定每个匹配的内容以及何时应用建议的默认值）
+3. **编写最少的文档**：首先读取`references/form.md`并写下它选择的内容。如果没有剩余学习内容，则不编写文档并继续执行步骤 4。在编写文档之前，检查是否存在确切的建议的 `<root>/solutions/[category]/[filename].md` 路径。如果存在，则读取它：仅在覆盖相同问题时更新它，保留其路径和frontmatter结构并添加`last_updated: YYYY-MM-DD`；否则，请选择一个独特的描述性文件名，并在写入之前重新检查是否不存在确切的路径。这仅是精确路径冲突处理 - 不要运行完整模式的语义重叠研究或调度子代理。使用 `assets/resolution-template.md` 中的适当轨道模板创建或更新文档，其中：
+   - YAML frontmatter 具有适合跟踪的字段，对数组项应用 YAML 安全引用规则（请参阅 `references/yaml-schema.md` > YAML 安全规则）
+   - 错误跟踪：问题、根本原因、包含关键代码片段的解决方案、一个预防技巧
+   - 知识轨道：背景、关键示例指导、一份适用性说明
+4. **词汇捕获（仅更新）**：读取`references/concepts-vocabulary.md`来解析上下文；如果其术语表存在，则扫描任何新文档和对话中的限定术语，并在引用状态的标准和连贯邻域范围内默默地添加、细化、折叠或擦除条目。如果 `GLOSSARY.md` 不存在，则将创建推迟到完整运行，即为文件播种的运行。在输出中记录结果（例如，“词汇：1 个条目精炼，1 个折叠”或“已扫描，无限定术语”）。如果此运行完全更改了`GLOSSARY.md`（添加、细化、折叠或删除），并且您的上下文中已有的项目的活动指令和约定未提及它，请将可发现性提示添加到下面的输出中。仅轻量级 **提示**；它不编辑指令文件。交互式完整运行在同意后进行编辑；非交互式完整也只有提示和报告。
+5. **只读可发现性检查**：使用您上下文中已有的项目活动指令和约定，根据`references/refresh-and-discoverability.md`中的**可发现性检查**下的三个标准评估它们是否将代理指向`<root>/solutions/`。请勿打开、提供编辑或编辑说明文件；轻量级仅报告结果。记录以下之一：
+   - `no gap` 当活动项目指令将代理指向知识存储时
+   - `已记录规则缺口，并给出补充指令文件的建议` 当活动项目说明存在但未提及时
+   - `不适用——没有生效的项目指令` 当没有项目指令处于活动状态时；不发出可发现性提示
+6. **机械声明检查**：编写文档后，按照`references/assembly.md`阶段 2.45 步骤 1 运行`scripts/validate-doc-claims.py`（相同的`SKILL_DIR`锚点，相同的裁决不自动修复规则；当裁决表标记任何内容时，读取`references/grounding-validation.md`）。轻量级仅跳过语义验证器子代理，而不跳过此确定性检查。
+7. **Frontmatter 解析器安全检查**：编写文档时，使用相同的捆绑脚本存在防护和手动回退检查表，按照 `references/assembly.md` 第 2 阶段步骤 8 中的方式验证编写的文档。纠正任何违规行为并重复检查；在编写的 frontmatter 解析器安全之前，不要报告成功。
+8. **跳过专门代理审查** (`references/enhancement.md`) 和语义基础验证器（`references/assembly.md` 阶段 2.45 步骤 2）以保存上下文
 
-**User-runnable retry rendering.** In the lightweight completion output below, default to `/ce-compound`; use `$ce-compound` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
+**用户可运行的重试渲染。** 在下面的轻量级完成输出中，默认为`/ce-compound`；仅当活动主机为 Codex 或明确记录以美元为前缀的技能调用时才使用 `$ce-compound`。仅将调用呈现为内联代码并仅输出一种形式。
 
-**Lightweight completion output:** In non-interactive Lightweight, do not emit this interactive block; use the depth-specific report under `Non-interactive mode` in `references/report.md` instead. In interactive Lightweight, emit:
+**轻量级完成输出：** 在非交互式轻量级中，不要发出此交互式块；请改用`references/report.md`中`Non-interactive mode`下的特定深度报告。在交互式轻量级中，发出：
 ```
-✓ Documentation complete (lightweight mode)
+✓ 文档齐全（轻量级模式）
 
 Files written:
-- <the check or standard, with how it was proven, when one was written>
-- <root>/solutions/[category]/[filename].md, when a doc was written
+- <检查或标准，以及如何证明的，何时编写的>
+- <root>/solutions/[类别]/[文件名].md，编写文档时
 
-Recommended form: <none | form, where, and the failure message or rule text>
+推荐形式：<无|形式、位置以及失败消息或规则文本>
 
-[If the lesson met the standard form and the repo has no CODING_STANDARDS.md:]
-This could be a coding standard if you adopt them.
+[如果课程符合标准形式并且存储库没有CODING_STANDARDS.md:]
+如果您采用它们，这可能会成为一种编码标准。
 
-[If discoverability check found instruction files don't surface the knowledge store:]
-Tip: Your AGENTS.md/CLAUDE.md doesn't surface <root>/solutions/ to agents —
-a brief mention helps all agents discover these learnings.
+[如果可发现性检查发现说明文件未显示在知识存储中：]
+提示：您的 AGENTS.md/CLAUDE.md 不会向代理显示 <root>/solutions/ —
+简短的提及可以帮助所有代理发现这些知识。
 
-[If CONCEPTS.md changed at all this run and isn't surfaced in the instruction files:]
-Tip: Your AGENTS.md/CLAUDE.md doesn't surface CONCEPTS.md —
-a one-line mention helps agents find the shared vocabulary.
+[如果 GLOSSARY.md 在整个运行过程中发生了变化并且没有出现在指令文件中：]
+提示：您的 AGENTS.md/CLAUDE.md 未显示 <实际 glossary/map 路径> —
+一行提及可以帮助代理找到共享词汇。
 
-Note: This was created in lightweight mode. For richer documentation
-(cross-references, detailed prevention strategies, specialized reviews,
-semantic grounding validation), re-run <rendered invocation> in a fresh session.
+注意：这是在轻量级模式下创建的。以获得更丰富的文档
+（交叉引用、详细的预防策略、专门审查、
+语义基础验证），在新会话中重新运行<渲染的调用>。
 ```
 
-**No subagents are launched. No parallel tasks. The chosen form, plus at most one learning, is the deliverable** (Phase 2.4's update-only vocabulary capture may also change an existing `CONCEPTS.md`).
+**没有启动任何子代理。没有并行任务。所选择的形式，加上最多一项学习，就是可交付成果**（第 2.4 阶段的仅更新词汇捕获也可能会更改现有的`GLOSSARY.md`）。
 
-In lightweight mode, the overlap check is skipped (no Related Docs Finder subagent). This means lightweight mode may create a doc that overlaps with an existing one. That is acceptable; a refresh will catch it later. Only suggest a refresh if there is an obvious narrow refresh target. Do not broaden into a large refresh sweep from a lightweight session.
+在轻量级模式下，将跳过重叠检查（无相关文档查找器子代理）。这意味着轻量级模式可能会创建与现有文档重叠的文档。这是可以接受的；稍后刷新即可捕获它。仅当存在明显的窄刷新目标时才建议刷新。不要从轻量级会话扩展到大型刷新扫描。
 
 ---

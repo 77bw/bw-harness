@@ -1,168 +1,168 @@
-# Universal Planning Workflow
+# 通用规划工作流程
 
-This file is loaded when ce-plan detects a non-software task (Phase 0.1b). It replaces the software-specific phases (0.2 through 5.1) with a domain-agnostic planning workflow.
+当ce-plan检测到非软件任务（阶段0.1b）时加载此文件。它用与领域无关的规划工作流程取代了特定于软件的阶段（0.2 到 5.1）。
 
-## Before starting: verify classification
+## 开始之前：验证分类
 
-The detection stub in SKILL.md routes here for anything that isn't clearly software. Verify the classification is correct before proceeding:
+SKILL.md 中的检测存根将路由至此处，以检测任何明显不是软件的内容。在继续之前验证分类是否正确：
 
-- **Is this actually a software task?** The key distinction is task-type, not topic-domain. A study guide about Rust is non-software (producing educational content). A Rust library refactor is software (modifying code). If this is actually software, return to Phase 0.2 in the main SKILL.md.
-- **Is this a trivial single-fact lookup?** Only a question answerable from one fact with no research, retrieval, or judgment skips planning — answer it directly and stop, in the user's terms. Do not narrate that it "isn't a planning task" or explain the routing; that is process exhaust (see Veil of value below). Examples: "zsh: command not found: brew", "what's the capital of France." A question that needs multiple steps, any retrieval, or synthesis to answer well does **not** qualify: it is an answer-seeking task (see Disposition below), not a quick-help exit. When unsure, do not exit.
-- **Pipeline mode?** If invoked from `lfg` or any `disable-model-invocation` context: tell the user this is a non-software task, `lfg` requires the software-only `ce-work` path, and they should invoke `ce-plan` directly for non-software planning. For this user-runnable output, default to `/ce-plan`; use `$ce-plan` only on Codex or a host explicitly documented as dollar-prefixed. Render only the invocation as inline code and output one form only, then stop.
-- **Unified artifact guard.** Universal-planning outputs are not software implementation plans. Do not label them `artifact_contract: ce-unified-plan/v1` and do not produce an implementation launch block unless the deliverable itself is a complete software implementation plan with Product Contract, Planning Contract, Implementation Units, Verification Contract, and Definition of Done.
+- **这实际上是一个软件任务吗？** 关键区别在于任务类型，而不是主题域。关于 Rust 的学习指南是非软件（制作教育内容）。 Rust 库重构是软件（修改代码）。如果这实际上是软件，请返回主SKILL.md中的阶段0.2。
+- **这是一个微不足道的单事实查找吗？** 只有一个可以从一个事实回答的问题，无需研究、检索或判断，就会跳过计划——用用户的话来说，直接回答并停止。不要叙述“这不是计划任务”或解释路线；即过程排放（参见下面的价值面纱）。示例：“zsh：找不到命令：brew”、“法国的首都是哪里。”需要多个步骤、任何检索或综合才能很好回答的问题**不**合格：它是一个寻求答案的任务（请参阅下面的配置），而不是快速帮助退出。当不确定时，不要退出。
+- **管道模式？** 如果从`lfg`或任何`disable-model-invocation`上下文调用：告诉用户这是一个非软件任务，`lfg`需要仅软件的`ce-work`路径，并且他们应该直接调用`ce-plan`进行非软件规划。对于此用户可运行的输出，默认为 `/ce-plan`；仅在 Codex 或明确记录为美元前缀的主机上使用 `$ce-plan`。仅将调用呈现为内联代码并仅输出一种形式，然后停止。
+- **统一的产物防护。** 通用规划输出不是软件实施计划。不要给它们贴上`artifact_contract: ce-unified-plan/v1`标签，也不要生成实施启动块，除非可交付成果本身是一个完整的软件实施计划，包含产品合同、规划合同、实施单元、验证合同和完成定义。
 
-Once past these checks, commit to the task — do not bail because it looks like a "lookup" or "research question." The user invoked the planning tool on purpose. Then choose the disposition below.
-
----
-
-## Disposition: plan-seeking vs. answer-seeking
-
-Two kinds of task land here, with different deliverables:
-
-- **Plan-seeking** — the deliverable is a *plan*: a trip itinerary, a study curriculum, an event runbook, a project plan. The plan is the artifact, saved or shared. → Follow Steps 1-3 below.
-- **Answer-seeking** — the deliverable is an *answer*: an investigative or analytical question ("how often does X happen — is it a big deal?", "how does our approach compare to Y?", "should we Z?"). No one wants a saved plan document for this; planning is the means to a good answer, not the output. → Follow the **Answer-seeking flow** below; skip the Step 3 artifact handling.
-
-If a request blends both ("research X, then plan Y"), do the answer-seeking research first, then produce the plan artifact.
-
-Commit to one disposition before reading further, and follow only that flow: a plan-seeking task still produces its plan document (Steps 1-3) and does not stop at a chat answer; an answer-seeking task does not write a plan file.
+一旦通过了这些检查，就致力于该任务——不要因为它看起来像“查找”或“研究问题”而放弃。用户故意调用规划工具。然后选择下面的配置。
 
 ---
 
-## Answer-seeking flow
+## 倾向：寻求计划与寻求答案
 
-The planning instinct still applies — but the plan is *working scaffold*, not an artifact. State it in chat to steer the work and show the human the approach; execute it; discard it. No plan file is written.
+这里有两种任务，具有不同的可交付成果：
 
-### State a brief plan-of-attack, then proceed
+- **寻求计划** - 可交付成果是一个*计划*：旅行行程、学习课程、活动手册、项目计划。计划是保存或共享的产物。 → 按照下面的步骤 1-3 进行操作。
+- **寻求答案** - 可交付成果是一个*答案*：一个调查或分析问题（“X 发生的频率 - 这是一个大问题吗？”，“我们的方法与 Y 相比如何？”，“我们应该 Z 吗？”）。没有人想要为此保存一份计划文档；规划是获得良好答案的手段，而不是输出。 → 按照下面的**寻求答案流程**进行操作；跳过步骤 3 产物处理。
 
-Say how the question will be answered, right-sized to it: a light question gets a one-line approach; a multi-part analytical question gets a short bulleted plan (a few steps). This is **non-blocking** — announce the approach and continue immediately. Do not ask the user to approve the plan; the stated approach is itself the checkpoint, and the user can interrupt if the framing is wrong. Stop to ask only on a genuine fork the agent cannot resolve (e.g., "his personal account or the org's?").
+如果请求混合了两者（“研究 X，然后计划 Y”），则首先进行寻求答案的研究，然后生成计划产物。
 
-### Execute the plan
-
-Carry out the approach. When the answer depends on facts the model can't reliably supply from memory — current data, recent events, specifics that drift — gather them using the **Research decomposition pattern** under Step 1 below (decompose into focused questions, dispatch in parallel via the platform's subagent/web primitive, collate). Skip research for anything the model already knows well.
-
-**Ground answers about the user's own code, repo, or named artifacts in the actual sources — not memory.** When the question references local code, a specific file, a named CLI or service, or "our X", read those sources first (and any resource the user named — see Core Principle 8 in SKILL.md). "The model already knows the topic" covers general knowledge only, never the contents of the user's codebase: a comparison or recommendation about local code that was never read is ungrounded. Inspect, then answer.
-
-**Execution here is research and analysis only — never code.** Reading code and artifacts to understand them is in-bounds research; writing or running code to change the system is not — that belongs in `ce-work`. This keeps the planning/execution boundary intact.
-
-### Deliver the answer
-
-Answer in chat. Do **not** write a plan file and do **not** run the Step 3 save/share menu by default. If the investigation produced something the user might want to keep (a comparison table, a sourced summary), offer to save it; otherwise just give the answer. In headless or non-interactive runs, skip the offer and deliver the answer.
-
-### Veil of value: what to show, what to hide
-
-The plan-of-attack and the answer are for the caller; the skill's internal machinery is not. Edit for relevance the way an expert consultant does — they tell you their thinking about your problem, not which template their back office applied.
-
-- **Show** (question-domain — reads as value): the approach to the user's actual question, in the user's terms.
-- **Hide** (skill-domain — process exhaust): which skill, mode, or phase is running; whether a plan file was or wasn't written; the routing or disposition decision itself.
-- **Never hide** (audit content — affects trust in the answer): caveats, gaps, and uncertainty. "I could only pull his last ~100 stars, so this is partial" or "this is my read, not a hard signal" is not junk — it is what a good assistant says out loud. The veil hides plumbing, never the limits of the answer.
-
-Register example, for "how often does he star things — is this a big deal?":
-
-> Wrong: "Quick note first: `ce-plan` builds implementation plans, so I ignored the template and just answered the question. Here's what the data says..."
-
-Leaks the skill's name, narrates an internal routing decision, apologizes for deviating — the caller sees the tool's machinery.
-
-> Right: "Let me size this up — I'll check how active a starrer he is overall, his recent cadence, and the kinds of repos he tends to star, then weigh where this one lands. [gathers data] Yes, this is a real signal: ..."
-
-Same underlying process; none of the machinery shows. The caller sees thinking about their question.
+在进一步阅读之前先确定一种部署，并仅遵循该流程：寻求计划的任务仍会生成其计划文档（步骤 1-3），并且不会停在聊天答案处；寻求答案的任务不会编写计划文件。
 
 ---
 
-## Step 1: Assess Ambiguity and Research Need
+## 寻求答案流程
 
-Evaluate two things before planning:
+计划本能仍然适用——但计划是“工作脚手架”，而不是人工制品。在聊天中陈述它以指导工作并向人们展示方法；执行它；丢弃它。没有写入计划文件。
 
-**Would 1-3 quick questions meaningfully improve this plan?**
+### 陈述一个简短的攻击计划，然后继续
 
-- **Default: ask 1-3 questions** via Step 1b when the answers would change the plan's structure or content. Always include a final option like "Skip — just make the plan with reasonable assumptions" so the user can opt out instantly.
-- **Skip questions entirely** only when the request already specifies all major variables or the task is simple enough that reasonable assumptions cover it well.
+说出将如何回答问题，大小合适：简单的问题采用单行方法；简单的问题采用单行的方法；多部分分析问题有一个简短的计划（几个步骤）。这是**非阻塞**——宣布该方法并立即继续。不要求用户批准该计划；所述方法本身就是检查点，如果框架错误，用户可以中断。仅停止询问代理无法解决的真正分叉（例如，“他的个人帐户还是组织的帐户？”）。
 
-**Research need — does this plan depend on facts that change faster than training data?**
+### 执行计划
 
-| Research need | Signals | Action |
+执行该方法。当答案取决于事实时，模型无法可靠地从内存中提供 - 当前数据、最近的事件、漂移的细节 - 使用下面步骤 1 下的 **研究分解模式** 收集它们（分解为重点问题，通过平台的 subagent/web 原语并行分派，整理）。跳过对模型已经熟知的任何内容的研究。
+
+**有关用户自己的代码、存储库或实际源中的命名产物的基本答案 - 而不是内存。 ** 当问题引用本地代码、特定文件、命名的 CLI 或服务或“我们的 X”时，首先阅读这些源（以及用户命名的任何资源 - 请参阅 SKILL.md 中的核心原则 8）。 “模型已经知道该主题”仅涵盖一般知识，而不是用户代码库的内容：对从未阅读过的本地代码进行比较或推荐是没有根据的。检查，然后回答。
+
+**这里的执行只是研究和分析——而不是代码。**阅读代码和产物来理解它们是界内研究；编写或运行代码来改变系统不属于 `ce-work`。这使得 planning/execution 边界保持完整。
+
+### 交付答案
+
+在聊天中回答。默认情况下，**不要**编写计划文件，也**不要**运行步骤 3 save/share 菜单。如果调查产生了用户可能想要保留的内容（比较表、来源摘要），请提出保存它；否则就给出答案。在无头或非交互式运行中，跳过报价并提供答案。
+
+### 价值面纱：展示什么，隐藏什么
+
+攻击计划和答案是给调用者的；该技能的内部机制不是。像专家顾问那样编辑相关性 - 他们告诉您他们对您的问题的想法，而不是他们的后台应用的模板。
+
+- **显示**（问题域 - 读作值）：以用户的方式解决用户实际问题的方法。
+- **隐藏**（技能域 - 进程耗尽）：正在运行哪个技能、模式或阶段；计划文件是否已编写；路由或处置决策本身。
+- **永远不要隐藏**（审核内容 - 影响对答案的信任）：警告、差距和不确定性。 “我只能拉他最后约 100 颗星，所以这是片面的”或“这是我读到的，不是硬信号”不是垃圾——这是一个好的助手大声说出来的。面纱隐藏着管道，但绝不是答案的界限。
+
+注册示例，“他多久给某件事加注星标——这有什么大不了的吗？”：
+
+> 错误：“首先快速说明：`ce-plan`构建实施计划，所以我忽略了模板，只是回答了问题。数据是这样的......”
+
+泄露技能名称，叙述内部路由决策，为偏离而道歉——调用者可以看到该工具的机制。
+
+> 右：“让我来评估一下——我会检查他作为明星的整体活跃程度、他最近的节奏以及他倾向于明星的回购类型，然后权衡这个的落地位置。[收集数据]是的，这是一个真实的信号：……”
+
+相同的底层流程；没有任何机械显示。来电者看到他们在思考他们的问题。
+
+---
+
+## 第 1 步：评估歧义和研究需求
+
+在计划之前评估两件事：
+
+**1-3 个简短的问题会有意义地改进这个计划吗？**
+
+- **默认：当答案会改变计划的结构或内容时，通过步骤 1b 提出 1-3 个问题**。始终包含最终选项，例如“跳过 - 只需根据合理的假设制定计划”，以便用户可以立即选择退出。
+- **仅当请求已指定所有主要变量或任务足够简单以至于合理的假设可以很好地涵盖它时，才完全跳过问题**。
+
+**研究需求 - 该计划是否依赖于比训练数据变化更快的事实？**
+
+| 研究需要 | 信号 | 行动 |
 |--------------|---------|--------|
-| **None** | Generic, timeless, or conceptual plan (study curriculum methodology, project management approach, personal goal breakdown) | Skip research. Model knowledge is sufficient. After structuring the plan, offer: "I based this on general knowledge. Want me to search for [specific thing research would improve]?" — e.g., sourced recipes, current product recommendations, expert frameworks. Only if the user accepts. |
-| **Recommended** | Plan references specific locations, venues, dates, prices, schedules, seasonal availability, or current events — anything where stale information would break the plan (closed restaurants, changed prices, cancelled events, wrong seasonal dates). | Research before planning. Decompose into 2-5 focused research questions and dispatch parallel web searches. In Claude Code, use the Agent tool with `model: "haiku"` for each search to reduce cost. Collate findings before structuring the plan. |
+| **没有任何** | 通用的、永恒的或概念性的计划（学习课程方法、项目管理方法、个人目标分解） | 跳过研究。模型知识就足够了。构建计划后，提出：“我基于一般知识。希望我搜索[可以改进的具体事物研究]？” — 例如，来源食谱、当前产品推荐、专家框架。仅当用户接受时。 |
+| **受到推崇的** | 计划引用了特定地点、场地、日期、价格、时间表、季节性供应情况或时事——任何陈旧信息会破坏计划的内容（餐馆关门、价格更改、活动取消、季节性日期错误）。 | 在规划之前进行研究。分解为 2-5 个重点研究问题并调度并行网络搜索。在Claude Code中，每次搜索都使用Agent工具配合`model: "haiku"`来降低成本。在制定计划之前整理调查结果。 |
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-When research is recommended, do it — don't just offer. Stale recommendations (closed restaurants, rethemed attractions, outdated prices) are worse than no recommendations. The user invoked `ce-plan` because they want a good plan, not a disclaimer about training data.
+当建议进行研究时，就去做——而不是仅仅提供。过时的推荐（关闭的餐厅、重新主题的景点、过时的价格）比没有推荐更糟糕。用户调用`ce-plan`是因为他们想要一个好的计划，而不是关于训练数据的免责声明。
 
-**Research decomposition pattern:**
-1. Identify 2-5 independent research questions based on the task. Good questions target facts the model is least confident about: current prices, hours, availability, recent changes, seasonal specifics.
-2. Dispatch parallel research. Prefer user-named surfaces first per Core Principle 8 in SKILL.md; fall back to web search for questions those surfaces don't cover.
-3. Collate findings into a brief research summary before proceeding to planning.
+**研究分解模式：**
+1. 根据任务确定 2-5 个独立研究问题。好的问题针对模型最不自信的事实：当前价格、营业时间、可用性、最近的变化、季节性细节。
+2. 调度并行研究。根据 SKILL.md 中的核心原则 8 首先优先选择用户命名的表面；回到网络搜索来寻找那些表面没有涵盖的问题。
+3. 在进行规划之前，将调查结果整理成简短的研究摘要。
 
-Example for "plan a date night in Seattle this Saturday":
-- "Best restaurants open late Saturday in Capitol Hill Seattle 2026"
-- "Events happening in Seattle [specific date]"
-- "Seattle waterfront current status and hours"
+“计划本周六在西雅图约会之夜”的示例：
+- “2026 年西雅图国会山周六晚营业的最佳餐厅”
+- “西雅图发生的事件[具体日期]”
+- “西雅图海滨现状和时间”
 
-## Step 1b: Focused Q&A
+## 步骤 1b：重点问答
 
-Ask up to 3 questions targeting the unknowns that would most change the plan. Use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question.
+针对最能改变计划的未知因素，提出最多 3 个问题。使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项。永远不要默默地跳过这个问题。
 
-**How to ask well:**
-- Offer informed options, not open-ended blanks. Instead of "When are you going?", try "Mid-week visits have 30-40% shorter lines — are you flexible on timing?" The question should give the user a frame of reference, not just extract information.
-- Use multi-select when several independent choices can be captured in one question. This is compact and respects the user's time.
-- Always include a final option like **"Skip — just make the plan with reasonable assumptions"** so the user can opt out at any point.
+**如何问得好：**
+- 提供明智的选择，而不是开放式的空白。不要问“你什么时候去？”，而是尝试“周中拜访的排队时间会缩短 30-40% — 您的时间安排灵活吗？”这个问题应该给用户一个参考框架，而不仅仅是提取信息。
+- 当一个问题中可以包含多个独立选项时，请使用多选。这是紧凑的并且尊重用户的时间。
+- 始终包含最终选项，例如**“跳过 - 只需根据合理的假设制定计划”**，以便用户可以随时选择退出。
 
-Focus on the unknowns specific to this task that would change what the plan recommends or how it's structured. Do not ask more than 3 — after that, proceed with assumptions for anything remaining.
+重点关注此任务特有的未知因素，这些未知因素会改变计划的建议内容或计划的结构。不要问超过 3 个——之后，继续对剩余的任何内容进行假设。
 
-## Step 2: Structure the Plan
+## 第 2 步：构建计划
 
-Create a structured plan guided by these quality principles. Do NOT use the software plan template (implementation units, test scenarios, file paths, etc.).
+创建以这些质量原则为指导的结构化计划。不要使用软件计划模板（实施单元、测试场景、文件路径等）。
 
-### Format: when to prescribe vs. present options
+### 格式：何时规定 vs. 现有选项
 
-Not every plan should be a single linear path. Match the format to the task:
+并非每个计划都应该是单一的线性路径。将格式与任务相匹配：
 
-| Task type | Best format | Why |
+| 任务类型 | 最佳格式 | 为什么 |
 |-----------|------------|-----|
-| **High personal preference** (food, entertainment, activities, gifts) | Curated options per category — present 2-3 choices and let the user compose | Preferences vary; a single pick may miss. Options respect the user's taste. |
-| **Logical sequence** (study plan, project timeline, multi-day trip logistics) | Single prescriptive path with clear ordering | Sequencing matters; options at each step create decision paralysis. |
-| **Hybrid** (event with fixed structure but variable details) | Fixed structure with choice points marked | The skeleton is set but specific vendors/venues/activities are options. |
+| **高度个人偏好**（食物、娱乐、活动、礼物） | 每个类别的精选选项 - 提供 2-3 个选项并让用户撰写 | 偏好各不相同；单个选秀可能会错过。选项尊重用户的品味。 |
+| **逻辑顺序**（学习计划、项目时间表、多日旅行后勤） | 具有明确顺序的单一规定路径 | 排序问题；每一步的选择都会造成决策瘫痪。 |
+| **混合**（结构固定但细节可变的事件） | 固定结构，标有选择点 | 骨架已设置，但具体的vendors/venues/activities是选项。 |
 
-Example: A date night plan should present 2-3 restaurant options, 2-3 activity options, and a suggested flow — not pick one restaurant and build the whole evening around it. A study plan should prescribe a single weekly progression — not present 3 different curricula to choose from.
+示例：约会之夜计划应提供 2-3 个餐厅选择、2-3 个活动选项和建议的流程——而不是选择一家餐厅并围绕它构建整个夜晚。学习计划应该规定每周一次的进展，而不是提供 3 种不同的课程可供选择。
 
-### Formatting: bullets over prose
+### 格式：项目符号优于散文
 
-- Prefer bullets and tables for actionable content (steps, options, logistics, budgets)
-- Use prose only for context, rationale, or explanations that connect the dots
-- Plans are for scanning and executing, not reading cover-to-cover
+- 更喜欢使用项目符号和表格来呈现可操作的内容（步骤、选项、后勤、预算）
+- 仅使用散文来表达上下文、基本原理或连接点的解释
+- 计划是用来扫描和执行的，而不是从头到尾阅读
 
-### Quality principles
+### 质量原则
 
-- **Actionable steps**: Each step is specific enough to execute without further research
-- **Sequenced by dependency**: Steps are in the right order, with dependencies noted
-- **Time-aware**: When relevant, include timing, durations, deadlines, or phases
-- **Resource-identified**: Specify what's needed — tools, materials, people, budget, locations
-- **Contingency-aware**: For important decisions, note alternatives or what to do if plans change
-- **Appropriately detailed**: Match detail to task complexity. A weekend trip needs less structure than a 3-month curriculum. A dinner plan should be concise, not a 200-line document.
-- **Domain-appropriate format**: Choose a structure that fits the domain:
-  - Itinerary for travel (day-by-day, with times and locations)
-  - Syllabus or curriculum for study plans (topics, resources, milestones)
-  - Runbook for events (timeline, responsibilities, logistics)
-  - Project plan for business or operational tasks (phases, owners, deliverables)
-  - Research plan for investigations (questions, methods, sources)
-  - Options menu for preference-driven tasks (curated picks per category)
+- **可操作的步骤**：每个步骤都足够具体，无需进一步研究即可执行
+- **按依赖关系排序**：步骤按正确顺序排列，并注明依赖关系
+- **时间意识**：相关时，包括时间、持续时间、截止日期或阶段
+- **资源识别**：指定所需内容 - 工具、材料、人员、预算、地点
+- **应急意识**：对于重要决策，请注意替代方案或计划发生变化时该怎么办
+- **适当详细**：将细节与任务复杂性相匹配。周末旅行所需的结构比三个月的课程要少。晚餐计划应该简洁，而不是 200 行的文件。
+- **适合领域的格式**：选择适合领域的结构：
+  - 旅行行程（每日、时间和地点）
+  - 学习计划的教学大纲或课程（主题、资源、里程碑）
+  - 活动运行手册（时间表、责任、后勤）
+  - 业务或运营任务的项目计划（阶段、所有者、可交付成果）
+  - 调查研究计划（问题、方法、来源）
+  - 用于偏好驱动任务的选项菜单（按类别精选）
 
-## Step 3: Save or Share
+## 第 3 步：保存或分享
 
-After structuring the plan, ask the user how they want to receive it using the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question.
+构建计划后，询问用户他们希望如何使用当前工具列表中已有的主机阻止问题工具接收该计划（按功能匹配，而不是按主机特定名称匹配）。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项。永远不要默默地跳过这个问题。
 
-**Question:** "Plan ready. How would you like to receive it?"
+**问题：**“计划已准备好。您希望如何接收它？”
 
-**Options:**
+**选项：**
 
-1. **Save to disk** — Write the plan as a markdown file. Ask where:
-   - `<root>/plans/` (only show if this directory exists)
-   - Current working directory
+1. **保存到磁盘** — 将计划写入 Markdown 文件。问哪里：
+   - `<root>/plans/`（仅显示此目录是否存在）
+   - 当前工作目录
    - `/tmp`
-   - A custom path
-   - Use filename convention: `YYYY-MM-DD-HHMM-<descriptive-name>-plan.md`, taking `HHMM` from the local wall-clock time at write; reserve the path atomically and, on collision, retry with the smallest available numeric suffix before the extension rather than overwriting
-   - Start the document with a `# Title` heading, followed by `Created: YYYY-MM-DD` on the next line. No YAML frontmatter.
+   - 自定义路径
+   - 使用文件名约定：`YYYY-MM-DD-HHMM-<descriptive-name>-plan.md`，从写入时的本地挂钟时间获取`HHMM`；以原子方式保留路径，并在发生冲突时，使用扩展名之前的最小可用数字后缀重试，而不是覆盖
+   - 以 `# Title` 标题开始文档，然后在下一行添加 `Created: YYYY-MM-DD`。没有YAML前言。
 
-2. **Save to disk and publish a copy** — Shown only when `references/publishing.md` chooses a publisher (one the user named, or the host's artifact tool); label it with that destination. Write the file as in option 1 first, then follow `references/publishing.md` to publish a copy and return the URL. The local file stays canonical.
+2. **保存到磁盘并发布副本** — 仅当 `references/publishing.md` 选择发布者（用户指定的发布者或主机的产物工具）时显示；用该目的地标记它。先按照选项1编写文件，然后按照`references/publishing.md`发布副本并返回URL。本地文件保持规范。
 
-Do not offer `ce-work` (software-only) or issue creation (not applicable to non-software plans).
+请勿提供 `ce-work`（仅限软件）或问题创建（不适用于非软件计划）。

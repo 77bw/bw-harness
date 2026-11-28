@@ -1,82 +1,82 @@
-# Apply Code Review Findings (after `ce-code-review`)
+# 应用代码审查结果（`ce-code-review`之后）
 
-Load this reference when `ce-code-review` has finished and **ce-work** (or another caller) should apply fixes before the Residual Work Gate.
+当 `ce-code-review` 完成时加载此参考，并且 **ce-work** （或其他调用者）应在剩余工作门之前应用修复。
 
-`ce-code-review` is invoked here with `mode:agent`, so it is **review-only** in this context — it reports findings and writes artifacts and does not mutate the checkout, commit, push, or file tickets. **The caller decides which fixes to apply and how.** Standalone review is also report-only unless local apply was explicitly authorized.
+`ce-code-review` 在这里与 `mode:agent` 一起调用，因此在这种情况下它是 **仅审查** — 它报告发现并写入产物，并且不会改变结帐、提交、推送或文件票证。 **调用者决定应用哪些修复以及如何应用。** 除非明确授权本地应用，否则独立审核也仅限于报告。
 
-## Consume the completed review (do not re-run it)
+## 使用已完成的审核（不要重新运行）
 
-This reference loads **after** review has run. In the ce-work shipping flow, step 3a already invoked `ce-code-review`; this apply step **consumes that output**. Do not start a second review, which would waste reviewer dispatches and risk overwriting the artifact the Residual Work Gate reconciles.
+此参考在审核运行后**加载。在ce-work交付流程中，步骤3a已经调用了`ce-code-review`；此应用步骤**消耗该输出**。不要开始第二次审阅，这会浪费审查者的调度，并有覆盖剩余工作门协调的产物的风险。
 
-Reuse the review output already in hand:
+重用现有的评审输出：
 
-- Parsed JSON (`status`, `actionable_findings`, `findings`, `artifact_path`, `run_id`) **or** the markdown Actionable Findings summary captured by the caller
-- Run artifact dir: `<artifact-path>/` (`review.json`, per-reviewer JSON for `why_it_matters`)
+- 解析后的 JSON (`status`, `actionable_findings`, `findings`, `artifact_path`, `run_id`) **或** 调用者捕获的 markdown 可操作结果摘要
+- 运行产物目录：`<artifact-path>/`（`review.json`，每个审查者JSON for `why_it_matters`）
 
-If `status` is `failed`, stop shipping and report `reason`. If `degraded`, note partial reviewer coverage before applying anything.
+如果`status`为`failed`，停止交付并报告`reason`。如果`degraded`，请在应用任何内容之前注意部分审稿人的覆盖范围。
 
-### Fallback — invoke `ce-code-review` only for cold callers
+### 后备 — 仅对陌生呼叫者调用 `ce-code-review`
 
-Only when the caller reached this file **without** already running review (no review output in hand): invoke `ce-code-review` once, then proceed to apply. Do not invoke when the caller already ran review (e.g., ce-work shipping step 3a).
+仅当调用者到达此文件时**没有**已经运行审核（手头没有审核输出）：调用 `ce-code-review` 一次，然后继续应用。当调用者已经运行审核时不要调用（例如，ce-work 运送步骤 3a）。
 
-Invoke the skill explicitly. Do not treat a casual "review my changes" prompt as a substitute unless the harness routed it to `ce-code-review`.
+明确调用该技能。不要将随意的“查看我的更改”提示视为替代，除非宿主将其路由至 `ce-code-review`。
 
 ```
-ce-code-review mode:agent plan:<plan-path> base:<merge-base-or-ref>
+ce-code-review mode:agent 计划：<plan-path> 基础：<merge-base-or-ref>
 ```
 
-- `mode:agent` — JSON output (`review.json` + primary JSON response) for programmatic parsing; same review pipeline as default.
-- `plan:` — when Phase 1 used a plan file (requirements completeness).
-- `base:` — when the diff base is already resolved on the current checkout; omit when reviewing a PR number/URL or standalone current branch.
-- Do **not** pass deprecated `mode:autofix`.
+- `mode:agent` — JSON 输出（`review.json` + 主要 JSON 响应）用于编程解析；与默认的审核管道相同。
+- `plan:` — 当第一阶段使用计划文件时（要求完整性）。
+- `base:` — 当当前结账时 diff 基础已经解析时；在查看 PR number/URL 或独立当前分支时省略。
+- **不要**传递已弃用的 `mode:autofix`。
 
-For human-facing shipping, invoke `ce-code-review` without `mode:agent` if markdown tables are preferred. It still reports only unless the invocation explicitly authorizes local apply. Capture the Actionable Findings and artifact dir before caller-owned apply.
+对于面向人的运输，如果首选Markdown表，请调用`ce-code-review`而不使用`mode:agent`。它仍然仅报告，除非调用明确授权本地应用。在调用者拥有的应用之前捕获可操作的结果和产物目录。
 
-## Inputs for apply
+## 应用的输入
 
-- `actionable_findings` from JSON, or the Actionable Findings section from markdown
-- Full finding detail when needed: `review.json` / artifact `findings`, or `{reviewer}.json` for `why_it_matters` and `evidence`
-- Stable finding `#`: reuse it in commits, in the record of unapplied findings (PR section or tracker ticket), and in subagent prompts
+- JSON 中的 `actionable_findings`，或 markdown 中的“可操作的发现”部分
+- 需要时完整查找详细信息：`review.json`/产物`findings`，或`{reviewer}.json`用于`why_it_matters`和`evidence`
+- 稳定的发现`#`：在提交、未应用的发现记录（PR部分或跟踪单）以及子代理提示中重用它
 
-## Check findings before applying fixes
+## 在应用修复之前检查结果
 
-The calling agent decides which findings are valid and which fixes it has permission to apply. Verify each finding against the evidence and the requested outcome. Reject incorrect claims, problems with no supporting evidence, and preferences whose benefit does not justify the change. Record why they were rejected; do not carry them forward as unfinished work.
+呼叫代理决定哪些调查结果有效以及哪些修复程序有权应用。根据证据和要求的结果验证每项发现。拒绝不正确的主张、没有支持证据的问题以及无法证明改变的好处的偏好。记录被拒绝的原因；不要把它们当作未完成的工作来推进。
 
-Apply justified fixes within the agreed scope when they can be reversed. Use project evidence and conventions to choose technical fixes; a design choice does not automatically need a user decision. Neither `confidence`, `autofix_class`, nor a concrete `suggested_fix` proves benefit or grants permission. If a significant problem has no suggested fix, investigate it before deciding to defer it.
+当可以撤销时，在商定的范围内应用合理的修复。使用项目证据和惯例来选择技术修复；设计选择并不自动需要用户决定。 `confidence`、`autofix_class`和具体的`suggested_fix`都不能证明利益或授予许可。如果一个重大问题没有建议的解决方案，请在决定推迟之前进行调查。
 
-Defer a fix when essential evidence is unavailable, the user must choose a product preference, the work would expand the agreed scope, or the calling agent lacks permission. Passing tests do not prove an unverified safety property or authorize changing an agreed requirement. At the Residual Work Gate, explain what decision is needed and what depends on it.
+当基本证据不可用、用户必须选择产品偏好、工作将扩大商定的范围或呼叫代理缺乏许可时，推迟修复。通过测试并不证明未经验证的安全属性或授权更改商定的要求。在剩余工作门处，解释需要什么决定以及取决于什么决定。
 
-Read the relevant source or assign a subagent to investigate a specific question. Use `ce-pov` only when an important, specific choice needs an independent assessment beyond ordinary inspection. Reviewer disagreement alone is not enough. Give it the subject, known constraints, and locations of supporting evidence. Use its answer or explanation of missing context to inform your decision. Neither gives permission to edit or automatically start a panel of models.
+阅读相关来源或指派子代理来调查特定问题。仅当重要的特定选择需要超出普通检查的独立评估时才使用`ce-pov`。仅审稿人的分歧是不够的。给出主题、已知的限制以及支持证据的位置。使用其答案或对缺失上下文的解释来指导您的决定。两者都没有授予编辑或自动启动模型面板的权限。
 
-## Execution — orchestrator reviews and groups findings, then applies or delegates
+## 执行——协调者审查和分组结果，然后应用或委托
 
-The lead agent decides which findings to act on, groups the work, reviews the diffs, runs tests, and checks what remains at the Residual Work Gate. It may investigate a small question directly; delegate broader research rather than loading every cited file. Subagents confirm that the evidence still matches the code before applying fixes within the agreed scope. They return any unresolved decisions with supporting evidence.
+首席代理决定对哪些发现采取行动、对工作进行分组、审查差异、运行测试并检查剩余工作门中剩余的内容。它可能会直接调查一个小问题；委托更广泛的研究，而不是加载每个引用的文件。子代理在商定的范围内应用修复之前确认证据仍然与代码匹配。他们返回任何未解决的决定并提供支持证据。
 
 
-### Where each fix runs
+### 每个修复运行的位置
 
-Dispatch file-grouped subagent batches when fixes need code you have not read, or when fixes on disjoint files form a real parallel wave. Apply every other fix in this context: one whose code is already in your context from this session's work, or a small region you can read without materially growing this context. The lead agent stays active through tests, commits, and the handoff, so loading many cited files here is the cost delegation avoids.
+当修复需要您尚未阅读的代码时，或者当对不相交文件的修复形成真正的并行波时，调度文件分组的子代理批次。在此上下文中应用所有其他修复：其代码已在本次会话工作的上下文中，或者您可以在不实质性增长此上下文的情况下阅读的一小部分区域。主导代理通过测试、提交和移交保持活动状态，因此在此处加载许多引用的文件是委托避免的成本。
 
-**Batching (primary rule: group by file):**
+**批处理（主要规则：按文件分组）：**
 
-1. Sort applicable findings by severity (P0 first).
-2. **Group by `file`.** All eligible findings on the same file → **one subagent** (it loads the file once and works through its `#` list in severity order).
-3. **Parallel waves:** batches with **disjoint file sets** may run in parallel (same worktree / shared-directory rules as `ce-work`'s execution strategy in `references/execution-strategy.md`).
-4. **Same file, many findings:** keep one subagent per file. If the prompt would exceed a comfortable size (~8 findings), split into **serial** subagent passes on that file (first batch highest severity, then next batch after merge or after the prior agent returns).
-5. **Cross-file coupling:** do not merge unrelated files into one subagent just to reduce agent count; file grouping is the default. Only co-batch multiple files when findings explicitly reference the same small related change (rare); when in doubt, separate by file.
+1. 按严重程度对适用的发现进行排序（首先是P0）。
+2. **按 `file` 分组。** 同一文件上的所有符合条件的结果 → **一个子代理**（它加载文件一次，并按严重性顺序处理其 `#` 列表）。
+3. **并行波：**具有**不相交文件集**的批处理可以并行运行（与`ce-work`在`references/execution-strategy.md`中的执行策略相同的工作树/共享目录规则）。
+4. **同一文件，许多发现：** 每个文件保留一个子代理。如果提示超出合适的大小（~8 个结果），则分成 **串行** 子代理传递该文件（第一批最高严重性，然后是合并后或前一个代理返回后的下一批）。
+5. **跨文件耦合：**不要为了减少代理数量而将不相关的文件合并到一个子代理中；文件分组是默认的。仅当结果明确引用相同的小的相关更改时才共同批处理多个文件（罕见）；如有疑问，请按文件分开。
 
-**Subagent prompt (per batch):** the assigned findings only (`#`, severity, file, line, title, `suggested_fix`, `requires_verification`; add `why_it_matters` from `{reviewer}.json` in the run artifact when useful), plus:
-- Work through assigned `#` in severity order; at each `file:line`, skip with a one-line reason if evidence no longer matches
-- Follow the review and permission rules above; choose technical fixes from project evidence and return decisions that still need the user
-- Do not re-run `ce-code-review`
-- Shared-directory fallback: do not stage or commit; return which `#` were applied or skipped and which files changed
+**子代理提示（每批次）：** 仅指定的结果（`#`、严重性、文件、行、标题、`suggested_fix`、`requires_verification`；有用时在运行产物中添加`{reviewer}.json`中的`why_it_matters`），加上：
+- 按严重程度顺序完成指定的`#`；在每个`file:line`，如果证据不再匹配，则跳过一行原因
+- 遵守上述审核和许可规则；从项目证据中选择技术修复并返回仍需要用户的决策
+- 不要重新运行`ce-code-review`
+- 共享目录后备：不暂存或提交；返回应用或跳过的 `#` 以及更改的文件
 
-**After inline fixes and after each wave:** orchestrator reviews diffs (scope = assigned `#` only), runs tests (`requires_verification: true` on any applied finding → at least targeted tests; multi-file → broader suite), commits (`fix(review): apply findings #…`) unless worktree-isolated subagents merge per Phase 1. Repeat until all batches complete.
+**内联修复后和每波之后：** 编排器审查差异（范围=仅分配`#`），运行测试（`requires_verification: true`在任何应用的发现→至少有针对性的测试；多文件→更广泛的套件），提交（`fix(review): apply findings #…`），除非工作树隔离的子代理按阶段1合并。重复直到所有批次完成。
 
-### Summary (required)
+### 摘要（必填）
 
-Report which `#` you applied inline and which batches you dispatched, `#` applied vs skipped, artifact path, verification results, and justified work still unresolved. Save the reasons for rejected claims with the review evidence. A skipped low-value suggestion is not a deferred concern to repeat in the handoff.
+报告您内联应用了哪些 `#` 以及您分派了哪些批次、应用了哪些`#` 与跳过了哪些、产物路径、验证结果以及仍未解决的合理工作。将拒绝索赔的原因与审查证据一起保存。跳过的低价值建议不是在切换中重复的延迟关注点。
 
-## Handoff to Residual Work Gate
+## 移交至剩余工作门
 
-Any justified finding still unresolved after this pass is **residual work**. Proceed to the Residual Work Gate with an updated count. Do not re-invoke `ce-code-review` solely to re-apply the same findings unless the diff changed materially after fixes.
+任何在本次通过后仍未解决的合理发现都是**剩余工作**。前往剩余工作门并获取更新的计数。不要仅仅为了重新应用相同的结果而重新调用`ce-code-review`，除非修复后差异发生重大变化。

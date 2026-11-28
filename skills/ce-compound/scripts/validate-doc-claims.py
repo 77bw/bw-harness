@@ -52,6 +52,8 @@ The script never touches the network (no fetch); classification uses
 whatever refs exist locally. Run a best-effort `git fetch --quiet` first
 when freshness matters. Pure stdlib (no third-party deps).
 """
+from __future__ import annotations
+
 import os
 import re
 import subprocess

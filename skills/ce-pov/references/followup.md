@@ -1,9 +1,9 @@
-# Requested continuation
+# 请求继续
 
-The judgment itself completes `ce-pov`. When another workflow called it, return the result; that workflow decides the next action. Do not add a menu or capture offer.
+判断本身完成`ce-pov`。当另一个工作流调用它时，返回结果；该工作流程决定下一步行动。不要添加菜单或获取优惠。
 
-A standalone invocation may hand off to another workflow only when the original request authorized the downstream action. The result must resolve the decision needed for that action. The action must remain within the inherited scope and be non-destructive and otherwise authorized. A recommendation alone grants no implementation authority. When a consequential choice remains with the user, return that choice under the skill body's interaction rule; otherwise finish with the result.
+仅当原始请求授权下游操作时，独立调用才可以切换到另一个工作流。结果必须解决该行动所需的决策。该操作必须保持在继承的范围内并且是非破坏性的并且以其他方式获得授权。仅提出建议并不授予实施权。当用户留下相应的选择时，根据技能体的交互规则返回该选择；否则以结果结束。
 
-Choose any authorized continuation from the actual outcome, not a fixed menu. Adoption may need planning or a trial; a document take may inform revisions; an approach-set position may return to design or execution. Invoke the skill responsible for that next step through the host's skill-invocation capability with the decision, evidence, conditions, and inherited scope. Never assume every positive result requires a plan.
+从实际结果中选择任何授权的延续，而不是固定的菜单。收养可能需要计划或试验；文件记录可以通知修改；方法设定的位置可能会返回到设计或执行。通过主机的技能调用能力以及决策、证据、条件和继承范围来调用负责下一步的技能。永远不要假设每一个积极的结果都需要一个计划。
 
-For a requested full write-up, read `references/report.md`. For a requested durable decision capture, invoke `ce-compound` with `mode:non-interactive` and the structured decision fitting an existing capture type. Neither is a required follow-up to a POV.
+如需完整的文章，请阅读`references/report.md`。对于请求的持久决策捕获，请使用 `mode:non-interactive` 调用 `ce-compound` 以及适合现有捕获类型的结构化决策。 POV 的后续行动也不是必需的。

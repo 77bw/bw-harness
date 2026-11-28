@@ -1,57 +1,57 @@
-# Phase 2, 2.5, and 2.6: approaches, synthesis, and claim verification
+# 第 2、2.5 和 2.6 阶段：方法、综合和声明验证
 
-### Phase 2: Explore Approaches
+### 第二阶段：探索方法
 
-When a Bake-off is explicitly requested for a consequential unresolved product mechanism, read `references/bakeoff.md` before generating approaches. It replaces generation for that question; presentation and scope confirmation below still apply. Otherwise use ordinary generation.
+当为后续未解决的产品机制明确请求烘焙时，请在生成方法之前阅读`references/bakeoff.md`。它取代了这个问题的一代；下面的介绍和范围确认仍然适用。否则使用普通一代。
 
-**Model elevation.** Before ordinary approach generation, load `references/reasoning-elevation.md`, resolve the choice at this boundary, and follow it. Do not generate approaches until activation resolution has completed and any selected dispatch or transparent fallback has settled. When no model is selected it is a no-op; proceed normally. It runs the same on every harness — do not skip it on some hosts.
+**模型高程。** 在生成普通方法之前，加载`references/reasoning-elevation.md`，解析此边界处的选择，并遵循它。在激活解决方案完成并且任何选定的调度或透明后备已解决之前，不要生成进场。当没有选择模型时，它是一个空操作；正常进行。它在每个宿主上运行相同 - 不要在某些主机上跳过它。
 
-If multiple plausible directions remain, propose **2-3 concrete approaches** based on research and conversation. Otherwise state the recommended direction directly.
+如果仍然有多个可行的方向，请根据研究和对话提出 **2-3 个具体方法**。否则直接说明推荐方向。
 
-Use at least one non-obvious angle — inversion (what if we did the opposite?), constraint removal (what if X weren't a limitation?), or analogy from how another domain solves this. The first approaches that come to mind are usually variations on the same axis. Hold each approach to an anti-genericness test: if it would appear in a generic listicle for this problem category, sharpen it against the grounding dossier or drop it.
+至少使用一个不明显的角度——反转（如果我们做相反的事情怎么办？）、约束去除（如果 X 不是限制怎么办？），或者从另一个领域如何解决这个问题进行类比。首先想到的方法通常是同一轴上的变化。对每种方法进行反通用性测试：如果它出现在该问题类别的通用列表中，则根据基础档案加强它或放弃它。
 
-Present approaches first, then evaluate. Let the user see all options before hearing which one is recommended — leading with a recommendation before the user has seen alternatives anchors the conversation prematurely.
+首先提出方法，然后进行评估。让用户在听到推荐的选项之前先看到所有选项——在用户看到替代方案之前就提出推荐，从而过早地锚定对话。
 
-If choosing among approaches meets Interaction Rule 7, offer `ce-prototype` there; do not run a design campaign in this skill. If the differences are visual (shape, layout, relationship) and do not meet Rule 7, use `references/visual-probes.md` before presenting the choice. If Phase 0.3 flagged the topic as visual, those differences do not meet Rule 7, and no shape decision has yet been through the text-vs-visual offer, make that offer here, per that reference. The visual path remains opt-in and display-only; text remains a first-class path.
+如果选择符合交互规则7的方法，则在那里提供`ce-prototype`；不要在此技能中开展设计活动。如果差异是视觉上的（形状、布局、关系）并且不符合规则 7，请在提出选择之前使用 `references/visual-probes.md`。如果阶段 0.3 将主题标记为视觉，则这些差异不符合规则 7，并且尚未通过文本与视觉要约做出形状决定，请根据该参考在此处做出该要约。视觉路径仍然是选择性加入和仅显示的；文本仍然是一流的路径。
 
-When useful, include one deliberately higher-upside alternative:
-- Identify what adjacent addition or reframing would most increase usefulness, compounding value, or durability without disproportionate carrying cost. Present it as a challenger option alongside the baseline, not as the default. Omit it when the work is already obviously over-scoped or the baseline request is clearly the right move.
+有用时，请故意添加一种更高价值的替代方案：
+- 确定哪些相邻的添加或重构最能提高实用性、复合价值或耐用性，而不会造成不成比例的持有成本。将其作为基线旁边的挑战者选项，而不是默认选项。当工作已经明显超出范围或者基线请求显然是正确的举动时，请忽略它。
 
-At product tier, alternatives should differ on *what* is built (product shape, actor set, positioning), not *how* it is built. Implementation-variant alternatives belong at feature tier.
+在产品层面，替代方案应该在“构建内容”（产品形状、参与者集、定位）上有所不同，而不是“如何构建”。实现变体的替代方案属于功能层。
 
-For each approach, provide:
-- Brief description (2-3 sentences)
-- Pros and cons
-- Key risks or unknowns
-- When it's best suited
+对于每种方法，请提供：
+- 简要说明（2-3句话）
+- 优点和缺点
+- 主要风险或未知因素
+- 当它最适合的时候
 
-**Approach granularity: mechanism / product shape, not architecture.** Approach descriptions name mechanism-level distinctions ("pause as a rule property" vs "pause as an event filter" vs "pause as a separate entity") and product-relevant trade-offs (plan-tier coupling, complexity surface, migration difficulty). They do NOT name implementation specifics — column names, table names, file paths, service classes, JSON shapes, exact method names. Those are ce-plan's job. Bringing architecture forward at brainstorm time forces the user to make architectural decisions on ce-brainstorm's intentionally-shallow research, and the synthesis at Phase 2.5 then has to filter out the leak.
+**方法粒度：机制/产品形状，而不是体系结构。**方法描述命名了机制级别的区别（“作为规则属性暂停”与“作为事件过滤器暂停”与“作为单独实体暂停”）和产品相关的权衡（计划层耦合、复杂性表面、迁移难度）。它们没有命名实现细节——列名、表名、文件路径、服务类、JSON形状、确切的方法名称。这些是ce-plan的工作。在头脑风暴时提出架构迫使用户根据 ce-brainstorm 故意浅薄的研究做出架构决策，然后阶段 2.5 的综合必须过滤掉泄漏。
 
-After presenting all approaches, state your recommendation and explain why. Recommend per Interaction Rule 9: the approach that meets the user's goal with the least added scope, with anything larger offered as the alternative it is.
+介绍所有方法后，陈述您的建议并解释原因。根据交互规则 9 推荐：以最少的增加范围满足用户目标的方法，并提供任何更大的替代方案。
 
-If one approach is clearly best and alternatives are not meaningful, skip the menu and state the recommendation directly.
+如果一种方法显然是最好的，而其他方法没有意义，请跳过菜单并直接陈述建议。
 
-If relevant, call out whether the choice is:
-- Reuse an existing pattern
-- Extend an existing capability
-- Build something net new
+如果相关，请指出选择是否：
+- 重用现有模式
+- 扩展现有能力
+- 构建一些全新的东西
 
-### Phase 2.5: Synthesis Summary
+### 阶段 2.5：综合总结
 
-**STOP. Before composing the synthesis, read `references/synthesis-summary.md`.** It defines what the user sees (the problem as you understand it, what we're building, call-outs), the internal three-bucket draft and where it lands in the doc, the revision loop, soft-cut, and self-redirect. Composed from memory, the synthesis tends to paste the internal draft into chat or leak implementation detail. The Path A / Path B routing below decides only *whether* a confirmation question is asked; it is not the synthesis spec.
+**停止。在撰写综合之前，请阅读`references/synthesis-summary.md`。**它定义了用户所看到的内容（您所理解的问题、我们正在构建的内容、标注）、内部三桶草案及其在文档中的位置、修订循环、软剪切和自重定向。综合由记忆组成，倾向于将内部草稿粘贴到聊天或泄漏实现细节中。下面的路径 A / 路径 B 路由仅决定“是否”询问确认问题；这不是合成规格。
 
-Show the user a scoping synthesis before Phase 3 writes the requirements-only unified plan — the user's last opportunity to correct scope before the artifact lands. The scoping synthesis is shaped like what two product collaborators would confirm before writing a PRD, not like a comprehensive audit or a one-line preview.
+在第 3 阶段编写仅满足需求的统一计划之前，向用户展示范围界定综合——这是用户在产物落地之前纠正范围的最后机会。范围综合的形状类似于两个产品合作者在编写 PRD 之前确认的内容，而不是像全面审核或单行预览。
 
-Runs for **all tiers** including Lightweight. Skip Phase 2.5 entirely on the Phase 0.1b non-software (universal-brainstorming) route.
+适用于**所有级别**，包括轻量级。在阶段 0.1b 非软件（通用头脑风暴）路线上完全跳过阶段 2.5。
 
-**Path A vs Path B** is decided by `references/synthesis-summary.md` from two signals: whether any blocking question was asked, and the Phase 0.3 tier. Path A (announce-only, no confirmation) applies **solely** to Lightweight tier with no blocking questions; every other case — including a richly pre-loaded Standard/Deep opener that needed no dialogue — is Path B (the full scoping synthesis, always followed by a confirmation question). Follow the reference's rule exactly; do not decide the path or compose the synthesis from memory.
+**路径 A 与路径 B** 由 `references/synthesis-summary.md` 从两个信号决定：是否提出任何阻塞问题，以及阶段 0.3 层。路径 A（仅公告，无确认）**仅**适用于轻量级，没有阻塞问题；所有其他情况（包括不需要对话的丰富的预加载Standard/Deep开场白）都是路径 B（完整的范围综合，始终紧随其后的是确认问题）。严格遵循引用文档的规则；不要根据记忆决定路径或进行合成。
 
-Session-settled decisions carried in from before this skill started render in the scoping synthesis as `Carrying forward:` lines, never as questions or call-outs — `references/synthesis-summary.md` defines that rendering. Path B rich-context openers carrying prior-session decisions are the common case.
+从该技能开始之前进行的会话解决决策在范围界定合成中渲染为`Carrying forward:`行，而不是问题或标注 - `references/synthesis-summary.md`定义了该渲染。路径 B 丰富上下文的开场白携带先前的会话决策是常见的情况。
 
-#### 2.6 Claim Verification (inside the Path B confirmation wait)
+#### 2.6 声明验证（在路径B确认等待内）
 
-When the upcoming Product Contract will assert checkable claims about the repo — absence claims ("no retry logic exists"), references to specific files, config, or dependencies, anything planning would build on — dispatch one generation-tier verifier at the same moment the Path B confirmation question goes up, so it runs during the user's think-time. Pass it the claim list (one line each), the grounding dossier path if one exists, and this instruction: verify each claim directly against the codebase — budget ~15 targeted reads — and return a per-claim verdict: **confirmed** (with `file:line`), **refuted** (with the contradicting evidence), or **unverifiable**. Do not block the confirmation question on the verifier.
+当即将发布的产品合同将断言有关存储库的可检查声明时 - 缺席声明（“不存在重试逻辑”）、对特定文件、配置或依赖项的引用，以及任何计划的基础 - 在路径 B 确认问题出现的同时派遣一个生成层验证程序，因此它在用户的思考时间内运行。将声明列表（每行一行）、基础档案路径（如果存在）和此指令传递给它：直接根据代码库验证每个声明 - 预算约 15 个目标读取 - 并返回每个声明的判决：**已确认**（使用 `file:line`）、**驳斥**（使用相反的证据）或 **无法验证**。不要屏蔽验证者的确认问题。
 
-Consume the verdicts at Phase 3: correct refuted claims before writing, label unverifiable ones as explicit assumptions. A fresh-context verifier replaces self-graded verification — the author confirming its own claims is anchored; the verifier never saw the dialogue.
+使用第三阶段的结论：在撰写之前纠正被驳斥的主张，将无法验证的主张标记为明确的假设。新上下文验证器取代了自我分级验证——作者确认自己的主张是锚定的；验证者从未见过对话。
 
-Skip when Path A applies, when the doc will make no checkable claims, or on the non-software route. If the verifier dispatch fails for a reason that survives correcting the invocation, fall back to verifying the claims inline before the Phase 3 write — Phase 1.1's verify-before-claiming rule still holds either way.
+当路径 A 适用时、当文档不会提出可检查的声明时或在非软件路线上时，请跳过。如果验证者调度因纠正调用后仍然存在的原因而失败，则在第 3 阶段写入之前回退到内联验证声明 - 第 1.1 阶段的“先验证后声明”规则仍然适用。

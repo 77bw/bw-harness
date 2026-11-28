@@ -1,31 +1,31 @@
-# Later-round synthesis rules — round 2+
+# 后期合成规则 — 第 2 轮以上
 
-Read this file at Phase 3 (synthesis) only when the current session carries decisions from an earlier review round of the same document: a decision primer rendered from `references/decision-primer.md`, or decision state retained by a resume (`references/document-intake.md`). A first review round does not need this file.
+仅当当前会话包含来自同一文档的较早审阅轮的决策时，才在第 3 阶段（综合）读取此文件：从 `references/decision-primer.md` 呈现的决策引物，或简历 (`references/document-intake.md`) 保留的决策状态。第一轮审核不需要此文件。
 
-## R29 Rejected-Finding Suppression (Round 2+)
+## R29 拒绝发现抑制（第 2 轮以上）
 
-When the orchestrator is running round 2+ on the same document in the same session, the decision primer (see `references/decision-primer.md`) carries forward every prior-round Skipped, Deferred, Acknowledged, and user-settled Withdrawn finding. Synthesis suppresses re-raised rejected findings rather than showing them to the user again. Acknowledged is treated as a rejected-class decision here: the user saw the finding, chose not to act on it (no Apply, no Defer append), and wants it on record, which is equivalent to Skip for suppression purposes. Only user-settled withdrawals (retired by a Skip/Defer premise or a user-asserted fact) reach this primer. An Apply-triggered withdrawal is provisional and never carried here, so a staged fix that failed or landed ineffectively is re-checked by fresh synthesis rather than suppressed by R29.
+当编排器在同一会话中对同一文档运行第 2 轮以上时，决策引物（请参阅 `references/decision-primer.md`）会继承前一轮的每一个“已跳过”、“已推迟”、“已确认”和“用户解决的已撤回”发现。综合抑制重新提出被拒绝的发现，而不是再次向用户显示它们。此处“确认”被视为拒绝类决策：用户看到了发现结果，选择不对其采取行动（不应用，不延迟追加），并希望将其记录下来，这相当于出于抑制目的而跳过。只有用户结算的提款（通过 Skip/Defer 前提或用户断言的事实撤回）才能达到此底漆。应用触发的撤回是临时的，永远不会在这里执行，因此失败或无效着陆的分阶段修复会通过新的合成重新检查，而不是被R29抑制。
 
-For each current-round finding, compare against the primer's rejected list:
+对于当前轮的每个发现，与底漆的拒绝列表进行比较：
 
-- **Matching test:** same as R30. A finding matches when its `normalize(section) + normalize(title)` fingerprint matches and its evidence substrings overlap the prior finding's by more than 50%. Suppress a matching finding only when the evidence and assumptions supporting the prior rejection remain current.
-- **Changed evidence:** reassess the finding when material changes to the document, relevant source, constraints, or newly available facts undermine the prior rejection. An unchanged document quote does not establish unchanged evidence. Retain the prior decision as history; a newly supported problem goes through ordinary admission and authority checks without treating reassessment as permission to reverse a user commitment.
-- **On suppression:** name the suppressed findings in the Coverage line as previously rejected, so the user can see what was suppressed. The user can explicitly escalate by invoking the review again on a different context if they believe the suppression was wrong.
+- **匹配测试：**与R30相同。当 `normalize(section) + normalize(title)` 指纹匹配并且其证据子串与先前发现的重叠超过 50% 时，该发现就匹配。仅当支持先前拒绝的证据和假设仍然有效时，才禁止匹配的发现。
+- **改变的证据：**当文件、相关来源、限制或新的事实破坏了之前的拒绝的重大变化时，重新评估调查结果。未更改的文件引用并不构成未更改的证据。保留先前的决定作为历史；新支持的问题会经过普通的准入和权限检查，而不会将重新评估视为撤销用户承诺的许可。
+- **关于抑制：** 将覆盖范围行中抑制的结果命名为之前拒绝的内容，以便用户可以看到被抑制的内容。如果用户认为压制是错误的，则可以通过在不同的上下文中再次调用审核来明确升级。
 
-This rule runs at synthesis time, not at the persona level. Personas have a soft instruction via the subagent template's `{decision_primer}` variable to avoid re-raising rejected findings, but the orchestrator makes the final call: synthesis checks whether the prior rejection still applies before suppressing a re-raised finding.
+该规则在综合时运行，而不是在角色级别运行。角色通过子代理模板的 `{decision_primer}` 变量有一个软指令，以避免重新提出被拒绝的发现，但编排器做出最后的决定：在抑制重新提出的发现之前，综合检查先前的拒绝是否仍然适用。
 
-## R30 Fix-Landed Matching Predicate
+## R30 固定落地匹配谓词
 
-When the orchestrator is running round 2+ on the same document, synthesis verifies that prior-round Applied findings actually landed. For each current-round finding whose `normalize(section) + normalize(title)` fingerprint matches a prior-round Applied finding, branch by evidence overlap. This fingerprint is round-to-round memory's own key; 3.3 merges by reasoning and has no fingerprint to share. It works here because both rounds' findings are stored records with stable section and title fields:
+当编排器在同一个文档上运行第 2 轮以上时，综合会验证前一轮应用材料公司的发现是否确实得到了落实。对于 `normalize(section) + normalize(title)` 指纹与上一轮应用发现匹配的每个当前轮发现，按证据重叠进行分支。这个指纹是逐轮存储器自己的密钥； 3.3 通过推理合并，没有指纹可共享。它在这里起作用是因为两轮的结果都是具有稳定部分和标题字段的存储记录：
 
-- **Strong match — evidence overlap >50% with the prior-round evidence: fix-landed regression.** The current-round finding is quoting the same problematic text the prior-round fix was supposed to remove. Flag it as "fix did not land" in the report rather than showing it as a new finding. Include the prior-round finding's title and the current-round persona's evidence so the user can see why the verification flagged it.
+- **强匹配 — 证据与前一轮证据重叠 >50%：修复落地回归。** 当前轮发现引用了前一轮修复应该删除的相同问题文本。在报告中将其标记为“修复未落地”，而不是将其显示为新发现。包括前一轮发现的标题和当前轮角色的证据，以便用户可以了解验证标记它的原因。
 
-- **Weak match — evidence overlap ≤50%: not a fix-landed regression.** Low evidence overlap means the prior problematic text is no longer being quoted, so do not flag "fix did not land." Do not suppress solely on fingerprint match. If the current-round item is explicitly a non-actionable verification observation (for example, its title or `why_it_matters` says the prior finding landed correctly and asks for no change), suppress it without reporting it. Otherwise, treat the finding as new and let it flow through dedup and routing normally.
+- **弱匹配 - 证据重叠≤50%：不是修复落地回归。**低证据重叠意味着先前有问题的文本不再被引用，因此不要标记“修复未落地”。不要仅仅根据指纹匹配进行抑制。如果本轮项目明确是不可操作的验证观察（例如，其标题或`why_it_matters`表示先前的发现正确并要求不进行更改），则将其压制而不报告。否则，将发现结果视为新的，并让它正常地通过重复数据删除和路由。
 
-  **Materially-different exception.** If the current-round finding's `why_it_matters` describes a substantively different concern than the prior-round finding — even though the section/title fingerprint matches — treat it as a new finding rather than a fix-verified suppression. The section may have been edited for an unrelated reason and the new edit introduced a different issue. The persona's substance, not just the fingerprint, is the signal.
+  **实质性不同的例外。** 如果当前轮发现的 `why_it_matters` 描述了与前轮发现有本质不同的问题（即使 section/title 指纹匹配），则将其视为新发现而不是经过修复验证的抑制。该部分可能因不相关的原因而被编辑，并且新的编辑引入了不同的问题。角色的实质，不仅仅是指纹，也是信号。
 
-- **Section renames count as different locations.** If the section name has changed between rounds (an edit renamed the heading), treat the new section as a different location and the current-round finding as new. Neither branch above applies.
+- **部分重命名算作不同的位置。**如果部分名称在轮次之间发生了更改（编辑重命名了标题），则将新部分视为不同位置，并将当前轮次的发现视为新的。上述两个分支均不适用。
 
-- **No fingerprint match:** not a verification candidate; the finding flows through normally to 3.3 (Merge Duplicate Findings) and onward routing.
+- **没有指纹匹配：**不是验证候选者；结果通常会流向 3.3（合并重复结果）并继续路由。
 
-This rule prevents two failure modes: (1) regressions where a fix didn't actually land, and (2) persona over-emission where a round-{N+1} reviewer correctly observes a prior-round resolution and emits a non-actionable "already addressed" finding. The persona-side guidance in `subagent-template.md` ("Do not emit findings to note prior-round resolutions") is the primary defense; this rule catches what the personas miss.
+此规则可防止两种失败模式：(1) 修复实际上并未落地的回归，以及 (2) 角色过度排放，其中第 {N+1} 轮审核者正确观察到前一轮解决方案并发出不可操作的“已解决”结果。 `subagent-template.md` 中的人物角色指导（“不要发布发现结果以记录前一轮决议”）是主要防御；这条规则抓住了人物角色错过的东西。

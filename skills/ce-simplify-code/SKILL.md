@@ -1,74 +1,76 @@
 ---
 name: ce-simplify-code
-description: "Simplify code for clarity, reuse, quality, and efficiency while preserving behavior, and prune tests and comments that carry no value. Use after implementation and before review, or to audit tests or comments in any part of a repo; use ce-debug for bugs."
-argument-hint: "[blank for current branch changes, or describe what to simplify or audit] [mode:pipeline] [size-cutoff:<N>] [proof-test:<path>]"
+description: "简化代码以提高清晰度、重用性、质量和效率，同时保留行为，并删除没有价值的测试和注释。在实施之后和审查之前使用，或者用于审核存储库任何部分中的测试或评论；使用 ce-debug 来处理错误。"
+argument-hint: "[当前分支更改为空，或描述要简化或审核的内容] [mode:pipeline] [大小截止：<N>] [证明测试：<path>]"
 ---
 
-Simplify code for clarity, reuse, quality, and efficiency, and prune tests and comments that carry no value, while preserving exact behavior. Prioritize readable, explicit code over compact code — fewer lines is not the goal.
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-## Mode
+简化代码以提高清晰度、重用性、质量和效率，并删除没有价值的测试和注释，同时保留准确的行为。优先考虑可读、明确的代码而不是紧凑的代码——更少的行数不是目标。
 
-Strip a `mode:pipeline` token, a `size-cutoff:<N>` token, and every `proof-test:<path>` token from the input before reading the rest as the scope. The proof-test path is context for Step 3, never scope; a caller may pass several.
+## 模式
 
-- **Pipeline** when `mode:pipeline` is present, or when no one asked for this run in their own current message: a step of another skill, or a run the agent starts itself, such as at a completion boundary. Work only on the current work, apply fixes without asking or waiting, and return the Step 5 summary to the caller. That summary is for the caller's record; never paste it into a commit, PR body, or other artifact.
-- **Standalone** when the user's own current message asked for this run. Their request sets the scope and focus. Report findings before editing anything, unless the request says to just fix them. Read `references/standalone-report.md` now, and again before applying any reported finding.
+从输入中剥离 `mode:pipeline` 标记、`size-cutoff:<N>` 标记和每个 `proof-test:<path>` 标记，然后将其余标记读取为范围。验证测试路径是第 3 步的上下文，而不是范围；一个呼叫者可能会传递多个。
 
-## Step 1: Identify scope
+- **管道** 当 `mode:pipeline` 存在时，或者当没有人在自己的当前消息中请求此运行时：另一技能的步骤，或代理自行启动的运行，例如在完成边界处。仅处理当前工作，无需询问或等待即可应用修复，并将第 5 步摘要返回给调用者。该摘要供来电者记录；切勿将其粘贴到提交、PR正文或其他产物中。
+- **独立**当用户自己的当前消息请求此运行时。他们的要求确定了范围和重点。在编辑任何内容之前报告调查结果，除非请求说只修复它们。现在请阅读`references/standalone-report.md`，并在应用任何报告的发现之前再次阅读。
 
-Resolve the scope in this order:
+## 第 1 步：确定范围
 
-1. **User-named scope** is authoritative; do not widen it. In standalone mode it may be the whole repo, an area, or a path.
-2. **Otherwise, in git**, use the current branch versus its base. Without a usable base, use staged and unstaged changes (`git diff HEAD`).
-3. **Outside git or without a diff**, use files the user named or that were edited earlier in the conversation.
+按此顺序解析范围：
 
-In pipeline mode the scope is what the caller passed, else the branch diff. Within it, prune only tests and comments the current work added or changed.
+1. **用户命名范围**具有权威性；不要扩大它。在独立模式下，它可能是整个存储库、一个区域或一条路径。
+2. **否则，在 git** 中，使用当前分支与其基础分支。如果没有可用的基础，请使用分阶段和非分阶段的更改 (`git diff HEAD`)。
+3. **在 git 之外或没有 diff**，使用用户命名的文件或之前在对话中编辑的文件。
 
-If none of the above produces a non-empty scope, pipeline mode reports "nothing to simplify" and returns. Standalone mode asks the user what to simplify, as `references/standalone-report.md` describes.
+在管道模式下，范围是调用者传递的范围，否则是分支差异。在其中，修剪仅测试和评论当前工作添加或更改的内容。
 
-**Preflight.** Code, for this skill, is human-authored source in a programming language that a compiler, interpreter, or shell runs, such as TypeScript, Python, shell, or SQL. Tests written in one are code too. Nothing else is code, whatever it is for. Prose is not code, in any format, including markdown that agents read: skills, prompts, and agent instructions. Neither are documentation, plans, data, configuration, generated or vendored files, dependencies, or lockfiles. If the scope holds no code, or only mechanical churn in code, report that there is nothing to simplify and stop without reviewers. For mixed scopes, retain only the code and the test fixtures it uses. This check is about the kind of change, never its size: explicit small scopes still run, and any size or cost threshold is the caller's to set.
+如果以上都没有产生非空作用域，管道模式将报告“无需简化”并返回。独立模式询问用户要简化什么，如`references/standalone-report.md`所述。
 
-When the platform's task-tracking capability is available, show the review, apply, and verification outcomes without creating one task per reviewer. Otherwise continue without simulating a task list in chat.
+**预检。** 对于此技能，代码是由编译器、解释器或 shell 运行的编程语言（例如 TypeScript、Python、shell 或 SQL）人工编写的源代码。用其中编写的测试也是代码。无论它的用途是什么，其他都不是代码。散文不是任何格式的代码，包括客服人员阅读的 Markdown：技能、提示和客服人员说明。文档、计划、数据、配置、生成或供应的文件、依赖项或锁定文件也不是。如果范围内没有代码，或者代码中只有机械搅动，请报告没有任何东西可以简化并在没有审查者的情况下停止。对于混合范围，仅保留代码及其使用的测试装置。此检查是关于更改的类型，而不是其大小：显式的小范围仍然运行，并且任何大小或成本阈值都由调用者设置。
 
-## Step 2: Launch review agents in parallel
+当平台的任务跟踪功能可用时，显示审核、应用和验证结果，而无需为每个审核者创建一项任务。否则继续，而不在聊天中模拟任务列表。
 
-Dispatch each reviewer as its own generic subagent via the platform's subagent primitive (`Agent`/`Task` in Claude Code, `spawn_agent` in Codex). Run reviews inline only when the platform has no subagent primitive, or when a dispatch fails as `references/reviewer-dispatch.md` describes. For each reviewer, read its prompt asset from this skill's directory and pass the **full file content** as the subagent's prompt, together with the resolved scope (the full diff or file set), the mode, any proof test, the user's constraints, and the project standards governing the scope (or their file paths):
+## 第 2 步：并行启动审核代理
+
+通过平台的子代理原语将每个审查者分派为其自己的通用子代理（Claude Code中的`Agent`/`Task`，Codex中的`spawn_agent`）。仅当平台没有子代理原语或调度失败（如`references/reviewer-dispatch.md`所述）时才运行内联审核。对于每个审查者，从该技能的目录中读取其提示资产，并传递**完整文件内容**作为子代理的提示，以及已解析的范围（完整的差异或文件集）、模式、任何证明测试、用户的约束以及管理范围（或其文件路径）的项目标准：
 
 - `references/personas/code-reuse-reviewer.md`
 - `references/personas/code-quality-reviewer.md`
 - `references/personas/efficiency-reviewer.md`
-- `references/personas/test-value-reviewer.md`, when the scope holds tests
-- `references/personas/comment-reviewer.md`, when the scope holds comments
+- `references/personas/test-value-reviewer.md`，当范围进行测试时
+- `references/personas/comment-reviewer.md`，当作用域包含注释时
 
-A standalone request about only tests or only comments runs only that reviewer.
+仅有关测试或仅评论的独立请求仅运行该审查者。
 
-Do not paraphrase these rubrics from memory. Read each file and pass it verbatim, or the reviewer loses the rules that keep the pass behavior-preserving.
+不要凭记忆解释这些规则。阅读每个文件并逐字传递它，否则审查者将失去保持传递行为保留的规则。
 
-When the input carried `size-cutoff:<N>`, read `references/single-pass.md` before dispatching; it decides whether the full team or one combined reviewer runs.
+当输入携带`size-cutoff:<N>`时，在调度前读取`references/single-pass.md`；它决定是由整个团队还是由一名联合审查者运行。
 
-Read `references/reviewer-dispatch.md` before dispatching; it covers the reviewers' model, a full harness, releasing review agents, and the permission mode.
+发送前读取`references/reviewer-dispatch.md`；它涵盖了审稿人模型、完整的工具、发布审稿代理和许可模式。
 
-## Step 3: Fix issues
+## 第 3 步：修复问题
 
-Proceed only after every review outcome is complete, whether returned by subagents or produced inline. In standalone mode, unless the request says to just fix them, report and stop here. Otherwise apply worthwhile findings directly; record false positives and low-value findings as skipped without asking the user.
+仅在每个审核结果完成后继续，无论是由子代理返回还是内联生成。在独立模式下，除非请求说只修复它们，否则报告并停止在这里。否则直接应用有价值的发现；在不询问用户的情况下将误报和低价值发现记录为跳过。
 
-Inspect beyond the resolved scope when needed to evaluate a finding, but edit only that scope and the import/export lines it needs. For a user-named file or directory scope, those import/export lines must also be inside it; skip any fix that would edit outside the mutation boundary.
+当需要评估结果时，检查超出已解析的范围，但仅编辑该范围及其所需的 import/export 行。对于用户命名的文件或目录范围，这些 import/export 行也必须位于其中；跳过任何会在突变边界之外进行编辑的修复。
 
-Each fix must preserve outputs, errors, side effects, and ordering. If that cannot be established, skip it.
+每个修复都必须保留输出、错误、副作用和顺序。如果无法建立，请跳过它。
 
-**Never simplify away a safety check.** Preserve trust-boundary validation, data-loss protection, security checks, and accessibility affordances. Skip any finding that would thin or remove one.
+**永远不要简化安全检查。**保留信任边界验证、数据丢失保护、安全检查和可访问性可供性。跳过任何会削弱或删除一个的发现。
 
-**Protect the proof tests.** In pipeline mode, each test the current work relied on to show its change works stays exactly as it is: every `proof-test:` path, else the tests the session's evidence names. Skip any finding from any reviewer that would delete, weaken, rename, move, merge, or rewrite one, or remove or rename the test-only code it calls. Behavior-preserving changes to the production code it exercises still apply. When you cannot tell which tests those are, delete or rewrite none of the tests the current work added or changed.
+**保护证明测试。** 在管道模式下，当前工作所依赖的每个测试都保持原样，以显示其更改工作：每个 `proof-test:` 路径，否则测试会话的证据名称。跳过任何审查者发现的任何会删除、削弱、重命名、移动、合并或重写代码的发现，或者删除或重命名其调用的仅测试代码。对它所执行的生产代码进行的行为保留更改仍然适用。当您无法判断这些测试是哪些时，请删除或重写当前工作添加或更改的任何测试。
 
-**Honor caller-passed structure pins.** A plan path passed with the structure-pin constraint is context, not scope. Preserve its `session-settled:` Key Technical Decisions, including deliberate duplication or separation.
+**尊重调用者传递的结构引脚。** 使用结构引脚约束传递的计划路径是上下文，而不是范围。保留其`session-settled:`关键技术决策，包括故意重复或分离。
 
-## Step 4: Verify behavior is preserved
+## 第 4 步：验证行为是否保留
 
-Run project-wide typecheck and lint. Run tests matched to blast radius: scoped tests for local changes, broader tests for shared or wide-reach changes, and the full suite when the runner cannot scope tests.
+运行项目范围的类型检查和 lint。运行与爆炸半径匹配的测试：针对本地更改的范围测试，针对共享或广泛范围更改的更广泛测试，以及运行程序无法范围测试时的全套测试。
 
-Report failures with the check name and relevant output. Fix simplification-caused failures or revert the responsible change. Never weaken or remove a test to make a check pass. A test is removed only as a test-value finding, and any remaining tests that finding named must still pass afterwards.
+使用检查名称和相关输出报告失败。修复简化导致的故障或恢复负责的更改。切勿为了使检查通过而削弱或删除测试。测试仅作为测试值发现被删除，并且发现命名的任何剩余测试之后仍必须通过。
 
-If no test suite, lint, or typecheck is configured, state that explicitly in the summary; do not silently skip verification.
+如果没有配置测试套件、lint 或类型检查，请在摘要中明确说明；不要默默地跳过验证。
 
-## Step 5: Summarize
+## 第五步：总结
 
-Summarize what was already sound and what improved. Report applied counts by reuse, quality, efficiency, structure, tests, and comments; skipped count; check outcomes; and any comment kept because its constraint could not be encoded. When `references/single-pass.md` applied, name the mode it chose. If nothing changed, say so. Do not use net lines removed as the success metric. In pipeline mode this summary ends the skill, not the turn: the caller's next step follows it.
+总结一下已经完善的内容和改进的内容。按重用、质量、效率、结构、测试和评论报告应用计数；跳过计数；检查结果；任何注释都会被保留，因为它的约束无法被编码。当应用`references/single-pass.md`时，命名它选择的模式。如果什么都没有改变，就这么说。不要使用删除的网络线路作为成功指标。在管道模式下，此摘要结束了技能，而不是回合：调用者的下一步随之而来。

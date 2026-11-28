@@ -1,27 +1,27 @@
-# Investigating a learning
+# 探究学习
 
-For each learning in scope, read it and cross-reference its claims against the current codebase. Dimensions that go stale independently: referenced paths/classes/modules; the recommended solution itself (does it still match how the code works?); code snippets; cross-referenced docs — for a knowledge-track learning (`problem_type` in the knowledge track of `references/schema.yaml`), that includes whether a guidance file it names or links (a skill's `SKILL.md`, a runbook, a root instruction file) states a different order or rule for the same procedure; compare only guidance the learning names, never search the guidance layer for one; overlap with other in-scope docs (note pairs covering the same problem/files/solution and which appears broader or more current); and domain vocabulary (note project-specific terms and whether `CONCEPTS.md` defines them accurately, and whether each in-scope entry still names a concept the project currently has and that is useful on its own — collect the signal, don't edit yet). On Claude Code only, also scan the injected auto-memory block for same-domain notes: memory-sourced signals are supplementary — they corroborate codebase evidence or prompt deeper investigation, never alone justify Replace or Delete, and in non-interactive mode memory-only drift means stale-mark. Match depth to specificity: a doc citing exact paths and snippets needs more verification than a general principle.
+对于范围内的每个学习，请阅读它并根据当前代码库交叉引用其声明。独立失效的维度：引用paths/classes/modules；推荐的解决方案本身（它仍然符合代码的工作方式吗？）；代码片段；交叉引用文档 - 对于知识轨道学习（`references/schema.yaml`知识轨道中的`problem_type`），包括其命名或链接的指导文件（技能的`SKILL.md`、操作手册、根指令文件）是否为同一过程规定了不同的顺序或规则；仅比较引导层的学习名称，切勿在引导层中搜索；与其他范围内的文档重叠（注释对覆盖相同的problem/files/solution并且看起来更广泛或更最新）；和领域词汇（注意项目特定术语以及 `GLOSSARY.md` 是否准确定义它们，以及每个范围内条目是否仍然命名项目当前拥有的概念并且其本身有用 - 收集信号，但不要编辑）。仅在 Claude Code 上，还扫描注入的自动内存块中的相同域注释：内存来源的信号是补充性的 - 它们证实代码库证据或促进更深入的调查，永远不会单独证明替换或删除的合理性，并且在非交互模式下，仅内存漂移意味着陈旧标记。将深度与特异性相匹配：引用确切路径和片段的文档比一般原则需要更多的验证。
 
-**Declared retirement condition.** When a learning's frontmatter has `retire_when`, check whether that condition is now met, the way the field says, through whatever interface its source exposes (an issue tracker, release notes, a version the repo pins). Record the result and the date checked in the report, not as a checked date or status in the learning; when the source cannot be reached, record that it could not be checked. The orchestrator runs this check itself, because investigation subagents carry only the clauses below. Never infer a condition for a learning that declares none.
+**声明的退休条件。** 当学习的 frontmatter 具有 `retire_when` 时，通过其源公开的任何接口（问题跟踪器、发行说明、存储库固定版本）检查现在是否满足该条件（按照字段所述的方式）。将结果和检查日期记录在报告中，而不是作为学习中的检查日期或状态；当无法到达源时，记录无法检查。协调器自行运行此检查，因为调查子代理仅携带以下条款。切勿为没有声明任何条件的学习推断条件。
 
-**An earlier stale mark.** A learning whose frontmatter has `status: stale` was left unsettled by an earlier refresh, and learnings researchers keep surfacing it labeled stale until a refresh settles it. Start from its `stale_reason`. Once this run settles the doc with any action other than another stale-mark, no doc that action leaves behind carries `status`, `stale_reason`, or `stale_date`: delete them from a doc that Keep or Update leaves in place (for Keep, this is the one edit it makes), and do not copy them into a successor or a consolidated doc. When this run still cannot settle the doc, keep the mark and rewrite `stale_reason` and `stale_date` with what this run found.
+**较早的过时标记。** 标题为 `status: stale` 的学习内容由于较早的刷新而变得不稳定，并且学习研究人员不断将其标记为过时的，直到刷新解决它。从它的`stale_reason`开始。一旦此运行使用除另一个陈旧标记之外的任何操作解决了文档，该操作留下的任何文档都不会携带`status`、`stale_reason`或`stale_date`：从保留或更新保留的文档中删除它们（对于保留，这是它所做的编辑），并且不要将它们复制到后继或合并文档中。当本次运行仍无法解决文档时，保留标记并用本次运行发现的内容重写`stale_reason`和`stale_date`。
 
-After individual docs, evaluate the set: overlaps, supersession (an older narrow doc a newer doc subsumes), and outright contradictions — between docs, or between a learning and a guidance file it names — contradictions actively mislead and outrank individual staleness. Note category-shape problems (a directory whose docs span unrelated themes, a near-empty category) as report-only observations — never restructure directories or create categories.
+在单个文档之后，评估该集合：重叠、取代（较旧的狭窄文档包含较新的文档）以及文档之间或学习文件与指导文件之间的彻底矛盾，这些矛盾会积极误导并超越个人的陈旧性。注意类别形状问题（其文档跨越不相关主题的目录，近乎空的类别）作为仅报告的观察 - 切勿重组目录或创建类别。
 
-**Subagents.** Use them for context isolation, choosing the lightest approach that fits: main thread for small scopes, parallel investigation subagents for 3+ independent docs, batches for broad sweeps; docs that overlap or share a root issue are investigated together, not parallelized. When spawning any subagent, omit the `mode` parameter so the user's permission settings apply, and include in its prompt:
+**子代理。** 使用它们进行上下文隔离，选择适合的最轻量方法：用于小范围的主线程、用于 3 个以上独立文档的并行调查子代理、用于广泛扫描的批次；重叠或共享根本问题的文档会一起研究，而不是并行研究。生成任何子代理时，请省略 `mode` 参数，以便应用用户的权限设置，并在其提示中包含：
 
-## Subagent prompt
+## 子代理提示
 
-Every investigation subagent's prompt carries these clauses verbatim, plus the clause in `references/refresh/worth-audit.md` unless the user asked for drift fixes only:
+每个调查子代理的提示都逐字包含这些条款，加上 `references/refresh/worth-audit.md` 中的条款，除非用户仅要求漂移修复：
 
-> Use your host's dedicated file search and read tools (Glob, Grep, and Read where they exist) for all investigation, rather than shell commands (ls, find, cat, grep, test, bash) for file operations. This avoids permission prompts and is more reliable. If your host exposes no such tools, use whatever read capability it does provide.
+> 使用主机的专用文件搜索和读取工具（Glob、Grep 和 Read（如果存在））进行所有调查，而不是使用 shell 命令（ls、find、cat、grep、test、bash）进行文件操作。这样就避免了权限提示，更加可靠。如果您的主机没有公开此类工具，请使用它提供的任何读取功能。
 >
-> Also scan the "user's auto-memory" block injected into your system prompt (Claude Code only). Check for notes related to the learning's problem domain. Report any memory-sourced drift signals separately from codebase-sourced evidence, tagged with "(auto memory [claude])" in the evidence section. If the block is not present in your context, skip this check.
+> 还要扫描注入到系统提示符中的“用户自动记忆”块（仅限Claude Code）。检查与学习问题领域相关的注释。将任何源自内存的漂移信号与源自代码库的证据分开报告，并在证据部分标记为“（自动内存[claude]）”。如果该块不存在于您的上下文中，请跳过此检查。
 >
-> If the learning is knowledge-track and names or links a guidance file (a skill's `SKILL.md`, a runbook, a root instruction file), read that file and, when it states a different order or a contradictory rule for the same procedure, return both conflicting quotes plus which side current code follows — or that code witnesses neither. Read only guidance the learning names; do not search for one, and do not edit it.
+> 如果学习是知识轨道，并命名或链接指导文件（技能的`SKILL.md`、操作手册、根指令文件），请阅读该文件，并且当它为同一过程规定不同的顺序或矛盾的规则时，返回两个冲突的引号以及当前代码遵循的哪一方 - 或者该代码两者都没有见证。只读指导学习名称；不要搜索，也不要编辑它。
 >
-> Check the learning's code citations against the repository's default branch, where the learning lives, not against a working tree that may hold unmerged work. A citation that matches the default branch has not drifted. When a cited line number no longer points at what the learning describes, recommend citing the function, class, or config key that defines it instead of a new line number.
+> 根据学习所在的存储库的默认分支检查学习的代码引用，而不是针对可能保存未合并工作的工作树。与默认分支匹配的引文并未发生漂移。当引用的行号不再指向学习描述的内容时，建议引用定义它的函数、类或配置键，而不是新的行号。
 
-Two subagent roles: **investigation** subagents are read-only and return evidence + a recommended action; **replacement** subagents write successor docs (one per Replace or Split candidate, run one at a time, sequentially). The orchestrator merges results, resolves contradictions, and performs all deletions and metadata edits centrally.
+两个子代理角色：**调查**子代理是只读的，返回证据+建议的操作； **替换**子代理编写后继文档（每个替换或拆分候选者一个，一次运行一个，按顺序）。协调器合并结果、解决矛盾并集中执行所有删除和元数据编辑。
 
-Classify a rejected subagent dispatch by whether an agent launched: correct a pre-launch argument rejection once, leave capacity-limited work queued, and if another launch failure survives correction, perform that pass in the orchestrator with the same inputs and report the substitution.
+根据代理是否启动对被拒绝的子代理调度进行分类：纠正一次预启动参数拒绝，将容量有限的工作留在队列中，如果另一个启动失败在纠正后仍然存在，则使用相同的输入在协调器中执行该传递并报告替换。

@@ -1,45 +1,45 @@
-# Session-Settled Decisions
+# 会议决定
 
-Protocol and schema for carrying decisions the user already made in the invoking conversation, so this skill builds on them instead of re-opening them. This file is byte-duplicated between `ce-plan` and `ce-brainstorm` (skills cannot share files); any edit must land in both copies and is guarded by `tests/settled-decisions-parity.test.ts`.
+用于承载用户在调用会话中已经做出的决策的协议和模式，因此该技能建立在它们的基础上，而不是重新打开它们。该文件在`ce-plan`和`ce-brainstorm`之间存在字节重复（技能无法共享文件）；任何编辑都必须同时包含在两个副本中，并由 `tests/settled-decisions-parity.test.ts` 保护。
 
-## The settlement test
+## 沉降试验
 
-Classify each conversation-carried decision by whether it survived examination — not by how confident the user sounded.
+根据每个对话中的决定是否通过检查来分类，而不是根据用户听起来有多自信。
 
-- **Settled** — a tradeoff, alternative, or risk was raised in the conversation and the user chose with it in view. Record with a provenance class (below).
-- **Directive** — the user asserted a choice no one examined (e.g., a cold "build it with X"). Not settled. It receives exactly one in-pipeline challenge, spent during this skill's research/pressure-test phase; the outcome lands in the artifact as a (labeled or unlabeled) decision entry. The artifact is the only record of that challenge: later stages do not get a second challenge, and an unanswered challenge raised in the pipeline may come back only through the calling pipeline's channel for divergent or residual findings.
-- **Unlabeled** — anything only the agent inferred or proposed without user engagement. Ordinary planning input; never annotated.
+- **解决**——在对话中提出了权衡、替代方案或风险，用户根据它进行选择。使用来源类进行记录（如下）。
+- **指令** — 用户断言了一个没有人检查过的选择（例如，冷酷的“用 X 构建它”）。没有解决。它恰好收到一个管道中的挑战，该挑战是在该技能的research/pressure-test阶段度过的；结果作为（标记或未标记的）决策条目落在产物中。该产物是该挑战的唯一记录：后期阶段不会收到第二个挑战，并且管道中提出的未答复的挑战可能仅通过调用管道的渠道返回以获取不同或残留的结果。
+- **未标记**——只有代理在没有用户参与的情况下推断或提出的任何内容。普通规划投入；从来没有注释过。
 
-Contrast pair: the user rejected option A after seeing the tradeoff -> settled (`user-directed`); the user said "sounds good" to a passing mention -> at most `user-approved`; the agent proposed X and the user never engaged -> no label.
+对比对：用户看到权衡后拒绝选项A->解决(`user-directed`)；用户对路过的提及说“听起来不错” -> 最多 `user-approved`；代理提出了 X，但用户从未参与 -> 没有标签。
 
-**No self-settling.** An agent never labels its own unexamined proposal, and never upgrades bare assent to `user-directed`. Only what the user did in the conversation can create a provenance label.
+**没有自我解决。** 代理永远不会给自己未经审查的提案贴上标签，也永远不会将纯粹的同意升级为`user-directed`。只有用户在对话中所做的事情才能创建出处标签。
 
-## Provenance classes
+## 出处类
 
-Exactly two classes; both render as visible English in the artifact:
+正好两节课；两者在产物中都呈现为可见英语：
 
-- `user-directed` — the user chose against or between options that were shown to them ("no, do X").
-- `user-approved` — the agent proposed with the tradeoff shown; the user assented.
+- `user-directed` — 用户在向他们显示的选项中进行选择（“不，做 X”）。
+- `user-approved` — 代理提出的权衡所示；用户同意了。
 
-The class records decision strength for human readers (plan annotation, PR provenance line). It is also the label to switch to when a later interactive acceptance changes a settled decision (the change was proposed and accepted -> `user-approved`). Consumers do not behave differently by class today.
+该类记录人类读者的决策强度（计划注释，PR出处线）。它也是当稍后的交互式接受更改已确定的决定时要切换到的标签（更改被提议并接受 -> `user-approved`）。如今，消费者的行为并没有因阶层而异。
 
-## The annotation
+## 注释
 
-A settled decision is recorded on its Key Technical Decision entry (plan) or Key Decision entry (brainstorm Product Contract) as an inline English parenthetical:
+已解决的决定以内联英文括号形式记录在其关键技术决策条目（计划）或关键决策条目（头脑风暴产品合同）中：
 
 `(session-settled: user-directed — chosen over <alternative>: <one-line reason>)`
 
-- The stem `session-settled:` and the class tokens `user-directed` / `user-approved` are stable protocol — greppable and test-pinned. The rest of the sentence is free-form prose.
-- Self-contained: decision, rejected alternative, and reason must be readable by a consumer with no access to the conversation.
-- No sidecar files, no frontmatter registry, no numeric weights, no lifecycle field. An unrecognized consumer sees a normal decision entry; the worst-case degradation is today's re-opening of the decision, never corruption.
+- 词干 `session-settled:` 和类标记 `user-directed` / `user-approved` 是稳定的协议——可 grepable 和测试固定。句子的其余部分是自由散文。
+- 自包含：决策、被拒绝的替代方案和原因必须可供无法访问对话的消费者阅读。
+- 没有 sidecar 文件，没有 frontmatter 注册表，没有数字权重，没有生命周期字段。未被识别的消费者看到正常的决策条目；最糟糕的情况就是今天重新开放的决定，决不是腐败。
 
-## Capture rules
+## 捕获规则
 
-- Never re-ask a settled decision. In the scoping synthesis it is never a question or call-out: one carried in from before the skill started renders as a "Carrying forward:" line, and one the user made in the skill's own dialogue is reflected in the stated shape instead. Question phases skip it.
-- Research builds on settled decisions and may contradict them only on evidence. Handle a contradiction by its severity: nothing found -> proceed silently; suboptimal-but-workable -> proceed as settled and attach a conflict call-out to the decision entry (at artifact-write time only — consumers that run after the write never mutate the artifact); invalidating (infeasible, wrong-thing, destructive) -> stop as blocked per this skill's pipeline contract.
-- A settled label never suppresses defect evidence: a real bug or infeasibility finding inside a settled approach keeps full severity everywhere.
-- When passing research context to subagents, include settled decisions as scope — with their rejected alternatives, so researchers do not re-survey them — plus the standing line: "If you find evidence a settled decision cannot work, report it — do not suppress it." Do not pass the advocacy or rationale for the decision (the decision as fact scopes the work; advocacy anchors), and keep any adversarial/validation lens blind to settlement markers.
+- 切勿重新询问已确定的决定。在范围界定综合中，它从来不是一个问题或呼唤：从技能开始之前引入的一个问题呈现为“结转：”行，而用户在技能自己的对话中所做的一个问题则反映在规定的形状中。提问阶段跳过它。
+- 研究建立在既定决定的基础上，并且只能根据证据来反驳这些决定。处理矛盾要分轻重：没有发现->默默进行；次优但可行 -> 按已解决的方式继续，并将冲突调出附加到决策条目（仅在产物写入时 - 写入后运行的消费者永远不会改变产物）；无效（不可行、错误、破坏性）-> 根据该技能的管道合同停止阻止。
+- 固定的标签永远不会抑制缺陷证据：在固定的方法中发现真正的错误或不可行性，到处都会保持完全的严重性。
+- 当将研究背景传递给子代理时，将已确定的决定作为范围 - 以及被拒绝的替代方案，这样研究人员就不会重新调查它们 - 加上固定的路线：“如果你发现有证据表明已确定的决定不起作用，请报告它 - 不要压制它。”不要传递该决定的主张或理由（该决定作为事实范围的工作；主张锚），并使任何 adversarial/validation 镜头对沉降标记视而不见。
 
-## Brief entries (pipeline input)
+## 简要条目（管道输入）
 
-A calling skill (e.g. `lfg`) may pass a distilled brief as invocation input — from the user or a calling skill. Each settled-decision entry requires: the decision, its class, the rejected alternative, and a one-line reason. An entry that cannot state its rejected alternative fails the settlement test — demote it to a directive (one challenge) or an open area. The required fields are a compliance aid; the settlement classification itself remains this skill's judgment. The brief is transient: once the artifact is written with labeled entries, the artifact is canonical and the brief carries no further authority.
+调用技能（例如`lfg`）可以将经过提炼的摘要作为调用输入传递——来自用户或调用技能。每个已确定的决策条目都需要：决策、类别、被拒绝的替代方案以及一行原因。无法说明其被拒绝的替代方案的条目无法通过解决测试 - 将其降级为指令（一项挑战）或开放区域。必填字段是合规性帮助；定居点分类本身仍然是该技能的判断。概要是暂时的：一旦产物用带标签的条目编写，该产物就是规范的，并且概要不再具有进一步的权威。

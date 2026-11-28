@@ -1,44 +1,44 @@
-# Issue Intelligence (Phase 1, conditional)
+# 问题情报（第一阶段，有条件）
 
-Read this when Phase 1 step 4 applies, that is, when issue-tracker intent was detected in Phase 0.2. `references/grounding.md` defines the four-step sequence (scan → fall back or scope → cluster → await). This file defines the payload of each call and how the scoping question is built.
+当阶段 1 步骤 4 适用时，即在阶段 0.2 中检测到问题跟踪者意图时，请阅读此内容。 `references/grounding.md` 定义了四步序列（扫描 → 回退或范围 → 集群 → 等待）。该文件定义每个调用的有效负载以及如何构建范围界定问题。
 
-The lens works against whichever tracker is reachable — GitHub, Linear, or Jira. Probe by capability (a connector/MCP, a documented API, or a documented CLI), never by assuming a specific binary exists. A missing binary or env var is not proof the tracker is unreachable.
+该镜头适用于任何可到达的跟踪器 - GitHub、Linear 或 Jira。按功能（connector/MCP、已记录的API或已记录的CLI）进行探测，切勿假设特定的二进制文件存在。缺少二进制文件或环境变量并不能证明跟踪器无法访问。
 
-## a. Scan call
+## 一个。扫码通话
 
-Read `references/agents/issue-intelligence-analyst.md` and dispatch a generic subagent seeded with that prompt, the focus hint, the `<scratch-dir>` resolved earlier in Phase 1, and the instruction that it is in **SCAN mode**.
+读取 `references/agents/issue-intelligence-analyst.md` 并分派一个通用子代理，该子代理以该提示、焦点提示、第 1 阶段早些时候解决的 `<scratch-dir>` 以及它处于 **SCAN 模式** 的指令为种子。
 
-It probes tracker access, does one bounded fetch, persists that fetched set to `<scratch-dir>/issue-scan.json`, and returns the distribution, a signal count, and an ambiguity assessment. It does **not** cluster.
+它探测跟踪器访问，执行一次有界提取，将提取的值保留为`<scratch-dir>/issue-scan.json`，并返回分布、信号计数和模糊度评估。它**不**集群。
 
-The scan call may run alongside the other Phase 1 grounding agents.
+扫描呼叫可能与其他第一阶段接地代理一起运行。
 
-## b. Fallback markers
+## b.后备标记
 
-Two outcomes end the lens before the cluster call. Both are warn-and-proceed — never block the run on them:
+两个结果在集群调用之前结束镜头。两者都是警告并继续——永远不要阻止它们的运行：
 
-- **First line is the `Issue analysis unavailable:` marker** (no reachable tracker) — log `"{that message}. Proceeding with standard ideation."` and continue with the remaining grounding.
-- **Fewer than 5 eligible issues** — note `"Insufficient issue signal for theme analysis"` and continue.
+- **第一行是 `Issue analysis unavailable:` 标记**（无法到达的跟踪器） - 记录 `"{that message}. Proceeding with standard ideation."` 并继续剩余的接地。
+- **少于 5 个符合条件的问题** — 记下 `"Insufficient issue signal for theme analysis"` 并继续。
 
-In both cases Phase 2 falls back to the six default frames; the Fleet section of `references/divergent-ideation.md` says what that fallback recomputes and what it carries forward. No scoping question is asked.
+在这两种情况下，第 2 阶段都会回退到六个默认帧； `references/divergent-ideation.md` 的舰队部分说明了后备重新计算的内容以及它向前推进的内容。没有询问范围问题。
 
-## b. Scoping question (the orchestrator decides; at most one question)
+## b.范围界定问题（协调者决定；最多一个问题）
 
-Read the scan's ambiguity assessment.
+阅读扫描的模糊性评估。
 
-**Auto-scope silently by default.** Compose the scope from focus hint → priority (when populated) → workflow-state → recency.
+**默认情况下静默自动范围。** 从焦点提示→优先级（填充时）→工作流程状态→新近度组成范围。
 
-Ask **one** blocking scoping question (per the asking rules in `references/grounding.md`) **only** on irreducible ambiguity: two or more coherent, materially-different scopes that no single deliberately-varied sample could fairly represent. Skip it entirely when the scan is unambiguous.
+**仅**针对不可约的歧义提出**一个**阻塞范围界定问题（根据`references/grounding.md`中的询问规则）：两个或多个连贯的、实质上不同的范围，没有一个故意变化的样本可以公平地表示。当扫描明确时完全跳过它。
 
-Its options are the scan's distribution-derived slices plus an always-present **"analyze a representative sample of everything,"** so the user can decline to narrow. When the slices plus that option would exceed the platform's blocking-tool option cap (Codex `request_user_input` takes 2-3 explicit options; `AskUserQuestion` takes 4), show the highest-mass slices that fit and fold the rest into the representative-sample option, or fall back to a numbered chat list. **Never drop the representative-sample option.**
+它的选项是扫描的分布派生切片加上始终存在的**“分析所有内容的代表性样本”**，以便用户可以拒绝缩小范围。当切片加上该选项将超出平台的阻止工具选项上限（Codex`request_user_input`需要2-3个显式选项；`AskUserQuestion`需要4）时，显示适合的最高质量切片并将其余部分折叠到代表性样本选项中，或者退回到编号的聊天列表。 **永远不要放弃代表性样本选项。**
 
-This is a grounding / subject-scoping question — the same kind as the Phase 0.2 subject gate ("what should the agent work on"), not a Phase 0.4 solution-constraint question. It counts toward the ≤3-question grain, and "Surprise me" stays available.
+这是一个基础/主题范围问题 - 与阶段 0.2 主题门（“代理应该做什么”）相同，而不是阶段 0.4 解决方案约束问题。它计入 ≤3 个问题的颗粒，并且“惊喜我”仍然可用。
 
-## c. Cluster call
+## c.集群调用
 
-Dispatch the analyst again in **CLUSTER mode**, passing the resolved scope **and the same `<scratch-dir>`** so it reuses the persisted `issue-scan.json` rather than re-fetching. It returns the leverage-ranked themes plus coverage accounting.
+在**集群模式**下再次调度分析师，传递解析的范围**和相同的`<scratch-dir>`**，以便它重用持久的`issue-scan.json`而不是重新获取。它返回杠杆排名主题以及覆盖范围会计。
 
-## d. What consolidation must carry
+## d.必须进行哪些整合
 
-The consolidated grounding summary's `Issue intelligence` section carries the theme summaries (titles, descriptions, issue counts, leverage, trend directions) **and the cluster call's coverage accounting** — fetched / eligible / analyzed / excluded / unknown-remainder, with any `>N` lower bound. That accounting is the non-exhaustive-coverage disclosure; it has to reach Phase 2 ideation and the Phase 4 artifact rather than being dropped at consolidation.
+综合基础摘要的 `Issue intelligence` 部分包含主题摘要（标题、描述、问题计数、杠杆、趋势方向）**和集群调用的覆盖范围统计** - 获取/合格/分析/排除/未知剩余，具有任何 `>N` 下限。该会计是非详尽的覆盖范围披露；它必须达到第二阶段的构思和第四阶段的产物，而不是在整合时被放弃。
 
-Themes become Phase 2 frames per the issue-tracker override in `references/divergent-ideation.md`.
+根据 `references/divergent-ideation.md` 中的问题跟踪器覆盖，主题成为第 2 阶段框架。

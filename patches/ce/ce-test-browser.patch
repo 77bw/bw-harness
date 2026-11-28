@@ -1,0 +1,372 @@
+diff --git a/skills/ce-test-browser/SKILL.md b/skills/ce-test-browser/SKILL.md
+index 9e88c40f2afdf04ff1641e26996438874cffa195..4fd00f11d82092f313ef48d523a3f01b067cc3e8 100644
+--- a/skills/ce-test-browser/SKILL.md
++++ b/skills/ce-test-browser/SKILL.md
+@@ -1,50 +1,52 @@
+ ---
+ name: ce-test-browser
+-description: Run browser tests for pages affected by the current branch or PR. Use when asked to run or check browser tests for the current change.
+-argument-hint: "[PR number, branch name, 'current', or --port PORT]"
++description: "对受当前分支或PR影响的页面运行浏览器测试。当要求运行或检查浏览器测试以了解当前更改时使用。"
++argument-hint: "[PR编号、分支名称、“当前”或--port端口]"
+ ---
+ 
+-# Browser Test Skill
++> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
+ 
+-Run end-to-end browser tests on pages affected by a PR or branch using the best approved browser driver available in the active harness.
++# 浏览器测试技巧
+ 
+-**Done:** the run ends by reporting what it found — either the summary, with every affected route marked Pass, Fail, or Skip and each Skip carrying its reason, or, when a preflight blocker stops testing before any route can be exercised, the blocker and what would clear it. Reaching neither, or dropping a route from the summary because nobody could reach it, is the failure this done condition exists to prevent.
++使用活动宿主中可用的最佳认可的浏览器驱动程序，在受 PR 或分支影响的页面上运行端到端浏览器测试。
+ 
+-## Modes
++**完成：** 运行以报告其发现的内容结束 - 要么是摘要，其中每条受影响的路线都标记为“通过”、“失败”或“跳过”，并且每个“跳过”都带有其原因，或者，当飞行前拦截器在任何路线可以执行之前停止测试时，拦截器以及将清除它的内容。无法到达任何一个，或者因为没有人能够到达而从摘要中删除一条路由，是此完成条件要防止的失败。
+ 
+-- **Manual (default):** the user controls the dev server. When the fallback driver is `agent-browser`, ask whether to run headed or headless.
+-- **Pipeline (`mode:pipeline`):** invoked by LFG or another automated runner. The run is unattended — never block on a question. Read `references/pipeline-orchestration.md` from this skill's directory and follow it; it overrides port selection (step 4, Determine the dev server port), dev-server startup (step 5, Verify the dev server is running), and visibility prompts (step 6, Set visibility), running the same port script with `--free` inside the block that starts the server.
++## 模式
+ 
+-## Browser Driver Policy
++- **手动（默认）：**用户控制开发服务器。当后备驱动程序为`agent-browser`时，询问是有头运行还是无头运行。
++- **管道 (`mode:pipeline`)：** 由 LFG 或其他自动运行程序调用。跑步是无人值守的——永远不会阻止某个问题。从该技能的目录中读取`references/pipeline-orchestration.md`并遵循它；它会覆盖端口选择（步骤 4，确定开发服务器端口）、开发服务器启动（步骤 5，验证开发服务器是否正在运行）和可见性提示（步骤 6，设置可见性），在启动服务器的块内使用 `--free` 运行相同的端口脚本。
+ 
+-Select the driver before the first browser action:
++## 浏览器驱动程序政策
+ 
+-1. **Prefer a host-native integrated browser.** Use a browser-control surface embedded in or directly owned by the active harness when it can navigate local URLs, inspect rendered and interactive state, click/fill/press, capture screenshots, and inspect console errors. A separately configured browser extension or integration is not host-native. Load and follow the selected capability's own instructions before browser work.
+-2. **Otherwise fall back to `agent-browser`.** Read `references/agent-browser-driver.md` before running any command.
+-3. **Do not introduce a third browser stack.** Never install or substitute standalone Playwright, Puppeteer, a separately configured browser extension or MCP, or other ad hoc browser automation. A Playwright API exposed inside the selected host-native browser remains host-native; it is not standalone Playwright.
++在第一个浏览器操作之前选择驱动程序：
+ 
+-Use one driver for the entire run. A selected host-native driver may fall back to `agent-browser` only if initialization fails before the first route is tested. After testing begins, do not mix driver sessions, element references, screenshots, or authentication state.
++1. **首选主机本机集成浏览器。** 当活动宿主可以导航本地 URL、检查渲染和交互状态、click/fill/press、捕获屏幕截图以及检查控制台错误时，请使用嵌入到活动宿主中或直接由活动宿主拥有的浏览器控制界面。单独配置的浏览器扩展或集成不是主机本机的。在浏览器工作之前加载并遵循所选功能自身的说明。
++2. **否则回退到 `agent-browser`。** 在运行任何命令之前阅读 `references/agent-browser-driver.md`。
++3. **不要引入第三个浏览器堆栈。** 切勿安装或替换独立的 Playwright、Puppeteer、单独配置的浏览器扩展或 MCP，或其他临时浏览器自动化。暴露在所选主机本机浏览器内的 Playwright API 仍保持主机本机；它不是独立的剧作家。
+ 
+-## Workflow
++整个运行过程中使用一名驾驶员。仅当在测试第一个路由之前初始化失败时，选定的主机本机驱动程序才可能回退到`agent-browser`。测试开始后，请勿混合驱动程序会话、元素引用、屏幕截图或身份验证状态。
+ 
+-Read `references/route-and-report.md` from this skill's directory before step 3 (Map changed files to routes). It carries the route-mapping patterns, the port and server commands, the per-page checks, the two human-facing prompts, and the summary format.
++## 工作流程
+ 
+-1. **Select the driver** per the policy above and record it. This also requires a git repository with changes to test.
+-2. **Determine test scope** from the argument: a PR number → `gh pr view [number] --json files -q '.files[].path'`; `current` or empty → `git diff --name-only main...HEAD`; a branch name → `git diff --name-only main...[branch]`.
+-3. **Map changed files to routes** and build the list of URLs to test.
+-4. **Determine the dev server port.** `scripts/resolve-port.sh` resolves it and prints the port alone on stdout: an explicit port argument; else a `--port` flag in a `package.json` dev/start script; else `PORT=` in `.env`, `.env.local`, or `.env.development`; else `3000`. Pass an explicit port when the user gave `--port N`, or when your active project instructions already in context state the dev-server port. Do not grep instruction files for one: prose mentions in docs, examples, and troubleshooting are unreliable and false-positive-prone, while config files and `.env` are trustworthy. Each mode runs the script in the shell call that needs the port, so no port value has to survive between shell calls or be transcribed out of prose; the reference gives the command. Manual mode uses that port as-is: the user controls their own server, so do not scan for alternatives.
+-5. **Verify the dev server is running** before asking the headed/headless question — a manual run with no server stops here, so asking first would waste the question.
+-6. **Set visibility, then verify the root.** Visibility is independent from unattended execution:
+-   - **Host-native integrated browser:** keep its normal integrated surface visible and non-blocking so the user can watch progress when useful. Do not repeatedly steal focus as routes change. This applies in both manual and pipeline modes.
+-   - **`agent-browser` fallback, pipeline mode:** run headless without asking.
+-   - **`agent-browser` fallback, manual mode:** ask the user whether to run headed or headless using the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to presenting options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question.
++在步骤 3 之前从该技能的目录中读取 `references/route-and-report.md`（将更改的文件映射到路由）。它携带路由映射模式、端口和服务器命令、每页检查、两个人性化的提示以及摘要格式。
+ 
+-   Then navigate to `http://localhost:<port>`, capture its rendered or interactive state, and confirm the root is served before iterating.
+-7. **Test each affected page** — navigate, inspect fresh state, exercise the critical interactions, capture evidence.
+-8. **Human verification** where a flow needs external interaction (OAuth, email, payments, SMS, third-party APIs): pause and ask. **Pipeline mode does not pause** — log each such flow as Skip with the reason and continue.
+-9. **Handle failures** by capturing the error state and the exact repro, then asking whether to fix now or skip. **Pipeline mode does not ask** — log the failure and continue.
+-10. **Report the summary** in the format the reference gives.
++1. **根据上述策略选择驱动程序**并记录下来。这还需要一个包含要测试的更改的 git 存储库。
++2. **根据参数确定测试范围**：PR数字→`gh pr view [number] --json files -q '.files[].path'`； `current` 或空 → `git diff --name-only main...HEAD`；分支名称 → `git diff --name-only main...[branch]`。
++3. **将更改的文件映射到路由**并构建要测试的 URL 列表。
++4. **确定开发服务器端口。** `scripts/resolve-port.sh` 解析它并在 stdout 上单独打印端口：显式端口参数；否则 `package.json` dev/start 脚本中的 `--port` 标志；否则 `PORT=` 位于 `.env`、`.env.local` 或 `.env.development` 中；否则`3000`。当用户给出 `--port N` 时，或者当您的活动项目指令已在上下文中声明开发服务器端口时，传递显式端口。不要 grep 指令文件：文档、示例和故障排除中提到的散文不可靠且容易出现误报，而配置文件和 `.env` 是值得信赖的。每种模式都在需要端口的 shell 调用中运行脚本，因此端口值不必在 shell 调用之间保留或从散文中转录出来；参考给出了命令。手动模式按原样使用该端口：用户控制自己的服务器，因此不会扫描替代端口。
++5. **在询问 headed/headless 问题之前验证开发服务器是否正在运行** — 没有服务器的手动运行会在此处停止，因此首先询问会浪费问题。
++6. **设置可见性，然后验证根。**可见性独立于无人值守执行：
++   - **主机本机集成浏览器：**保持其正常集成表面可见且无阻塞，以便用户可以在有用时查看进度。不要随着路线的变化而反复抢走焦点。这适用于手动和管道模式。
++   - **`agent-browser`后备，管道模式：**无需询问即可无头运行。
++   - **`agent-browser`后备，手动模式：**询问用户是否使用当前工具列表中已有的主机阻塞问题工具来运行有头或无头（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到在主持人的用户可见聊天界面上显示选项。永远不要默默地跳过这个问题。
+ 
+-## Driver Reference
++   然后导航到`http://localhost:<port>`，捕获其渲染或交互状态，并在迭代之前确认根已服务。
++7. **测试每个受影响的页面** - 导航、检查新状态、执行关键交互、捕获证据。
++8. **人工验证** 当流程需要外部交互（OAuth、电子邮件、支付、短信、第三方 API）时：暂停并询问。 **管道模式不会暂停** - 将每个此类流程记录为“跳过”并注明原因并继续。
++9. **通过捕获错误状态和准确的重现来处理故障**，然后询问是立即修复还是跳过。 **管道模式不询问** - 记录失败并继续。
++10. **以引用文档给出的格式报告摘要**。
+ 
+-When `agent-browser` is selected as the fallback, read `references/agent-browser-driver.md` from this skill's directory before running its commands. Host-native drivers follow their harness-provided instructions instead.
++## 驱动程序参考
++
++当选择`agent-browser`作为后备时，请在运行其命令之前从该技能的目录中读取`references/agent-browser-driver.md`。主机本机驱动程序会遵循其宿主提供的说明。
+diff --git a/skills/ce-test-browser/references/agent-browser-driver.md b/skills/ce-test-browser/references/agent-browser-driver.md
+index d403cbf230d8659f682f8e8c6f5999481bcf4b1d..e5b71e07f84804ec18d60b483cbf759eae9457ca 100644
+--- a/skills/ce-test-browser/references/agent-browser-driver.md
++++ b/skills/ce-test-browser/references/agent-browser-driver.md
+@@ -1,28 +1,28 @@
+-# `agent-browser` Fallback Driver
++# `agent-browser` 后备驱动程序
+ 
+-Read this file only after the main skill selects `agent-browser` because no qualifying host-native integrated browser is available.
++仅在主要技能选择`agent-browser`后才阅读此文件，因为没有合格的主机原生集成浏览器可用。
+ 
+-## Bootstrap
++## 引导程序
+ 
+-Verify the direct CLI is installed:
++验证直接CLI是否已安装：
+ 
+ ```bash
+ command -v agent-browser >/dev/null 2>&1 && echo "Ready" || echo "NOT INSTALLED"
+ ```
+ 
+-If it is missing, tell the user: "`agent-browser` is not installed. Use the `ce-setup` skill to print the current install command, then install `agent-browser` and retry." Then stop. An installed discovery skill does not imply that the CLI or its browser runtime is installed.
++如果丢失，则告诉用户：“`agent-browser`未安装。使用`ce-setup`技能打印当前安装命令，然后安装`agent-browser`并重试。”然后停下来。安装的发现技能并不意味着已安装 CLI 或其浏览器运行时。
+ 
+-Before running browser actions, load the workflow and troubleshooting content that matches the installed CLI:
++在运行浏览器操作之前，加载与已安装的 CLI 匹配的工作流程和故障排除内容：
+ 
+ ```bash
+ agent-browser skills get core
+ ```
+ 
+-If the CLI exists but cannot launch its browser, follow the current core troubleshooting instructions and report the exact launch failure. Do not misreport a missing browser runtime or launch error as a missing CLI.
++如果 CLI 存在但无法启动其浏览器，请按照当前的核心故障排除说明进行操作并报告确切的启动失败情况。不要将缺少的浏览器运行时或启动错误错误报告为缺少 CLI。
+ 
+-## Commands Used by This Skill
++## 该技能使用的命令
+ 
+-Add `--headed` to commands when manual mode selected a visible browser. Pipeline mode defaults this fallback driver to headless.
++当手动模式选择可见浏览器时，将 `--headed` 添加到命令中。管道模式默认将此后备驱动程序设置为无头驱动程序。
+ 
+ ```bash
+ # Navigate and inspect
+@@ -44,4 +44,4 @@ agent-browser back
+ agent-browser wait @e1
+ ```
+ 
+-Use the installed core documentation for console-error inspection and any command not shown here. Do not switch to another browser driver after the first route is tested.
++使用已安装的核心文档进行控制台错误检查以及此处未显示的任何命令。第一个路由测试完毕后，请勿切换到其他浏览器驱动程序。
+diff --git a/skills/ce-test-browser/references/pipeline-orchestration.md b/skills/ce-test-browser/references/pipeline-orchestration.md
+index 64546901f019d7ef2bc73ac9e50a817a36e265a0..bfc92ce08c9cbcc83c214f7de522dbb943537aaa 100644
+--- a/skills/ce-test-browser/references/pipeline-orchestration.md
++++ b/skills/ce-test-browser/references/pipeline-orchestration.md
+@@ -1,21 +1,21 @@
+-# Pipeline-Mode Server Orchestration
++# 管道模式服务器编排
+ 
+-Read and follow this file only when invoked with `mode:pipeline` (LFG or another automated runner). It overrides visibility prompts, free-port selection, and dev-server startup. It does not change browser-driver selection. In pipeline mode you run unattended — never block on a question.
++仅当使用 `mode:pipeline`（LFG 或其他自动运行器）调用时才读取并遵循此文件。它会覆盖可见性提示、自由端口选择和开发服务器启动。它不会更改浏览器驱动程序选择。在管道模式下，您可以在无人值守的情况下运行——永远不会阻塞问题。
+ 
+-The run's report, either the summary or the preflight blocker that stopped testing, is the last thing this skill writes. It ends this skill, not the turn. The caller runs in this same session, and its next step follows the report.
++运行报告（无论是摘要还是停止测试的预检阻塞项）是该技能写入的最后内容。它结束了该技能，而不是回合。调用者在同一个会话中运行，其下一步遵循报告。
+ 
+-## 1. No visibility question
++## 1. 没有可见性问题
+ 
+-Unattended execution does not mean hidden execution. Do not ask a visibility question:
++无人值守执行并不意味着隐藏执行。不要问可见性问题：
+ 
+-- When a host-native integrated browser is selected, keep its normal integrated surface visible and non-blocking so the user can watch progress without interrupting the run. Do not repeatedly steal focus.
+-- When the fallback `agent-browser` driver is selected, run it headless without passing `--headed`.
++- 当选择主机本机集成浏览器时，保持其正常集成表面可见且无阻塞，以便用户可以在不中断运行的情况下观看进度。不要重复窃取焦点。
++- 当选择后备`agent-browser`驱动程序时，无头运行它而不通过`--headed`。
+ 
+-## 2. Claim a free port and start the server
++## 2. 申请一个空闲端口并启动服务器
+ 
+-Multiple agents may run on the same machine, so never assume the resolved port is free: `scripts/resolve-port.sh --free` in this skill's directory resolves the port and scans upward to the first port with no listener, printing it alone on stdout.
++多个代理可能在同一台机器上运行，因此永远不要假设解析的端口是空闲的：此技能目录中的`scripts/resolve-port.sh --free`解析端口并向上扫描到没有侦听器的第一个端口，将其单独打印在标准输出上。
+ 
+-Run the whole thing as **one** command. Shell variables do not survive between separate Bash calls, so the port resolution, the free scan, and the startup all happen inside this block — it seeds `PORT` by capturing the script's output, not from anything an earlier step printed. Add the explicit port as a second argument when the user gave `--port N` or your in-context project instructions state the dev-server port.
++作为**一个**命令运行整个过程。 Shell 变量在单独的 Bash 调用之间无法生存，因此端口解析、自由扫描和启动都发生在该块内 - 它通过捕获脚本的输出而不是从之前打印的任何内容来播种 `PORT`。当用户给出 `--port N` 或您的上下文项目指令声明开发服务器端口时，添加显式端口作为第二个参数。
+ 
+ ```bash
+ SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
+@@ -42,4 +42,4 @@ if ! lsof -i ":${PORT}" -sTCP:LISTEN -t >/dev/null 2>&1; then
+ fi
+ ```
+ 
+-The scan may land on a different port than the resolved one, and `$PORT` does not survive into later shell calls. Note the number this block echoes ("Using dev server port: N") and use that literal port in every subsequent selected-driver navigation — do not rely on `${PORT}` carrying over. Then return to the "Test Each Affected Page" step, navigate to `http://localhost:<N>`, inspect the rendered state, and test each route.
++扫描可能会落在与已解析端口不同的端口上，并且 `$PORT` 不会保留到以后的 shell 调用中。请注意此块回显的数字（“使用开发服务器端口：N”）并在每个后续选定驱动程序导航中使用该文字端口 - 不要依赖 `${PORT}` 继承。然后返回到“测试每个受影响的页面”步骤，导航到`http://localhost:<N>`，检查渲染状态并测试每个路由。
+diff --git a/skills/ce-test-browser/references/route-and-report.md b/skills/ce-test-browser/references/route-and-report.md
+index 42ee3419267a5b734a93da06a83fa8944ddffc87..9b7b3cc09de497bc9e309af95b149e969212539f 100644
+--- a/skills/ce-test-browser/references/route-and-report.md
++++ b/skills/ce-test-browser/references/route-and-report.md
+@@ -1,26 +1,26 @@
+-# Routes, server, and reporting
++# 路由、服务器和报告
+ 
+-Read this before mapping changed files to routes (workflow step 3). It carries the route-mapping starting points, the port and server commands, what to check on each page, the two human-facing prompts, and the summary format.
++在将更改的文件映射到路由之前阅读此内容（工作流程步骤 3）。它携带路由映射起点、端口和服务器命令、每个页面上要检查的内容、两个人性化的提示以及摘要格式。
+ 
+-## Map changed files to routes
++## 将更改的文件映射到路由
+ 
+-Map each changed file to the route(s) that render it, then build the list of URLs to test. The table below is a starting point of common patterns, not an exhaustive rule set — apply judgment for the project's actual layout:
++将每个更改的文件映射到呈现它的路由，然后构建要测试的 URL 列表。下表是常见模式的起点，而不是详尽的规则集 - 根据项目的实际布局进行判断：
+ 
+-| File Pattern | Route(s) |
++| 文件模式 | 路线 |
+ |-------------|----------|
+ | `app/views/users/*` | `/users`, `/users/:id`, `/users/new` |
+ | `app/controllers/settings_controller.rb` | `/settings` |
+-| `app/javascript/controllers/*_controller.js` | Pages using that Stimulus controller |
+-| `app/components/*_component.rb` | Pages rendering that component |
+-| `app/views/layouts/*` | All pages (test homepage at minimum) |
+-| `app/assets/stylesheets/*` | Visual regression on key pages |
+-| `app/helpers/*_helper.rb` | Pages using that helper |
+-| `src/app/*` (Next.js) | Corresponding routes |
+-| `src/components/*` | Pages using those components |
++| `app/javascript/controllers/*_controller.js` | 使用该刺激控制器的页面 |
++| `app/components/*_component.rb` | 渲染该组件的页面 |
++| `app/views/layouts/*` | 所有页面（至少测试主页） |
++| `app/assets/stylesheets/*` | 关键页面上的视觉回归 |
++| `app/helpers/*_helper.rb` | 使用该帮助程序的页面 |
++| `src/app/*` (Next.js) | 对应路线 |
++| `src/components/*` | 使用这些组件的页面 |
+ 
+-## Determine the port and verify the dev server is running
++## 确定端口并验证开发服务器正在运行
+ 
+-`scripts/resolve-port.sh` resolves the port and prints it alone on stdout, so the shell call that needs it captures the value instead of a later step re-typing a printed number. Append the explicit port as an argument when you have one.
++`scripts/resolve-port.sh` 解析端口并将其单独打印在标准输出上，因此需要它的 shell 调用会捕获该值，而不是稍后的步骤重新键入打印的数字。如果有显式端口，请附加显式端口作为参数。
+ 
+ ```bash
+ SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
+@@ -37,93 +37,93 @@ else
+ fi
+ ```
+ 
+-## Test each affected page
++## 测试每个受影响的页面
+ 
+-For each affected route, use the selected driver to navigate and capture fresh rendered or interactive state.
++对于每条受影响的路线，使用选定的驱动程序来导航和捕获新的渲染或交互状态。
+ 
+-**Verify key elements:**
+-- Page title/heading present
+-- Primary content rendered
+-- No error messages visible
+-- Forms have expected fields
+-- No new console errors attributable to the tested flow
++**验证关键要素：**
++- 当前第title/heading页
++- 呈现的主要内容
++- 没有可见的错误消息
++- 表单具有预期字段
++- 测试流程没有出现新的控制台错误
+ 
+-**Test critical interactions:** derive locators or element references from the selected driver's latest inspected state, perform the click/fill/press action, then inspect the resulting state. Do not guess selectors or reuse stale references.
++**测试关键交互：**从所选驱动程序的最新检查状态派生定位器或元素引用，执行 click/fill/press 操作，然后检查结果状态。不要猜测选择器或重复使用过时的引用。
+ 
+-**Take screenshots:** capture viewport and full-page evidence when the selected driver supports it. Materialize screenshots as local artifacts when a later workflow or report needs file paths; otherwise in-app evidence is sufficient.
++**截取屏幕截图：**当所选驱动程序支持时，捕获视口和整页证据。当后续工作流程或报告需要文件路径时，将屏幕截图具体化为本地产物；否则应用程序内的证据就足够了。
+ 
+-## Human verification (when required)
++## 人工验证（需要时）
+ 
+-| Flow Type | What to Ask |
++| 流量类型 | 问什么 |
+ |-----------|-------------|
+-| OAuth | "Please sign in with [provider] and confirm it works" |
+-| Email | "Check your inbox for the test email and confirm receipt" |
+-| Payments | "Complete a test purchase in sandbox mode" |
+-| SMS | "Verify you received the SMS code" |
+-| External APIs | "Confirm the [service] integration is working" |
++| 开放认证 | “请使用 [provider] 登录并确认其有效” |
++| 电子邮件 | “检查您的收件箱中是否有测试电子邮件并确认收到” |
++| 付款方式 | “在沙盒模式下完成测试购买” |
++| 短信 | “验证您收到短信代码” |
++| 外部API | “确认[服务]集成正在运行” |
+ 
+-Ask the user with the platform's question tool (the list is in SKILL.md step 6), or present numbered options and wait:
++使用平台的提问工具询问用户（列表在SKILL.md步骤6），或呈现编号选项并等待：
+ 
+ ```
+ Human Verification Needed
+ 
+-This test touches [flow type]. Please:
+-1. [Action to take]
+-2. [What to verify]
++这个测试涉及到【流量类型】。请：
++1. [采取的行动]
++2. [要验证什么]
+ 
+-Did it work correctly?
+-1. Yes - continue testing
+-2. No - describe the issue
++它工作正常吗？
++1. 是 - 继续测试
++2. 否 - 描述问题
+ ```
+ 
+-## Handle failures
++## 处理失败
+ 
+-1. **Document the failure:**
+-   - Capture a screenshot of the error state with the selected driver
+-   - Note the exact reproduction steps
++1. **记录失败：**
++   - 捕获所选驱动程序的错误状态的屏幕截图
++   - 注意准确的复制步骤
+ 
+-2. **Ask the user how to proceed:**
++2. **询问用户如何继续：**
+ 
+    ```
+-   Test Failed: [route]
++   测试失败：[路线]
+ 
+-   Issue: [description]
+-   Console errors: [if any]
++   问题：[描述]
++   控制台错误：[如果有]
+ 
+    How to proceed?
+-   1. Fix now - debug and fix the failing test
+-   2. Skip - continue testing other pages
++   1. 立即修复 - 调试并修复失败的测试
++   2. 跳过 - 继续测试其他页面
+    ```
+ 
+-3. **If "Fix now":** investigate, propose a fix, apply, re-run the failing test
+-4. **If "Skip":** log as skipped, continue
++3. **如果“立即修复”：** 调查、提出修复方案、应用、重新运行失败的测试
++4. **如果“跳过”：**记录为已跳过，则继续
+ 
+-## Test summary
++## 测试总结
+ 
+ ```markdown
+-## Browser Test Results
++## 浏览器测试结果
+ 
+-**Test Scope:** PR #[number] / [branch name]
+-**Server:** http://localhost:<port>
++**测试范围：** PR #[编号] / [分支名称]
++**服务器：** http://localhost:<port>
+ 
+-### Pages Tested: [count]
++### 测试页数：[计数]
+ 
+-| Route | Status | Notes |
++| 路线 | 地位 | 笔记 |
+ |-------|--------|-------|
+-| `/users` | Pass | |
+-| `/settings` | Pass | |
+-| `/dashboard` | Fail | Console error: [msg] |
+-| `/checkout` | Skip | Requires payment credentials |
++| `/users` | 经过 | |
++| `/settings` | 经过 | |
++| `/dashboard` | 失败 | 控制台错误：[消息] |
++| `/checkout` | 跳过 | 需要付款凭据 |
+ 
+-### Console Errors: [count]
+-- [List any errors found]
++### 控制台错误：[计数]
++- [列出发现的所有错误]
+ 
+-### Human Verifications: [count]
+-- OAuth flow: Confirmed
+-- Email delivery: Confirmed
++### 人工验证：[计数]
++- OAuth 流程：已确认
++- 电子邮件发送：已确认
+ 
+-### Failures: [count]
+-- `/dashboard` - [issue description]
++### 失败：[计数]
++- `/dashboard` - [问题描述]
+ 
+-### Result: [PASS / FAIL / PARTIAL]
++### 结果：[PASS / FAIL / 部分]
+ ```

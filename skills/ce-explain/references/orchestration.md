@@ -1,27 +1,27 @@
-# Evidence and Delegation
+# 证据和授权
 
-Read before grounding or delegation on the full path. The skill body owns interaction and completion; this reference owns the run directory, the evidence pass, and capability fallbacks.
+在接地或授权之前阅读完整路径。技能体具有交互性和完成性；该参考拥有运行目录、证据通道和功能回退。
 
-## Interaction method
+## 互动方式
 
-The skill body's interaction rule decides whether a question is needed. When it is, use the host's question capability already in the current tool list; never call a user-facing question tool to discover whether it exists. If no such tool is available, ask in chat only when a person is participating. Otherwise return the missing information to the calling workflow.
+技能体的交互规则决定是否需要提问。出现时，使用当前工具列表中已有的主持人提问能力；永远不要调用面向用户的提问工具来发现它是否存在。如果没有此类工具可用，请仅在有人参与时在聊天中提问。否则将丢失的信息返回到调用工作流。
 
-## Model tiers
+## 型号等级
 
-Dispatch is tiered by task shape, never hardcoded to a model name:
+调度按任务形状分层，从不硬编码为模型名称：
 
-- **Extraction tier** — the work-recap scout and each behavior-trace scout: search-and-quote work. Use the platform's cheapest capable model when the harness exposes a known override; otherwise inherit.
-- **Ceiling tier** — the explainer composition, including its `Check yourself` section. This runs in the main conversation on the orchestrator's model; nothing is dispatched for it.
+- **提取层** — 工作回顾侦察和每个行为跟踪侦察：搜索和引用工作。当宿主暴露已知的覆盖时，使用平台最便宜的型号；否则继承。
+- **天花板** — 解释器组成，包括其 `Check yourself` 部分。这在协调器模型的主要对话中运行；没有为其发送任何内容。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-**Degradation rule.** When the platform's subagent primitive cannot select per-agent models, dispatch scouts on the inherited model and keep their read budgets. When the platform has no subagent primitive at all, run the scout work inline with the same budgets. When a dispatch fails, treat a concurrency or active-agent-limit error as backpressure — retry after a slot frees; a launch that fails for a reason that survives correcting the invocation runs that scout's work inline with the same budgets, disclosed in one line.
+**降级规则。** 当平台的子代理原语无法选择每个代理模型时，在继承的模型上调度侦察员并保留其读取预算。当平台根本没有子代理原语时，以相同的预算运行内联侦察工作。当调度失败时，将并发或活动代理限制错误视为背压 - 在插槽释放后重试；一次发射失败的原因是，在纠正调用运行后，侦察兵的工作符合相同的预算，在一行中披露。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-## Run directory
+## 运行目录
 
-Create `$RUN_DIR` with this block before writing an artifact or a scout dossier. It rejects a symlink or a scratch root owned by another user:
+在编写产物或侦察档案之前，使用此块创建`$RUN_DIR`。它拒绝另一个用户拥有的符号链接或临时根：
 
 ```bash
 SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
@@ -35,24 +35,24 @@ RUN_DIR="$SCRATCH_ROOT/ce-explain/$(date +%Y%m%d)-$(openssl rand -hex 3)";
 echo "$RUN_DIR";
 ```
 
-## Grounding by input shape
+## 通过输入形状接地
 
-**Repo-touching inputs** (a concept with footprint in this repo, a diff, a recap): use the project's active instructions already in context and go directly to the diff, call-sites, current source, or commits. Read `CONCEPTS.md` when canonical vocabulary matters. If the topic cannot be scoped from the input and existing context, allow one targeted root or workspace probe.
+**仓库接触输入**（此仓库中包含足迹的概念、差异、回顾）：使用上下文中已有的项目活动指令，并直接转到差异、调用站点、当前源或提交。当规范词汇很重要时，请阅读适用的词汇表。如果存储库有`GLOSSARY-MAP.md`，则首先解析其范围内上下文；否则使用 root `GLOSSARY.md`。如果无法根据输入和现有上下文确定主题的范围，请允许一个目标根或工作区探测。
 
-**Diff mode:** resolve the change (the `diff:` ref, or the most recent substantial change when the request points at one implicitly) and gather its evidence — the diff itself, the files it touches, any plan or solution doc that motivated it. **Empty range** or missing subject: do not silently explain something else. Report that before explaining an adjacent thing. Use a substitute only when the request permits it or the user agrees; name the substitution in the result and artifact `Subject` when present. Otherwise return the unresolved scope to the caller.
+**差异模式：**解决更改（`diff:`引用，或当请求隐式指向某个时的最新实质性更改）并收集其证据 - 差异本身、它涉及的文件、激发它的任何计划或解决方案文档。 **空范围**或缺少主题：不要默默地解释其他事情。在解释相邻的事情之前先报告这一点。仅当请求允许或用户同意时才使用替代品；命名结果中的替换以及产物 `Subject`（如果存在）。否则将未解析的范围返回给调用者。
 
-**Recap mode:** Do not pre-scan, count, or characterize the window in the main conversation. Instead dispatch a generic subagent directly at the extraction tier, seeded with `references/agents/work-recap-scout.md` and passed the resolved window, the repo root, and `$RUN_DIR`. It returns an evidence summary with commit shas and `file:line` pointers, and writes `recap-evidence.md`. **Empty window:** report the absence of activity and finish without an explainer artifact. **When the harness exposes no subagent primitive**, run the scout inline with its prompt's sources and budgets, still write `recap-evidence.md`, and form no view of the window until it is done. If dispatch fails, follow the degradation rule above.
+**回顾模式：** 不要在主对话中预扫描、计数或表征窗口。相反，直接在提取层分派通用子代理，以 `references/agents/work-recap-scout.md` 为种子，并传递已解析的窗口、存储库根和 `$RUN_DIR`。它返回带有提交shas和`file:line`指针的证据摘要，并写入`recap-evidence.md`。 **空窗口：**报告没有活动并在没有解释器产物的情况下完成。 **当工具未公开任何子代理原语时**，运行与其提示源和预算内联的侦察程序，仍然编写 `recap-evidence.md`，并且在完成之前不形成窗口视图。如果调度失败，则按照上面的降级规则执行。
 
-**External concepts** (no footprint in this repo): skip repo grounding entirely — do not force repo context into the output. Research with whatever web tools are reachable. When none are, you may explain from model knowledge, but label that content **Unverified — from model knowledge, not checked against current sources** in the response or artifact metadata.
+**外部概念**（此存储库中没有足迹）：完全跳过存储库接地 - 不要将存储库上下文强制到输出中。使用任何可用的网络工具进行研究。如果没有，您可以根据模型知识进行解释，但在响应或产物元数据中标记该内容**未经验证 - 来自模型知识，未根据当前来源进行检查**。
 
-**Idea mode:** the idea is a fixed given. Explain its implications, mechanics, and trade-offs for the user's understanding. Never scope it (`ce-brainstorm`'s job), never generate and rank alternatives (`ce-ideate`'s job).
+**想法模式：**想法是固定给定的。解释其含义、机制和权衡，以便用户理解。永远不要确定范围（`ce-brainstorm`的工作），永远不要生成和排名替代方案（`ce-ideate`的工作）。
 
-## Behavior and rationale
+## 行为和理由
 
-For a how question, trace the relevant trigger through its state changes, ownership boundaries, and effect. Inspect actual source and relevant tests; a filename or conversation claim does not establish behavior. Preserve the conditions and failure paths that matter to the requested use.
+对于“如何”的问题，通过其状态变化、所有权边界和效果来追踪相关触发器。检查实际来源和相关测试；文件名或对话声明并不建立行为。保留对所请求的使用至关重要的条件和故障路径。
 
-One pass is enough when that trace can name those boundaries without hand-waving. When one pass cannot, split the question into one slice per ownership boundary the answer depends on and dispatch a behavior-trace scout for each slice. Read `references/agents/behavior-trace-scout.md` and seed a generic subagent at the extraction tier with the question, its slice, and a distinct dossier path under `$RUN_DIR`. Dispatch the slices together. Two slices is the smallest split. More than four means the question is still unscoped: narrow it and trace again rather than adding scouts. Read each dossier from its path, and reconcile overlap or contradiction by reading the source. A gist is not the trace.
+当该跟踪无需挥手即可命名这些边界时，一次传递就足够了。当一次传递不能时，将问题分成答案所依赖的每个所有权边界的一个切片，并为每个切片分派一个行为跟踪侦察员。读取`references/agents/behavior-trace-scout.md`并在提取层播种通用子代理，其中包含问题、其切片以及`$RUN_DIR`下的不同档案路径。将切片一起发送。两片是最小的分割。超过四个意味着问题仍然没有确定范围：缩小范围并再次追踪，而不是添加侦察员。从路径中阅读每个档案，并通过阅读来源来协调重叠或矛盾。要点不是痕迹。
 
-For a why question, look for the decision record: motivating docs, comments, git history, PR discussions, or linked issues. Follow evidence to available sources when the local record cannot answer the question, within the request's source restrictions. Access to team chat is not permission to search it when the calling workflow makes that opt-in. Expand investigation to resolve material gaps, not to satisfy a source quota.
+对于“为什么”问题，请查找决策记录：激励文档、评论、git 历史记录、PR 讨论或链接问题。当本地记录无法在请求的来源限制范围内回答问题时，请遵循可用来源的证据。当呼叫工作流程选择加入时，对团队聊天的访问权限并不意味着对其进行搜索。扩大调查是为了解决实质性缺口，而不是为了满足来源配额。
 
-Code shows behavior, not necessarily intent. Cite documented reasons separately from supported inferences; report contradictions and unknowns. A missing search result does not prove there was no reason. Establish whether a historical constraint still applies before presenting it as a current requirement. When the explanation informs a change, make the relevant constraints and unresolved risks usable by that next step without selecting an approach for it.
+代码显示行为，不一定是意图。将记录的原因与支持的推论分开引用；报告矛盾和未知数。搜索结果缺失并不能证明没有原因。在将历史约束作为当前需求呈现之前，确定历史约束是否仍然适用。当解释告知变更时，使相关约束和未解决的风险可供下一步使用，而无需为其选择方法。

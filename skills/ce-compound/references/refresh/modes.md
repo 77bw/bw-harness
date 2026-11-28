@@ -1,27 +1,27 @@
-# Interactive and non-interactive modes
+# 交互和非交互模式
 
-Strip `mode:refresh`, `mode:non-interactive`, its deprecated alias `mode:headless`, and any `depth:` token, which has no meaning in a refresh. The remainder is a scope hint. Run **non-interactive** if either non-interactive token was present; otherwise run **interactive**.
+剥离 `mode:refresh`、`mode:non-interactive`、其已弃用的别名 `mode:headless` 以及任何 `depth:` 标记，这些标记在刷新中没有任何意义。其余部分是范围提示。如果存在非交互式令牌，则运行 **非交互式**；否则运行**交互式**。
 
-**Interactive:** apply unambiguous actions directly; ask the user only on genuine judgment calls (the Decide section of `references/refresh/classify.md` lists them).
+**交互式：**直接应用明确的操作；仅询问用户真正的判断调用（`references/refresh/classify.md` 的决策部分列出了它们）。
 
-**Non-interactive:** never pause for input, in any phase.
+**非交互式：**在任何阶段都不会暂停输入。
 
-- Apply all safe actions: Keep, Update, Consolidate, auto-Delete (only under the gates in `references/refresh/classify.md`), Replace (when evidence is sufficient). If a write succeeds, record it as **applied**; if it fails (e.g., permission denied), record it as **recommended** and continue — never stop to ask for permissions.
-- When classification is genuinely ambiguous or Replace evidence is insufficient, mark the doc stale instead: add `status: stale`, `stale_reason: [what you found]`, `stale_date: YYYY-MM-DD` to its frontmatter. Err toward stale-marking over incorrect action. If even that write fails, record it as recommended.
-- Relocations auto-apply only under the four-condition gate in `references/refresh/classify.md`; otherwise recommend. Splits are always recommend-only: fragment boundaries are a retrieval-value judgment with no ground truth.
-- With no scope hint, process everything — no scope-narrowing questions. With a scope hint that matches nothing, report the miss and exit; do not widen to all docs.
-- The report (see Report) is the primary deliverable.
-- Apply worth findings and standards changes from `references/refresh/worth-audit.md` as above, unless the arguments ask for drift fixes only.
+- 应用所有安全操作：保留、更新、合并、自动删除（仅在 `references/refresh/classify.md` 的门下）、替换（当证据充足时）。如果写入成功，记录为**applied**；如果失败（例如，权限被拒绝），请将其记录为**推荐**并继续 - 永远不要停止请求权限。
+- 当分类确实不明确或替换证据不充分时，请将文档标记为陈旧：将 `status: stale`、`stale_reason: [what you found]`、`stale_date: YYYY-MM-DD` 添加到其 frontmatter。由于不正确的操作而导致陈旧标记。如果写入失败，请按照建议进行记录。
+- 重定位仅在`references/refresh/classify.md`的四条件门下自动应用；否则推荐。分割始终是仅推荐的：片段边界是没有基本事实的检索值判断。
+- 没有范围提示，处理一切——没有范围缩小的问题。如果范围提示不匹配，则报告未命中并退出；不要扩展到所有文档。
+- 该报告（参见报告）是主要交付成果。
+- 如上所述，应用从 `references/refresh/worth-audit.md` 开始的价值发现和标准更改，除非参数仅要求漂移修复。
 
-## Blocking questions
+## 屏蔽问题
 
-Wherever a refresh asks the user something, use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question. Ask one question at a time, prefer multiple choice, lead with the recommended option and a one-sentence rationale.
+无论何时刷新询问用户某些内容，请使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项。永远不要默默地跳过这个问题。一次提出一个问题，更喜欢多项选择，以推荐的选项和一句话理由作为引导。
 
-## CONCEPTS.md bootstrap requests
+## GLOSSARY.md 引导请求
 
-If invoked specifically to create or bootstrap `CONCEPTS.md` ("create a CONCEPTS.md", "build the concept map"), the intent is ambiguous between two jobs — disambiguate with a blocking question:
+如果专门调用来创建或引导`GLOSSARY.md`（“创建GLOSSARY.md”，“构建概念图”），则两个作业之间的意图是不明确的——用阻塞问题来消除歧义：
 
-1. **Create CONCEPTS.md (build the concept map)** — skip the `<root>/solutions/` classification work. Read `references/concepts-vocabulary.md` and follow its **Seed goal** and **Scope of a seed** (repo-wide) rules: seed the project's core domain nouns from the declared domain model, write the preamble (see Vocabulary Capture), cluster per the organization rules, run the Discoverability Check per `references/refresh/discoverability.md`, then commit per `references/refresh/commit.md` — do not leave the bootstrap uncommitted.
-2. **Run a refresh cycle** — proceed normally; `CONCEPTS.md` is seeded (if absent) and reconciled during Vocabulary Capture.
+1. **创建GLOSSARY.md（构建概念图）** — 跳过`<root>/solutions/`分类工作。阅读`references/concepts-vocabulary.md`并遵循其**种子目标**和**种子范围**（存储库范围）规则：首先解析映射的上下文；将其证据核心域名词与声明的域模型分开播种，使用共享上下文和语言输入格式（请参阅词汇捕获），根据组织规则进行集群，根据`references/refresh/discoverability.md`运行可发现性检查，然后根据`references/refresh/commit.md`提交 - 不要让引导程序未提交。
+2. **运行刷新周期** — 正常进行； `GLOSSARY.md` 在词汇捕获期间进行播种（如果不存在）并进行协调。
 
-In non-interactive mode, default to the refresh cycle and note in the report that a standalone repo-wide bootstrap was not run.
+在非交互模式下，默认为刷新周期，并在报告中注意到未运行独立的存储库范围的引导程序。

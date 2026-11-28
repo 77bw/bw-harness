@@ -1,41 +1,43 @@
 ---
 name: ce-code-review
-description: "Review a named diff or PR for bugs, regressions, tests, and standards. Use when asked to review code or when a shipping skill needs a review receipt. Use when asked to apply this review's findings locally. Use ce-resolve-pr-feedback for feedback already left on a PR."
-argument-hint: "[mode:agent] [apply:local] [blank to review current branch, or provide PR link]"
+description: "检查命名的 diff 或 PR 的错误、回归、测试和标准。当要求检查代码或运输技能需要检查收据时使用。当要求在本地应用本次审查的结果时使用。使用 ce-resolve-pr-feedback 获取已留在 PR 上的反馈。"
+argument-hint: "[mode:agent] [apply:local] [空白以查看当前分支，或提供PR链接]"
 ---
 
-# Code Review
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Help the caller deliver a correct change within the agreed scope. Find defects and improvements whose consequences justify action; judge the code against its intended behavior and project requirements, not a preferred rewrite. Serious defects remain important even when the diff is small. An adequate change needs no findings.
+# 代码审查
 
-**Done when:** required review and validation are complete, retained findings are supported by the source, and the caller has a clear result with any remaining coverage limits. Apply only when the invocation authorizes it, under the rules below.
+帮助调用者在约定的范围内交付正确的变更。发现缺陷和改进，其后果足以证明采取行动；根据其预期行为和项目需求来判断代码，而不是首选重写。即使差异很小，严重的缺陷仍然很重要。充分的改变不需要任何发现。
 
-## Artifact Root
+**完成时间：** 所需的审查和验证已完成，保留的结果得到来源的支持，并且调用者有明确的结果以及任何剩余的覆盖范围限制。仅当调用授权时才应用，并遵循以下规则。
+
+## 神器根
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Execution spine
+## 执行脊柱
 
-Follow these steps in order; the references supply the detail but never change the order. Read each reference when you enter the step whose own work it governs; a read made before that step does not satisfy it, and a reference you only hand to a leaf is not one you read.
+按顺序执行以下步骤；引用文档提供了详细信息，但绝不更改顺序。当您进入其所管辖的工作的步骤时，请阅读每个引用文档；在该步骤之前进行的阅读不能满足它，并且您仅对一片叶子进行的引用并不是您所阅读的。
 
-1. Read `references/modes-and-output.md` first. It settles arguments, conflicts, the quick-review short-circuit, the Review depth gate, and what this invocation returns.
-2. **Stage 1.** Read `references/scope.md` and resolve the reviewed diff, the scope mode, and the deterministic scope signals. Then apply that Review depth gate before Stage 2. Lite ends the run without the later spine references; lite and focused each run from this context by `references/depth-paths.md`.
-3. **Stage 2.** Read `references/intent-and-plan.md`, write the intent summary every reviewer receives, and discover the plan Stage 6 verifies requirements against.
-4. **Stage 3.** Read `references/persona-catalog.md` and `references/select-and-route.md`, then select the reviewers the change's risks call for, find the applicable standards files, and decide how the adversarial review will run.
-5. **Stage 3d.** When adversarial is selected for a local reviewed tree, start and persist the sanctioned cross-model job that `references/cross-model-review.md` defines, **before any local persona dispatch**. Invoking this skill is itself the authorization for its configured or allowlisted peer route, once you have made the required disclosure of the recipient and of the code that leaves the machine. Do not ask the user to confirm a second time, and do not skip the peer because the user did not repeat that authorization. An explicit user prohibition on external review overrides it, as does a checkout that sets `cross_model_review_mode: off` with no live opt-in; both are resolved before you bind a route. A started peer replaces the local adversarial persona at this stage, and only a real failure to scope, allowlist, reach, authenticate, or start it leaves the local fallback in the roster; a later stage may still restore the local reviewer under the conditions that reference states.
-6. **Stage 4.** Read `references/dispatch-reviewers.md`. Dispatch the selected local reviewers as one concurrent batch collected in this turn, sized to the host's active-agent cap. Every successful launch is collected only when its terminal outcome is in hand: a valid compact return is consumed, a tool error or malformed output is recorded as a failed reviewer, and a launch acknowledgement alone is not a result. Use the host's blocking collection capability for asynchronous receipts within the bound that reference states, after which an uncollected reviewer is a failed reviewer; a terminal outcome may arrive as the call's return, a blocking wait's return, or a host-delivered terminal message that names the launch and carries its payload; a progress update is not one. If launched work cannot be collected reliably, stop it, and for any persisted peer (the cross-model job) run the cleanup its reference describes before returning the failure result, and never end the turn on progress to await it. Detaching local review into a polled background job is forbidden. The cross-model peer is the only detached work, and it may overlap this batch.
-7. **Stages 5 and 6.** Once every reviewer result is in, write the finish input `references/finish-input.md` defines and stay in that reference: it owns the validator launch and the run-artifact list. Dispatch in sequence the two leaf subagents it names, each seeded with its own finish reference, which the leaves read from disk and you do not open: a merge leaf (`references/finish-merge.md`) that folds in the peer's findings once and merges from the run dir, then, after you launch and collect the validator it selected, a report leaf (`references/finish-report.md`) that renders the report. Neither leaf launches a subagent; you launch every one. Emit the report leaf's return verbatim as this skill's response. Never synthesize directly from raw reviewer artifacts, and never merge or render in the dispatch context.
+1. 先读`references/modes-and-output.md`。它解决争论、冲突、快速审阅短路、审阅深度门以及此调用返回的内容。
+2. **阶段 1.** 读取 `references/scope.md` 并解析已审查的差异、示波器模式和确定性示波器信号。然后在第 2 阶段之前应用“审查深度门”。Lite 结束运行，而无需稍后的书脊参考； lite 并将每次运行的重点都集中在 `references/depth-paths.md` 上。
+3. **第 2 阶段.** 阅读 `references/intent-and-plan.md`，写下每个审查者收到的意图摘要，并发现第 6 阶段验证需求所依据的计划。
+4. **阶段 3.** 阅读 `references/persona-catalog.md` 和 `references/select-and-route.md`，然后选择变更风险所需的审查者，找到适用的标准文件，并决定如何进行对抗性审阅。
+5. **第 3d 阶段。** 当为本地审核树选择对抗性时，在任何本地角色调度之前启动并保留 `references/cross-model-review.md` 定义的经批准的跨模型作业。一旦您按照要求公开了接收者和离开计算机的代码，调用此技能本身就是对其配置的或列入白名单的对等路由的授权。不要要求用户再次确认，也不要因为用户没有重复该授权而跳过对等点。用户对外部审查的明确禁止会覆盖它，就像设置 `cross_model_review_mode: off` 且没有实时选择加入的结账一样；两者都在绑定路由之前解决。在此阶段，已启动的对等点会取代本地对抗角色，并且只有在范围、许可名单、到达、身份验证或启动方面真正失败时，才会在名册中留下本地后备；稍后阶段仍可能在引用状态的条件下恢复本地审核员。
+6. **第 4 阶段。** 阅读 `references/dispatch-reviewers.md`。将选定的本地审查者作为本轮收集的一个并发批次进行分派，其大小适合主机的活动代理上限。仅当其最终结果已掌握时，才会收集每次成功的启动：使用有效的紧凑返回，将工具错误或格式错误的输出记录为失败的审核者，并且单独的启动确认并不是结果。在引用规定的范围内使用主机的阻塞收集功能进行异步收据，之后未收集的审查者即为失败的审查者；终端结果可能会作为调用的返回、阻塞等待的返回或主机传递的命名启动并携带其有效负载的终端消息而到达；进度更新不是一个。如果无法可靠地收集已启动的工作，请停止它，并且对于任何持久的对等点（跨模型作业），在返回失败结果之前运行其参考描述的清理，并且永远不要结束打开进度来等待它。禁止将本地审核分离到轮询后台作业中。跨模型对等点是唯一独立的工作，它可能与这批工作重叠。
+7. **第 5 阶段和第 6 阶段。** 每个审查者结果输入后，编写完成输入 `references/finish-input.md` 定义并保留在该引用中：它拥有验证器启动和运行产物列表。按顺序分派它命名的两个叶子子代理，每个子代理都有自己的完成参考，叶子从磁盘读取并且您不打开：合并叶子（`references/finish-merge.md`），它折叠一次对等点的发现并从运行目录合并，然后，在您启动并收集它选择的验证器后，报告叶子（`references/finish-report.md`）呈现报告。两个叶子节点都不会启动子代理；你启动每一个。逐字发出报告叶的返回作为该技能的响应。切勿直接从原始审查者产物进行合成，也切勿在调度上下文中合并或渲染。
 
-## Operating principles
+## 工作原理
 
-- **Report-only by default; never push.** A bare `ce-code-review` invocation produces findings and does not apply them. Entering the apply stage requires `apply:local`, or an explicit user request in the invoking prompt to apply or fix this review's findings; a deprecated `mode:autofix` token is neither. `mode:agent` never mutates the tree, even when nested inside a workflow that later applies findings. Never push, open PRs, or file tickets in any mode.
-- **No blocking prompts.** Never use `AskUserQuestion`, `request_user_input`, `ask_user`, or other blocking question tools. Infer intent, plan, and scope from explicit tokens, git state, PR metadata, and conversation. Note uncertainty in Coverage or the verdict — do not stop to ask.
-- **A spawned worker or peer starts a new context and does not continue the parent conversation.**
-- **Explicit mutations only.** Never run `gh pr checkout`, `git checkout`, `git switch`, or similar branch-switch commands. Passing a PR number, URL, or branch name selects **review scope**, not permission to mutate the working tree. Uncommitted work can only be reviewed from the checkout that holds it, so to review it on a feature branch, stay on that branch (or check it out yourself) and pass `base:` or no target.
-- **Report outcomes, not machinery.** What you show the user is about the review: what is being examined, which coverage is included and the one-line reason for each conditional lens, the independent cross-model pass, and the findings. Name what the user would recognize, such as a PR number, a reviewer's concern, or a peer model. This skill's internal labels, dispatch bookkeeping, and setup narration stay out of user-facing text. Never claim more about the peer than its receipt attests. This governs *what* you surface and suppress, not the wording; use your own voice.
+- **默认情况下仅报告；从不推送。** 纯粹的 `ce-code-review` 调用会产生结果但不会应用它们。进入应用阶段需要`apply:local`，或者在调用提示中明确的用户请求来应用或修复此审核的结果；已弃用的 `mode:autofix` 令牌两者都不是。 `mode:agent` 永远不会改变树，即使嵌套在稍后应用结果的工作流程中也是如此。切勿在任何模式下推送、打开 PRs 或归档票据。
+- **无屏蔽提示。** 切勿使用`AskUserQuestion`、`request_user_input`、`ask_user`或其他屏蔽问题工具。从显式标记、git 状态、PR 元数据和对话推断意图、计划和范围。请注意承保范围或判决的不确定性——不要停下来询问。
+- **生成的工作人员或对等方启动新的上下文，并且不会继续父对话。**
+- **仅限显式突变。**切勿运行 `gh pr checkout`、`git checkout`、`git switch` 或类似的分支切换命令。传递 PR 数字、URL 或分支名称选择**审查范围**，而不是改变工作树的权限。未提交的工作只能从保存它的结账中进行审查，因此要在功能分支上审查它，请留在该分支上（或自己检查）并通过 `base:` 或没有目标。
+- **报告结果，而不是机制。** 您向用户展示的是有关审查的内容：正在检查的内容、包含哪些覆盖范围以及每个条件镜头的一行原因、独立的跨模型传递以及结果。命名用户会识别的内容，例如 PR 数字、审查者的关注点或同行模型。该技能的内部标签、调度簿记和设置旁白不会出现在面向用户的文本中。切勿对同行提出超出其收据证明的更多信息。这决定了你所表达和压制的“内容”，而不是措辞；用你自己的声音。

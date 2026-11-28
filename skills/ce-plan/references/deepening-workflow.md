@@ -1,263 +1,263 @@
-# Deepening Workflow
+# 深化工作流程
 
-This file contains the confidence-check execution path (5.3.3-5.3.7). Load it only when step 5.3.2 (Gate: Decide Whether to Deepen) determines that deepening is warranted.
+该文件包含置信度检查执行路径 (5.3.3-5.3.7)。仅当步骤 5.3.2（门：决定是否加深）确定需要加深时才加载它。
 
-## 5.3.3 Score Confidence Gaps
+## 5.3.3 评分置信度差距
 
-Use a checklist-first, risk-weighted scoring pass.
+使用检查表优先、风险加权的评分方式。
 
-For each section, compute:
-- **Trigger count** - number of checklist problems that apply
-- **Critical-section bonus** - add 1 for `Key Technical Decisions`, `Implementation Units`, `System-Wide Impact`, `Risks & Dependencies`, or `Open Questions` in `Standard` or `Deep` plans
+对于每个部分，计算：
+- **触发计数** - 适用的清单问题数
+- **关键部分奖励** - 为 `Standard` 或 `Deep` 计划中的 `Key Technical Decisions`、`Implementation Units`、`System-Wide Impact`、`Risks & Dependencies` 或 `Open Questions` 添加 1
 
-Treat a section as a candidate if:
-- it hits **2+ total points**
+如果满足以下条件，则将节视为候选节：
+- 它达到**2+总分**
 
-Choose only the top **2-5** sections by score. If deepening a lightweight plan (high-risk exception), cap at **1-2** sections.
+仅选择按分数排名最高的 **2-5** 部分。如果深化轻量级计划（高风险例外），则上限为 **1-2** 部分。
 
-If the plan already has a `deepened:` date:
-- Prefer sections that have not yet been substantially strengthened, if their scores are comparable
-- Revisit an already-deepened section only when it still scores clearly higher than alternatives
+如果计划已经有 `deepened:` 日期：
+- 如果分数具有可比性，则优先选择尚未大幅强化的部分
+- 仅当其得分仍明显高于其他部分时，才重新访问已经加深的部分
 
-**Section Checklists:**
+**部分清单：**
 
-**Requirements**
-- Requirements are vague or disconnected from implementation units
-- Success criteria are missing or not reflected downstream
-- Units do not clearly advance the traced requirements
-- Origin requirements are not clearly carried forward
-- Origin A/F/AE IDs (when supplied by the upstream brainstorm) are not preserved where planning decisions touch them, or are referenced inconsistently across Requirements, units, and test scenarios
+**要求**
+- 要求模糊或与实施单位脱节
+- 成功标准缺失或未反映在下游
+- 单位未明确推进追溯要求
+- 原产地要求没有明确延续
+- 起源A/F/AE ID（当由上游头脑风暴提供时）在规划决策涉及的地方不会被保留，或者在需求、单元和测试场景中引用不一致
 
-**Context & Research / Sources & References**
-- Relevant repo patterns are named but never used in decisions or implementation units
-- Cited learnings or references do not materially shape the plan
-- High-risk work lacks appropriate external or internal grounding
-- Research is generic instead of tied to this repo or this plan
+**背景与研究/来源与引用文档**
+- 相关的回购模式已命名，但从未在决策或实施单元中使用
+- 引用的经验或引用文档不会对计划产生实质性影响
+- 高风险工作缺乏适当的外部或内部接地
+- 研究是通用的，而不是与此存储库或此计划相关
 
-**Key Technical Decisions**
-- A decision is stated without rationale
-- Rationale does not explain tradeoffs or rejected alternatives
-- The decision does not connect back to scope, requirements, or origin context
-- An obvious design fork exists but the plan never addresses why one path won
-- Agent/tool/workflow features lack an explicit decision about action parity, context parity, shared workspace, tool granularity, or approval boundaries
+**关键技术决策**
+- 做出的决定没有理由
+- 基本原理没有解释权衡或被拒绝的替代方案
+- 该决策与范围、需求或原始上下文无关
+- 存在明显的设计分叉，但该计划从未解决为什么一条路径获胜的问题
+- Agent/tool/workflow 功能缺乏关于操作同等性、上下文同等性、共享工作空间、工具粒度或批准边界的明确决定
 
-**Open Questions**
-- Product blockers are hidden as assumptions
-- Planning-owned questions are incorrectly deferred to implementation
-- Resolved questions have no clear basis in repo context, research, or origin decisions
-- Deferred items are too vague to be useful later
+**开放问题**
+- 产品阻碍因素被隐藏为假设
+- 规划问题被错误地推迟到实施
+- 已解决的问题在回购背景、研究或来源决策中没有明确的基础
+- 推迟的项目太模糊，以后没有用处
 
-**High-Level Technical Design (when present)**
-- The sketch uses the wrong medium for the work
-- The sketch contains implementation code rather than pseudo-code
-- The non-prescriptive framing is missing or weak
-- The sketch does not connect to the key technical decisions or implementation units
+**高级技术设计（如果存在）**
+- 草图使用了错误的媒介来完成作品
+- 该草图包含实现代码而不是伪代码
+- 非规定性框架缺失或薄弱
+- 草图与关键技术决策或实施单位没有联系
 
-**High-Level Technical Design (when absent)** *(Standard or Deep plans only)*
-- The work involves DSL design, API surface design, multi-component integration, complex data flow, or state-heavy lifecycle
-- Key technical decisions would be easier to validate with a visual or pseudo-code representation
-- The approach section of implementation units is thin and a higher-level technical design would provide context
+**高级技术设计（缺席时）** *（仅限标准或深度计划）*
+- 工作涉及 DSL 设计、API 曲面设计、多组件集成、复杂数据流或状态密集的生命周期
+- 通过视觉或伪代码表示可以更轻松地验证关键技术决策
+- 实施单元的方法部分很薄弱，更高层次的技术设计将提供背景
 
-**Implementation Units**
-- Dependency order is unclear or likely wrong
-- File paths or test file paths are missing where they should be explicit
-- Units are too large, too vague, or broken into micro-steps
-- Approach notes are thin or do not name the pattern to follow
-- Test scenarios are vague (don't name inputs and expected outcomes), skip behavior the unit builds (e.g., no scenario for failure handling the unit includes, no integration scenario for a unit crossing layers), or are disproportionate to the unit's complexity
-- Feature-bearing units have blank or missing test scenarios (feature-bearing units require actual test scenarios; the `Test expectation: none` annotation is only valid for non-feature-bearing units)
-- Verification outcomes are vague or not expressed as observable results
-- Agent-relevant units do not include agent-native verification: parity checks, context-injection checks, tool-result checks, approval/failure behavior, or checkpoint/resume where applicable
-- Existing U-IDs were renumbered after a unit was reordered, split, or deleted (U-IDs are stable: never renumber existing IDs; gaps from deletions are preserved; new units take the next unused number)
-- A unit realizing an origin Key Flow does not cite the F-ID, or a unit enforcing an origin Acceptance Example does not cite the AE-ID, when origin supplies them
+**实施单位**
+- 依赖顺序不明确或可能错误
+- 文件路径或测试文件路径在应该明确的地方丢失
+- 单位太大、太模糊或被分解为微步骤
+- 方法注释很薄弱或者没有指定要遵循的模式
+- 测试场景模糊（不命名输入和预期结果），跳过单元构建的行为（例如，没有单元包含的故障处理场景，没有跨层单元的集成场景），或者与单元的复杂性不成比例
+- 特征单元测试场景空白或缺失（特征单元需要实际测试场景；`Test expectation: none`标注仅对非特征单元有效）
+- 验证结果模糊或未表达为可观察的结果
+- 与代理相关的单元不包括代理本机验证：奇偶校验检查、上下文注入检查、工具结果检查、approval/failure 行为或checkpoint/resume（如果适用）
+- 在对单元进行重新排序、拆分或删除后，对现有 U-ID 进行重新编号（U-ID 是稳定的：永远不会对现有 ID 重新编号；保留删除造成的间隙；新单元采用下一个未使用的编号）
+- 当来源提供时，实现来源密钥流的单位不引用 F-ID，或者执行来源接受示例的单位不引用 AE-ID
 
-**System-Wide Impact**
-- Affected interfaces, callbacks, middleware, entry points, or parity surfaces are missing
-- Integration coverage is weak for cross-layer work
-- Agent-facing tools, prompts, runtime context, shared workspaces, approval gates, or human-only boundaries are missing when the feature affects agent-capable systems
+**全系统影响**
+- 受影响的接口、回调、中间件、入口点或奇偶校验表面丢失
+- 跨层工作的集成覆盖率较弱
+- 当该功能影响支持代理的系统时，面向代理的工具、提示、运行时上下文、共享工作区、批准门或仅限人类的边界会丢失
 
-**Risks & Dependencies / Documentation / Operational Notes**
-- A named risk has no decision: it is neither mitigated nor recorded as considered and not built (`references/structure.md` 3.8). A risk accepted with a reason is decided; a missing mitigation alone is not a gap
-- External dependency assumptions are weak or unstated
+**风险和依赖性/文档/操作说明**
+- 命名风险没有决定：它既不会被缓解，也不会被记录为已考虑的和未构建的 (`references/structure.md` 3.8)。决定接受有理由的风险；仅仅缺少缓解措施并不是一个差距
+- 外部依赖性假设很弱或未说明
 
-Use the plan's own `Context & Research` and `Sources & References` as evidence. If those sections cite a pattern, learning, or risk that never affects decisions, implementation units, or verification, treat that as a confidence gap.
+使用计划自己的`Context & Research`和`Sources & References`作为证据。如果这些部分引用的模式、学习或风险从不影响决策、实施单元或验证，请将其视为置信差距。
 
-## 5.3.4 Report and Dispatch Targeted Research
+## 5.3.4 报告和发送有针对性的研究
 
-Before dispatching agents, report what sections are being strengthened and why:
+在派遣特工之前，报告正在加强哪些部分以及原因：
 
 ```text
-Strengthening [section names] — [brief reason for each, e.g., "decision rationale is thin", "cross-boundary effects aren't mapped"]
+加强[部分名称] - [每个部分的简要原因，例如“决策基本原理很薄弱”、“未绘制跨界效应”]
 ```
 
-Wherever this phase dispatches a subagent, classify a rejected dispatch by whether an agent launched: correct a pre-launch argument rejection once, leave capacity-limited work queued, and otherwise follow the fallback or failed-pass handling stated for that dispatch.
+无论此阶段在何处调度子代理，都根据代理是否已启动对被拒绝的调度进行分类：更正一次启动前参数拒绝，将容量有限的工作留在队列中，否则遵循为该调度规定的回退或失败通过处理。
 
-For each selected section, choose the smallest useful agent set. Do **not** run every agent. Use at most **1-3 agents per section** and usually no more than **8 agents total**.
+对于每个选定的部分，选择最小的有用代理集。 **不要**运行每个代理。 **每部分最多使用 1-3 个药剂**，通常总共不超过 **8 个药剂**。
 
-The names below are skill-local prompt asset file stems under `references/agents/`, not standalone agent types. For each selected name, read `references/agents/<name>.md` and seed a generic subagent with that prompt content plus the section context described below. Do not name a persona or CE agent through `subagent_type`, typed `Agent` names, or platform-level CE agent registration; when the host requires an agent-name field, it carries the plain generic agent.
+以下名称是`references/agents/`下的技能本地提示资产文件干，而不是独立代理类型。对于每个选定的名称，阅读 `references/agents/<name>.md` 并使用该提示内容以及下面描述的部分上下文播种通用子代理。请勿通过 `subagent_type`、键入 `Agent` 名称或平台级 CE 代理注册来命名角色或 CE 代理；当主机需要代理名称字段时，它携带普通的通用代理。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-**Deterministic Section-to-Agent Mapping:**
+**确定性部分到代理的映射：**
 
-**Requirements / Open Questions classification**
-- `spec-flow-analyzer` for missing user flows, edge cases, and handoff gaps
-- `repo-research-analyst` (Scope: `architecture, patterns`) for repo-grounded patterns, conventions, and implementation reality checks
+**要求/开放问题分类**
+- `spec-flow-analyzer` 用于丢失用户流、边缘情况和切换间隙
+- `repo-research-analyst`（范围：`architecture, patterns`）用于基于仓库的模式、约定和实现现实检查
 
-**Context & Research / Sources & References gaps**
-- `learnings-researcher` for institutional knowledge and past solved problems
-- `framework-docs-researcher` for official framework or library behavior
-- `best-practices-researcher` for current external patterns and industry guidance
-- `web-researcher` for landscape/prior-art gaps — competitor patterns, market signals, or an unsettled external option set (which library/provider/approach) that recommendations depend on
-- Add `git-history-analyzer` only when historical rationale or prior art is materially missing
+**背景和研究/来源和引用文档的差距**
+- `learnings-researcher` 用于机构知识和过去已解决的问题
+- `framework-docs-researcher` 用于官方框架或库行为
+- `best-practices-researcher` 当前外部模式和行业指导
+- `web-researcher` landscape/prior-art 差距 - 推荐所依赖的竞争对手模式、市场信号或未解决的外部选项集（library/provider/approach）
+- 仅当历史原理或现有技术严重缺失时才添加`git-history-analyzer`
 
-**Key Technical Decisions**
-- `architecture-strategist` for design integrity, boundaries, and architectural tradeoffs
-- `agent-native-planning-strategist` when the decision involves agents, prompts, tools, MCP, workflow automation, action/context parity, shared workspace, approval gates, or agent execution lifecycle
-- Add `framework-docs-researcher` or `best-practices-researcher` when the decision needs external grounding beyond repo evidence
+**关键技术决策**
+- `architecture-strategist` 用于设计完整性、边界和架构权衡
+- `agent-native-planning-strategist` 当决策涉及代理、提示、工具、MCP、工作流自动化、action/context 奇偶校验、共享工作区、批准门或代理执行生命周期时
+- 当决策需要回购证据之外的外部依据时，添加 `framework-docs-researcher` 或 `best-practices-researcher`
 
-**High-Level Technical Design**
-- `architecture-strategist` for validating that the technical design accurately represents the intended approach and identifying gaps
-- `repo-research-analyst` (Scope: `architecture, patterns`) for grounding the technical design in existing repo patterns and conventions
-- `agent-native-planning-strategist` when the technical design includes agent orchestration, MCP/tools, prompt-defined behavior, shared workspace, checkpoint/resume, approvals, or agent-to-UI communication
-- Add `best-practices-researcher` when the technical design involves a DSL, API surface, or pattern that benefits from external validation
+**高级技术设计**
+- `architecture-strategist` 用于验证技术设计是否准确地代表了预期方法并识别差距
+- `repo-research-analyst`（范围：`architecture, patterns`）将技术设计扎根于现有的回购模式和约定中
+- `agent-native-planning-strategist` 当技术设计包括代理编排、MCP/tools、提示定义的行为、共享工作区、checkpoint/resume、批准或代理到 UI 通信时
+- 当技术设计涉及 DSL、API 表面或受益于外部验证的模式时，添加`best-practices-researcher`
 
-**Implementation Units / Verification**
-- `repo-research-analyst` (Scope: `patterns`) for concrete file targets, patterns to follow, and repo-specific sequencing clues
-- `pattern-recognition-specialist` for consistency, duplication risks, and alignment with existing patterns
-- `agent-native-planning-strategist` when units should cover agent-accessible domain actions, tool/context changes, prompt changes, or parity testing
-- Add `spec-flow-analyzer` when sequencing depends on user flow or handoff completeness
+**实施单位/验证**
+- `repo-research-analyst`（范围：`patterns`）用于具体文件目标、要遵循的模式以及特定于存储库的排序线索
+- `pattern-recognition-specialist` 确保一致性、重复风险以及与现有模式的一致性
+- `agent-native-planning-strategist` 当单元应涵盖代理可访问的域操作、tool/context 更改、提示更改或奇偶校验测试时
+- 当排序取决于用户流程或切换完整性时添加`spec-flow-analyzer`
 
-**System-Wide Impact**
-- `architecture-strategist` for cross-boundary effects, interface surfaces, and architectural knock-on impact
-- `agent-native-planning-strategist` for action parity, context parity, shared workspace, tool granularity, approval boundaries, and agent execution lifecycle in agent-capable systems
-- Add the specific specialist that matches the risk:
-  - `performance-oracle` for scalability, latency, throughput, and resource-risk analysis
-  - `security-sentinel` for auth, validation, exploit surfaces, and security boundary review
-  - `data-integrity-guardian` for migrations, persistent state safety, consistency, and data lifecycle risks
+**全系统影响**
+- `architecture-strategist` 用于跨界效果、界面和建筑连锁影响
+- `agent-native-planning-strategist` 用于支持代理的系统中的操作奇偶校验、上下文奇偶校验、共享工作空间、工具粒度、批准边界和代理执行生命周期
+- 添加与风险匹配的特定专家：
+  - `performance-oracle` 用于可扩展性、延迟、吞吐量和资源风险分析
+  - `security-sentinel` 用于身份验证、验证、漏洞利用面和安全边界审查
+  - `data-integrity-guardian` 用于迁移、持久状态安全性、一致性和数据生命周期风险
 
-**Risks & Dependencies / Operational Notes**
-- Use the specialist that matches the actual risk:
-  - `security-sentinel` for security, auth, privacy, and exploit risk
-  - `data-integrity-guardian` for migrations, backfills, persistent data safety, constraints, transaction boundaries, and production data transformation risk
-  - `performance-oracle` for capacity, latency, and scaling concerns
+**风险和依赖性/操作说明**
+- 使用与实际风险相匹配的专家：
+  - `security-sentinel` 用于安全、身份验证、隐私和漏洞利用风险
+  - `data-integrity-guardian` 用于迁移、回填、持久数据安全、约束、事务边界和生产数据转换风险
+  - `performance-oracle` 考虑容量、延迟和扩展问题
 
-**Agent Prompt Shape:**
+**代理提示形状：**
 
-For each selected section, pass:
-- The scope prefix from the mapping above when the agent supports scoped invocation
-- A short plan summary
-- The exact section text
-- Why the section was selected, including which checklist problems applied
-- The plan depth and risk profile
-- A specific question to answer
+对于每个选定的部分，传递：
+- 当代理支持作用域调用时，上面映射中的作用域前缀
+- 简短的计划摘要
+- 确切的部分文本
+- 为什么选择该部分，包括应用了哪些清单问题
+- 计划深度和风险状况
+- 需要回答的具体问题
 
-Instruct the agent to return:
-- findings that change planning quality
-- stronger rationale, sequencing, verification, risk treatment, or references
-- no implementation code
-- no shell commands
+指示代理返回：
+- 改变规划质量的发现
+- 更有力的理由、排序、验证、风险处理或参考
+- 没有实现代码
+- 没有 shell 命令
 
-## 5.3.5 Choose Research Execution Mode
+## 5.3.5 选择研究执行模式
 
-Use the lightest mode that will work:
+使用可行的最轻模式：
 
-- **Direct mode** - Default. Use when the selected section set is small and the parent can safely read the agent outputs inline.
-- **Artifact-backed mode** - Use only when the selected research scope is large enough that inline returns would create unnecessary context pressure.
+- **直接模式** - 默认。当所选部分集较小并且家长可以安全地内联读取代理输出时使用。
+- **产物支持模式** - 仅当所选研究范围足够大以至于内联返回会造成不必要的上下文压力时才使用。
 
-Signals that justify artifact-backed mode:
-- More than 5 agents are likely to return meaningful findings
-- The selected section excerpts are long enough that repeating them in multiple agent outputs would be wasteful
-- The topic is high-risk and likely to attract bulky source-backed analysis
+证明产物支持模式合理的信号：
+- 超过 5 个代理可能会返回有意义的发现
+- 所选部分摘录足够长，在多个代理输出中重复它们会很浪费
+- 该主题风险较高，可能会吸引大量来源支持的分析
 
-If artifact-backed mode is not clearly warranted, stay in direct mode.
+如果没有明确保证产物支持模式，请保持直接模式。
 
-Artifact-backed mode uses a per-run OS-temp scratch directory. Create it once before dispatching sub-agents and capture its **absolute path** — pass that absolute path to each sub-agent so they write to it directly. Do not use `.context/`; the artifacts are per-run throwaway that are cleaned up when deepening ends (see 5.3.6b), matching the repo Scratch Space convention for one-shot artifacts. Do not pass unresolved shell-variable strings to sub-agents; they need the resolved absolute path.
+产物支持模式使用每次运行的操作系统临时临时目录。在分派子代理之前创建一次并捕获其**绝对路径** - 将该绝对路径传递给每个子代理，以便它们直接写入。不要使用`.context/`；这些产物是每次运行后丢弃的，在加深结束时会被清理（参见 5.3.6b），与一次性产物的存储库暂存空间约定相匹配。不要将未解析的 shell 变量字符串传递给子代理；他们需要解析的绝对路径。
 
 ```bash
 SCRATCH_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ce-plan-deepen-XXXXXX")"
 echo "$SCRATCH_DIR"
 ```
 
-Refer to the echoed absolute path as `<scratch-dir>` throughout the rest of this workflow.
+在本工作流程的其余部分中，将回显的绝对路径称为 `<scratch-dir>`。
 
-## 5.3.6 Run Targeted Research
+## 5.3.6 进行有针对性的研究
 
-Launch the selected local prompt assets as generic subagents in parallel using the execution mode chosen above. If the current platform does not support parallel dispatch, run them sequentially instead. Omit the `mode` parameter when dispatching so the user's configured permission settings apply.
+使用上面选择的执行模式并行启动选定的本地提示资产作为通用子代理。如果当前平台不支持并行调度，请改为按顺序运行它们。调度时省略 `mode` 参数，以便应用用户配置的权限设置。
 
-Prefer local repo and institutional evidence first. Use external research only when the gap cannot be closed responsibly from repo context or already-cited sources.
+首先优先考虑本地回购和机构证据。仅当无法从回购上下文或已引用的来源负责任地缩小差距时，才使用外部研究。
 
-If a selected section can be improved by reading the origin document more carefully, do that before dispatching external agents.
+如果可以通过更仔细地阅读原始文档来改进所选部分，请在派遣外部代理之前执行此操作。
 
-**Direct mode:** Have each selected prompt-seeded subagent return its findings directly to the parent. Keep the return payload focused: strongest findings only, the evidence or sources that matter, the concrete planning improvement implied by the finding.
+**直接模式：** 让每个选定的即时种子子代理将其结果直接返回给父代理。保持返回有效载荷的重点：仅最强的发现、重要的证据或来源、发现所暗示的具体规划改进。
 
-**Artifact-backed mode:** For each selected prompt-seeded subagent, pass the absolute `<scratch-dir>` path captured earlier and instruct the subagent to write one compact artifact file inside that directory, then return only a short completion summary. Each artifact should contain: target section, why selected, 3-7 findings, source-backed rationale, the specific plan change implied by each finding. No implementation code, no shell commands.
+**产物支持模式：** 对于每个选定的提示种子子代理，传递之前捕获的绝对 `<scratch-dir>` 路径，并指示子代理在该目录中写入一个紧凑的产物文件，然后仅返回一个简短的完成摘要。每个产物应包含：目标部分、选择原因、3-7 个发现、来源支持的基本原理、每个发现隐含的具体计划变更。没有实现代码，没有 shell 命令。
 
-If an artifact is missing or clearly malformed, re-run that prompt-seeded subagent or fall back to direct-mode reasoning for that section.
+如果产物丢失或明显畸形，请重新运行提示种子子代理或回退到该部分的直接模式推理。
 
-If agent outputs conflict:
-- Prefer repo-grounded and origin-grounded evidence over generic advice
-- Prefer official framework documentation over secondary best-practice summaries when the conflict is about library behavior
-- If a real tradeoff remains, record it explicitly in the plan
+如果代理输出冲突：
+- 与一般建议相比，更喜欢基于回购和起源的证据
+- 当冲突与库行为有关时，优先选择官方框架文档而不是次要最佳实践摘要
+- 如果仍然存在真正的权衡，请将其明确记录在计划中
 
-## 5.3.6b Interactive Finding Review (Interactive Mode Only)
+## 5.3.6b 交互式查找结果审核（仅限交互模式）
 
-Skip this step in auto mode — proceed directly to 5.3.7.
+在自动模式下跳过此步骤 — 直接进入 5.3.7。
 
-In interactive mode, present each agent's findings to the user before integration. For each agent that returned findings:
+在交互模式下，在集成之前向用户展示每个代理的发现结果。对于每个返回结果的代理：
 
-1. **Summarize the agent and its target section** — e.g., "The architecture-strategist reviewed Key Technical Decisions and found:"
-2. **Present the findings concisely** — bullet the key points, not the raw agent output. Include enough context for the user to evaluate: what the agent found, what evidence supports it, and what plan change it implies.
-3. **Ask the user** using the platform's blocking question tool when available (see Interaction Method):
-   - **Accept** — integrate these findings into the plan
-   - **Reject** — discard these findings entirely
-   - **Discuss** — the user wants to talk through the findings before deciding
+1. **总结代理及其目标部分** - 例如，“架构策略师审查了关键技术决策并发现：”
+2. **简明地呈现调查结果** — 列出要点，而不是原始代理输出。包含足够的上下文供用户评估：代理发现了什么、支持它的证据以及它意味着什么计划更改。
+3. **使用平台的屏蔽问题工具（如果可用）询问用户**（请参阅交互方法）：
+   - **接受** — 将这些发现纳入计划中
+   - **拒绝** — 完全放弃这些发现
+   - **讨论** — 用户希望在做出决定之前讨论调查结果
 
-If the user chooses "Discuss", engage in brief dialogue about the findings and then re-ask with only accept/reject (no discuss option on the second ask). The user makes a deliberate choice either way.
+如果用户选择“讨论”，请就调查结果进行简短对话，然后仅使用 accept/reject 重新提问（第二次询问时没有讨论选项）。无论哪种方式，用户都会做出深思熟虑的选择。
 
-When presenting findings from multiple agents targeting the same section, present them one agent at a time so the user can make independent decisions. Do not merge findings from different agents before showing them.
+当呈现针对同一部分的多个代理的调查结果时，一次向他们展示一个代理，以便用户可以做出独立的决定。在展示之前不要合并来自不同代理的发现。
 
-Findings against `session-settled:`-labeled KTDs are presented like any other — suppressing them is pipeline/auto-mode behavior only, never interactive. A user-accepted finding that changes a labeled KTD is a new settlement: update the KTD text and relabel it `user-approved`.
+针对 `session-settled:` 标记的 KTD 的发现与其他任何结果一样 - 抑制它们只是 pipeline/auto-mode 行为，而不是交互。用户接受的更改标记 KTD 的发现是一种新的解决方案：更新 KTD 文本并重新标记它 `user-approved`。
 
-After all agents have been reviewed, carry only the accepted findings forward to 5.3.7.
+对所有代理进行审查后，仅将已接受的结果提交至 5.3.7。
 
-If the user accepted no findings, report "No findings accepted — plan unchanged." Then proceed directly to Phase 5.4 (skip document-review and synthesis — the plan was not modified). This interactive-mode-only skip does not apply in auto mode; auto mode always proceeds through 5.3.7 and 5.3.8. No explicit scratch cleanup needed — `$SCRATCH_DIR` is OS temp and will be cleaned up by the OS; leaving it in place preserves the rejected agent artifacts for debugging.
+如果用户不接受任何发现，则报告“未接受任何发现 - 计划不变”。然后直接进入阶段5.4（跳过文件审查和综合——计划未修改）。此仅限交互模式的跳过不适用于自动模式；自动模式始终执行 5.3.7 和 5.3.8。不需要显式的暂存清理 - `$SCRATCH_DIR` 是操作系统温度，将由操作系统清理；将其保留在适当的位置可以保留被拒绝的代理产物以进行调试。
 
-If findings were accepted and the plan was modified, proceed through 5.3.7 and 5.3.8 as normal — document-review acts as a quality gate on the changes.
+如果调查结果被接受并且计划被修改，则正常进行 5.3.7 和 5.3.8 — 文件审查充当变更的质量门。
 
-## 5.3.7 Synthesize and Update the Plan
+## 5.3.7 综合和更新计划
 
-Strengthen only the selected sections. Keep the plan coherent and preserve its overall structure.
+仅加强选定的部分。保持计划的连贯性并保持其整体结构。
 
-**In interactive mode:** Only integrate findings the user accepted in 5.3.6b. If some findings from different agents touch the same section, reconcile them coherently but do not reintroduce rejected findings.
+**在交互模式下：** 仅集成用户在 5.3.6b 中接受的结果。如果不同代理的某些发现涉及同一部分，请将它们连贯一致，但不要重新引入被拒绝的发现。
 
-**Session-settled KTD stability.** Deepening may append rationale or a conflict call-out to a `session-settled:`-labeled Key Technical Decision, but never removes the annotation or inverts the decision. Handle contradicting evidence by its severity. Nothing found: proceed silently. Suboptimal but workable: proceed as settled and attach a conflict call-out to the KTD. Invalidating: stop as blocked per the SKILL.md Phase 5.2 pipeline contract.
+**会话解决的 KTD 稳定性。** 深化可能会将基本原理或冲突标注附加到 `session-settled:` 标记的关键技术决策中，但绝不会删除注释或颠倒决策。根据证据的严重性来处理矛盾的证据。什么也没找到：默默地继续。次优但可行：按已解决的方式继续，并将冲突标注附加到 KTD。无效：根据SKILL.md阶段5.2管道合同的封锁停止。
 
-Deepening may tighten, not only grow. A section can be strengthened by cutting as well as adding — collapse multi-idea sentences, drop hedges, and delete superseded text outright rather than leaving it as strikethrough or stacking a separate "resolutions" layer on top of it. A shorter, contradiction-free section is a stronger one. This is distinct from "rewrite the entire plan from scratch" below, which stays forbidden.
+深化可能会收紧，而不仅仅是增长。可以通过剪切和添加来加强一个部分——折叠多思想句子、删除树篱以及彻底删除被取代的文本，而不是将其保留为删除线或在其顶部堆叠单独的“决议”层。较短、无矛盾的部分是更有力的部分。这与下面的“从头开始重写整个计划”不同，后者仍然是被禁止的。
 
-**Strengthen at the owning entry.** The owning entry is the R or KTD that states a rule in full. That rule gains evidence, rationale, or precision at that entry; a sibling section that needs it cites the owning ID. Never restate an owned rule into a Key Decision, Scope bullet, or unit Approach — deleting an unlinked sibling restatement found in a strengthened section is itself a valid tightening move.
+**在所属条目处加强。** 所属条目是完整说明规则的 R 或 KTD。该规则在该条目处获得证据、理由或精确性；需要它的同级部分引用所属 ID。切勿将拥有的规则重述为关键决策、范围项目符号或单元方法 - 删除强化部分中发现的未链接的同级重述本身就是有效的收紧举措。
 
-Allowed changes:
-- Tighten prose in a strengthened section through the `ce-noslop` skill: remove superseded text in place (version control holds the history), and replace unlinked restatements with citations of the owning R/KTD
-- Clarify or strengthen decision rationale
-- Tighten requirements trace or origin fidelity
-- Reorder or split implementation units when sequencing is weak — but **never renumber existing U-IDs**. Reordering preserves U-IDs in their new order (e.g., U1, U3, U5 reordered is correct; renumbering to U1, U2, U3 is not). Splitting keeps the original U-ID on the original concept and assigns the next unused number to the new unit. Renumbering breaks ce-work blocker and verification references that were written against the original IDs
-- Add missing pattern references, file/test paths, or verification outcomes
-- Expand system-wide impact, risks, or rollout treatment where a finding passes `references/structure.md` 3.8. Each agent finding is a claim to judge by that test; one that fails it is recorded as considered and not built, not merged into units
-- Reclassify open questions between `Resolved During Planning` and `Deferred to Implementation` when evidence supports the change
-- Strengthen, replace, or add a High-Level Technical Design section when the work warrants it and the current representation is weak
-- Strengthen or add per-unit technical design fields where the unit's approach is non-obvious
-- Add or update `deepened: YYYY-MM-DD` in frontmatter when the plan was substantively improved
+允许的更改：
+- 通过`ce-noslop`技能在强化部分收紧散文：删除被取代的文本（版本控制保存历史），并用对所属R/KTD的引用替换未链接的重述
+- 澄清或强化决策理由
+- 严格要求跟踪或原点保真度
+- 当排序较弱时，重新排序或拆分实施单元 — 但**切勿对现有 U-ID 重新编号**。重新排序会按新顺序保留 U-ID（例如，重新排序的 U1、U3、U5 是正确的；重新编号为 U1、U2、U3 则不正确）。拆分将原始 U-ID 保留在原始概念上，并将下一个未使用的编号分配给新单元。重新编号会破坏针对原始 ID 写入的 ce-work 阻塞项和验证引用
+- 添加缺失的模式引用、file/test路径或验证结果
+- 当发现结果通过 `references/structure.md` 3.8 时，扩大系统范围的影响、风险或推广处理。每个代理人的发现都是通过该测试进行判断的主张；失败的项目将被记录为已考虑但未建造，未合并为单元
+- 当证据支持更改时，在`Resolved During Planning`和`Deferred to Implementation`之间重新分类悬而未决的问题
+- 当工作需要且当前代表性较弱时，加强、替换或添加高级技术设计部分
+- 加强或增加单位方法不明显的单位技术设计领域
+- 当计划得到实质性改进时，在frontmatter中添加或更新`deepened: YYYY-MM-DD`
 
-Do **not**:
-- Add implementation code — no imports, exact method signatures, or framework-specific syntax. Pseudo-code sketches and DSL grammars are allowed
-- Add git commands, commit choreography, or exact test command recipes
-- Add generic `Research Insights` subsections everywhere
-- Rewrite the entire plan from scratch
-- Invent new product requirements, scope changes, or success criteria without stating them explicitly
-- Renumber existing U-IDs as part of reordering, splitting, deletion, or "tidying" the unit list. Deepening is the most likely accidental-renumber vector — preserve U-IDs even when the new order would look cleaner with sequential numbering
-- Restate a rule a cited R or KTD already owns into a sibling section — synthesis folds section-isolated findings back per section, which is exactly where duplicate restatements creep in; cite the owning ID instead
+不要**：
+- 添加实现代码——无需导入、精确的方法签名或特定于框架的语法。允许使用伪代码草图和 DSL 语法
+- 添加 git 命令、提交编排或精确的测试命令配方
+- 在各处添加通用 `Research Insights` 小节
+- 从头开始重写整个计划
+- 发明新的产品要求、范围变更或成功标准，但未明确说明
+- 作为重新排序、拆分、删除或“整理”单元列表的一部分，对现有 U-ID 进行重新编号。深化是最有可能的意外重新编号向量 - 即使新顺序通过顺序编号看起来更干净，也保留 U-ID
+- 重述引用的 R 或 KTD 已经拥有的规则到同级部分中 - 综合将各部分隔离的发现折叠回每个部分，这正是重复重述的地方；请引用所有者 ID
 
-If research reveals a product-level ambiguity that should change behavior or scope:
-- Do not silently decide it here
-- Record it under `Open Questions`
-- Recommend `ce-brainstorm` if the gap is truly product-defining
+如果研究揭示了产品层面的模糊性，应该改变行为或范围：
+- 不要在这里默默决定
+- 记录在`Open Questions`下
+- 如果差距确实决定了产品，则推荐`ce-brainstorm`

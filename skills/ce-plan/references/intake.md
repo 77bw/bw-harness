@@ -1,160 +1,160 @@
-# Plan Intake
+# 计划摄入量
 
-Phase 0.2 through 0.7 of `ce-plan`. Read this before resolving the upstream product source. The principles and quality bar below govern every phase from here on.
+`ce-plan` 的 0.2 到 0.7 相。在解决上游产品源之前请阅读本文。下面的原则和质量标准管理着从现在开始的每个阶段。
 
-## Core Principles
+## 核心原则
 
-1. **Use the Product Contract as the source of truth** - If `ce-brainstorm` produced a requirements-only unified plan, planning should enrich it in place rather than re-inventing behavior or creating a second artifact.
-2. **Decisions, not code** - Capture approach, boundaries, files, dependencies, risks, and test scenarios. Do not pre-write implementation code or shell command choreography. Pseudo-code sketches or DSL grammars that communicate high-level technical design are welcome when they help a reviewer validate direction — but they must be explicitly framed as directional guidance, not implementation specification.
-3. **Research before structuring** - Explore the codebase, institutional learnings, and external guidance when warranted before finalizing the plan.
-4. **Right-size the artifact** - Small work gets a compact plan. Large work gets more structure. The philosophy stays the same at every depth.
-5. **Separate planning from execution discovery** - Resolve planning-time questions here. Explicitly defer execution-time unknowns to implementation.
-6. **Keep the plan portable** - The plan should work as a living document, review artifact, or issue body without embedding tool-specific executor instructions.
-7. **Carry execution direction lightly when it matters** - If the request, origin document, or repo context clearly implies test-first proof, characterization coverage, smoke-first verification, or another non-default execution direction, reflect that in the plan as a lightweight natural-language signal. Do not encode it as a finite enum or turn the plan into step-by-step execution choreography.
-8. **Honor user-named resources** - When the user names a specific resource — a CLI, MCP server, URL, file, doc link, or prior artifact — treat it as authoritative input, not a suggestion. Discover it if unknown (`command -v`, fetch, read) before assuming it's unavailable. Use it in place of generic alternatives. If it fails or doesn't exist, say so explicitly rather than silently substituting.
+1. **使用产品合同作为事实来源** - 如果 `ce-brainstorm` 生成了仅满足需求的统一计划，则规划应适当丰富它，而不是重新发明行为或创建第二个产物。
+2. **决策，而不是代码** - 捕获方法、边界、文件、依赖项、风险和测试场景。不要预先编写实现代码或 shell 命令编排。传达高级技术设计的伪代码草图或 DSL 语法在帮助审查者验证方向时受到欢迎，但它们必须明确地构建为方向指导，而不是实现规范。
+3. **构建之前进行研究** - 在最终确定计划之前探索代码库、机构学习和必要时的外部指导。
+4. **调整产物大小** - 小工作得到紧凑的计划。大型工作变得更加结构化。这一理念在每个深度上都保持不变。
+5. **将规划与执行发现分开** - 在此处解决规划时间问题。明确地将执行时间未知数推迟到实现。
+6. **保持计划的可移植性** - 计划应作为动态文档、审查产物或问题正文，而不嵌入特定于工具的执行器指令。
+7. **重要时轻率地执行执行方向** - 如果请求、原始文档或存储库上下文明确暗示测试优先证明、特征覆盖、烟雾优先验证或其他非默认执行方向，请在计划中将其反映为轻量级自然语言信号。不要将其编码为有限枚举或将计划转变为逐步执行编排。
+8. **尊重用户命名的资源** - 当用户命名特定资源（CLI、MCP 服务器、URL、文件、文档链接或先前产物）时，将其视为权威输入，而不是建议。如果未知（`command -v`、获取、读取），请先发现它，然后再假设它不可用。使用它代替通用替代品。如果失败或不存在，请明确说明，而不是默默地替换。
 
-## Plan Quality Bar
+## 计划质量栏
 
-Every plan should contain:
-- A clear problem frame and scope boundary
-- Concrete requirements traceability back to the request or origin document
-- Repo-relative file paths for the work being proposed (see the path policy in `references/output-mode.md`)
-- Explicit test file paths for feature-bearing implementation units
-- Decisions with rationale, not just tasks
-- Existing patterns or code references to follow
-- Enumerated test scenarios for each feature-bearing unit, specific enough that an implementer knows exactly what to test without inventing coverage themselves
-- Clear dependencies and sequencing
+每个计划应包含：
+- 清晰的问题框架和范围边界
+- 具体需求可追溯至请求或原始文档
+- 所提议工作的存储库相对文件路径（请参阅`references/output-mode.md`中的路径策略）
+- 包含功能的实现单元的显式测试文件路径
+- 决策时要有理由，而不仅仅是任务
+- 要遵循的现有模式或代码参考
+- 枚举每个功能承载单元的测试场景，足够具体，以便实施者确切地知道要测试什么，而无需自己发明覆盖范围
+- 清晰的依赖性和顺序
 
-A plan is ready when its contents give an implementer sufficient direction and no launch-blocking question remains. Verify material claims about existing code and fixtures against the repository; distinguish these prerequisites from additions the plan proposes to build. Record any unresolved prerequisite that prevents implementation as a blocker.
+当计划的内容为实施者提供足够的指导并且不存在启动阻碍问题时，计划就已准备就绪。根据存储库验证有关现有代码和固定装置的材料声明；将这些先决条件与计划提议建立的附加设施区分开来。将任何阻碍实施的未解决先决条件记录为阻碍因素。
 
-#### 0.2 Find Upstream Product Contract
+#### 0.2 查找上游产品合约
 
-Before asking planning questions, resolve the upstream product source in this order:
+在提出规划问题之前，请按以下顺序解决上游产品来源：
 
-1. **Explicit path from the user.** Read its contents. If a unified plan has a Product Contract but needs implementation planning, this run enriches that same file in place. If it already contains implementation planning, treat it as a resume/deepening target and resolve any gaps there. If it is a legacy `docs/brainstorms/*-requirements.{md,html}` file, use it as a legacy origin and write a new unified plan in `<root>/plans/`.
-2. **Recent Product Contracts needing planning.** Search `<root>/plans/*.{md,html}` for unified plans from `product_contract_source: ce-brainstorm`, and inspect their contents. Follow an explicit supersession notice to its canonical path only when the linked document's contents establish that it represents the same requested work; otherwise stop for clarification. If same-basename Markdown and HTML copies exist without a clear canonical path, ask which to use; neither format nor a readiness label establishes precedence.
-3. **Legacy requirements docs.** Search `docs/brainstorms/` for files matching `*-requirements.md` or `*-requirements.html`. These remain readable historical inputs; do not migrate or rewrite them.
+1. **来自用户的显式路径。** 阅读其内容。如果统一计划有产品合同但需要实施计划，则此运行会丰富该相同文件。如果它已经包含实施计划，请将其视为resume/deepening目标并解决其中的任何差距。如果是遗留的`docs/brainstorms/*-requirements.{md,html}`文件，则将其作为遗留源，并在`<root>/plans/`中编写新的统一计划。
+2. **近期需要规划的产品合同。** 在`product_contract_source: ce-brainstorm`中搜索`<root>/plans/*.{md,html}`统一规划，并检查其内容。仅当链接文档的内容确定它代表相同的请求工作时，才遵循其规范路径的明确取代通知；否则停止澄清。如果存在相同基名的 Markdown 和 HTML 副本，但没有明确的规范路径，请询问使用哪一个；格式和就绪标签都没有确定优先级。
+3. **旧版需求文档。** 搜索 `docs/brainstorms/` 匹配 `*-requirements.md` 或 `*-requirements.html` 的文件。这些仍然是可读的历史输入；不要迁移或重写它们。
 
-**Relevance criteria:** A Product Contract source is relevant if:
-- The topic semantically matches the feature description
-- It was created within the last 30 days (use judgment to override if the document is clearly still relevant or clearly stale)
-- It appears to cover the same user problem or scope
+**相关性标准：** 产品合同来源在以下情况下是相关的：
+- 主题在语义上与功能描述匹配
+- 它是在过去 30 天内创建的（使用判断来覆盖该文档是否明显仍然相关或明显过时）
+- 它似乎涵盖了相同的用户问题或范围
 
-If multiple source documents match, ask which one to use using the platform's blocking question tool when available (see Interaction Method). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+如果多个源文档匹配，请使用平台的阻塞问题工具（如果可用）询问使用哪一个（请参阅交互方法）。否则，在聊天中显示编号选项并等待用户回复后再继续。
 
-**Session-settled decisions are an input tier alongside the document sources above.** Decisions already examined-and-chosen in the invoking conversation — or carried in a distilled brief passed as invocation input, from the user or a calling skill — enter planning as settled constraints, not open questions. Read `references/settled-decisions.md` before classifying decisions carried in from the conversation; it defines the settlement test, the two provenance classes, the annotation shape, the capture rules, and what a brief entry must include. Classifying without it risks labeling unexamined assertions as settled, or re-asking decisions the user already closed.
+**会话解决的决策是与上述文档源一起的输入层。** 已在调用对话中检查和选择的决策 - 或在作为调用输入传递的摘要摘要中携带，来自用户或调用技能 - 作为已解决的约束而不是开放问题输入计划。在对对话中进行的决策进行分类之前，请先阅读`references/settled-decisions.md`；它定义了结算测试、两个来源类、注释形状、捕获规则以及简短条目必须包含的内容。如果没有它进行分类，可能会面临将未经审查的断言标记为已解决的风险，或者重新询问用户已经关闭的决定。
 
-When input carries a prototype run or capsule, read its decisions when available. Carry its source reference forward from the session or upstream artifact under the Prototype sources contract in `references/plan-sections.md`, including when enriching an existing plan.
+当输入带有原型运行或胶囊时，请阅读其可用的决定。根据`references/plan-sections.md`中的原型源合同，从会话或上游产物中继承其源参考，包括在丰富现有计划时。
 
-#### 0.3 Use the Product Contract as Primary Input
+#### 0.3 使用产品合同作为主要输入
 
-If a relevant requirements-only unified plan exists:
-1. Read metadata, Goal Capsule, Product Contract, Open Questions, and Sources (scan headings to locate them; don't read long appendices unless referenced).
-2. Announce that `ce-plan` will add the implementation planning to that same file.
-3. Preserve the Product Contract's **meaning and stable R/A/F/AE IDs** unless planning discovers a direct conflict. Conflicts become explicit assumptions or questions; do not silently rewrite product scope.
-   - Preservation protects decisions, not bytes. **Meaning-preserving restructuring is sanctioned without a conflict:** splitting an overloaded requirement (the original R-ID keeps the original core intent; split-out parts take next unused numbers), moving a rule's full statement onto the R that governs it while slimming the Key Decision to label + annotation + `Governs R…` links, and deleting unlinked duplicate restatement. When an R is split, or a rule moves to a different R, re-point every affected `Governs R…`, `Covers R…`, and inline `per R…` citation to the IDs that now govern it; the preservation map records the change but does not replace those live links. Restructuring must not weaken a qualifier, drop an edge case, or reclassify a product constraint as an implementation preference — those are scope changes, not restructures.
-   - Because enrichment edits the same file that holds the user's product decisions, record a one-line **Product Contract preservation** note in the enriched plan: "Product Contract unchanged", "restructured, no scope change: \<old-ID → new-IDs map\>", or "changed: \<R-IDs\> — \<why\>". This keeps the WHAT/HOW review boundary visible to reviewers (`ce-doc-review`, PR review) when there is no separate brainstorm file to diff against. For a *substantive* product-scope change (not a clarification or restructure), pause and confirm with the user before writing implementation units.
-4. Carry forward all applicable Product Contract sections listed below.
-5. Use the Product Contract as the primary input to planning and research.
-6. Do not create a duplicate plan unless an explicit `output:` conversion or pipeline override requires a new canonical path; when conversion happens, report old path and new canonical path.
+如果存在仅相关要求的统一计划：
+1. 阅读元数据、目标胶囊、产品合同、开放问题和来源（扫描标题以找到它们；除非引用，否则不要阅读长附录）。
+2. 宣布`ce-plan`将把实施计划添加到同一文件中。
+3. 保留产品合同的**含义和稳定的R/A/F/AE ID**，除非规划发现直接冲突。冲突变成明确的假设或问题；不要默默地重写产品范围。
+   - 保存保护的是决策，而不是字节。 **保留意义的重组在没有冲突的情况下得到认可：**拆分超载的需求（原始 R-ID 保留原始核心意图；拆分部分采用下一个未使用的数字），将规则的完整语句移动到管理它的 R 上，同时将关键决策精简为标签 + 注释 + `Governs R…` 链接，并删除未链接的重复重述。当 R 被拆分或规则移动到不同的 R 时，将每个受影响的 `Governs R…`、`Covers R…` 和内联 `per R…` 引用重新指向现在管理它的 ID；保存地图会记录更改，但不会替换那些实时链接。重组不得削弱限定条件、放弃边缘情况或将产品约束重新分类为实施偏好——这些是范围变化，而不是重组。
+   - 由于丰富编辑的是保存用户产品决策的同一文件，因此请在丰富计划中记录一行 **产品合同保留** 注释：“产品合同未更改”、“已重组，无范围更改：\<old-ID → new-IDs 映射\>”或“已更改：\<R-IDs\> — \<why\>”。当没有单独的头脑风暴文件可供比较时，这可以使审查者（`ce-doc-review`、PR审阅）保持WHAT/HOW审阅边界可见。对于“实质性”产品范围更改（不是澄清或重组），请在编写实施单元之前暂停并与用户确认。
+4. 继承下列所有适用的产品合同部分。
+5. 使用产品合同作为规划和研究的主要输入。
+6. 不要创建重复的计划，除非显式 `output:` 转换或管道覆盖需要新的规范路径；当发生转换时，报告旧路径和新规范路径。
 
-If a relevant legacy requirements document exists:
-1. Read it thoroughly
-2. Announce that it will serve as the origin document for planning
-3. Carry forward all of the following:
-   - Problem frame
-   - Actors (A-IDs), Key Flows (F-IDs), and Acceptance Examples (AE-IDs) when present — preserve these as constraints that implementation units must honor
-   - Requirements and success criteria
-   - Scope boundaries (including "Deferred for later" and "Outside this product's identity" subsections when present)
-   - Key decisions and rationale
-   - Dependencies or assumptions
-   - Outstanding questions, preserving whether they are blocking or deferred
-4. Use the source document as the primary input to planning and research
-5. Reference important carried-forward decisions in the plan with `(see origin: <source-path>)`
-6. Do not silently omit source content — if the origin document discussed it, the plan must address it even if briefly. Before finalizing, scan each section of the origin document to verify nothing was dropped.
+如果存在相关的遗留需求文档：
+1. 仔细阅读
+2. 宣布作为规划原始文件
+3. 继承以下所有内容：
+   - 问题框架
+   - 参与者 (A-ID)、关键流程 (F-ID) 和验收示例 (AE-ID)（如果存在）——将它们保留为实施单元必须遵守的约束
+   - 要求和成功标准
+   - 范围边界（包括“推迟到以后”和“超出此产品的身份”小节）
+   - 关键决策和理由
+   - 依赖性或假设
+   - 悬而未决的问题，保留它们是否被阻止或推迟
+4. 使用源文件作为规划和研究的主要输入
+5. 参考计划中的重要结转决策，`(see origin: <source-path>)`
+6. 不要默默地忽略源内容——如果原始文档讨论过它，那么计划必须解决它，即使是简短的。在最终确定之前，扫描原始文档的每个部分以验证没有任何内容丢失。
 
-If no relevant Product Contract source exists, planning may proceed from the user's request directly and will create a complete unified plan with `product_contract_source: ce-plan-bootstrap`.
+如果不存在相关的产品合同来源，则计划可以直接从用户的请求开始，并会创建一个完整的统一计划，`product_contract_source: ce-plan-bootstrap`。
 
-**Settled decisions get the same preservation discipline as origin Product Contract decisions.** Session-settled decisions (from the conversation or a passed brief) are augmented by research, never re-asked, and never silently rewritten. Handle contradiction evidence by its severity. Nothing found: proceed silently. Suboptimal but workable: proceed as settled, and attach a conflict call-out to the labeled KTD when the plan is written (Phase 5.2). Invalidating: stop as blocked, as the Phase 5.2 pipeline contract describes.
+**已解决的决策与原始产品合同决策具有相同的保存原则。** 会议解决的决策（来自对话或通过的简报）通过研究得到增强，不会被重新询问，也不会默默地重写。根据矛盾证据的严重程度来处理矛盾证据。什么也没找到：默默地继续。次优但可行：按已解决的方式进行，并在编写计划时将冲突标注附加到标记的 KTD（阶段 5.2）。无效：如第 5.2 阶段管道合约所述，因阻塞而停止。
 
-#### 0.4 Planning Bootstrap (No Requirements Doc or Unclear Input)
+#### 0.4 规划引导程序（没有需求文档或输入不明确）
 
-If no relevant requirements document exists, or the input needs more structure:
-- Assess whether the request is already clear enough for direct technical planning — "clear enough" means the bootstrap exit condition below already holds, so confirm the problem frame, scope boundaries, and success signals are known or recorded as assumptions, then continue to Phase 0.5
-- If the ambiguity is mainly product framing, user behavior, or scope definition, recommend `ce-brainstorm` as a suggestion — but always offer to continue planning here as well
-- If the user signals they lack working knowledge of the problem domain itself, recommend `ce-brainstorm` — its blindspot pass maps the decisions the territory will force before requirements are extracted — but honor their choice to continue here; Phase 2 (Resolve Planning Questions) then applies its unfamiliar-territory scaffolding
-- If the user wants to continue here (or was already explicit about wanting a plan), run the planning bootstrap below
+如果不存在相关需求文档，或者输入需要更多结构：
+- 评估请求是否已经足够清晰以进行直接技术规划——“足够清晰”意味着下面的引导退出条件已经成立，因此确认问题框架、范围边界和成功信号已知或记录为假设，然后继续进入阶段 0.5
+- 如果歧义主要是产品框架、用户行为或范围定义，则推荐 `ce-brainstorm` 作为建议 - 但也始终建议继续在此处进行规划
+- 如果用户表示他们缺乏问题领域本身的工作知识，请推荐`ce-brainstorm`——它的盲点通过映射了在提取需求之前该领域将强制做出的决策——但尊重他们的选择，继续在这里；第二阶段（解决规划问题）然后应用其陌生领域的脚手架
+- 如果用户想继续这里（或者已经明确想要一个计划），请运行下面的计划引导程序
 
-The planning bootstrap should establish:
-- Problem frame
-- Intended behavior
-- Scope boundaries and obvious non-goals
-- Success criteria
-- Blocking questions or assumptions
+规划引导程序应建立：
+- 问题框架
+- 预期行为
+- 范围边界和明显的非目标
+- 成功标准
+- 阻止问题或假设
 
-Keep this bootstrap brief. It exists to preserve direct-entry convenience, not to replace a full brainstorm.
+保持这个引导程序简短。它的存在是为了保持直接输入的便利，而不是取代全面的头脑风暴。
 
-**Exit condition:** Exit the bootstrap when each of these holds, OR the user explicitly wants to proceed: the problem frame is stated; the in-scope and out-of-scope boundaries that matter are known; success criteria or acceptance signals are known or recorded as assumptions. Recording an item as an assumption satisfies the boundaries and success-signal clauses. That is what lets the check pass in headless mode and on a `SKIP_SCOPING_CONFIRM` run, where no synchronous user exists to answer. The problem-frame clause is the exception: it must be **stated**, because the plan's required sections always include `Problem Frame`, and an assumed frame would either leave a mandatory section empty or promote an unvalidated guess into product scope. When the prompt does not supply one, or supplies only an approach with no outcome, derive the outcome from the request's own motivation rather than assuming it, or stop and ask; when that motivation is itself a component-level fact (a platform limit, a cost, a failure mode inside the system), follow it to what it costs the people the system serves — the approach becomes the Goal Capsule's Means, not its Objective. That derived Objective is the holdable goal, not a catalog of what the plan will cover; those assumptions go to `### Assumptions` at Phase 5.2 (Write Plan File), following the existing rule. A session-settled decision counts as already-established for every clause it covers — never re-ask it. This exit condition covers the bootstrap only; it adds no check to Phase 2's planning questions or the brainstorm-sourced Phase 5.1.5 path.
+**退出条件：** 当其中每一个成立时退出引导程序，或者用户明确希望继续：说明问题框架；范围内和范围外的重要边界是已知的；成功标准或接受信号是已知的或记录为假设。将项目记录为假设满足边界和成功信号条款。这就是让检查在无头模式和 `SKIP_SCOPING_CONFIRM` 运行中通过的原因，其中不存在同步用户来应答。问题框架条款是个例外：它必须被**说明**，因为计划的必需部分始终包括 `Problem Frame`，并且假设的框架要么将强制部分留空，要么将未经验证的猜测提升到产品范围中。当提示没有提供一种方法，或者只提供一种没有结果的方法时，从请求本身的动机中得出结果，而不是假设它，或者停下来询问；当该动机本身就是一个组件级事实（平台限制、成本、系统内部的故障模式）时，请遵循它来了解系统所服务的人员的成本 - 该方法成为目标胶囊的手段，而不是其目标。衍生的目标是可实现的目标，而不是计划将涵盖的内容的目录；这些假设按照现有规则进入第 5.2 阶段（编写计划文件）的`### Assumptions`。会话解决的决定对于它所涵盖的每个条款都被视为已经确定 - 永远不要重新询问它。此退出条件仅涵盖引导程序；它没有对第 2 阶段的规划问题或头脑风暴得出的第 5.1.5 阶段路径进行检查。
 
-If the bootstrap uncovers major unresolved product questions:
-- Recommend `ce-brainstorm` again
-- If the user still wants to continue, require explicit assumptions before proceeding
+如果引导程序发现主要的未解决的产品问题：
+- 再次推荐`ce-brainstorm`
+- 如果用户仍想继续，则在继续之前需要明确的假设
 
-If the bootstrap reveals that a different workflow would serve the user better:
+如果引导程序显示不同的工作流程可以更好地为用户服务：
 
-- **Bug-shaped prompt** (user describes broken behavior — "fix the bug where X", error message, regression, "doesn't work"). Offer `ce-debug` as an alternative alongside continuing with `ce-plan` whenever the code with the bug is reachable (in cwd OR in a named repo found at another local path). Stay in `ce-plan` silently when the named code can't be found anywhere local — paper-planning is the only useful output when the code cannot be reached.
+- **错误形状的提示**（用户描述损坏的行为 - “修复 X 处的错误”、错误消息、回归、“不起作用”）。只要可以访问存在错误的代码（在 cwd 中或在另一个本地路径中找到的命名存储库中），就提供 `ce-debug` 作为替代方案，同时继续使用 `ce-plan`。当在本地任何地方都找不到指定的代码时，请默默地留在`ce-plan`——无法访问代码时，纸质计划是唯一有用的输出。
 
-  **When the bug is at another local path (not cwd):**
-  - Announce the target explicitly **before** any cross-repo investigation: which path will be read AND where plan outputs will land (default: target repo's `<root>/plans/`, not cwd's).
-  - Default: proceed from the target repo for both investigation and plan-write. The user can interrupt to redirect (switch context, paper-plan, abandon, etc.). No location menu — the announcement makes the cross-repo nature visible, and the user can speak up if they want something unusual.
-  - **After** announcing and proceeding, present the standard ce-debug routing menu (continue with `ce-plan` vs switch to `ce-debug`) — same shape as the in-cwd case. Cross-repo location and ce-debug skill routing are separate decisions; do not merge them into a single question.
+  **当 bug 位于另一个本地路径（不是 cwd）时：**
+  - **在**任何跨回购调查之前明确宣布目标：将读取哪个路径以及计划输出将落在何处（默认：目标回购的`<root>/plans/`，而不是cwd）。
+  - 默认：从目标存储库继续进行调查和计划编写。用户可以中断以重定向（切换上下文、纸质计划、放弃等）。没有位置菜单——公告使跨存储库的性质可见，如果用户想要一些不寻常的东西，他们可以大声说出来。
+  - **在**宣布并继续之后，呈现标准的ce-debug路由菜单（继续使用`ce-plan` vs 切换到`ce-debug`）——与in-cwd情况相同的形状。跨仓库位置和ce-debug技能路由是单独的决定；不要将它们合并为一个问题。
 
-  Reading code at another path is fine in principle — that's just file access. The harm to avoid is silent operation on the wrong repo, especially writing the plan doc somewhere it won't be discovered (a busyblock plan landing in `cli-printing-press/<root>/plans/` is a discoverability disaster). The announcement requirement makes the target visible; defaulting to the target repo for both investigation and outputs respects the user's stated intent (they named that repo); the orthogonal ce-debug menu keeps the skill-choice question clean.
+  原则上，在其他路径读取代码是没问题的——这只是文件访问。要避免的危害是在错误的存储库上进行静默操作，尤其是在不会被发现的地方编写计划文档（在`cli-printing-press/<root>/plans/`着陆的繁忙区块计划是一场可发现性灾难）。公告要求使目标可见；默认为调查和输出的目标存储库尊重用户声明的意图（他们命名该存储库）；正交的ce-debug菜单使技能选择问题保持干净。
 
-  The accessibility classification is conservative and may under-suggest in monorepos, dependency bugs, or after renames. Users can always invoke `ce-debug` manually.
+  可访问性分类是保守的，可能在单一存储库、依赖项错误或重命名后建议不足。用户始终可以手动调用`ce-debug`。
 
-  **Headless mode**: skip the `ce-debug` suggestion menu entirely; default to continuing with `ce-plan` (the user's explicit invocation). There is no synchronous user to choose between skills, and switching to `ce-debug` automatically would change the skill mid-run without authorization.
+  **无头模式**：完全跳过`ce-debug`建议菜单；默认继续`ce-plan`（用户的显式调用）。没有同步用户可以选择技能，自动切换到`ce-debug`会在运行中未经授权更改技能。
 
-- **Clear task ready to execute** (known root cause, obvious fix, no architectural decisions) — no routing question; the Output Contract gate in SKILL.md resolves it at Phase 0.6 (Assess Plan Depth), and the user can redirect at any point.
+- **准备好执行的明确任务**（已知的根本原因，明显的修复，没有架构决策） - 没有路由问题； SKILL.md中的输出合约门在阶段0.6（评估计划深度）解决它，并且用户可以在任何点重定向。
 
-#### 0.5 Classify Outstanding Questions Before Planning
+#### 0.5 在规划之前对悬而未决的问题进行分类
 
-If the origin document contains `Resolve Before Planning` or similar blocking questions:
-- Review each one before proceeding
-- Reclassify it into planning-owned work **only if** it is actually a technical, architectural, or research question
-- Keep it as a blocker if it would change product behavior, scope, or success criteria
+如果原始文档包含`Resolve Before Planning`或类似的阻塞问题：
+- 在继续之前检查每一项
+- **仅当**它实际上是一个技术、架构或研究问题时，才将其重新分类为规划所属的工作
+- 如果它会改变产品行为、范围或成功标准，请将其作为阻碍因素
 
-If true product blockers remain:
-- State them clearly
-- Ask the user, using the platform's blocking question tool when available (see Interaction Method), whether to:
-  1. Resume `ce-brainstorm` to resolve them
-  2. Convert them into explicit assumptions or decisions and continue
-- Do not continue planning while true blockers remain unresolved
+如果真正的产品阻碍仍然存在：
+- 清楚地说明它们
+- 使用平台的屏蔽问题工具（如果可用）（请参阅交互方法）询问用户是否：
+  1. 恢复`ce-brainstorm`来解决它们
+  2. 将它们转换为明确的假设或决策并继续
+- 在真正的阻碍仍未解决时，不要继续计划
 
-#### 0.6 Assess Plan Depth
+#### 0.6 评估计划深度
 
-First resolve the Output Contract gate that SKILL.md states. A Direct or Chat brief selection exits intake to `references/output-contracts.md` without classifying depth; only Durable continues here.
+首先解决SKILL.md规定的输出合约门。直接或聊天简短选择退出进入`references/output-contracts.md`，不分类深度；这里只有耐用继续。
 
-Classify the work into one of these plan depths:
+将工作分类为以下计划深度之一：
 
-- **Lightweight** - small, well-bounded, low ambiguity
-- **Standard** - normal feature or bounded refactor with some technical decisions to document
-- **Deep** - cross-cutting, strategic, high-risk, or highly ambiguous implementation work
+- **轻量级** - 小、界限清楚、模糊性低
+- **标准** - 正常功能或有界重构，并记录一些技术决策
+- **深入** - 跨领域、战略性、高风险或高度模糊的实施工作
 
-If depth is unclear, ask one targeted question and then continue.
+如果深度不清楚，请提出一个有针对性的问题，然后继续。
 
-For a material Durable run, use the host's task-tracking capability when available to show route-level outcomes and meaningful transitions. If unavailable, continue without simulating it in chat.
+对于实质性持久运行，请使用主机的任务跟踪功能（如果可用）来显示路线级别的结果和有意义的转换。如果不可用，请继续而不在聊天中进行模拟。
 
-#### 0.7 Solo-Mode Scoping Synthesis
+#### 0.7 独奏模式范围综合
 
-Show the user the call-outs — the specific forks in scope or approach where user input materially changes the plan — so scope can be corrected **before Phase 1 research is spent**. Sub-agent dispatch (repo-research-analyst, learnings-researcher, etc.) is the expensive next step; this phase exists so that effort is not spent on the wrong scope.
+向用户展示标注——用户输入实质上改变计划的范围或方法中的特定分支——以便可以在**第一阶段研究进行**之前纠正范围。子代理调度（回购-研究-分析师、学习-研究员等）是昂贵的下一步；此阶段的存在是为了避免将精力花在错误的范围上。
 
-Runs **only in solo invocation** — when Phase 0.2 found no upstream Product Contract source (no requirements-only unified plan and no legacy `*-requirements` doc; `product_contract_source: ce-plan-bootstrap`) AND Phase 0.4 stayed in ce-plan (did not route to ce-debug, ce-work, or universal-planning) AND Phase 0.5 cleared (no unresolved blockers) AND not on Phase 0.1 fast paths (resume normal, deepen-intent) AND Phase 0.6's Output Contract gate selected Durable. Each of these is an explicit condition. Skip Phase 0.7 entirely when any of them fails — upstream-sourced invocations (unified-plan enrichment or legacy brainstorm) defer to Phase 5.1.5 instead.
+**仅在单独调用中** - 当阶段 0.2 发现没有上游产品合同源（没有仅需求的统一计划，没有遗留 `*-requirements` 文档；`product_contract_source: ce-plan-bootstrap`）并且阶段 0.4 停留在 ce-plan（没有路由到 ce-debug、ce-work 或通用规划）并且阶段 0.5 清除（没有未解决的阻碍）且不运行时阶段 0.1 快速路径（恢复正常，深化意图）和阶段 0.6 的输出合同门选择“持久”。其中每一个都是一个明确的条件。当其中任何一个阶段失败时，请完全跳过第 0.7 阶段 - 上游来源的调用（统一计划丰富或遗留头脑风暴）改为推迟到第 5.1.5 阶段。
 
-**Read `references/synthesis-summary.md` before composing the scoping synthesis.** It defines what the user sees, the confirmation and auto-proceed lines, the revision loop, soft-cut, self-redirect, headless routing, and where the internal draft lands in the plan.
+**在撰写范围综合之前阅读`references/synthesis-summary.md`。**它定义了用户看到的内容、确认和自动继续行、修订循环、软剪切、自重定向、无头路由以及内部草稿在计划中的位置。
 
-**Required output of this step — do not skip; silent proceeding is not allowed.** Compose an internal three-bucket scope draft (Stated / Inferred / Out of scope — internal thinking that feeds where content goes in the plan body at Phase 5.2, not the chat output). Derive call-outs (specific forks where user input materially changes the plan), then emit the **solo-variant** synthesis and **wait for user confirmation before continuing to Phase 1.** It states the problem as you understand it, then a scope claim — what the plan will target, what it will not, at affirm-or-redirect level — never an enumeration of Implementation Units, file paths, or PR/sequencing shape (the plan-write step decides those, and they are not knowable yet). Use the confirmation or auto-proceed lines in `references/synthesis-summary.md` (loaded above) rather than reconstructing them here.
+**此步骤所需的输出 - 不要跳过；不允许静默进行。** 撰写内部三桶范围草案（陈述/推断/超出范围 - 内部思维，用于提供第 5.2 阶段计划正文内容的位置，而不是聊天输出）。派生标注（用户输入实质上改变计划的特定分支），然后发出 **单独变体** 综合并**等待用户确认，然后继续进入第 1 阶段。** 它按照您所理解的方式陈述问题，然后是范围声明 - 计划的目标是什么，不是什么，在确认或重定向级别 - 绝不是实施单元、文件路径或 PR/sequencing 形状的枚举（计划写入步骤决定这些，并且它们不是）还可知）。使用`references/synthesis-summary.md`（上面加载）中的确认或自动继续行，而不是在此处重建它们。
 
-**Blocking decision:** auto-proceed — send the user the auto-proceed announcement in chat, then continue without waiting — only when plan depth is **Lightweight AND zero call-outs survive**. Standard and Deep always present the confirmation and wait for it, even with zero call-outs.
+**阻止决策：**自动继续 - 在聊天中向用户发送自动继续公告，然后无需等待即可继续 - 仅当计划深度为 **轻量级且零调用存活**时。标准和深度始终呈现确认并等待它，即使调出为零。
 
-**Headless / opt-in skip:** in headless mode, or when `SKIP_SCOPING_CONFIRM` resolved to skip in Phase 0.0, do not block — compose the internal draft, skip the chat-time confirmation, and write Inferred bets into a `## Assumptions` section when the plan is written (Phase 5.2). The skip covers only this scoping confirmation; Phase 0.4 routing, Phase 0.5 blockers, Phase 2 questions, source-doc disambiguation, and the Phase 5.4 menu still happen. Announcement wording and full routing: `references/synthesis-summary.md` ("Headless mode", "When to skip the blocking confirmation").
+**无头/选择加入跳过：**在无头模式下，或者当 `SKIP_SCOPING_CONFIRM` 决定在阶段 0.0 中跳过时，不要阻止 - 撰写内部草稿，跳过聊天时间确认，并在编写计划时将推断赌注写入 `## Assumptions` 部分（阶段 5.2）。跳过仅涵盖此范围确认；阶段 0.4 路由、阶段 0.5 拦截器、阶段 2 问题、源文档消歧和阶段 5.4 菜单仍然会发生。公告措辞和完整路由：`references/synthesis-summary.md`（“无头模式”，“何时跳过阻塞确认”）。

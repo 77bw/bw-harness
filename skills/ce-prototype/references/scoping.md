@@ -1,38 +1,38 @@
-# Deciding what to prototype
+# 决定原型化内容
 
-Required read before the go-ahead message, in every run.
+每次运行时都需要在继续消息之前阅读。
 
-## Getting the question
+## 得到问题
 
-Accept a prompt, a brainstorm path, a plan path, or an empty invoke. An empty invoke still uses this session: if the conversation already names what to try, start from that. Ask only when you cannot tell. If you are inferring from messy history, say what you inferred — do not silently guess.
+接受提示、头脑风暴路径、计划路径或空调用。空调用仍然使用此会话：如果对话已经指定了要尝试的内容，则从该会话开始。仅当您无法判断时才询问。如果你从混乱的历史中推断，请说出你的推断——不要默默猜测。
 
-A run in a repo is about that product unless the user says otherwise. Read this conversation and any supplied brainstorm or plan. If the repo still has to be checked, dispatch a generic subagent for it rather than judging first how big the search is — you cannot tell until you are in it. Use the platform's subagent primitive (`Agent` in Claude Code, `spawn_agent` in Codex) where available; where there is none, do the same scoped read inline. Do not dispatch a standalone agent by type or name. Ask it for what the question touches — the page, component, or flow you will recreate — with its file paths, what it does today, and the constraints on it. Do not scan the tree — neither you nor the subagent — and do not ask for a summary of the architecture. Then read those files yourself when you need the detail.
+除非用户另有说明，否则存储库中的运行是关于该产品的。阅读这段对话以及任何提供的头脑风暴或计划。如果仍然需要检查存储库，请为其调度一个通用子代理，而不是首先判断搜索有多大——只有进入搜索范围后才能知道。如果可用，请使用平台的子代理原语（Claude Code中的`Agent`、Codex中的`spawn_agent`）；如果没有，则执行相同的范围内联读取。不要按类型或名称调度独立代理。询问问题涉及的内容 - 您将重新创建的页面、组件或流程 - 及其文件路径、它今天执行的操作以及对其的限制。不要扫描树——无论是你还是子代理——也不要要求架构的摘要。然后，当您需要详细信息时，请自行阅读这些文件。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-Before building, you need the product surface, the question, and any hard constraints (must keep, must not change). You do not need the user to have named how it should work or feel — that is this skill's job. If the surface or the constraints are missing, ask those. Do not ask them to invent the answer in chat.
+在构建之前，您需要产品表面、问题和任何硬约束（必须保留，不得更改）。您不需要用户指定它应该如何工作或感觉如何——这就是这项技能的工作。如果缺少表面或约束，请询问。不要要求他们在聊天中发明答案。
 
-Name the parts that can only be settled against a real artifact, or take the user's named question. Start with the question that would be most expensive to get wrong. Combine parts in one prototype when the question is how they work together.
+列出只能根据真实产物解决的部分，或者采用用户指定的问题。从犯错代价最高的问题开始。当问题是部件如何协同工作时，将它们合并到一个原型中。
 
-If the supplied brainstorm or plan already records a settled visual-probe decision for this question (a display-only sketch the user already judged), do not rebuild that question.
+如果提供的头脑风暴或计划已经记录了该问题的已解决的视觉探测决策（用户已经判断的仅显示草图），则不要重建该问题。
 
-## Narrow vs wide
+## 窄与宽
 
-Classify the question before you build.
+在构建之前对问题进行分类。
 
-- **Narrow** — a specific detail with a small similar set (this control vs that control, this placement, this transition). Put two or three close variants on one surface. Do not invent a wildly different mechanism.
-- **Wide** — the space is open (make this more fun to use, explore how this could work). Diverge first: name three to five distinct avenues — different mechanisms, not tweaks of one idea. Give each one a plain line about what the user would see or do, not a coined name and a verdict on it; keep the detail for the ones they lean toward. The user picks, or you put a comparable subset on one surface. Then converge against the built ones. Do not start by building one idea as if it were the answer.
+- **狭窄** - 具有小的相似集的特定细节（这个控件与那个控件、这个位置、这个过渡）。在一个表面上放置两个或三个相近的变体。不要发明一种截然不同的机制。
+- **宽** - 空间是开放的（使其使用起来更有趣，探索它是如何工作的）。首先发散：说出三到五个不同的途径——不同的机制，而不是对一个想法的调整。给每个人一个简单的说明，说明用户会看到什么或做什么，而不是创造一个名称和对其的判断；保留他们倾向于的细节。用户选择，或者您将一个类似的子集放在一个表面上。然后与已建的聚合。不要一开始就提出一个想法，就好像它就是答案一样。
 
-If width is unclear, ask once whether this is a close comparison or an open exploration. Do not default to either.
+如果宽度不清楚，请询问一次这是近距离比较还是开放探索。两者都不要默认。
 
-## Size the build
+## 调整构建大小
 
-Size the prototype to the uncertainty, not to "small." The ambitious bet, the combination that only makes sense together, and the open space with no mechanism yet all take a bigger build; a separable choice can be decided on its own in something smaller. Do not start with the leftover easy question because it feels cheap. The go-ahead names that split, so this decision is made before it, not after.
+原型的尺寸要考虑到不确定性，而不是“小”。雄心勃勃的赌注，只有在一起才有意义的组合，以及尚未建立机制的开放空间，都需要更大的构建；一个可分离的选择可以在较小的事情上自行决定。不要从剩下的简单问题开始，因为它感觉很便宜。分裂的批准名称，所以这个决定是在它之前做出的，而不是之后。
 
-## The go-ahead message
+## 继续消息
 
-Before starting a preview, building must be authorized. A request that already is to prototype this named thing is that authorization after scoping. The go-ahead message is owed when the request is only whether to prototype, or when the split or an inferred question would surprise them. The point of that message is so they can redirect an expensive build, not so they can read a briefing. Stay high-level: what you will try, why, and how it is split. Add detail only when the split or an inference would otherwise be surprising. If you inferred from messy history, say so. Leave a way to name a different question. When the message is owed, wait for proceed or correction. Do not build until building is authorized.
+在开始预览之前，必须获得构建授权。已经对这个命名事物进行原型设计的请求是范围界定后的授权。当请求只是是否原型时，或者当拆分或推断的问题会让他们感到惊讶时，就应该发出继续消息。该消息的目的是让他们可以重新定向昂贵的构建，而不是让他们可以阅读简报。保持高水平：您将尝试什么、为什么以及如何拆分。仅当分裂或推论会令人惊讶时才添加细节。如果你是从混乱的历史中推断出来的，请说出来。留下一个命名不同问题的方式。当消息欠下时，等待继续或更正。在获得建造许可之前请勿建造。
 
-## Between questions
+## 问题之间
 
-Once they have tried something and decided, work out which questions are still worth building for. A decision often answers a later question too, makes one pointless, or turns up one nobody had thought of. When that list changes, say what changed in the next go-ahead. If what they decide changes what they want to build rather than answering the question you asked, stop and hand back what you learned instead of building for a question they have moved past.
+一旦他们尝试过某件事并做出决定，就找出哪些问题仍然值得提出。一项决定常常也回答了后来的问题，使一个问题变得毫无意义，或者出现了一个没人想到的问题。当该列表发生变化时，请说明下一次更改的内容。如果他们的决定改变了他们想要构建的内容，而不是回答你提出的问题，请停下来并交回你学到的东西，而不是为他们已经过去的问题构建。

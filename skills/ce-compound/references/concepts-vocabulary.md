@@ -1,114 +1,91 @@
-# CONCEPTS.md vocabulary rules
+# GLOSSARY.md 词汇规则
 
-`CONCEPTS.md` defines the words that mean something specific in this codebase. It is the shared base that `<root>/solutions/` and AGENTS.md can cite without redefining terms. It lives at the repo root. Terms enter in two ways, accretion and seeding (below), and the file is created the first time either path produces a qualifying entry.
+在读取或写入之前解析目标：如果存储库有 `GLOSSARY-MAP.md`，请按照其链接到达此工作所涉及的上下文（或实际调查的存储库范围刷新的单独范围的上下文）。不要创建组合的根词汇表。如果没有地图，请使用根`GLOSSARY.md`；仅当此模式允许播种并且存在限定术语时，才创建缺失的术语表。损坏的地图或不明确的所有者是路由问题，而不是猜测新路径的许可。报告未解决的上下文并保留词汇不变。在本技能中，“GLOSSARY.md”表示已解析的文件；在报告和可发现性链接中使用其具体路径（地图是多个上下文的持久入口点）。旧版CONTEXT/CONCEPTS文件是迁移输入，而不是第二个目标； project-governance 迁移的表面未合并术语，而不是自动重命名。
 
-## The supported mutations
+对于每次写入，请读取已安装的`domain-modeling`技能的[GLOSSARY-FORMAT.md](../../domain-modeling/GLOSSARY-FORMAT.md)。它的上下文标题、语言条目和别名是共享表示。下面的证据和保留规则选择要写入的条目，而不是第二种格式。永远不要默默地取代既定的含义：区分兼容的细化和矛盾。保留有争议的条目完整并返回domain-modeling的术语、实际定义和证据；在无人值守模式下报告status/research未解决的项目并继续独立工作。
 
-A run may **add** an entry, **refine** one, **fold** one into the entry that already carries its meaning, **retire** one to `## Retired`, **delete** one, or **scrub** violations from one it touched. Which subset a given run may perform is stated where that run is defined, and is not re-listed anywhere else.
+## 支持的突变
 
-**Update-only** names what a run withholds, never what it grants: no creation and no seeding. It does not widen the subset that run's own definition permits.
+一次运行可以**添加**一个条目，**细化**一个，**将**一个折叠到已经具有其含义的条目中，**将**一个删除到`## Retired`，**删除**一个，或者**清除**它所触及的条目中的违规行为。给定运行可以执行哪个子集在定义该运行的地方进行了说明，并且不会在其他地方重新列出。
 
-## How terms enter: accretion and seeding
+**仅更新**命名运行保留的内容，而不是它授予的内容：没有创建，也没有播种。它不会扩大运行自身定义允许的子集。
 
-Two paths populate the file, and they cover different gaps:
+## 术语如何输入：吸积和播种
 
-- **Accretion**: a learning brings up a term whose meaning was not obvious, so it gets defined. This reliably catches *peripheral* terms, because friction is what brings them up.
-- **Seeding**: a run proactively defines the **core domain nouns** of the area it is working in. This catches the *stable-central* terms accretion never reaches: the nouns a system is built around rarely break, so they rarely appear in a learning, yet they are exactly what a reader needs to orient. Without seeding, the file fills with peripheral mechanics and never names what the project is about.
+两个路径填充该文件，并且它们覆盖不同的间隙：
 
-### Seed goal
+- **累加**：学习提出了一个术语，其含义并不明显，因此它被定义。这可靠地捕获了“外围”术语，因为摩擦是产生它们的原因。
+- **播种**：运行主动定义其工作领域的**核心领域名词**。这捕获了永远无法达到的*稳定中心*术语增长：系统构建的名词很少被破坏，因此它们很少出现在学习中，但它们正是读者需要定位的内容。如果没有种子，该文件就会充满外围机制，并且永远不会命名该项目的内容。
 
-Define the core domain nouns the area's **declared domain model** exposes that meet the qualifying bar (see "What earns a slot"). The codebase sets the count: seed every term that genuinely qualifies, none added to reach a number and none pulled from beyond the declared model to inflate one. A small domain yields a few; a large one, more. The bound is the **source** (the declared domain model of the area in scope, meaning schema, core types, primary models, and top-level domain docs, not a full-codebase trawl) and the **bar** (the same "a new engineer would need this defined" test), never a fixed quantity.
+### 种子目标
 
-### Scope of a seed
+定义区域的**声明的域模型**公开的符合资格标准的核心域名词（请参阅“什么赢得了位置”）。代码库设置了计数：为真正符合条件的每个术语播种，没有添加任何术语来达到某个数字，也没有从声明的模型之外拉出来夸大一个数字。一个小领域产生一些；一个大的，更多。界限是**源**（范围内区域的声明域模型，意味着架构、核心类型、主要模型和顶级域文档，而不是完整的代码库拖网）和**栏**（相同的“新工程师需要这个定义的”测试），从来不是固定数量。
 
-- A **scoped run** (a learning capture, or a refresh narrowed to an area) seeds only that area's core nouns, and defines only terms it actually investigated against code. It does not reach for repo-wide nouns it never touched.
-- A **repo-wide bootstrap** (an explicit "create CONCEPTS.md" request) seeds the whole project's declared domain model. This is the only path that produces a coherent "what is this project" glossary; a scoped run cannot, and should not pretend to.
+### 种子的范围
 
-## Be opinionated
+- **范围运行**（学习捕获或缩小到某个区域的刷新）仅播种该区域的核心名词，并仅定义它实际针对代码调查的术语。它不会触及它从未触及的回购范围内的名词。
+- **存储库范围的引导程序**（显式的“创建 GLOSSARY.md”请求）为整个项目声明的域模型提供种子。这是产生连贯的“这个项目是什么”术语表的唯一途径；作用域运行不能也不应该假装这样做。
 
-When the team uses several words for the same concept, pick the best one and drop the rest. Dropping a synonym is not a retirement: the surviving entry still carries that meaning, so the word becomes an aliases line on it (see "Per entry") and never goes to `## Retired`, which is only for a concept the project no longer has. Settled distinctions go to the Flagged ambiguities tail. The glossary is not a record of all words the team has ever used. It is the team's agreed-upon vocabulary.
+## 固执己见
 
-## The file stands on its own
+当团队使用多个单词来表达同一概念时，选择最好的一个并放弃其余的。删除同义词并不是退休：幸存的条目仍然带有该含义，因此该单词成为其上的别名行（请参阅“每个条目”）并且永远不会到达`## Retired`，这仅适用于项目不再具有的概念。已解决的区别将转到已标记的歧义尾部。词汇表并不是团队曾经使用过的所有单词的记录。这是团队商定的词汇。
 
-Each entry teaches its concept to a reader with no access to anything else: no codebase, no PR history, no architecture meetings, no Slack. This rules out:
+## 该文件独立存在
 
-- Implementation specifics (file paths, class names, function signatures, table names, library calls)
-- Status fields, dates, owners on the entries
-- Examples or current-config values drawn from the code, such as specific thresholds, counts, or enum values that will change. State the behavior, not the number: "each skill sets its own actionable threshold" rather than "surfaces at 50, fixes at 75."
-- Links to PRs, issues, channels, or roadmap milestones
-- Version-specific claims ("currently uses X; migrating to Y")
+每个条目都向无法访问其他任何内容的读者传授其概念：没有代码库，没有 PR 历史，没有架构会议，没有 Slack。这排除了：
 
-Cross-references between entries within `CONCEPTS.md` are fine — they resolve internally. General programming vocabulary (caches, queues, jobs, sessions) and everyday domain English need no redefinition either. But if an entry leans on another *project-specific* term to make sense, that term must be defined here too — an undefined project-specific sibling is itself a candidate to add.
+- 实现细节（文件路径、类名、函数签名、表名、库调用）
+- 条目的状态字段、日期、所有者
+- 从代码中提取的示例或当前配置值，例如将更改的特定阈值、计数或枚举值。说明行为，而不是数字：“每种技能都有自己的可行阈值”，而不是“出现在 50 点，固定在 75 点”。
+- PRs、问题、渠道或路线图里程碑的链接
+- 特定于版本的声明（“当前使用 X；迁移到 Y”）
 
-## What earns a slot — and what keeps one
+`GLOSSARY.md` 内的条目之间的交叉引用很好——它们在内部解析。通用编程词汇（缓存、队列、作业、会话）和日常领域英语也不需要重新定义。但是，如果一个条目依赖于另一个“特定于项目的”术语才有意义，则该术语也必须在此处定义 - 未定义的特定于项目的兄弟本身就是要添加的候选者。
 
-A term qualifies on two counts: its meaning here is precise enough that a new engineer would need it defined to follow conversations, tickets, or code, and it is a concept in its own right rather than a property of one already defined. General programming vocabulary does not belong, even when used heavily.
+## 是什么赢得一席之地——又是什么保持一席之地
 
-Both counts apply at both moments — admitting a term the work surfaced, and deciding whether an existing entry keeps its heading.
+一个术语有两个资格：它的含义足够精确，新工程师需要对其进行定义以跟踪对话、票据或代码，并且它本身就是一个概念，而不是已定义的概念的属性。一般编程词汇不属于其中，即使大量使用时也是如此。
 
-An entry that loses its heading still has to resolve for whoever meets the term next in an old ticket, learning, or commit. Ask which surviving entry can carry it. Usually one can, either the neighbor whose property it always was, or the concept that replaced it. **Fold** it there: the meaning moves into that entry, cross-references repoint, and the old term is named on that entry, worded so a reader can tell whether it meant this entry or was replaced by it. When nothing can carry it, the term **retires** to `## Retired` at the tail if readers will still meet it in the project's own material, and is deleted if they will not. Version history is the archive.
+这两种计数在这两个时刻都适用——承认作品中出现的术语，并决定现有条目是否保留其标题。
 
-Removing an entry acts only on positive contrary evidence, and uncertainty leaves it standing. Name where the concept went — what replaced it, what absorbed it, what took it out. Being unable to find it is not the same as it being gone: a deleted class, path, or symbol is never that evidence (an entry is meant to outlive the code that implemented it, which is what standing on its own means), and neither is the absence of corroboration.
+失去标题的条目仍然需要为旧票证、学习或提交中的下一个术语进行解析。询问哪个幸存的条目可以携带它。通常可以，要么是它一直是其财产的邻居，要么是取代它的概念。 **折叠**在那里：含义移入该条目，交叉引用重新指向，并且旧术语在该条目上命名，措辞以便读者可以判断它是否意味着该条目或被它替换。当没有任何东西可以携带它时，如果读者仍然会在项目自己的材料中遇到它，则术语**退休**到尾部的`## Retired`，如果不会，则被删除。版本历史记录是存档。
 
-## The coherence neighborhood
+删除条目仅对积极的相反证据起作用，并且不确定性使其保持不变。说出这个概念的去向——什么取代了它，什么吸收了它，什么淘汰了它。无法找到它并不等于它消失了：删除的类、路径或符号从来都不是证据（条目意味着比实现它的代码更长寿，这就是它本身的意义），缺乏证实也不是证据。
 
-The neighborhood of an entry is its cluster siblings plus the terms it cross-references or that reference it. It bounds a capture-time pass: act only on evidence already in hand, never audit the whole file, and flag for a refresh anything whose judgment would need investigation this run did not do.
+## 一致性邻域
 
-## Per entry
+条目的邻域是它的簇兄弟加上它交叉引用或引用它的术语。它限制了捕获时间过程：仅对现有证据采取行动，从不审核整个文件，并标记刷新任何其判断需要调查本次运行未执行的内容。
 
-The definition is one sentence: what the term means in this domain, and what makes it distinct from neighbors. A term with non-obvious behavioral rules (lifecycle, cancellation semantics, ownership invariants) earns a second paragraph for those rules, never for elaborating the definition itself.
+## 每个条目
 
-When dropped synonyms exist, list them as an aliases line directly under the definition: *Avoid: Booking, appointment*. Entities typically need more depth than value types; status concepts may need transition notes.
+定义就是一个句子：该术语在该领域中的含义，以及它与邻居的不同之处。仅在需要区分含义时添加证据域不变量；将实施和研究证据保留在术语表之外。
 
-## Relationships (optional)
+当存在删除的同义词时，将它们列为定义正下方的别名行：`_Avoid_: Booking, appointment`。实体通常需要比值类型更多的深度；状态概念可能需要过渡注释。
 
-When relationships between entries carry meaning a reader needs (ownership, cardinality, lifecycle dependencies that span entries), capture them in a `## Relationships` section near the top of the file or its cluster. Skip it when entries stand on their own without structural context. Relationships are a lift for domains where structure is part of what makes terms meaningful, not a routine section.
+## 关系（可选）
 
-## Organization
+当条目之间的关系具有读者需要的含义（所有权、基数、跨越条目的生命周期依赖关系）时，请将它们捕获在文件或其集群顶部附近的 `## Relationships` 部分中。当条目在没有结构上下文的情况下独立存在时，请跳过它。对于那些结构是使术语有意义的部分而不是常规部分的领域来说，关系是一种提升。
 
-Cluster concepts by domain relationship (entities with their states, processes with their stages) so a reader sees structure without effort. A flat list works when the file is small. Reshape as the file grows.
+## 组织
 
-## Flagged ambiguities (tail of file)
+按领域关系（实体及其状态、流程及其阶段）对概念进行聚类，以便读者毫不费力地看到结构。当文件较小时，平面列表有效。随着文件的增长而重塑。
 
-When two terms were used interchangeably and the team settled on a distinction, record the resolution as a one-line note: *"'account' had been used for both Customer and User — these are distinct."* This section is the audit trail for opinions the team has formed.
+## 标记的歧义（文件尾部）
 
-## Retired (tail of file, present only when it has entries)
+当两个术语互换使用并且团队确定了区别时，将解决方案记录为一行注释：*“‘帐户’已用于客户和用户 - 它们是不同的。”*此部分是团队形成的意见的审计跟踪。
 
-One line per concept the project no longer has and nothing replaced: what the term meant, and what removed it. Write enough that someone meeting it in an old ticket understands what they were reading and why it is not current. Do not carry the original entry over.
+## 已退休（文件尾部，仅当有条目时才出现）
 
-## One illustrative entry — the shape, not a template
+项目中的每个概念不再有一行，也没有任何替代物：该术语的含义是什么，以及是什么删除了它。写得足够多，以便在旧票中遇到它的人能够理解他们正在阅读的内容以及为什么它不是最新的。请勿携带原始条目。
 
-```
-## Booking
+## 刷新期间的词汇捕获
 
-### Reservation
-A future commitment to seat a Party at a specified date and time.
-*Avoid:* Booking, appointment
+执行每个文档操作后，将调查期间标记的域术语与 `GLOSSARY.md` 进行协调。
 
-A Reservation owns its Party but does not own a Table — Tables are acquired only when the Party arrives, through a Seating. Lifecycle: Booked, Seated, Completed, No-Show. Cancellation before a Seating is non-destructive; cancellation after a Seating is recorded as a No-Show.
+1. **汇总**范围内学习的限定术语；当一个术语以不同的精度出现时，将兼容的阴影合并到一个条目中；报告冲突而不是选择一种含义。
+2. **如果`GLOSSARY.md`存在：**添加缺失的术语，细化语料库出现新精度的条目，然后协调本次运行范围达到的每个条目**什么赢得了一个位置 - 以及什么保留了一个**上面：回填中心但缺少的核心名词，然后将每个未通过栏的条目路由到条件名称的结果 - 折叠到可以携带它的幸存条目中，当读者仍然满足该术语时退出到`## Retired`，当读者仍然满足该术语时删除他们不会。无范围刷新会读取整个存储；将每个证据上下文与其自己的术语表进行协调——这是积累的术语表所需要的；有瞄准镜的会留在其区域内，而其余部分则保持不变。保留读取与种子目标种子相同的**声明的域模型**，因此存在和不存在是根据一个来源来判断的。
+3. **如果不存在**并且至少有一个术语合格：引导它 — 根据种子目标将范围内区域的核心领域名词与浮现的术语一起播种，在创建时保守地保留边界术语的标准。使用共享格式：命名上下文并对其进行简要描述，然后将规范条目放在`## Language`下；仅在有用时才将其分组到副标题下。
+4. **根据引用的标准（实现细节、漂移的配置值、status/owner/date元数据、重复项、未定义的特定于项目的同级）在第 2 步协调的相同条目中清理违规行为 - 在无范围运行中的整个文件，因为刷新是一项审核；该区域的条目位于范围内的条目上。
+5. 不要扩展超出本次运行的范围，也不要追溯地将 `(see GLOSSARY.md)` 指针注入学习中。
 
-### Party
-The guests committed to a Reservation. Each Reservation has exactly one Party. Party size is the count promised at booking, not the count who arrive.
-
-### Table
-A physical seating unit with fixed capacity. Tables are shared resources — they do not belong to Reservations and are allocated only on the day-of through Seatings.
-
-### Seating
-The act of placing a Party at a Table once the Party arrives. A Reservation has at most one Seating; a Table accumulates many Seatings across its lifetime.
-```
-
-## Vocabulary capture during a refresh
-
-After the per-doc actions execute, reconcile the domain terms flagged during investigation with `CONCEPTS.md`.
-
-1. **Aggregate** qualifying terms across the learnings in scope; when one term surfaced with different shades of precision, union the shades into one entry.
-2. **If `CONCEPTS.md` exists:** add missing terms, refine entries where the corpus surfaced new precision, then reconcile every entry this run's scope reaches against **What earns a slot — and what keeps one** above: backfill central-but-missing core nouns, then route each entry that fails the bar to the outcome that condition names — fold into the surviving entry that can carry it, retire to `## Retired` when readers will still meet the term, delete when they will not. An unscoped refresh reads the whole store, so its reconcile covers the whole file — that is the pass an accreted glossary needs; a scoped one stays in its area and leaves the rest untouched. Retention reads the same **declared domain model** the Seed goal seeds from, so presence and absence are judged against one source.
-3. **If it doesn't exist** and at least one term qualified: bootstrap it — seed the in-scope area's core domain nouns per the Seed goal alongside the surfaced terms, holding the bar conservatively for borderline terms at creation. Start the file with this preamble under a `# Concepts` heading:
-
-   > Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound captures and refreshes learnings; direct edits are fine. Glossary only, not a spec or catch-all.
-
-   1-4 terms → flat headings; more → cluster by domain relationship per the reference.
-4. **Scrub violations** per the reference's criteria (implementation specifics, config values that drift, status/owner/date metadata, duplicates, undefined project-specific siblings) in the same entries step 2 reconciled — the whole file on an unscoped run, because refresh is an audit; the area's entries on a scoped one.
-5. Do not expand beyond what this run's scope reaches, and do not retroactively inject `(see CONCEPTS.md)` pointers into learnings.
-
-Report what this run did to `CONCEPTS.md`. "scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. The visible record is the audit signal that the reference was consulted, and it is what keeps a silent glossary mutation from going unreported. Apply vocabulary edits silently in every mode — no user prompt.
+向`GLOSSARY.md`报告这次运行的结果。仅当文件是运行发现的逐字节文件时，“已扫描，无限定条件”才是正确的；任何改变都会报告其计数，无论是哪一步发生的。可见记录是查阅引用文档的审计信号，它可以防止沉默的术语表突变未被报告。在每种模式下静默应用词汇编辑 — 无需用户提示。

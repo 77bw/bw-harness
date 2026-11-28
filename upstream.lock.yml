@@ -3,127 +3,640 @@
     "url": "https://github.com/mattpocock/skills",
     "commit": "6f7f7831a625f040a8e06a0e7954826b87ce775a",
     "license": "MIT",
-    "patches": [],
     "resources": {
       "licenses/Matt-Pocock-MIT": {
         "source": "LICENSE",
-        "sha256": "c35e5776201f2713d50da75b6ec6a34d3e072717c7988b4aeabe67f2c0a35abb"
+        "sha256": "c35e5776201f2713d50da75b6ec6a34d3e072717c7988b4aeabe67f2c0a35abb",
+        "upstream_sha256": "c35e5776201f2713d50da75b6ec6a34d3e072717c7988b4aeabe67f2c0a35abb",
+        "executables": []
       },
       "skills/codebase-design": {
         "source": "skills/engineering/codebase-design",
-        "sha256": "0eece2d6148eede9eebea3989944ea6215b809204352ca82a3a83203b79b78b4"
+        "sha256": "76e558dd537e391667ba7d0d52fa7411a473e3876f66375092575e2965d2cd50",
+        "upstream_sha256": "0eece2d6148eede9eebea3989944ea6215b809204352ca82a3a83203b79b78b4",
+        "executables": [],
+        "requires": [],
+        "patch": "patches/matt/codebase-design.patch"
       },
       "skills/domain-modeling": {
         "source": "skills/engineering/domain-modeling",
-        "sha256": "57926b975b3077c5ebe6f449d2476384c1c3fb1d46452a1141625384923c974c"
+        "sha256": "7882e8abb983f42f8f94cfe8e11f6308df9b4367eb4e5f8af9911df6b50261fe",
+        "upstream_sha256": "57926b975b3077c5ebe6f449d2476384c1c3fb1d46452a1141625384923c974c",
+        "executables": [],
+        "requires": [],
+        "patch": "patches/matt/domain-modeling.patch"
       },
       "skills/grill-with-docs": {
         "source": "skills/engineering/grill-with-docs",
-        "sha256": "8973c3d9463fc9dd708adc36a0f97b01aab4ae7d6a0217c2aa0f0a7ef206b83c"
+        "sha256": "8b6748602c4c3aa786aeb35fd4f9b5c609a8d648c26f53d06b4df2943895e35d",
+        "upstream_sha256": "8973c3d9463fc9dd708adc36a0f97b01aab4ae7d6a0217c2aa0f0a7ef206b83c",
+        "executables": [],
+        "requires": [
+          "ce-plan",
+          "domain-modeling"
+        ],
+        "patch": "patches/matt/grill-with-docs.patch"
       },
       "skills/improve-codebase-architecture": {
         "source": "skills/engineering/improve-codebase-architecture",
-        "sha256": "3c72a8a3852beda9b28b6a14ce665506ea57a59a76568cf826873ec17d798c5a"
+        "sha256": "ae56f8a4101fff550e21ee640fdd6ee41f160474b188d83e72175e2186a33dcb",
+        "upstream_sha256": "3c72a8a3852beda9b28b6a14ce665506ea57a59a76568cf826873ec17d798c5a",
+        "executables": [],
+        "requires": [
+          "codebase-design",
+          "domain-modeling"
+        ],
+        "patch": "patches/matt/improve-codebase-architecture.patch"
       },
       "skills/tdd": {
         "source": "skills/engineering/tdd",
-        "sha256": "cb510a538834fd446bae7cff1e6e46c4b625524d162bfc56c6d64486115a48e3"
+        "sha256": "8ff4a668bc0b1e747bdc74ad914dddf7a9689787ceca2c091b17671aa9235146",
+        "upstream_sha256": "cb510a538834fd446bae7cff1e6e46c4b625524d162bfc56c6d64486115a48e3",
+        "executables": [],
+        "requires": [
+          "ce-code-review",
+          "codebase-design"
+        ],
+        "patch": "patches/matt/tdd.patch"
       },
       "skills/grilling": {
         "source": "skills/productivity/grilling",
-        "sha256": "e0e4918ef2675bf3bc0e48fa83c40446cd961c107afdf435cbc2daa774cb0efe"
+        "sha256": "533961b40a625672b4e0e1e5b5e89557cc247d84bae00e2d76108cb595c237e7",
+        "upstream_sha256": "e0e4918ef2675bf3bc0e48fa83c40446cd961c107afdf435cbc2daa774cb0efe",
+        "executables": [],
+        "requires": [],
+        "patch": "patches/matt/grilling.patch"
+      },
+      "skills/bw-help": {
+        "source": "skills/engineering/ask-matt",
+        "derived_from": "ask-matt",
+        "upstream_sha256": "3e106f7d925f59b112975fb4fb96bf790d68a358b1d5a0bf6cb5f4d35035f14a",
+        "sha256": "fddac4e0e6ca887e9af14322837fed039ed7eb4bce70985a18fb501d4bd06dde",
+        "executables": [],
+        "requires": [
+          "ce-babysit-pr",
+          "ce-brainstorm",
+          "ce-commit",
+          "ce-commit-push-pr",
+          "ce-compound",
+          "ce-debug",
+          "ce-handoff",
+          "ce-plan",
+          "ce-prototype",
+          "ce-resolve-pr-feedback",
+          "ce-work",
+          "codebase-design",
+          "domain-modeling",
+          "grill-with-docs",
+          "improve-codebase-architecture",
+          "project-governance",
+          "setup-bw-harness"
+        ],
+        "patch": "patches/matt/bw-help.patch"
+      },
+      "skills/setup-bw-harness": {
+        "source": "skills/engineering/setup-matt-pocock-skills",
+        "derived_from": "setup-matt-pocock-skills",
+        "upstream_sha256": "fb96a61c2698a9f4299778861547b92f11719d033d1cd5dea7e95a98fe8e438a",
+        "sha256": "3736df4e53090eda357421ead97f3642254c6cd527563b64703461b42af3d14e",
+        "executables": [],
+        "requires": [
+          "ce-setup",
+          "project-governance"
+        ],
+        "patch": "patches/matt/setup-bw-harness.patch"
       }
+    },
+    "skill_catalog": [
+      "ask-matt",
+      "chief-of-staff",
+      "claude-handoff",
+      "code-review",
+      "codebase-design",
+      "diagnosing-bugs",
+      "domain-modeling",
+      "git-guardrails-claude-code",
+      "grill-me",
+      "grill-with-docs",
+      "grilling",
+      "handoff",
+      "implement",
+      "implement-spec",
+      "improve-codebase-architecture",
+      "loop-me",
+      "migrate-to-shoehorn",
+      "pr",
+      "prototype",
+      "research",
+      "retro",
+      "scaffold-exercises",
+      "setup-matt-pocock-skills",
+      "setup-pre-commit",
+      "setup-ts-deep-modules",
+      "software-factory",
+      "tdd",
+      "teach",
+      "to-questionnaire",
+      "to-spec",
+      "to-tickets",
+      "triage",
+      "wait-what",
+      "wayfinder",
+      "wizard",
+      "writing-beats",
+      "writing-for-agents",
+      "writing-fragments",
+      "writing-shape"
+    ],
+    "excluded_routes": {
+      "ask-matt": "Distributed as bw-help, not as a second entry.",
+      "chief-of-staff": "No shipped control path requires this upstream entry.",
+      "claude-handoff": "No shipped control path requires this upstream entry.",
+      "code-review": "No shipped control path requires this upstream entry.",
+      "diagnosing-bugs": "No shipped control path requires this upstream entry.",
+      "git-guardrails-claude-code": "No shipped control path requires this upstream entry.",
+      "grill-me": "No shipped control path requires this upstream entry.",
+      "handoff": "No shipped control path requires this upstream entry.",
+      "implement": "No shipped control path requires this upstream entry.",
+      "implement-spec": "No shipped control path requires this upstream entry.",
+      "loop-me": "No shipped control path requires this upstream entry.",
+      "migrate-to-shoehorn": "No shipped control path requires this upstream entry.",
+      "pr": "No shipped control path requires this upstream entry.",
+      "prototype": "No shipped control path requires this upstream entry.",
+      "research": "No shipped control path requires this upstream entry.",
+      "retro": "No shipped control path requires this upstream entry.",
+      "scaffold-exercises": "No shipped control path requires this upstream entry.",
+      "setup-matt-pocock-skills": "Distributed as setup-bw-harness, not as a second entry.",
+      "setup-pre-commit": "No shipped control path requires this upstream entry.",
+      "setup-ts-deep-modules": "No shipped control path requires this upstream entry.",
+      "software-factory": "No shipped control path requires this upstream entry.",
+      "teach": "No shipped control path requires this upstream entry.",
+      "to-questionnaire": "No shipped control path requires this upstream entry.",
+      "to-spec": "No shipped control path requires this upstream entry.",
+      "to-tickets": "No shipped control path requires this upstream entry.",
+      "triage": "No shipped control path requires this upstream entry.",
+      "wait-what": "No shipped control path requires this upstream entry.",
+      "wayfinder": "No shipped control path requires this upstream entry.",
+      "wizard": "No shipped control path requires this upstream entry.",
+      "writing-beats": "No shipped control path requires this upstream entry.",
+      "writing-for-agents": "No shipped control path requires this upstream entry.",
+      "writing-fragments": "No shipped control path requires this upstream entry.",
+      "writing-shape": "No shipped control path requires this upstream entry."
+    },
+    "non_routes": {
+      "skills/bw-help/SKILL.md:ask-matt:e15feef5bf081378": "Attribution for renamed derivative; not an invocation.",
+      "skills/setup-bw-harness/SKILL.md:setup-matt-pocock-skills:a2bae695fa1d47ea": "Attribution for renamed derivative; not an invocation."
     }
   },
   "ce": {
     "url": "https://github.com/EveryInc/compound-engineering-plugin",
     "commit": "fcb5e3adc1890db34f482f73e2449f3c57a2f423",
     "license": "MIT",
-    "patches": [],
     "resources": {
       "licenses/Every-MIT": {
         "source": "LICENSE",
-        "sha256": "9512267466b7d2d4bc4f150584011da7110aa95fdbe4b1932e2132d3720a937b"
+        "sha256": "9512267466b7d2d4bc4f150584011da7110aa95fdbe4b1932e2132d3720a937b",
+        "upstream_sha256": "9512267466b7d2d4bc4f150584011da7110aa95fdbe4b1932e2132d3720a937b",
+        "executables": []
       },
       ".pi/extensions/compound-engineering.ts": {
         "source": ".pi/extensions/compound-engineering.ts",
-        "sha256": "4c7a35b0527b3b07bf0bc9608c18b9f6a751cf1e931e48850941b0e4b5e5c615"
+        "sha256": "4c7a35b0527b3b07bf0bc9608c18b9f6a751cf1e931e48850941b0e4b5e5c615",
+        "upstream_sha256": "4c7a35b0527b3b07bf0bc9608c18b9f6a751cf1e931e48850941b0e4b5e5c615",
+        "executables": []
       },
       "skills/ce-brainstorm": {
         "source": "skills/ce-brainstorm",
-        "sha256": "896adf193e9eeef5d23487abbdd6425aad3a31e242d21ef900602efa8d6fd028"
+        "sha256": "f38975806fa329e900b16797c8c7a8cba27c340878c84c0ea1f1951e61d87d37",
+        "upstream_sha256": "896adf193e9eeef5d23487abbdd6425aad3a31e242d21ef900602efa8d6fd028",
+        "executables": [
+          "scripts/elevation-dispatch.sh",
+          "scripts/packs-resolve.py",
+          "scripts/peer-job-runner.py"
+        ],
+        "requires": [
+          "ce-bakeoff",
+          "ce-compound",
+          "ce-debug",
+          "ce-doc-review",
+          "ce-explain",
+          "ce-noslop",
+          "ce-plan",
+          "ce-pov",
+          "ce-prototype",
+          "ce-setup",
+          "ce-work",
+          "domain-modeling",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-brainstorm.patch"
       },
       "skills/ce-code-review": {
         "source": "skills/ce-code-review",
-        "sha256": "bc1a8e0328c96b425077f3660752b96940ed55746dbd02e263547ad2dd5b9fb1"
+        "sha256": "338186f929ef0613b49e147a3bfe8cec982613f3c68aca11bd4b8a739f5a905f",
+        "upstream_sha256": "bc1a8e0328c96b425077f3660752b96940ed55746dbd02e263547ad2dd5b9fb1",
+        "executables": [
+          "scripts/cross-model-adversarial-review.sh",
+          "scripts/findings-mechanics.py",
+          "scripts/packs-resolve.py",
+          "scripts/peer-job-runner.py",
+          "scripts/review-scope.py",
+          "scripts/run-log.py"
+        ],
+        "requires": [
+          "ce-brainstorm",
+          "ce-doc-review",
+          "ce-noslop",
+          "ce-plan",
+          "ce-resolve-pr-feedback",
+          "ce-setup",
+          "ce-work"
+        ],
+        "patch": "patches/ce/ce-code-review.patch"
       },
       "skills/ce-compound": {
         "source": "skills/ce-compound",
-        "sha256": "6484dbdf977e90ba6805041259348a13ca921971b5a8ba107649b3c90a8a6761"
+        "sha256": "82b29e1fdda3eff9c2820f8236cbdb324122ae886d60f78f5e164adad3365d3e",
+        "upstream_sha256": "6484dbdf977e90ba6805041259348a13ca921971b5a8ba107649b3c90a8a6761",
+        "executables": [
+          "scripts/packs-resolve.py",
+          "scripts/session-history/discover-sessions.sh",
+          "scripts/validate-frontmatter.py"
+        ],
+        "requires": [
+          "ce-setup",
+          "ce-simplify-code",
+          "domain-modeling",
+          "project-governance"
+        ],
+        "patch": "patches/ce/ce-compound.patch"
       },
       "skills/ce-compound-refresh": {
         "source": "skills/ce-compound-refresh",
-        "sha256": "a10d23989ebde80a6a4dc171c9f22e4419767bcf1ce3f08f966db8b904325cac"
+        "sha256": "167a94642eecb6893a2cfde38bf64df20729adce51cf97f7b666f9af176b48e5",
+        "upstream_sha256": "a10d23989ebde80a6a4dc171c9f22e4419767bcf1ce3f08f966db8b904325cac",
+        "executables": [],
+        "requires": [
+          "ce-compound"
+        ],
+        "patch": "patches/ce/ce-compound-refresh.patch"
       },
       "skills/ce-debug": {
         "source": "skills/ce-debug",
-        "sha256": "6c91c0eb4d67540fb8a19e78cfe7c2da8654cd120a16010153ba593441a95d7c"
+        "sha256": "3b8756df6c2aeaf2dee341b9a2ba16e4fa0861852983543c998d19dde4b5fe17",
+        "upstream_sha256": "6c91c0eb4d67540fb8a19e78cfe7c2da8654cd120a16010153ba593441a95d7c",
+        "executables": [
+          "scripts/packs-resolve.py"
+        ],
+        "requires": [
+          "ce-babysit-pr",
+          "ce-bakeoff",
+          "ce-brainstorm",
+          "ce-code-review",
+          "ce-commit",
+          "ce-commit-push-pr",
+          "ce-compound",
+          "ce-resolve-pr-feedback",
+          "ce-simplify-code",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-debug.patch"
       },
       "skills/ce-doc-review": {
         "source": "skills/ce-doc-review",
-        "sha256": "aa753a4b22abf818a2cbbb3ccbe833200cf27893d2d2478f111c133a130ca18c"
+        "sha256": "db6e76fca269c8fe536aa008cc72a9f28845e4aa88ce5d617a8bcb73e4938e5a",
+        "upstream_sha256": "aa753a4b22abf818a2cbbb3ccbe833200cf27893d2d2478f111c133a130ca18c",
+        "executables": [
+          "scripts/cross-model-doc-review.sh",
+          "scripts/packs-resolve.py",
+          "scripts/peer-job-runner.py"
+        ],
+        "requires": [
+          "ce-brainstorm",
+          "ce-code-review",
+          "ce-noslop",
+          "ce-plan",
+          "ce-setup",
+          "ce-work"
+        ],
+        "patch": "patches/ce/ce-doc-review.patch"
       },
       "skills/ce-handoff": {
         "source": "skills/ce-handoff",
-        "sha256": "91767e995c82e2f3cc004956d1b8054c510ace2ca2b7692c84b3ba80595289fe"
+        "sha256": "560c92e55030d83af1244f99edf5759809c8c25f36e30ab24f6909fe48dbc754",
+        "upstream_sha256": "91767e995c82e2f3cc004956d1b8054c510ace2ca2b7692c84b3ba80595289fe",
+        "executables": [],
+        "requires": [],
+        "patch": "patches/ce/ce-handoff.patch"
       },
       "skills/ce-optimize": {
         "source": "skills/ce-optimize",
-        "sha256": "e2e7dc6b6bd746596f6d10b223738467403ce9606f2f728ad693405006e86955"
+        "sha256": "ccb47a80108f5fbb5c5f32211e38961606e14f05b7e11dcadd70ad60d4666f53",
+        "upstream_sha256": "e2e7dc6b6bd746596f6d10b223738467403ce9606f2f728ad693405006e86955",
+        "executables": [
+          "scripts/experiment-worktree.sh",
+          "scripts/measure.sh",
+          "scripts/parallel-probe.sh"
+        ],
+        "requires": [
+          "ce-code-review",
+          "ce-compound",
+          "ce-debug",
+          "ce-work"
+        ],
+        "patch": "patches/ce/ce-optimize.patch"
       },
       "skills/ce-plan": {
         "source": "skills/ce-plan",
-        "sha256": "e5d53c48207f7c27e579743200b144844cb3b760b26688fd94f4a86686d9572c"
+        "sha256": "d19ff1963121cacde07e25f947d54acfa3bbc6b582c17f25b6060ca004230391",
+        "upstream_sha256": "e5d53c48207f7c27e579743200b144844cb3b760b26688fd94f4a86686d9572c",
+        "executables": [
+          "scripts/elevation-dispatch.sh",
+          "scripts/packs-resolve.py",
+          "scripts/peer-job-runner.py"
+        ],
+        "requires": [
+          "ce-bakeoff",
+          "ce-brainstorm",
+          "ce-debug",
+          "ce-doc-review",
+          "ce-explain",
+          "ce-noslop",
+          "ce-optimize",
+          "ce-pov",
+          "ce-prototype",
+          "ce-setup",
+          "ce-work",
+          "domain-modeling",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-plan.patch"
       },
       "skills/ce-setup": {
         "source": "skills/ce-setup",
-        "sha256": "e973b810c46193b28f86dc6af2154c0a79d03eff848b2429ae59587828e7212e"
+        "sha256": "36cf00c3e693fe36140c60c701c968e1682fe5f86b01269267ea41e89c1a3f61",
+        "upstream_sha256": "e973b810c46193b28f86dc6af2154c0a79d03eff848b2429ae59587828e7212e",
+        "executables": [
+          "scripts/check-health",
+          "scripts/packs-resolve.py"
+        ],
+        "requires": [
+          "bw-help",
+          "ce-babysit-pr",
+          "ce-brainstorm",
+          "ce-code-review",
+          "ce-commit",
+          "ce-commit-push-pr",
+          "ce-compound",
+          "ce-doc-review",
+          "ce-explain",
+          "ce-noslop",
+          "ce-plan",
+          "ce-work",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-setup.patch"
       },
       "skills/ce-simplify-code": {
         "source": "skills/ce-simplify-code",
-        "sha256": "daf9b38b8dc3824ee15180a64cabd72f0dc688a72eacfce8a8cbbfa6c5a7f358"
+        "sha256": "a950dc4ad8c2669b62b7f87427d3e971d46ed36d7c8d1cca0df7d9dbbc0d6b3e",
+        "upstream_sha256": "daf9b38b8dc3824ee15180a64cabd72f0dc688a72eacfce8a8cbbfa6c5a7f358",
+        "executables": [
+          "scripts/structure-evidence.py"
+        ],
+        "requires": [
+          "ce-debug"
+        ],
+        "patch": "patches/ce/ce-simplify-code.patch"
       },
       "skills/ce-work": {
         "source": "skills/ce-work",
-        "sha256": "9e134df79c2c90a6b37a2f99d8613059d908f0600b1ccb09f3f6bafdb1c722fe"
+        "sha256": "df1860411b78262390b90629f375090e5ebab013cb79cb1954bdce9b6087a945",
+        "upstream_sha256": "9e134df79c2c90a6b37a2f99d8613059d908f0600b1ccb09f3f6bafdb1c722fe",
+        "executables": [
+          "scripts/cross-model-work.sh",
+          "scripts/packs-resolve.py",
+          "scripts/peer-job-runner.py",
+          "scripts/unit-workspace.py"
+        ],
+        "requires": [
+          "ce-brainstorm",
+          "ce-code-review",
+          "ce-commit",
+          "ce-commit-push-pr",
+          "ce-debug",
+          "ce-plan",
+          "ce-pov",
+          "ce-setup",
+          "ce-simplify-code",
+          "ce-worktree",
+          "lfg",
+          "project-governance"
+        ],
+        "patch": "patches/ce/ce-work.patch"
       },
       "skills/ce-worktree": {
         "source": "skills/ce-worktree",
-        "sha256": "041c652e2c42f6ae98d0e11038ebb8a852f8f46623adfc103dc36b772e6458c7"
+        "sha256": "dc1810e842b04ef838f22e25bea64bcdac472bfe42a116657b082b64126a87cd",
+        "upstream_sha256": "041c652e2c42f6ae98d0e11038ebb8a852f8f46623adfc103dc36b772e6458c7",
+        "executables": [],
+        "requires": [
+          "ce-code-review",
+          "ce-work"
+        ],
+        "patch": "patches/ce/ce-worktree.patch"
       },
       "skills/ce-noslop": {
         "source": "skills/ce-noslop",
-        "sha256": "e199145cad2da2f5245305984d24b8fbcfb6af003e47efcdf3c6dbd4dbaa9331"
+        "sha256": "fc6a4accf09a27748c6f22b9d6684c7b9aafec98183d9454442eec45d29d9860",
+        "upstream_sha256": "e199145cad2da2f5245305984d24b8fbcfb6af003e47efcdf3c6dbd4dbaa9331",
+        "executables": [],
+        "requires": [],
+        "patch": "patches/ce/ce-noslop.patch"
       },
       "skills/ce-prototype": {
         "source": "skills/ce-prototype",
-        "sha256": "4a3072fc2d8099c7327377f3c295356fae2360caef854129f7652d4c414dd5fc"
+        "sha256": "b4c602b41758398d0b1cadc445b7cb8e3e0f8ea31f12861bf27ca93d5b69ac9f",
+        "upstream_sha256": "4a3072fc2d8099c7327377f3c295356fae2360caef854129f7652d4c414dd5fc",
+        "executables": [],
+        "requires": [
+          "ce-brainstorm",
+          "ce-plan",
+          "ce-work",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-prototype.patch"
       },
       "skills/ce-bakeoff": {
         "source": "skills/ce-bakeoff",
-        "sha256": "589b6cd771c0a88d16b5c9a878590058696b6198b60907222a5547fc6c1bb9f2"
+        "sha256": "bcb4d07b5af6e978fd24f9ac0d5193f08e5ff6cc6dfac3b79b14c0f09359282c",
+        "upstream_sha256": "589b6cd771c0a88d16b5c9a878590058696b6198b60907222a5547fc6c1bb9f2",
+        "executables": [],
+        "requires": [
+          "ce-brainstorm",
+          "ce-debug",
+          "ce-ideate",
+          "ce-optimize",
+          "ce-plan",
+          "ce-pov",
+          "ce-prototype"
+        ],
+        "patch": "patches/ce/ce-bakeoff.patch"
       },
       "skills/ce-pov": {
         "source": "skills/ce-pov",
-        "sha256": "c75c6b8fb5d01189ca587bb862abfd2ec685fe18e1876d08a3cd139d9e4d5ee3"
+        "sha256": "a5335ae42cfc075f5a432d8d09b2d161cec7f56d5daa7343c084f664b2456f56",
+        "upstream_sha256": "c75c6b8fb5d01189ca587bb862abfd2ec685fe18e1876d08a3cd139d9e4d5ee3",
+        "executables": [
+          "scripts/cross-model-pov.sh",
+          "scripts/peer-job-runner.py"
+        ],
+        "requires": [
+          "ce-bakeoff",
+          "ce-brainstorm",
+          "ce-code-review",
+          "ce-compound",
+          "ce-debug",
+          "ce-doc-review",
+          "ce-explain",
+          "ce-ideate",
+          "ce-noslop",
+          "ce-plan",
+          "ce-setup",
+          "ce-work"
+        ],
+        "patch": "patches/ce/ce-pov.patch"
       },
       "skills/ce-explain": {
         "source": "skills/ce-explain",
-        "sha256": "df4ff34491e56d39ff115bc4d036b0f6b654f4b8887fd8ec8fa4fcaee040ed04"
+        "sha256": "eadcc192200411fdcc630fa2748423e1c7ccc528dac1befd383c6cae997ccbee",
+        "upstream_sha256": "df4ff34491e56d39ff115bc4d036b0f6b654f4b8887fd8ec8fa4fcaee040ed04",
+        "executables": [],
+        "requires": [
+          "ce-brainstorm",
+          "ce-compound",
+          "ce-debug",
+          "ce-ideate",
+          "ce-plan",
+          "ce-pov"
+        ],
+        "patch": "patches/ce/ce-explain.patch"
       },
       "skills/ce-ideate": {
         "source": "skills/ce-ideate",
-        "sha256": "054e1287021f93051378dc65407f6e14ecec7a735e057bb813006f1a79ad6894"
+        "sha256": "25896295864af354acbe8061cfc91022b8dfe4c94cea6232db225c1f9f978804",
+        "upstream_sha256": "054e1287021f93051378dc65407f6e14ecec7a735e057bb813006f1a79ad6894",
+        "executables": [],
+        "requires": [
+          "ce-brainstorm",
+          "ce-doc-review",
+          "ce-plan",
+          "ce-pov",
+          "ce-work"
+        ],
+        "patch": "patches/ce/ce-ideate.patch"
+      },
+      "skills/ce-commit": {
+        "source": "skills/ce-commit",
+        "upstream_sha256": "af7fc8e02d4c41a3d6690a73fdc547fec6cfbf37b68131a7059e26c40a9e8856",
+        "sha256": "95234a98b86d38411f632c04622afead1cb7368196c60d4c98e3141638a9493a",
+        "executables": [],
+        "requires": [
+          "ce-commit-push-pr"
+        ],
+        "patch": "patches/ce/ce-commit.patch"
+      },
+      "skills/ce-commit-push-pr": {
+        "source": "skills/ce-commit-push-pr",
+        "upstream_sha256": "67554b2de4dbd01d17d3c40dac8195b0fb2c401e8e251978c2b371a5a798af8c",
+        "sha256": "b9ebe317543ce4be33b8acbefb571d8532d244c58767e549d303b59cdd03bc96",
+        "executables": [],
+        "requires": [
+          "ce-babysit-pr",
+          "ce-code-review",
+          "ce-explain",
+          "ce-noslop",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-commit-push-pr.patch"
+      },
+      "skills/ce-resolve-pr-feedback": {
+        "source": "skills/ce-resolve-pr-feedback",
+        "upstream_sha256": "9a4d8e4b9116a633857e35320c9a3fdef8222f7bb0ae62fb4477e2ceaf99dd2e",
+        "sha256": "5e8758951709ae6971befa314b84f77fba8781617f071e3a01bf1ef94a213000",
+        "executables": [
+          "scripts/get-pr-comments",
+          "scripts/get-thread-for-comment",
+          "scripts/reply-to-pr-thread",
+          "scripts/resolve-pr-thread"
+        ],
+        "requires": [
+          "ce-babysit-pr",
+          "ce-code-review",
+          "ce-debug",
+          "ce-noslop",
+          "ce-pov",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-resolve-pr-feedback.patch"
+      },
+      "skills/ce-babysit-pr": {
+        "source": "skills/ce-babysit-pr",
+        "upstream_sha256": "392539120768acb44e559a6dbe7d1c820b10d1f5d81462d6d5a17670305b65f5",
+        "sha256": "61b1a41bed220552ff9cc6abae9a990bc79d316c8bcdddfc3ff0d9b8c2b9742a",
+        "executables": [
+          "scripts/intake-overlap",
+          "scripts/pr-snapshot"
+        ],
+        "requires": [
+          "ce-commit-push-pr",
+          "ce-debug",
+          "ce-noslop",
+          "ce-resolve-pr-feedback",
+          "ce-work",
+          "lfg"
+        ],
+        "patch": "patches/ce/ce-babysit-pr.patch"
+      },
+      "skills/lfg": {
+        "source": "skills/lfg",
+        "upstream_sha256": "cdf05b3b4ed08ac08ea9e5d77c62e0c28ee4e478925c576632cd0e94a0598a88",
+        "sha256": "b1de16e9296a8a1dc81e63d7406a0d2be213196ac6470052cffd209e1530e61a",
+        "executables": [],
+        "requires": [
+          "ce-babysit-pr",
+          "ce-brainstorm",
+          "ce-code-review",
+          "ce-commit-push-pr",
+          "ce-compound",
+          "ce-debug",
+          "ce-doc-review",
+          "ce-explain",
+          "ce-handoff",
+          "ce-ideate",
+          "ce-noslop",
+          "ce-plan",
+          "ce-pov",
+          "ce-prototype",
+          "ce-resolve-pr-feedback",
+          "ce-simplify-code",
+          "ce-test-browser",
+          "ce-work",
+          "project-governance"
+        ],
+        "patch": "patches/ce/lfg.patch"
+      },
+      "skills/ce-test-browser": {
+        "source": "skills/ce-test-browser",
+        "upstream_sha256": "1ae56bf5bb8b47794a1de0daed56b445c104aba43dd6b338d1ebc035c6b52d20",
+        "sha256": "b83468abcc7a035be5f720608c81a95e433023b49980136f14a99d3a4c6356f6",
+        "executables": [
+          "scripts/resolve-port.sh"
+        ],
+        "requires": [
+          "ce-setup"
+        ],
+        "patch": "patches/ce/ce-test-browser.patch"
       }
     },
     "skill_catalog": [
@@ -167,15 +680,30 @@
       "wtf"
     ],
     "excluded_routes": {
-      "ce-help": "Use bw-help for local navigation.",
-      "ce-strategy": "Product strategy is outside this Python pack.",
-      "ce-proof": "External publishing is not offered.",
-      "ce-promote": "External marketing is not offered.",
-      "ce-commit": "Project Git delivery is not offered.",
-      "ce-commit-push-pr": "Project Git delivery is not offered.",
-      "ce-resolve-pr-feedback": "Remote PR handling is not offered.",
-      "ce-babysit-pr": "Remote PR monitoring is not offered.",
-      "lfg": "Autonomous shipping is not offered."
+      "ce-dogfood": "No shipped control path requires this upstream entry.",
+      "ce-help": "Navigation is provided by bw-help.",
+      "ce-polish": "No shipped control path requires this upstream entry.",
+      "ce-product-pulse": "No shipped control path requires this upstream entry.",
+      "ce-promote": "Marketing distribution is outside this pack.",
+      "ce-proof": "Publisher integration is not part of the shipped workflow.",
+      "ce-retro": "No shipped control path requires this upstream entry.",
+      "ce-retune": "No shipped control path requires this upstream entry.",
+      "ce-riffrec-feedback-analysis": "No shipped control path requires this upstream entry.",
+      "ce-strategy": "Product strategy is outside the development workflow.",
+      "ce-sweep": "No shipped control path requires this upstream entry.",
+      "ce-test-xcode": "No shipped control path requires this upstream entry.",
+      "wtf": "No shipped control path requires this upstream entry."
+    },
+    "non_routes": {
+      "skills/ce-setup/references/config-template-lines.txt:ce-sweep:1026659bd517104d": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template-lines.txt:ce-sweep:62cb5d65b8745860": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template-lines.txt:ce-promote:b452840c450b0a34": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template-lines.txt:ce-promote:45de5772a73ca344": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template-lines.txt:ce-product-pulse:117b95d0874efe8e": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template.yaml:ce-promote:b452840c450b0a34": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template.yaml:ce-promote:40903d854bc62b7f": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template.yaml:ce-sweep:1026659bd517104d": "Upstream configuration ownership comment; not an invocation.",
+      "skills/ce-setup/references/config-template.yaml:ce-sweep:1fe8d90fd0fb4ef1": "Upstream configuration ownership comment; not an invocation."
     }
   }
 }

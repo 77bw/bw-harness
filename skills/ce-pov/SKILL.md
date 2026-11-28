@@ -1,64 +1,66 @@
 ---
 name: ce-pov
-description: "Judge a supplied subject against the project's evidence and constraints. Use when assessing an external-adoption question, a holistic take on a document, or a supplied approach set. Use for an oracle panel to consult other models and reconcile their opinions. Use ce-explain for understanding and ce-doc-review for findings review."
-argument-hint: "[question, document, or approaches] [cross-check] — or bare"
+description: "根据项目的证据和限制来判断所提供的主题。在评估外部采用问题、对文档的整体看法或提供的方法集时使用。用于判定依据机小组咨询其他模型并协调他们的意见。使用 ce-explain 进行理解，使用 ce-doc-review 进行结果审查。"
+argument-hint: "[问题、文件或方法] [交叉检查] — 或裸露"
 ---
 
-# Form a Point of View
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Produce a decisive, project-grounded point of view in the subject's own shape: a **graded verdict** on an external-adoption question, a **holistic take** on a document, or a **position** on a supplied approach set. The subject is whatever this skill was invoked with, in the prompt or the conversation. Stay read-only while forming and reconciling the POV. You are done when the POV is delivered with its attribution and required disclosure, or when an explicit blocker is returned. Use `ce-bakeoff` to develop competing solutions, `ce-ideate` to explore opportunities, or `ce-brainstorm` to establish goals.
+# 形成观点
+
+以主题自身的形式产生决定性的、以项目为基础的观点：对外部采用问题的**分级裁决**、对文档的**整体看法**，或对提供的方法集的**立场**。主题是在提示或对话中调用此技能的任何内容。在形成和协调 POV 时保持只读状态。当 POV 连同其归属和所需披露一起交付时，或者当返回显式阻塞项时，您就完成了。使用 `ce-bakeoff` 开发竞争解决方案，`ce-ideate` 探索机会，或 `ce-brainstorm` 建立目标。
 
 
-## Grounding is not optional
+## 接地不是可选的
 
-**Never issue a POV you did not earn against the project's own context.** Every subject must meet the minimum project evidence (the **project floor**) in `references/method.md`. An external-adoption verdict must also meet the full external evidence bar there. A document or approach-set POV must verify against outside sources any external claim its bottom line depends on. Nothing the conversation asserts substitutes for grounding.
+**切勿针对项目自身背景发布您未获得的 POV。** 每个主题都必须满足 `references/method.md` 中的最低项目证据（**项目楼层**）。外部收养判决还必须满足完整的外部证据标准。文件或方法集 POV 必须根据外部来源验证其底线所依赖的任何外部声明。谈话中所主张的任何内容都不能替代接地气。
 
-## Consumer and interaction
+## 消费者与互动
 
-Deliver a supported position in the form the intended consumer can use. Lead with the decision and preserve the evidence, material tradeoffs, uncertainty, and conditions that determine it. Make identifiers understandable without requiring the reader to reopen the subject. In progress updates, say in plain words what you are checking and which model or helper is checking it. Never name this skill's machinery there (payloads, scouts, dossiers, tiers, round numbers, scratch files).
+以目标消费者可以使用的形式提供支持的位置。主导决策并保存决定决策的证据、重大权衡、不确定性和条件。使标识符易于理解，而不需要读者重新打开主题。在进行更新时，请用简单的语言说明您正在检查的内容以及哪个模型或助手正在检查它。永远不要在那里命名该技能的机制（有效负载、侦察、档案、等级、轮数、临时文件）。
 
-When contributing to an ongoing workflow, return the result and leave continuation to its owner, the calling workflow. Do not add follow-up or panel offers to that return. An explicit oracle or named-peer request still runs the panel, including when it comes from a calling workflow.
+当为正在进行的工作流做出贡献时，返回结果并将继续留给其所有者，即调用工作流。请勿在该退货中添加后续报价或小组报价。显式的判定依据机或命名对等请求仍会运行面板，包括来自调用工作流程的请求。
 
-## Identify the question and return the result
+## 识别问题并返回结果
 
-Identify the question from the request and conversation, then look up facts you can verify. Do not interview the user to work out what to assess. If missing information would change the recommendation and you cannot find it, return **Blocked — missing context**. Explain what is missing, why it matters, and what would resolve it. The calling agent decides whether to ask for clarification or take another action. This applies whether the user invokes `ce-pov` directly or another agent calls it; no separate non-interactive mode is needed.
+从请求和对话中找出问题，然后查找可以验证的事实。不要采访用户来确定要评估什么。如果缺少信息会更改推荐，并且您无法找到它，请返回 **已阻止 - 缺少上下文**。解释缺少什么，为什么它很重要，以及如何解决它。呼叫代理决定是否要求澄清或采取其他行动。无论用户直接调用`ce-pov`还是其他代理调用它，这都适用；不需要单独的非交互模式。
 
-## Artifact Root
+## 神器根
 
-Resolve `<root>` the first time you compose a `<root>/` path; a read of `<root>/solutions/` counts as composing one. Pass the resolved path to scouts, never the config. A non-git project has no `<root>`, so its prior-decision scan uses local ADRs and design docs instead.
+第一次构建`<root>/`路径时解析`<root>`；阅读`<root>/solutions/`算作撰写一篇。将解析的路径传递给侦察兵，而不是配置。非 git 项目没有 `<root>`，因此其事先决策扫描使用本地 ADR 和设计文档。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-### Phase 0: Frame and Classify
+### 第 0 阶段：框架和分类
 
-**Read `references/intake.md` now, before any grounding.** It defines the output mode, what a calling workflow passes in, orientation and framing, sizing, and what to do when the question has no bounded answer. Settle the subject and the POV intent there (adopt / migrate / compare / is-this-our-problem / Document-take / Approach-set / explainer); an intent that belongs to another skill finishes at intake, and one that continues records how reversible the decision is. Read `references/boundaries.md` when this skill's fit is in doubt.
+**现在，在任何基础之前阅读`references/intake.md`。**它定义了输出模式、调用工作流程传入的内容、方向和框架、大小以及当问题没有有限答案时要做什么。在那里解决主题和 POV 意图（采用/迁移/比较/这是我们的问题/文档获取/方法设置/解释者）；属于另一项技能的意图在摄入时结束，而继续的意图则记录该决定的可逆性。当对这项技能是否合适有疑问时，请阅读`references/boundaries.md`。
 
-### Phase 1: Ground
+### 第一阶段：接地
 
-**Read `references/grounding.md` now, before grounding by either path.** It defines the model tiers (the POV reasoning itself is never dispatched), where scratch files may go, what scouts receive and how many run, which capabilities gate which steps, and how grounded facts are kept apart from unconfirmed ones.
+**现在，在通过任一路径接地之前，请阅读`references/grounding.md`。**它定义了模型层（POV 推理本身永远不会被发送）、临时文件可能去哪里、侦察员收到什么以及运行多少个、哪些功能控制哪些步骤，以及如何将扎实的事实与未经证实的事实分开。
 
-Send scouts directly to candidate-specific current evidence, never a generic repo profile. They search in their own context and return a dossier path plus a gist, which you read on demand. Where the facts the verdict depends on are already located, confirm them with bounded reads of the authoritative source instead of dispatching scouts; unscoped or noisy grounding still dispatches. A claim made in the conversation is a pointer to check, never self-verifying. The prior-decision scan (`<root>/solutions/`, ADRs, design docs) stays mandatory on either path.
+直接将侦察员发送到特定于候选人的当前证据，而不是通用的回购配置文件。他们在自己的上下文中搜索并返回档案路径和要点，您可以按需阅读。当判决所依据的事实已经确定时，通过对权威来源的有限阅读来确认，而不是派遣侦察员；未确定范围或有噪音的接地仍然会发送。谈话中提出的主张是一个需要检查的指针，而不是自我验证。事先决策扫描（`<root>/solutions/`、ADR、设计文档）在任一路径上都是强制性的。
 
-When the judgment requires an explanation of unresolved behavior or design rationale, invoke `ce-explain`. Pass the question, its scope, and the decision it informs. Use adequate current evidence instead of repeating an investigation. Treat its cited findings as evidence to assess under the same grounding standard, not as authority for the recommendation. Keep ownership of the judgment here. If `ce-explain` is unavailable, gather the evidence directly or report what is missing.
+当判断需要对未解决的行为或设计原理进行解释时，请调用`ce-explain`。传递问题、其范围以及它所传达的决定。使用充分的现有证据而不是重复调查。将其引用的发现视为根据相同基础标准进行评估的证据，而不是作为建议的权威。保留此处判决的所有权。如果`ce-explain`不可用，请直接收集证据或报告缺少的内容。
 
-### Phase 2: Verify Grounding
+### 第 2 阶段：验证接地
 
-**Read `references/method.md` now**, before reasoning about the POV. It defines the Verify and POV steps, the skeptic stance, tiering, and the evidence check. Apply that check over the grounded evidence. If the evidence falls short, no subject shape may return a confident result; that reference names the result each shape returns instead.
+**在推理 POV 之前，立即阅读 `references/method.md`**。它定义了验证和 POV 步骤、怀疑态度、分层和证据检查。对有根据的证据进行检查。如果证据不足，任何主体形状都无法返回可信的结果；该引用命名了每个形状返回的结果。
 
-### Phase 3: Point of View
+### 第三阶段：观点
 
-First form ce-pov's own independent POV under the active subject-shape contract in `references/method.md`, but do not emit it. Freeze that position. Keep it out of an independent peer's initial context; expose it only when the task is to critique that position, or in a later reconciliation round.
+首先在`references/method.md`中的活动主题形状契约下形成ce-pov自己的独立POV，但不发射它。冻结那个位置。使其远离独立同行的初始背景；仅当任务是批评该立场或在以后的和解回合中才揭露它。
 
-A panel request is an explicit ask to consult or reconcile other models: a panel, a cross-check, or `oracle`, anywhere in the invocation context. Declining one, or merely mentioning one, is not a request. When a panel is requested, or when a POV formed without one may qualify for a proactive offer, read `references/cross-model-panel.md` before resolving participation or deciding whether to offer. Finish the panel branch before composing the result. A POV that follows a panel request states which peers ran, or that none did and why. A POV with no panel request carries no panel note.
+面板请求是明确要求咨询或协调其他模型：面板、交叉检查或`oracle`，在调用上下文中的任何位置。拒绝一个或仅仅提及一个，并不是一种请求。当请求设立小组时，或者在没有小组的情况下形成的 POV 可能有资格获得主动要约时，请在解决参与或决定是否要约之前阅读`references/cross-model-panel.md`。在组成结果之前完成面板分支。小组请求后的 POV 会说明哪些同行运行了，或者没有运行，以及原因。没有小组请求的 POV 不带有小组注释。
 
-Only then deliver the position with the content required by `references/method.md`. Adapt its presentation to the intended use; cite supporting evidence rather than reprinting dossiers or raw peer output.
+然后才交付`references/method.md`所需内容的位置。调整其外观以适应预期用途；引用支持性证据，而不是重印档案或原始同行输出。
 
-### Phase 4: Deliver and return
+### 第四阶段：交付和退货
 
-The judgment is the deliverable; implementation is not. A calling workflow receives the result and control back. For a requested write-up or continuation, read `references/followup.md`; it defines artifact delivery and what authority a downstream action needs. Do not require a next-step choice to complete a POV.
+判决是可交付成果；实施则不然。调用工作流接收结果并返回控制权。对于所请求的补充或继续，请阅读`references/followup.md`；它定义了产物交付以及下游操作需要什么权限。不需要下一步选择来完成 POV。

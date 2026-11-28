@@ -1,82 +1,82 @@
-# Execution Strategy and Native Dispatch
+# 执行策略和本地调度
 
-Read this after the engine is resolved and before dispatching any worker or scheduling a parallel wave. `SKILL.md` resolves the route and enforces the checks on in-progress files and writes; the reference for the selected engine holds any engine-specific lock. This file describes how native work is scheduled, packaged, dispatched, and integrated.
+在引擎解决后、派遣任何工作人员或安排并行波之前，请阅读本文。 `SKILL.md` 解析路由并强制检查正在进行的文件和写入；所选引擎的参考持有任何特定于引擎的锁定。该文件描述了本机工作是如何调度、打包、分派和集成的。
 
-A spawned worker or peer starts a new context and does not continue the parent conversation.
+生成的工作人员或对等方启动新的上下文，并且不会继续父对话。
 
-For the inline/subagent engine, **run each dependency layer's independent units together as a parallel wave of fresh workers.** This is the default, not an optimization to opt into: a wave spends more tokens than inline work in exchange for finishing sooner, and that is the intended trade. Serialize writes only where the dependency graph actually demands it, and only for the specific units that demand it. Let the plan's `Dependencies` and `Files` drive batching: run an independent dependency layer together, then the next. Serializing a whole plan is justified only by a genuinely linear dependency chain, or by units that can neither meet the shared-workspace wave contract below nor obtain an isolated workspace. Blanket caution never justifies it.
+对于 inline/subagent 引擎，**将每个依赖层的独立单元作为新工作人员的并行 Wave 一起运行。** 这是默认设置，而不是选择的优化：一个 Wave 花费比内联工作更多的代币来换取更快完成，这就是预期的交易。序列化仅在依赖关系图实际需要它的地方写入，并且仅针对需要它的特定单元。让计划的`Dependencies`和`Files`驱动批处理：一起运行一个独立的依赖层，然后运行下一个。序列化整个计划只能通过真正的线性依赖链或既不能满足下面的共享工作空间波契约也不能获得隔离工作空间的单元来证明。一刀切的谨慎从来没有证明其合理性。
 
-A unit that must run in sequence gains no time from a worker, so run it inline in this context. Give a sequential unit a fresh worker only when this context is crowded enough that a clean window would materially help that unit.
+必须按顺序运行的单元不会从工作人员那里获得时间，因此在此上下文中内联运行它。仅当上下文足够拥挤以至于干净的窗口对该单元有实质性帮助时，才为顺序单元分配新的工作人员。
 
-| Strategy | When to use |
+| 战略 | 何时使用 |
 |----------|-------------|
-| **Inline** | Trivial work (1-2 files, no real decomposition), units the dependency graph chains, work needing user interaction mid-flight, or bare prompts that lack structured units |
-| **Parallel subagents** | The default for structured multi-unit plans: dispatch each dependency layer's independent units (per the Parallel Safety Check) together, then the next layer — in harness-isolated workspaces, or in the shared workspace under the wave contract below |
-| **Serial subagents** | A chained unit when this context is crowded enough that a fresh window would materially help it. Fresh context per unit, executed in dependency order |
+| **排队** | 琐碎的工作（1-2 个文件，没有真正的分解）、依赖图链的单元、需要用户交互的工作，或者缺乏结构化单元的简单提示 |
+| **并行子代理** | 结构化多单元计划的默认设置：将每个依赖层的独立单元（根据并行安全检查）分派在一起，然后是下一层 - 在宿主隔离的工作区中，或在下面的波次合同下的共享工作区中 |
+| **系列子代理** | 当这个环境足够拥挤以至于一个新的窗户会对其有实质性帮助时，就会成为一个连锁单元。每个单元都有新的上下文，按依赖顺序执行 |
 
-**Parallel Safety Check**: scheduling is separate from engine and workspace selection. Apply this check to native and cross-model candidates before dispatching a wave:
+**并行安全检查**：调度与引擎和工作空间选择分开。在发送 wave 之前，将此检查应用于本机和跨模型候选者：
 
-1. Start only with units whose dependencies are already committed and whose peers in the same readiness layer do not depend on one another.
-2. Map declared files to units from each candidate's `Files:` section, then reason beyond those declarations. File overlap is necessary but not sufficient: shared types/APIs/interfaces, migrations, lockfiles, generated artifacts/clients, registry or config/schema surfaces, and an environment singleton (one dev server/port, shared database, browser session, package install, or rate limit) all create contention.
-3. Estimate expected merge and verification cost. Even isolated workers serialize when they share a contract or when reconciling their likely outputs is not obviously smaller and safer than serial authoring.
-4. Dispatch together only when dependencies, declared files, semantic surfaces, runtime resources, and expected merge cost all support independence. Resolve uncertainty by inspection, not by default: read the actual files and contracts in question; minutes of reading is cheaper than hours of serial waiting. When contention survives inspection, **decline parallelism** for exactly the contending units and dispatch the rest of the layer in parallel. Uncertainty about one unit never serializes its whole layer. Safety still beats speed for the units that genuinely contend.
-5. Give every concurrent worker either an isolated workspace or membership in a shared-workspace wave that meets the wave contract below. A synchronous native unit stays in the active checkout.
-6. Cap concurrency at a bounded batch (~3-5 workers), even when more units appear independent.
-7. Weigh the cold-start cost before decomposing: every dispatched worker pays a context ramp-up before its first write. A unit too small to outweigh its own ramp-up belongs batched with related small units into one worker's packet, or done inline, rather than dispatched alone.
-8. Abort criteria: broad unplanned edits, semantic overlap, out-of-scope failures, or repeated collision disables further waves; preserve or finish affected work serially.
+1. 仅从依赖项已提交且同一就绪层中的对等方不相互依赖的单元开始。
+2. 将声明的文件映射到每个候选人的 `Files:` 部分中的单元，然后对这些声明进行推理。文件重叠是必要的，但还不够：共享types/APIs/interfaces、迁移、锁定文件、生成的artifacts/clients、注册表或config/schema表面以及环境单例（一个开发server/port、共享数据库、浏览器会话、包安装或速率限制）都会产生争用。
+3. 估计预期的合并和验证成本。即使是孤立的工作人员在共享合同或协调其可能的输出时进行序列化也不会明显比串行创作更小和更安全。
+4. 仅当依赖项、声明的文件、语义表面、运行时资源和预期合并成本都支持独立性时才一起分派。通过检查而不是默认解决不确定性：阅读有问题的实际文件和合同；几分钟的阅读比几个小时的连续等待要便宜。当争用通过检查后，**拒绝竞争单元的并行性**，并并行调度该层的其余部分。一个单元的不确定性永远不会序列化它的整个层。对于真正竞争的单位来说，安全仍然胜过速度。
+5. 为每个并发工作人员提供一个独立的工作空间，或者满足下面的 Wave 合同的共享工作空间 Wave 中的成员资格。同步本机单元保持在活动结账状态。
+6. 即使更多单元看起来是独立的，也要限制有限批次（约 3-5 个工作人员）的并发性。
+7. 在分解之前权衡冷启动成本：每个派遣的工作人员在第一次写入之前都要支付上下文提升费用。一个单元太小而无法超过其自身的增量，应与相关的小单元一起分批放入一个工人的包中，或者串联完成，而不是单独调度。
+8. 中止标准：广泛的计划外编辑、语义重叠、超出范围的故障或重复碰撞会禁用进一步的波次；继续保留或完成受影响的工作。
 
-Isolation for native workers is the harness's job, within the boundary `SKILL.md` sets. Probe what your native subagent mechanism provides and pick the parallel path:
-- **Harness-native isolated workers**: each worker edits an isolated workspace the harness manages, for example Claude Code `Agent` with worktree isolation, or a harness worker capability whose result confirms an isolated workspace. Being already inside a worktree does not block this route (harness-managed worktrees are peers, not nested). But a harness-supplied workspace is not automatically a faithful snapshot of your tree: when the session itself runs inside a managed worktree, the harness may cut the copy from the primary checkout or its default branch instead (observed live), and uncommitted state never survives isolation. So dispatch each isolated worker with the intended base commit SHA. Before editing, the worker verifies its copy's `HEAD` equals that SHA, and on mismatch stops and reports rather than proceeding; the orchestrator then runs that unit on the shared workspace under the wave contract or serially. A unit that depends on uncommitted state cannot use this route. Parallelize only units that pass the Safety Check; isolation makes recovery possible, not overlap safe.
-- **Shared workspace only**: subagents edit your working directory. Dispatch a parallel wave only when it meets the shared-workspace wave contract below; units that cannot meet it run serially. Do not infer isolation from the presence of a subagent API; use only a capability the active harness actually exposes.
-- **No subagent mechanism:** run inline.
+在边界 `SKILL.md` 集内，本地工人的隔离是宿主的工作。探索您的本机子代理机制提供的内容并选择并行路径：
+- **宿主本机隔离工作线程**：每个工作线程编辑宿主管理的隔离工作区，例如具有工作树隔离的 Claude Code `Agent`，或者其结果确认隔离工作区的宿主工作线程功能。已经位于工作树内部不会阻塞此路径（宿主管理的工作树是对等的，而不是嵌套的）。但是，宿主提供的工作空间不会自动成为树的忠实快照：当会话本身在托管工作树内运行时，宿主可能会从主签出或其默认分支中剪切副本（实时观察），并且未提交的状态永远不会在隔离中幸存。因此，使用预期的基本提交 SHA 来分派每个隔离的工作线程。在编辑之前，工作人员会验证其副本的 `HEAD` 是否等于 SHA，如果不匹配，则停止并报告而不是继续；然后，编排器根据波合同或串行方式在共享工作区上运行该单元。依赖于未提交状态的单元不能使用此路由。仅并行化通过安全检查的单元；隔离使恢复成为可能，而不是重叠安全。
+- **仅限共享工作区**：子代理编辑您的工作目录。仅当满足下面的共享工作空间wave合约时才调度并行wave；不能满足的单元串行运行。不要通过子代理API的存在来推断隔离；仅使用活动宿主实际公开的功能。
+- **无子代理机制：**内联运行。
 
-**Dispatch a wave in one response.** When a dependency layer clears the Safety Check, first privately list every dispatch-ready unit; then issue every worker dispatch that doesn't depend on another's result in that one response — multiple dispatch tool calls in a single message (e.g. Claude Code `Agent` calls), never one per turn.
+**一次响应调度一波。** 当依赖层清除安全检查时，首先私下列出每个调度就绪单元；然后在一个响应中发出不依赖于另一个结果的每个工人调度 - 在一条消息中调用多个调度工具（例如 Claude Code `Agent` 调用），而不是每轮一个。
 
-**Native dispatch (inline/subagent engines only)** uses your harness's subagent/worker mechanism. Once a unit is selected for cross-model execution, use the loaded controller protocol for that unit; it must not re-enter this ordinary subagent dispatch.
+**本机调度（仅限inline/subagent引擎）**使用您的宿主的subagent/worker机制。一旦选择一个单元进行跨模型执行，请使用该单元加载的控制器协议；它不能重新进入这个普通的子代理调度。
 
-Read `references/worker-model.md` before the first native worker dispatch. It decides which model each worker runs on.
+在第一个本地工人调度之前阅读`references/worker-model.md`。它决定每个工作人员运行的模型。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-Classify a rejected native dispatch by whether a worker launched: correct a pre-launch argument rejection once, leave capacity-limited work queued, and if another launch failure survives correction, execute that unit inline under the same unit packet and verification contract.
+根据工作人员是否启动对被拒绝的本机调度进行分类：纠正一次预启动参数拒绝，将容量有限的工作留在队列中，如果另一个启动失败在纠正后仍然存在，则在相同的单元数据包和验证合约下内联执行该单元。
 
-**Fresh worker invariant (native subagent dispatch only):** When dispatching an implementation unit to a native subagent worker, create a new worker context with no prior implementation-unit transcript. Bind the worker handle to exactly that unit: it may continue or recover the same unit, but never receive a different unit. Retire each handle after its unit is integrated; never retask it or retain idle implementation workers for reuse. Invoke an explicit close/release operation only when the active harness exposes one and assigns that lifecycle action to the caller; otherwise completion is the worker's release boundary. Inline execution creates no worker context or handle, so it has nothing to retire.
+**每个原生子代理实施单元使用新上下文。** 不携带任何先前实施单元的对话。将工作句柄严格绑定到该单元；可以继续或恢复同一单元，但不为不同单元复用。集成后退役句柄，不重新分派任务。仅当当前宿主提供关闭或释放接口且该职责明确由调用方承担时调用它；否则完成就是释放边界。就地执行不创建工作上下文或句柄。
 
-Give each native worker:
-- Include the active unit's prototype source citations with their qualifications about locality, availability, and the authority of requirements. Instruct the worker to inspect accessible, explicitly cited prototype decisions and selected screens or states before implementing the affected behavior, including when those sources are in another worktree. Keep edits and tests inside the assigned workspace.
-- The plan path plus a **bounded unit packet** and inherited authority — Goal Capsule, Definition of Done, the unit's section, the Verification Contract entries relevant to it, any referenced R/F/AE/KTD excerpts, **plus any Product Contract Key Decision whose `Governs R…` links name the unit's cited R-IDs** (its `session-settled:` annotation reaches the worker only through this reverse link — cited KTDs alone carry only planning-decision labels). A downstream worker may narrow that unit and authority, never broaden either. Do not send "read the whole plan" as the worker prompt. (For a legacy non-unified plan, the plan path for reference is acceptable.)
-- The user's stated limits from this run that bear on the unit (paths to leave alone, actions not to take, output they do not want), in the user's words, including limits the plan does not record. Where the plan and a user limit conflict, the limit wins and the worker reports the conflict.
-- **What to do when a step is blocked.** When the harness refuses an action, or a step cannot run in this environment (a missing credential, tool, or service), the worker holds that step and whatever depends on it. It does not reach the same result by another route, keeps its finished edits in place, completes the parts of the unit that do not depend on it, and reports. A test the worker expects to fail, or is fixing, is ordinary work, not a blocked step.
-- The unit's Goal, Files, Approach, Execution note, Patterns, Test scenarios, Verification, any resolved deferred questions for it, and the text and citation of each Compound Pack rule matched to its files (`references/work-intake.md`), given as team rules to honor that never widen the unit or its authority.
-- The **Build what was asked** and **Plan IDs stay out of written files** rules from `references/implementation-loop.md`, verbatim, and the instruction that tests prove the behavior the unit builds: make vague scenarios concrete, and add no scenarios or handling for failure paths, validation, or edge cases the unit does not build. The worker reports anything it considered and did not build.
-- **Instruction to choose the unit's evidence strategy and gather the evidence** (see Evidence Strategy in Phase 2) — for behavior-bearing changes, honor the Execution note and default to proof-first or characterization-first: create/update/strengthen the test and observe the red failure or characterization baseline **before** changing production code. The worker is the only party that witnesses this, so it must capture it as it goes.
-- **Instruction to report, in its final message, (a) the file paths it changed, (b) the unit's verification evidence, and (c) whatever did not go as briefed** — for (b), `behavior_changed`, existing tests inspected, tests added/changed or used unchanged, the red failure or characterization observed (when applicable), the verification run and result, and any deliberate no-test exception with its reason; for (c), each action the harness refused, each step held or worked around, anything left unverified, and any change outside the unit's files. The handoff is a text summary on most harnesses with no guaranteed diff, so reported paths are the orchestrator's starting hint (it still verifies the actual tree); the evidence fields are **not** reconstructable from the tree afterward, so a worker that omits them forces the orchestrator to re-derive or leave `verification_evidence` incomplete.
-- **No canonical commits.** Native workers implement and may run their *own unit's* focused tests in isolation as a self-check; the **orchestrator owns staging, the canonical commits, and the authoritative test runs**. A worker in a harness-isolated worktree may commit on its own branch only when the harness hands results back as a branch; that commit only carries the change, and the orchestrator still verifies it and makes the canonical commit. A worker in the shared workspace runs no Git command that writes the index. An external cross-model worker leaves its tree uncommitted, within the boundary `SKILL.md` sets; the host's transport snapshots only move changes and are never canonical commits.
+给每个本地工人：
+- 包括活动单元的原型源引用及其有关位置、可用性和需求权威性的资格。指示工作人员在实施受影响的行为之前检查可访问的、明确引用的原型决策和选定的屏幕或状态，包括当这些源位于另一个工作树中时。将编辑和测试保留在指定的工作空间内。
+- 计划路径加上**有界单元数据包**和继承权限 - 目标胶囊、完成定义、单元部分、与其相关的验证合同条目、任何引用的 R/F/AE/KTD 摘录、**加上其 `Governs R…` 链接命名单元引用的 R-ID 的任何产品合同关键决策**（其 `session-settled:` 注释仅通过此反向链接到达工作人员 — 引用的 KTD 仅携带计划决策）标签）。下游工人可能会缩小该单位和权限，但永远不会扩大。不要在工作人员提示时发送“阅读整个计划”。 （对于遗留的非统一规划，可以参考规划路径。）
+- 用户在本次运行中规定的对单元产生的限制（不进行处理的路径、不采取的操作、不想要的输出），用用户的话来说，包括计划未记录的限制。如果计划和用户限制发生冲突，则限制获胜，并且工作人员报告冲突。
+- **当步骤被阻止时该怎么办。** 当宿主拒绝操作或步骤无法在此环境中运行（缺少凭证、工具或服务）时，工作人员将保留该步骤以及依赖于它的任何内容。它不会通过其他途径达到相同的结果，将其完成的编辑保留在适当的位置，完成不依赖于它的单元部分，并进行报告。工作人员预计会失败或正在修复的测试是普通工作，而不是受阻步骤。
+- 该单元的目标、文件、方法、执行说明、模式、测试场景、验证、任何已解决的延迟问题以及与其文件匹配的每个Compound Pack规则的文本和引文 (`references/work-intake.md`)，作为团队规则予以遵守，决不会扩大单元或其权限。
+- **构建所要求的内容**和**计划 ID 不包含在书面文件中**规则来自 `references/implementation-loop.md`，逐字记录，并且测试证明单元构建的行为的指令：使模糊的场景具体化，并且不添加场景或对单元未构建的故障路径、验证或边缘情况的处理。工人报告了它考虑过但没有建造的任何东西。
+- **选择单元证据策略并收集证据的说明**（请参阅第 2 阶段中的证据策略）- 对于行为变化，请遵守执行说明并默认为证明优先或表征优先：create/update/strengthen 测试并观察红色故障或表征基线**在**更改生产代码之前。工人是唯一目睹这一情况的一方，因此它必须在发生过程中捕获它。
+- **在最终消息中报告的说明，(a) 更改的文件路径，(b) 单元的验证证据，以及 (c) 任何未按照简报进行的内容** — 对于 (b)，`behavior_changed`、已检查的现有测试、测试added/changed 或未更改地使用、观察到的红色故障或特征（如果适用）、验证运行和结果，以及任何故意的无测试异常及其原因；对于 (c)，宿主拒绝的每个操作、保留或解决的每个步骤、任何未验证的内容以及单位文件之外的任何更改。切换是大多数宿主上的文本摘要，没有保证差异，因此报告的路径是协调器的起始提示（它仍然验证实际的树）；证据字段之后**无法**从树中重建，因此省略它们的工作人员会迫使编排器重新推导或使 `verification_evidence` 不完整。
+- **没有规范的提交。** 本地工作人员实施并可以单独运行他们的*自己的单位*集中测试作为自我检查； **编排者拥有暂存、规范提交和权威测试运行**。仅当宿主手结果作为分支返回时，宿主隔离工作树中的工作人员才可以在自己的分支上提交；该提交仅包含更改，编排器仍然会验证它并进行规范提交。共享工作区中的工作人员不运行写入索引的 Git 命令。外部跨模型工作人员在边界 `SKILL.md` 集内将其树保留为未提交；主机的传输快照仅移动更改，而不是规范提交。
 
-**Shared-workspace wave contract**: a parallel wave in a shared working directory is permitted only while all of these hold. A unit that cannot meet one runs serially or gets isolation:
+**共享工作空间波合约**：仅当所有这些都成立时，才允许共享工作目录中的并行波。无法满足要求的单元串行运行或被隔离：
 
-- **Clean committed baseline.** Dispatch the wave from a committed tree, so each worker's output is attributable and revertible by its file set and an aborted wave restores to the baseline.
-- **Exclusive ownership, including hidden write surfaces.** Beyond the disjoint declared files the Safety Check already verified, every hidden write surface (lockfiles, generated artifacts, snapshots, formatter sweeps, package manifests) is either excluded from all workers or assigned to exactly one.
-- **No worker Git operations.** Workers must not `git add`, commit, or otherwise write the index; concurrent index writes corrupt the shared index. The orchestrator stages and commits after the batch.
-- **Orchestrator-owned verification.** Workers run no mutating verification (full suites, installs, builds that write shared state); a worker may run a single focused unit test only if it touches no shared state. The authoritative run happens after the wave on the integrated tree.
-- **Abort on unowned writes.** A write outside every worker's exclusive set aborts the wave and disables further shared-workspace waves for the run. Restore to the baseline only changes attributable to a worker. A change no worker accounts for may be the user's: preserve it and stop for reconciliation rather than discarding it.
+- **清理提交的基线。** 从提交的树中分派 Wave，因此每个工作人员的输出都可以通过其文件集进行归因和恢复，并且中止的 Wave 会恢复到基线。
+- **独占所有权，包括隐藏的写入表面。** 除了安全检查已验证的不相交声明的文件之外，每个隐藏的写入表面（锁定文件、生成的产物、快照、格式化程序扫描、包清单）要么从所有工作人员中排除，要么分配给确切的一个。
+- **没有工人Git操作。**工人不得`git add`、提交或以其他方式写入索引；并发索引写入会损坏共享索引。编排器在批处理后进行暂存和提交。
+- **编排器拥有的验证。**工作人员不运行变异验证（完整套件、安装、写入共享状态的构建）；仅当工作人员不涉及共享状态时，才可以运行单个集中单元测试。权威运行发生在集成树上的浪潮之后。
+- **在无主写入时中止。** 每个工作线程的独占集之外的写入都会中止该 wave 并禁用运行的进一步共享工作空间 wave。仅将可归因于工作人员的更改恢复到基线。没有工作人员考虑的更改可能是用户的：保留它并停止进行协调，而不是丢弃它。
 
-**Permission mode:** Omit the `mode` parameter when dispatching subagents so the user's configured permission settings apply. Do not pass `mode: "auto"`; it overrides user-level settings like `bypassPermissions`.
+**权限模式：** 调度子代理时省略 `mode` 参数，以便应用用户配置的权限设置。不要通过`mode: "auto"`；它会覆盖用户级设置，例如 `bypassPermissions`。
 
-**A step a worker reported as held, refused, or unverified keeps the unit open**, on the serial and the parallel path alike. You may retry the refused action yourself when your own permissions and the user's limits allow it, but do not substitute a route the worker was told not to take. Otherwise commit the finished part only if it stands on its own, do not mark the unit complete, and report the open step as a blocker.
+**工作人员报告为保留、拒绝或未经验证的步骤使单元保持打开状态**，在串行和并行路径上都是如此。当您自己的权限和用户限制允许时，您可以自己重试被拒绝的操作，但不要替换工作人员被告知不要采取的路线。否则，仅当完成的部分独立存在时才提交，不将单元标记为完成，并将打开的步骤报告为阻塞项。
 
-**After each serial inline/subagent unit:** review the diff against the unit's scope and `Files:`, run the relevant tests, fix before starting the next (never on a broken tree), record the unit's verification evidence (from the worker's return when a worker ran), update the task list, and commit. If the unit used a native subagent worker, retire its handle per the fresh worker invariant, then dispatch the next subagent unit in a new worker context. An inline unit has no worker handle to retire; start the next unit directly.
+**在每个串行inline/subagent单元之后：**检查单元范围和`Files:`的差异，运行相关测试，在开始下一个之前进行修复（永远不要在损坏的树上），记录单元的验证证据（来自工作人员运行时工作人员的返回），更新任务列表，然后提交。如果该单元使用本机子代理工作程序，则根据新的工作程序不变量退休其句柄，然后在新的工作程序上下文中分派下一个子代理单元。内联单元没有可退出的工作句柄；直接启动下一个单元。
 
-**After a parallel inline/subagent batch, the orchestrator integrates; never trust the handoff summary alone:**
-1. Wait for every worker in the batch to finish.
-2. **Inspect the actual tree, not reported paths.** Determine what each worker really changed (`git status`/diff in its workspace or the shared dir). Reported paths are a hint; declared `Files:` are often incomplete, because workers create or modify files the plan didn't anticipate.
-3. **Detect real collisions and semantic contention**: compare actual paths plus shared contracts, generated/config surfaces, and verification effects. A clean merge is not proof of compatibility. Preserve or re-run colliding units on the advancing canonical base; never blind-merge them.
-4. **Review, test, commit, and retire each unit in dependency order — the orchestrator owns commits.** Integrate one result, inspect actual scope, run authoritative verification, create its canonical commit, then immediately retire that unit's worker per the fresh worker invariant before considering the next. Never send the retired handle another implementation unit or keep it in an orchestrator-managed idle pool. Clean up an isolated workspace only when the harness assigns that cleanup to the caller and only after proving the unit's work was integrated — never infer manual cleanup commands from the provider name. Revalidate every remaining result against the advancing canonical tree. Capture each worker's returned verification evidence into the run's `verification_evidence` roll-up. If a worker omitted it, re-derive what the tree allows and mark the rest as unverified rather than fabricating a red-before-implementation observation the worker never reported.
-5. Update the task list (progress lives in the commits).
-6. Dispatch the next dependency layer only after every unit in the batch has been integrated and its worker retired. Any remaining isolated-workspace cleanup follows the active harness's ownership and lifecycle contract.
+**并行inline/subagent批次后，协调器进行集成；永远不要只相信交接摘要：**
+1. 等待批次中的每个工人完成。
+2. **检查实际的树，而不是报告的路径。**确定每个工作人员真正更改的内容（其工作区或共享目录中的`git status`/diff）。报告的路径是一个提示；声明的 `Files:` 通常是不完整的，因为工作人员创建或修改了计划未预料到的文件。
+3. **检测真实的冲突和语义争用**：比较实际路径加上共享合约、generated/config表面和验证效果。干净的合并并不能证明兼容性。在前进的规范基地上保留或重新运行碰撞单位；永远不要盲目合并它们。
+4. **按依赖顺序审查、测试、提交和退役每个单元 - 协调器拥有提交。** 集成一个结果，检查实际范围，运行权威验证，创建其规范提交，然后根据新的工作人员不变式立即退役该单元的工作人员，然后再考虑下一个结果。切勿将已退役的句柄发送到另一个实施单元或将其保留在编排器管理的空闲池中。仅当宿主将清理任务分配给调用者并且仅在证明单元的工作已集成之后才清理隔离的工作区 - 切勿从提供者名称推断手动清理命令。针对前进的规范树重新验证每个剩余结果。将每个工作人员返回的验证证据捕获到运行的 `verification_evidence` 汇总中。如果工作人员忽略了它，则重新推导树允许的内容，并将其余部分标记为未经验证，而不是在工作人员从未报告的实施前伪造一个红色观察结果。
+5. 更新任务列表（进度存在于提交中）。
+6. 仅在批次中的每个单元都已集成并且其工作人员退休后才分派下一个依赖层。任何剩余的隔离工作区清理都遵循活动宿主的所有权和生命周期合同。
 
-**Per-harness integration (examples; the universal flow above is the contract):**
-- **Harness-owned worktree/branch:** integrate one branch in dependency order, verify, and commit before the next; on conflict abort and re-run or explicitly resolve that unit against the advanced tree.
-- **Harness-owned uploaded change set:** accept one isolated result, inspect and verify it, commit it canonically, then release the worker before the next result.
-- **Shared workspace:** worker outputs sit uncommitted in the one working directory. Ownership decides who *may* write a path, never what a delta *is*: attribute each delta from what the unit's worker reports and inspection confirms, and commit or roll back only worker-attributed changes. A delta no worker accounts for, inside or outside an owned set, may be the user's, so preserve it and stop for reconciliation. Verify and commit in dependency order.
-- **External cross-model workspace:** follow the conditionally loaded cross-model parallel-wave protocol and controller receipts; ordinary branch-merge shortcuts do not apply.
+**每宿主集成（示例；上面的通用流程是合同）：**
+- **Harness 拥有的 worktree/branch：** 按照依赖顺序集成一个分支，验证并在下一个分支之前提交；发生冲突时中止并重新运行或根据高级树显式解决该单元。
+- **Harness 拥有的上传变更集：** 接受一个孤立的结果，检查并验证它，规范地提交它，然后在下一个结果之前释放工作人员。
+- **共享工作区：** 工作人员输出未提交地存放在一个工作目录中。所有权决定谁“可以”编写路径，而不是增量“是什么”：根据单位工作人员报告和检查确认的内容对每个增量进行归属，并仅提交或回滚归属于工作人员的更改。没有工作人员帐户的增量，无论在拥有的集合内部还是外部，都可能是用户的，因此保留它并停止进行协调。按依赖顺序验证并提交。
+- **外部跨模型工作区：**遵循有条件加载的跨模型并行波协议和控制器收据；普通的分支合并快捷方式不适用。

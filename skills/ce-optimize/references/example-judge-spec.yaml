@@ -1,8 +1,8 @@
-# Minimal first-run template for qualitative metrics.
-# Start here when true quality requires semantic judgment, not a proxy metric.
+# 定性指标的最小首次运行模板。
+# 当真正的质量需要语义判断而不是代理指标时，请从这里开始。
 
 name: improve-search-relevance
-description: Improve semantic relevance of search results without obvious failures
+description: "提高搜索结果的语义相关性，而不会出现明显的故障"
 
 metric:
   primary:
@@ -12,10 +12,10 @@ metric:
   degenerate_gates:
     - name: result_count
       check: ">= 5"
-      description: Return enough results to judge quality
+      description: "返回足够的结果来判断质量"
     - name: empty_query_failures
       check: "== 0"
-      description: Empty or trivial queries must not fail
+      description: "空或琐碎的查询一定不能失败"
   diagnostics:
     - name: latency_ms
     - name: recall_at_10

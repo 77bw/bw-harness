@@ -1,101 +1,100 @@
-# Phase 0.3-1.7: prior learnings, identity, and measurement scaffolding
+# 阶段 0.3-1.7：先前的学习、身份和测量脚手架
 
-Read this after the spec is saved and follow it through the approval gate. A gate is a check that stops the run until its condition holds. The SKILL.md body states the two gates in here that stop the run (the clean-tree gate and the user approval gate). This file carries the procedure around them: prior-learnings search, run identity and resume detection, the branch and scratch space, the measurement harness, the baseline, the parallelism probe, and the worktree budget.
+保存规范后请阅读此内容，并按照其通过审批。门是一种停止运行直到其条件成立的检查。 SKILL.md 正文指出了此处停止运行的两个门（干净树门和用户批准门）。该文件包含围绕它们的过程：先前学习搜索、运行身份和恢复检测、分支和暂存空间、测量工具、基线、并行性探测和工作树预算。
 
-### 0.3 Search Prior Learnings
+### 0.3 搜索先前的知识
 
-Resolve `<root>` first (the body's Artifact Root rule); pass its resolved path to the researcher. When `<root>/solutions/` holds at least one markdown file, read `references/agents/learnings-researcher.md` and dispatch a generic subagent seeded with that local prompt to search for prior optimization work on similar topics. An empty or missing store has nothing to search, so skip this step. Do not dispatch a standalone agent by type/name. If relevant learnings exist, incorporate them into the approach.
+先解决`<root>`（本体的Artifact Root规则）；将其解析路径传递给研究人员。当 `<root>/solutions/` 包含至少一个 Markdown 文件时，读取 `references/agents/learnings-researcher.md` 并分派一个通用子代理，该子代理以该本地提示为种子，以搜索类似主题的先前优化工作。空的或丢失的商店没有任何可搜索的内容，因此请跳过此步骤。不要在 type/name 之前派遣独立代理。如果存在相关的学习内容，请将其纳入方法中。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-### 0.4 Run Identity Detection
+### 0.4 运行身份检测
 
-Check if `optimize/<spec-name>` branch already exists:
+检查 `optimize/<spec-name>` 分支是否已经存在：
 
 ```bash
 git rev-parse --verify "optimize/<spec-name>" 2>/dev/null
 ```
 
-Resolve `<state-root>` by the rule in `references/persistence.md` (The State Root), then check for an existing experiment log at `<state-root>/experiment-log.yaml`. A log found under `.context/compound-engineering/ce-optimize/<spec-name>/` when a durable root is now available is still this run's root; do not move it. A run whose ledger still exists is an existing run even when the branch does not exist in this checkout, so check the log independently of the branch.
+根据`references/persistence.md`（状态根）中的规则解析`<state-root>`，然后在`<state-root>/experiment-log.yaml`处检查现有实验日志。当持久根现在可用时在`.context/compound-engineering/ce-optimize/<spec-name>/`下找到的日志仍然是本次运行的根；不要移动它。即使分支在此结帐中不存在，分类帐仍然存在的运行也是现有运行，因此独立于分支检查日志。
 
-When an existing run's `run_state.status` is `waiting` and this entry is a wake, a scheduler fire, or a resume invocation of that same run, it is a resume: do not ask. Otherwise present the user with a choice via the platform question tool:
-- **Resume**: read ALL state from the experiment log on disk (do not rely on any in-memory context from a prior session). Recover any measured-but-unlogged experiments by scanning worktree directories for `result.yaml` markers. Then apply the SKILL.md body's resume rule to decide what is skipped and which approval checks run again.
-- **Fresh start**: archive the old branch to `optimize-archive/<spec-name>/archived-<timestamp>`, clear the experiment log, start from scratch
+当现有运行的 `run_state.status` 为 `waiting` 并且此条目是唤醒、调度程序触发或同一运行的恢复调用时，它是恢复：不要询问。否则，通过平台问题工具向用户提供选择：
+- **恢复**：从磁盘上的实验日志读取所有状态（不依赖于先前会话的任何内存中上下文）。通过扫描工作树目录中的 `result.yaml` 标记来恢复任何已测量但未记录的实验。然后应用 SKILL.md 主体的恢复规则来决定跳过哪些内容以及再次运行哪些批准检查。
+- **全新开始**：将旧分支归档到`optimize-archive/<spec-name>/archived-<timestamp>`，清除实验日志，从头开始
 
-### 0.5 Create Optimization Branch and State Root
+### 0.5 创建优化分支和状态根
 
 ```bash
 git checkout -b "optimize/<spec-name>"  # or switch to existing if resuming
 ```
 
-Create `<state-root>` if it does not exist:
+如果`<state-root>`不存在则创建：
 ```bash
 mkdir -p "<state-root>"
 ```
 
 ---
 
-## Phase 1: Measurement Scaffolding
+## 第一阶段：测量脚手架
 
-**This phase stops the run until the user approves the baseline and parallel readiness. Phase 2 does not start before that.**
+**此阶段停止运行，直到用户批准基线和并行准备就绪。第 2 阶段不会在此之前开始。**
 
-**Bundled scripts.** Phases 1 and 3 call helper scripts that ship in this skill's `scripts/` directory (`measure.sh`, `decide.mjs`, `parallel-probe.sh`, `experiment-worktree.sh`). The Bash tool's working directory is the user's project, not the skill directory, so a bare `scripts/<name>` path will not resolve. Invoke each by the skill's own absolute path. Every runnable block below already sets `SKILL_DIR` inline (shell state does not persist between Bash tool calls, so each block must carry it). Replace the `<absolute path …>` placeholder with the directory you loaded this `ce-optimize` SKILL.md from before running. The shape:
+**捆绑脚本。** 第 1 阶段和第 3 阶段调用此技能的 `scripts/` 目录（`measure.sh`、`decide.mjs`、`parallel-probe.sh`、`experiment-worktree.sh`）中提供的帮助程序脚本。 Bash 工具的工作目录是用户的项目，而不是技能目录，因此裸露的 `scripts/<name>` 路径将无法解析。通过技能自己的绝对路径调用每个技能。下面的每个可运行块都已经设置了 `SKILL_DIR` 内联（shell 状态在 Bash 工具调用之间不会持续存在，因此每个块都必须携带它）。将 `<absolute path …>` 占位符替换为运行前加载此 `ce-optimize` SKILL.md 的目录。形状：
 
 ```bash
 SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
 bash "$SKILL_DIR/scripts/<name>"
 ```
 
-### 1.1 Clean-Tree Gate
+### 1.1 清树门
 
-The SKILL.md body states this gate. Run `git status --porcelain`, filter the output against `scope.mutable` and `scope.immutable`, and apply the body's rule to the result. Name the dirty in-scope files, ask the user to commit or stash them, and do not continue until they are clean.
+SKILL.md主体说明了这个门。运行 `git status --porcelain`，根据 `scope.mutable` 和 `scope.immutable` 过滤输出，并将主体规则应用于结果。命名脏的范围内文件，要求用户提交或隐藏它们，并且在它们干净之前不要继续。
 
-### 1.2 Build or Validate Measurement Harness
+### 1.2 构建或验证测量工具
 
-**If user provides a measurement harness** (the `measurement.command` already exists):
-1. Run it once via the measurement script:
+**如果用户提供测量工具**（`measurement.command`已经存在）：
+1. 通过测量脚本运行一次：
    ```bash
    SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
    bash "$SKILL_DIR/scripts/measure.sh" "<measurement.command>" <timeout_seconds> "<measurement.working_directory or .>"
    ```
-2. Validate the JSON output:
-   - Contains keys for all degenerate gate metric names
-   - Contains keys for all diagnostic metric names
-   - Contains keys for every required hard objective (`metric.primary` when it is hard, plus every `metric.objectives` entry)
-   - Values are numeric or boolean as expected
-3. If validation fails, report what is missing and ask the user to fix the harness
+2. 验证 JSON 输出：
+   - 包含所有简并门指标名称的键
+   - 包含所有诊断指标名称的键
+   - 包含每个所需硬目标的密钥（困难时为`metric.primary`，加上每个`metric.objectives`条目）
+   - 值是预期的数字或布尔值
+3. 如果验证失败，请报告缺少的内容并要求用户修复宿主
 
-**If agent must build the harness:**
-1. Analyze the codebase to understand the current approach and what should be measured
-2. Build an evaluation script (e.g., `evaluate.py`, `evaluate.sh`, or equivalent)
-3. Add the evaluation script path to `scope.immutable` -- the experiment agent must not modify it
-   When the target produces per-case results (items, tests, queries, requests), have the script also report the few worst cases with what went wrong, under a key that no gate or objective reads. Later hypotheses need that evidence as well as the totals.
-4. Run it once and validate the output
-5. Include the measurement method and validated output in the Phase 1 approval presentation, with a link to the script for inspection.
+**如果代理必须建造宿主：**
+1. 分析代码库以了解当前的方法以及应该衡量的内容
+2. 构建评估脚本（例如，`evaluate.py`、`evaluate.sh`或等效脚本）
+3. 将评估脚本路径添加到`scope.immutable`——实验代理不得修改它当目标生成每个案例的结果（项目、测试、查询、请求）时，让脚本在没有门或目标读取的密钥下报告出现问题的少数最坏情况。后来的假设需要证据和总数。
+4. 运行一次并验证输出
+5. 在第一阶段批准演示文稿中包括测量方法和经过验证的输出，并提供检查脚本的链接。
 
-**The eval set the harness scores against.** The set is the artifact the run keeps; the optimizer is replaceable. Build it from observed failures, not from what would be convenient to score: categorize the failures the user has seen, then cover each category with several items, because a category that appears once can either select or confirm but not both. Ten to twenty items is enough to start; fifty to a hundred labeled items is the range where a judge becomes trustworthy; beyond that, quality of the items matters more than count. The set is fixed for the run and listed in `scope.immutable`. When a holdout is configured, split the set so the held-out part is not in the selection command's inputs. When the target is instruction text (a skill, an agent-instructions file, a persona, a tool description), read `references/text-targets.md` before building the set: it carries the coverage rule that decides whether a rule you want kept survives the run.
+**评估设置了宿主分数。**该集合是运行保留的产物；优化器是可更换的。根据观察到的失败来构建它，而不是根据方便评分的内容来构建它：对用户看到的失败进行分类，然后用多个项目覆盖每个类别，因为出现一次的类别可以选择或确认，但不能两者兼而有之。开始时十到二十件就足够了；五十到一百个贴有标签的物品是法官值得信赖的范围；除此之外，物品的质量比数量更重要。该集合对于运行是固定的并列在 `scope.immutable` 中。配置保留后，拆分集合，以便保留部分不在选择命令的输入中。当目标是指令文本（技能、代理指令文件、角色、工具描述）时，请在构建集合之前阅读`references/text-targets.md`：它携带覆盖规则，决定您想要保留的规则是否在运行中幸存。
 
-**Validity gate (before the baseline).** Run the probes the run has inputs for; a probe with no inputs is recorded as not run and stated at approval, never asked for here. The harness does not reward a trivial shortcut: build an empty, constant, or copied output yourself and confirm it does not score as well as real output. When known-good and known-bad exemplars exist (`references/spec.md`), the harness separates them in the metric's direction. When `metric.judge.calibration.labels` is set, the judge's scores agree with the labels at or above `min_agreement` (default 0.8); a run with no labels yet gets the offer in 1.3, after the baseline is judged. A harness that fails a probe it ran stops the run before the baseline; report which probe failed and the values it produced. One case requires calibration rather than offering it: a judge run that waits between ticks through a wake after turn end does not leave Phase 1 with neither labels nor the user's explicit waiver. Record the outcome as `harness_validation` in the experiment log at CP-1, including the waiver text when calibration was waived.
+**有效性门（在基线之前）。** 运行运行具有输入的探针；没有输入的探测器被记录为未运行并在批准时声明，这里从未要求过。该工具不会奖励简单的捷径：自己构建一个空的、常量的或复制的输出，并确认它的得分不如实际输出。当存在已知良好和已知不良样本时 (`references/spec.md`)，宿主会在度量方向上将它们分开。当`metric.judge.calibration.labels`设置时，评委的分数与`min_agreement`或以上的标签一致（默认0.8）；在判断基线后，没有标签的运行将在 1.3 中获得报价。如果宿主运行的探测器出现故障，则会在基线之前停止运行；报告哪个探针失败以及它产生的值。一种情况需要校准而不是提供校准：在回合结束后的唤醒期间等待的判断运行不会让第一阶段既没有标签也没有用户的明确放弃。在 CP-1 的实验日志中将结果记录为 `harness_validation`，包括放弃校准时的放弃文本。
 
-### 1.3 Establish Baseline
+### 1.3 建立基线
 
-Run the measurement harness on the current code. Baseline and final confirmation always use the full configured protocol (`repeat_count` samples when mode is `repeat` or `ladder`; one run when mode is `stable`). Exploratory experiments later may spend less; the baseline must not.
+在当前代码上运行测量工具。基线和最终确认始终使用完整配置的协议（模式为`repeat`或`ladder`时`repeat_count`样本；模式为`stable`时运行一次）。以后的探索性实验可能花费更少；基线不得。
 
-**If stability mode is `repeat` or `ladder`:**
-Do not start this protocol until the counts that mode uses are coherent. Repeat needs a positive `repeat_count`. Ladder needs positive `exploratory_pairs` and `confirmation_repeats` (falling back to `repeat_count`) with confirmation at least the exploratory count. That is the same rule `scripts/decide.mjs` uses. A repeat-mode spec does not need ladder fields.
-1. Run the harness that many times (`repeat_count` in repeat mode; the coherent confirmation count in ladder mode)
-2. Aggregate results using the configured aggregation method (median, mean, min, max)
-3. Calculate variance across runs
-4. If variance exceeds the configured comparison threshold, warn the user and suggest increasing `repeat_count`
+**如果稳定模式为`repeat`或`ladder`：**
+在模式使用的计数一致之前，不要启动此协议。重复需要正`repeat_count`。阶梯需要正的`exploratory_pairs`和`confirmation_repeats`（回落到`repeat_count`）并至少确认探索性计数。这与 `scripts/decide.mjs` 使用的规则相同。重复模式规范不需要梯形字段。
+1. 多次运行宿主（重复模式下`repeat_count`；梯形图模式下的连贯确认计数）
+2. 使用配置的聚合方法聚合结果（中值、平均值、最小值、最大值）
+3. 计算运行间的方差
+4. 如果方差超过配置的比较阈值，则警告用户并建议增加`repeat_count`
 
-**Spend only the measurement the current decision needs.** After Phase 1, a smoke failure is degenerate; one paired exploratory sample can reject a clearly worse candidate or mark it inconclusive; add samples only while the result is promising or inconclusive; run the full configured protocol only before keeping a candidate and for the run's final confirmation. `scripts/decide.mjs` returns that next step. When mode is `stable` or `repeat`, keep the existing full-protocol behavior.
+**仅使用当前决策所需的测量。** 在第 1 阶段之后，烟雾故障已退化；一对探索性样本可以拒绝明显较差的候选者或将其标记为不确定；仅在结果有希望或不确定时添加样本；仅在保留候选者和运行的最终确认之前运行完整配置的协议。 `scripts/decide.mjs` 返回下一步。当模式为`stable`或`repeat`时，保留现有的全协议行为。
 
-The Phase 1 baseline total is the number later comparisons score against. It is not the cost shares of a named workload. When a cost target needs to know where the cost goes, Phase 2 finds that by locating the work; do not run a second Phase 1 baseline for it.
+第一阶段基线总数是后来比较得分的数量。它不是指定工作负载的成本份额。当成本目标需要知道成本去向时，第二阶段通过定位工作来找到这一点；不要为其运行第二个第一阶段基线。
 
-Record the baseline in the experiment log. Persist every required hard objective under `metrics` (or `judge` when the primary is a judge score) so `decide.mjs` can load the same snapshot shape later experiments use. Gates and diagnostics stay in their own containers.
+在实验日志中记录基线。将每个必需的硬目标坚持在`metrics`（或`judge`，当主要是判断分数时），这样`decide.mjs`可以加载稍后实验使用的相同快照形状。门和诊断装置位于各自的容器中。
 ```yaml
 baseline:
-  timestamp: "<current ISO 8601 timestamp>"
+  timestamp: "<当前 ISO 8601 时间戳>"
   gates:
     <gate_name>: <value>
     ...
@@ -107,62 +106,62 @@ baseline:
     ...
 ```
 
-If primary type is `judge`, also run the judge evaluation on baseline output to establish the starting judge score. Record the baseline's `worst_cases` from the measurement output or the judges, as Phase 3.3 does for experiments.
+如果主要类型为`judge`，则还对基线输出进行法官评估，以确定起始法官分数。记录来自测量输出或判断的基线 `worst_cases`，如第 3.3 阶段的实验那样。
 
-**Offer to check the judge against the user (judge primary, no labels yet).** Assume the user wants the run automated. Once the baseline has been judged, real outputs and the judge's scores for them already exist, so this is the cheapest moment to find out whether the judge scores the way the user would. Offer it once, as an ordinary message of a sentence or two before any question: what the check is, that it takes a few minutes, and what it protects against, which is the run getting better at pleasing the automated scorer rather than at what the user actually wants. The reason is what lets the user decide, so it goes in that message and not only in an option's small print; the question that follows is a short yes or no. Make continuing without it the easy answer, and do not raise it again after a no.
+**提供对照用户检查判断（初级判断，还没有标签）。**假设用户希望自动运行。一旦判断了基线，真实的输出和法官的分数就已经存在，因此这是查明法官的分数是否与用户的方式相同的最便宜的时刻。提供一次，作为任何问题之前的一两句话的普通信息：检查是什么，需要几分钟，以及它防止什么，这是为了取悦自动记分器而不是用户真正想要的东西而运行。原因是让用户做出决定，因此它会出现在消息中，而不仅仅是选项的小字中；接下来的问题是简短的是或否。让没有它的继续成为简单的答案，并且在拒绝后不要再次提出它。
 
-The user's scores are only worth comparing if they have not seen the judge's first. Make the offer before you report any judge score, the baseline mean included, and report those scores once the user has declined or finished scoring.
+用户的分数只有在没有看到评委的第一分数的情况下才值得比较。在报告任何评判分数（包括基线平均值）之前提出报价，并在用户拒绝或完成评分后报告这些分数。
 
-When the user accepts, do the work for them, in ordinary chat messages rather than the host's question tool. Reading an output and judging it needs room: a question picker cramps long text, caps the number of choices, and differs on every host, so use it for the yes-or-no offer and not for the scoring. State the scale once, with what each score means. Then show the outputs a few at a time (two or three to a message), each numbered and quoted in full so it is easy to read, and ask the user to reply with a score per number and, if they want, a few words on why. Accept whatever shape the reply takes ("1: 3, 2: 4 too much jargon") and ask again only about what you could not read. Do not reveal the judge's score for an output before the user has scored it.
+当用户接受时，在普通的聊天消息中而不是主持人的提问工具中为他们完成工作。读取输出并判断它需要空间：问题选择器会压缩长文本，限制选择数量，并且每个主机上的情况都不同，因此将其用于是或否的提议，而不是用于评分。陈述一次等级，以及每个分数的含义。然后一次显示几个输出（一条消息显示两个或三个），每个输出都进行了完整编号和引用，以便于阅读，并要求用户回复每个数字的分数，如果他们愿意，还可以说明原因。接受任何形式的答复（“1:3、2:4 太多行话”），并仅再次询问您无法阅读的内容。在用户评分之前，不要透露评委对输出的评分。
 
-They never open or edit a file: you write each answer to the labels file (`<state-root>/judge-labels.yaml` unless the spec names a path), set `metric.judge.calibration.labels` to it, and compare against the judge scores you already have, at no extra judge cost. Around ten items is enough to see a pattern, and the user can stop at any point; use what they gave. Then tell them plainly how often they and the judge agreed and show the clearest disagreements. Agreement under `min_agreement` means the rubric needs work before it is worth optimizing against: say so and offer to fix the rubric together, which returns to 1.2.
+他们从不打开或编辑文件：您将每个答案写入标签文件（`<state-root>/judge-labels.yaml`，除非规范指定路径），为其设置`metric.judge.calibration.labels`，并与您已有的评判分数进行比较，无需额外的评判成本。大约十个项目就足以看到一个模式，并且用户可以在任何点停止；使用他们所提供的。然后清楚地告诉他们他们和法官达成一致并表现出最明显分歧的频率。 `min_agreement` 下的协议意味着该标题在值得优化之前需要进行工作：这么说并提出一起修复该标题，这将返回到 1.2。
 
-A judge run that will continue unattended is the one case where this is an ask rather than an offer (the validity gate above): the same flow, and the user may still decline with an explicit waiver.
+将在无人值守的情况下继续进行的法官运行是一种询问而不是要约的情况（上面的有效性门）：相同的流程，并且用户仍然可以通过明确的放弃来拒绝。
 
-### 1.4 Parallelism Readiness Probe
+### 1.4 并行度就绪探测
 
-1.4 and 1.5 apply when experiments share this machine (`execution.backend` is `worktree` or `codex`, or `remote` has fallen back to `worktree`). With `remote` workers each on their own checkout, skip both, record "not applicable: detached workers" in the approval evidence, and let `execution.max_concurrent` cap dispatched workers instead.
+当实验共享这台机器时（`execution.backend`是`worktree`或`codex`，或者`remote`回落到`worktree`），1.4和1.5适用。 `remote` 工人各自结帐，则跳过这两个，在批准证据中记录“不适用：分离工人”，并让`execution.max_concurrent` 限制派遣工人。
 
-Run the parallelism probe script:
+运行并行性探测脚本：
 ```bash
 SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
 bash "$SKILL_DIR/scripts/parallel-probe.sh" "<project_directory>" "<measurement.command>" "<measurement.working_directory>" <shared_files...>
 ```
 
-Read the JSON output. Present any blockers to the user with suggested mitigations. Treat the probe as intentionally narrow. It should inspect the measurement command, the measurement working directory, and explicitly declared shared files, not the entire repository.
+读取JSON输出。向用户展示任何阻塞项以及建议的缓解措施。将探头故意缩小。它应该检查测量命令、测量工作目录和显式声明的共享文件，而不是整个存储库。
 
-### 1.5 Worktree Budget Check
+### 1.5 工作树预算检查
 
-Count existing worktrees:
+计算现有工作树：
 ```bash
 SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
 bash "$SKILL_DIR/scripts/experiment-worktree.sh" count
 ```
 
-If count + `execution.max_concurrent` would exceed 12:
-- Warn the user
-- Suggest cleaning up existing worktrees or reducing `max_concurrent`
-- Do NOT block -- the user may proceed at their own risk
+如果 count + `execution.max_concurrent` 超过 12：
+- 警告用户
+- 建议清理现有工作树或减少 `max_concurrent`
+- 不要阻止——用户可能需要自行承担风险
 
-### 1.6 Write Baseline to Disk (CP-1)
+### 1.6 将基线写入磁盘（CP-1）
 
-**MANDATORY CHECKPOINT.** Before presenting results to the user, write the initial experiment log with baseline metrics to disk:
+**强制检查点。** 在向用户呈现结果之前，将带有基线指标的初始实验日志写入磁盘：
 
-1. Create the experiment log file at `<state-root>/experiment-log.yaml`
-2. Include all required top-level sections from `references/experiment-log-schema.yaml`: `spec`, `run_id`, `started_at`, `baseline`, `experiments`, and `best`, plus the `harness_validation` record from the validity gate
-3. Seed `experiments` as an empty array and seed `best` from the baseline snapshot (use `iteration: 0`, baseline metrics, and baseline judge scores if present) so later phases have a valid current-best state to compare against
-4. Optionally seed `hypothesis_backlog: []` here as well so the log shape is stable before Phase 2 populates it
-5. **Verify**: read the file back and confirm the required sections are present and the baseline values match
-6. Only THEN present results to the user
+1. 在`<state-root>/experiment-log.yaml`处创建实验日志文件
+2. 包括 `references/experiment-log-schema.yaml` 中所有必需的顶级部分：`spec`、`run_id`、`started_at`、`baseline`、`experiments` 和 `best`，以及来自有效性门的 `harness_validation` 记录
+3. 种子 `experiments` 作为空数组，种子 `best` 来自基线快照（使用 `iteration: 0`、基线指标和基线判断分数（如果存在）），以便后续阶段具有有效的当前最佳状态进行比较
+4. 也可以选择在此处添加 `hypothesis_backlog: []` 种子，以便日志形状在第 2 阶段填充之前保持稳定
+5. **验证**：读回文件并确认所需部分存在并且基线值匹配
+6. 仅然后向用户呈现结果
 
-### 1.7 User Approval Gate
+### 1.7 用户审批门
 
-The SKILL.md body states this gate and its user-facing reporting rule. Present what Phase 1 assembled and offer three options: proceed, fix issues, and adjust spec. Adjusting the spec sends the run back through Phase 1 so the baseline matches the new spec. It is available only while the log holds nothing derived from the spec (no hypothesis backlog and no experiments); when this gate is presented again on a resume, `references/persistence.md` (The Approval Record) decides what a changed spec means. Say plainly which spend is capped. `stopping.max_total_cost_usd` caps the whole run, while the judge cap counts only scoring. With neither set, spend is uncapped apart from the iteration and hour limits. When a wake after turn end is in use, set `metric.judge.max_total_cost_usd` before presenting the gate; unattended judge spend cannot be uncapped. **Do not enter Phase 2 until the user explicitly approves.**
+SKILL.md 正文说明了此门及其面向用户的报告规则。展示第一阶段组装的内容并提供三个选项：继续、解决问题和调整规格。调整规格将运行返回到第 1 阶段，以便基线与新规格匹配。仅当日志不包含任何源自规范的内容时（没有假设积压且没有实验），它才可用；当这个门再次出现在简历上时，`references/persistence.md`（批准记录）决定更改后的规格意味着什么。明确说明哪些支出受到限制。 `stopping.max_total_cost_usd` 限制整个运行，而裁判限制只计算得分。如果没有设置，除了迭代和时间限制之外，支出不受限制。当使用转弯结束后唤醒时，在出闸门之前设置`metric.judge.max_total_cost_usd`；无人值守的法官支出不能取消上限。 **在用户明确批准之前不要进入阶段 2。**
 
-Explain the starting measurements, whether behavior checks passed, any measurement limitations or execution blockers, the planned experiment scope, the caps in force including `stopping.max_wall_hours`, and estimated scoring and whole-run cost against the configured caps. Link the experiment log and measurement script for inspection. Send this as an ordinary message laid out to be read, then ask; the question itself is one short sentence and its options, because a question picker shows long text as a single cramped block. Keep the full degenerate-gate values, diagnostics, judge scores, probe results and mitigations, clean-tree confirmation, and worktree count and projection in the saved evidence. Report those details to the user when they affect the user's decision.
+解释起始测量、行为检查是否通过、任何测量限制或执行阻碍、计划的实验范围、有效的上限（包括 `stopping.max_wall_hours`）以及针对配置的上限的估计得分和整体运行成本。链接实验日志和测量脚本以进行检查。将其作为普通消息发送以供阅读，然后询问；问题本身是一个短句子及其选项，因为问题选择器将长文本显示为单个狭窄的块。在保存的证据中保留完整的简并门值、诊断、判断分数、探测结果和缓解措施、干净树确认以及工作树计数和投影。当这些细节影响用户的决定时，向用户报告这些细节。
 
-The moment the user approves, write the approval record to the experiment log as `references/persistence.md` (The Approval Record) specifies, verify it, then re-read the spec and baseline from disk before Phase 2. A resume whose record is absent, or whose spec digest or caps no longer match the spec on disk, presents this gate again.
+用户批准后，按照`references/persistence.md`（批准记录）指定的方式将批准记录写入实验日志，对其进行验证，然后在第 2 阶段之前从磁盘重新读取规范和基线。如果简历的记录不存在，或者其规范摘要或上限不再与磁盘上的规范匹配，则会再次出现此门。
 
-**Evidence quality line.** State the validity-gate result: which probes passed and which were not run. For a judge primary, give how often the judge agreed with the user's own scores, or, when that check was skipped, tell the user in your own everyday words what skipping it means for them: the scores come from an automated reviewer nobody has compared with their taste, so an improvement in the score is worth a look at real outputs before they trust it. Write this for someone who has never heard the word calibration; do not reuse this paragraph's wording. State whether a holdout is configured. When it is not, say plainly that selection and reporting will share one sample, so the reported gain may be partly fit to that sample; the user is approving that limitation. Where the schema requires a holdout (a judge primary, or a run that waits between ticks through a wake after turn end), its absence is a spec failure caught at load, not a question this gate can approve past.
+**证据质量线。** 说明有效性门结果：哪些探针通过，哪些未运行。对于法官初选，请给出法官同意用户自己的分数的频率，或者，当跳过该检查时，用您自己的日常用语告诉用户跳过这对他们意味着什么：分数来自无人与他们的品味进行比较的自动审查者，因此分数的改进值得在他们信任之前查看真实的输出。写这篇文章是为了那些从未听说过校准这个词的人；不要重复使用本段的措辞。说明是否配置了保留。如果不是，请明确表示选择和报告将共享一个样本，因此报告的增益可能部分适合该样本；用户正在批准该限制。如果模式需要保留（判断主要，或者在回合结束后通过唤醒在滴答之间等待的运行），则它的缺席是在加载时捕获的规范失败，而不是此门可以批准过去的问题。
 
 ---

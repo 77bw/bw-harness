@@ -1,165 +1,165 @@
-# Open Questions Deferral
+# 未解决的问题推迟
 
-This reference defines how a finding left open is recorded in the document, in a visible `Deferred / Open Questions` section in the document's native format, and when that record is removed. The record exists so that a later session reading only the document still sees what the review left for the author.
+此参考定义如何将未打开的结果记录在文档中、文档本机格式的可见 `Deferred / Open Questions` 部分中，以及何时删除该记录。该记录存在，以便稍后仅阅读文档的会话仍然可以看到评论留给作者的内容。
 
-- **Interactive mode:** a finding is recorded when the user chooses Defer: from the walk-through, the walk-through's auto-resolve preview, or routing option A or C, through `references/walkthrough.md` (per-finding Defer, and routing options A and C) and `references/bulk-preview.md` (Defer entries in the walk-through's auto-resolve plan).
-- **Non-interactive mode:** after synthesis and before returning, record every proposed fix that was not applied and every decision left for the user, unless the request restricts edits to the document (read-only, report-only, or a narrower edit scope that excludes this section). Under such a restriction, record nothing and list the items as not recorded, with that reason, in the structured result. FYI observations are not recorded. The rest of this file applies, with the non-interactive differences stated where they occur.
+- **交互模式：** 当用户从演练、演练的自动解决预览或路由选项 A 或 C 中选择“延迟”时，将记录结果，通过 `references/walkthrough.md`（每个结果延迟以及路由选项 A 和 C）和 `references/bulk-preview.md`（延迟演练的自动解决计划中的条目）。
+- **非交互模式：** 在综合之后和返回之前，记录每个未应用的建议修复以及留给用户的每个决定，除非请求限制对文档的编辑（只读、仅报告或不包括此部分的较窄编辑范围）。在这种限制下，不记录任何内容，并因此在结构化结果中将未记录的项目列出。仅供参考，观察结果未记录。本文件的其余部分适用，并指出非交互式差异发生的位置。
 
 ---
 
-## Append flow
+## 追加流程
 
-### Step 1: Locate or create the Open Questions section
+### 第 1 步：找到或创建“开放问题”部分
 
-Scan the document for an existing `Deferred / Open Questions` section, matching its visible heading text exactly. Preserve the document's native format and existing structure; never insert markdown syntax into HTML.
+扫描文档中现有的 `Deferred / Open Questions` 部分，与其可见的标题文本完全匹配。保留文档的原始格式和现有结构；切勿将 Markdown 语法插入 HTML。
 
-- **Section present:** append inside it at its existing location. Do not create a duplicate at the end; the user positioned the section deliberately.
-- **Section absent:** create it near the end of the document, before any trailing footer. Use `## Deferred / Open Questions` in markdown and the document's existing section-and-heading pattern in HTML. Open it with one line saying its entries are review items left for the author and do not block implementation, so an executor does not mistake them for the plan's blocking Open Questions.
+- **存在的部分：**附加在其内部的现有位置。不要在最后创建重复项；用户故意定位该部分。
+- **缺少部分：** 在文档末尾附近、任何尾随页脚之前创建它。在 Markdown 中使用 `## Deferred / Open Questions` 以及 HTML 中文档现有的节和标题模式。打开它时用一行字表示其条目是留给作者的审查项目，不会阻止实施，因此执行者不会将它们误认为是计划阻止开放问题。
 
-### Step 2: Locate or create the timestamped subsection
+### 步骤 2：找到或创建带时间戳的小节
 
-Within the Open Questions section, scan for a visible subsection heading matching the current review date: `From YYYY-MM-DD review`. Use `###` in markdown and the document's existing subsection pattern in HTML. Behavior:
+在“开放问题”部分中，扫描与当前审核日期匹配的可见小节标题：`From YYYY-MM-DD review`。在 Markdown 中使用 `###` 以及 HTML 中文档的现有分段模式。行为：
 
-- **Subsection present:** append new entries to it. Multiple Defer actions within a single review session accumulate under the same subsection.
-- **Subsection absent:** create it as the last subsection within Open Questions, using the native heading pattern described above.
+- **当前小节：**向其中添加新条目。单个审核会话中的多个推迟操作会累积在同一小节下。
+- **缺少小节：**使用上述本机标题模式将其创建为开放问题中的最后一个小节。
 
-Date format: ISO 8601 calendar date (`YYYY-MM-DD`). If multiple reviews occur on the same document on the same day within the same session, they still share the same subsection. Multi-day same-document reviews get distinct subsections, which is the intended behavior.
+日期格式：ISO 8601 日历日期 (`YYYY-MM-DD`)。如果在同一天的同一会话中对同一文档进行多次审阅，它们仍然共享同一小节。多天的同一文档审阅会得到不同的小节，这是预期的行为。
 
-### Step 3: Format and append the entry
+### 步骤 3：格式化并附加条目
 
-Per deferred finding, append a reader-facing list entry in the document's native format. The entry carries no hidden comment; every field Step 4's dedup needs is reconstructable from visible text:
+根据延迟的发现，以文档的本机格式附加面向读者的列表条目。条目没有隐藏评论；步骤 4 的重复数据删除所需的每个字段都可以从可见文本中重建：
 
-The example below is markdown. In HTML, mirror the nearest sibling entry's element structure. If no sibling entry exists, use a semantic HTML list with one deferred finding per list item.
+下面的例子是markdown。在 HTML 中，镜像最近的同级条目的元素结构。如果不存在同级条目，请使用语义 HTML 列表，其中每个列表项都有一个延迟查找。
 
 ```
-- **{title}** — {section} ({severity}, {reviewer}, confidence {confidence})
+- **{title}** — {section}（{severity}、{reviewer}、信心{confidence}）
 
   {why_it_matters}
 ```
 
-Fields come from the finding's schema:
+字段来自结果的架构：
 
-- `{title}` — the finding's title field
-- `{section}` — the finding's section field, unmodified (human-readable)
+- `{title}` — 结果的标题字段
+- `{section}` — 结果的部分字段，未修改（人类可读）
 - `{severity}` — P0 / P1 / P2 / P3
-- `{reviewer}` — the persona that produced the finding (after dedup, the persona with the highest confidence anchor; list every persona that flagged it if there were several)
-- `{confidence}` — the integer anchor (`50`, `75`, or `100`), emitted without a decimal point or percent sign
-- `{why_it_matters}` — the full why_it_matters text, preserving the framing guidance from the subagent template
+- `{reviewer}` — 产生结果的角色（去重后，具有最高置信度档位点的角色；列出标记它的每个角色（如果有多个）
+- `{confidence}` — 整数锚点（`50`、`75` 或 `100`），发出时不带小数点或百分号
+- `{why_it_matters}` — 完整的 why_it_matters 文本，保留子代理模板的框架指导
 
-A proposed fix recorded in non-interactive mode adds one line after `{why_it_matters}`: `Change: <suggested_fix as intent language>`, because the change is what the next session would act on and no approval for it exists yet. Otherwise, do not include `suggested_fix` or the full `evidence` array in the appended entry. Those live in the review run artifact (when applicable) and do not belong in the document's Open Questions section. The entry is a concern summary for the reader returning later, not a full decision record.
+以非交互模式记录的拟议修复在`{why_it_matters}`后添加一行：`Change: <suggested_fix 作为意图语言>`，因为该更改是下一个会话将执行的操作，并且尚不存在对其的批准。否则，请勿在附加条目中包含 `suggested_fix` 或完整的 `evidence` 数组。这些问题存在于审阅运行产物中（如果适用），并且不属于文档的开放问题部分。该条目是供读者稍后返回的关注摘要，而不是完整的决策记录。
 
-**Render `{title}` and `{why_it_matters}` under the shared rendering floor** (`references/rendering-floor.md`). This entry is persisted for a later reader who no longer has the review's context, so apply the floor's opaque-token policy to all three classes (gloss navigation IDs at first mention, translate mechanism symbols such as functions, files, and line refs to their role, drop provenance that does not affect the decision) and lead `{why_it_matters}` with the consequence. The floor's full decision-first field order does not apply: a deferred entry is a persisted concern, not an actionable finding, so it carries no Recommendation/Change/Basis. A deferred entry whose only description of a referenced item is a bare identifier of any class is not acceptable.
+**在共享渲染层下渲染`{title}`和`{why_it_matters}`** (`references/rendering-floor.md`)。此条目会保留给后来不再了解评论上下文的读者，因此将地板的不透明令牌策略应用于所有三个类（首次提及时注释导航 ID，将函数、文件和行引用等机制符号转换为其角色，删除不影响决策的出处）并引导 `{why_it_matters}` 并得出结果。该楼层的完整决策优先现场顺序不适用：延迟进入是一个持续存在的问题，而不是一个可采取行动的发现，因此它没有Recommendation/Change/Basis。引用项的唯一描述是任何类的裸标识符的延迟条目是不可接受的。
 
-### Step 4: Idempotence on compound-key collisions
+### 步骤 4：复合键冲突的幂等性
 
-If an entry with the same compound key already exists under the same visible `From YYYY-MM-DD review` subsection, regardless of heading syntax, do not append a duplicate. This can happen when:
+如果同一可见 `From YYYY-MM-DD review` 子部分下已存在具有相同复合键的条目，则无论标题语法如何，都不要追加重复项。这可能发生在以下情况：
 
-- The same review session re-routes the same finding to Defer a second time (rare but possible via best-judgment-the-rest after a walk-through Defer)
-- The orchestrator retries after a partial failure
+- 相同的审查会议将相同的发现第二次重新路由到推迟（很少见，但有可能在演练推迟后通过最佳判断来实现）
+- 协调器在部分失败后重试
 
-**Compound key for dedup:** `normalize(section) + normalize(title) + why_fingerprint`, computed on both sides from the **rendered entry text that will actually be written** (after Step 3's floor rendering), not the raw schema fields. Keying on the rendered text keeps new-entry keys aligned with parsed existing-entry keys, because the floor rewrites `{title}` and leads `{why_it_matters}` with a paraphrased consequence. An existing persisted entry retains only its rendered bullet, so a new entry must be keyed from the same rendered form it is about to write. Within a session the same finding renders identically against the same document, so a retry or a second Defer recomputes the same key and collides. All three parts reconstruct from the visible entry, so no hidden metadata is needed:
+**用于重复数据删除的复合键：** `normalize(section) + normalize(title) + why_fingerprint`，根据**将实际写入**的渲染条目文本（在步骤 3 的楼层渲染之后）在两侧计算，而不是原始架构字段。对渲染文本进行键入可以使新条目键与已解析的现有条目键保持一致，因为地板重写了 `{title}` 并导致 `{why_it_matters}` 并产生释义结果。现有的持久条目仅保留其呈现的项目符号，因此必须从即将写入的同一呈现形式键入新条目。在会话中，相同的发现会针对相同的文档进行相同的渲染，因此重试或第二次延迟会重新计算相同的密钥并发生冲突。所有三个部分都是从可见条目重建的，因此不需要隐藏的元数据：
 
-- `normalize(section)` and `normalize(title)` use the same normalization as synthesis step 3.3 dedup (lowercase, strip punctuation, collapse whitespace). For a new finding, render the entry per Step 3 first, then normalize the rendered `{title}` (the bold leader) and `{section}`; for an existing entry, parse the same fields out of the rendered bullet. (`{section}` renders unmodified, so it matches either way; `{title}` may be glossed, which is exactly why the new-finding side must normalize the rendered title, not the schema title.)
-- `why_fingerprint` is the first ~120 characters of the entry's **rendered** `{why_it_matters}` prose (the consequence-first text actually written), cut on a word boundary, with any run of whitespace collapsed to a single space. Because both sides use the rendered prose, the same fingerprint recomputes from the visible bullet on any retry or reread. When why_it_matters is empty, fall back to `normalize(section) + normalize(title)` alone.
+- `normalize(section)` 和 `normalize(title)` 使用与综合步骤 3.3 重复数据删除相同的归一化（小写字母、去除标点符号、折叠空格）。对于新发现，首先按照步骤 3 渲染条目，然后标准化渲染的 `{title}`（粗体前导）和 `{section}`；对于现有条目，从渲染的项目符号中解析相同的字段。 （`{section}` 渲染未修改，因此它可以匹配任何一种方式；`{title}` 可能会被注释掉，这正是新发现方必须规范化渲染标题而不是模式标题的原因。）
+- `why_fingerprint` 是条目的 **渲染** `{why_it_matters}` 散文（实际编写的结果优先文本）的前约 120 个字符，在单词边界上剪切，任何空白都折叠为单个空格。由于双方都使用渲染的散文，因此在任何重试或重读时都会根据可见项目符号重新计算相同的指纹。当why_it_matters为空时，单独回落到`normalize(section) + normalize(title)`。
 
-Title-only dedup is not sufficient: two different findings in the same document (even on the same review date) can legitimately share a short title if their sections or rationale differ. Using only `{title}` would silently drop one and lose user-visible backlog context. Matching on section and the why-fingerprint keeps distinct findings distinct, and stays close to the R29/R30 matching test (`section + title + evidence-substring overlap`) so cross-round and intra-round dedup behave consistently.
+仅标题重复数据删除是不够的：同一文档中的两个不同发现（即使是在同一审核日期）如果其部分或基本原理不同，则可以合法地共享简短标题。仅使用 `{title}` 会默默地删除一个并丢失用户可见的待办事项上下文。部分匹配和原因指纹可保持不同的结果不同，并与 R29/R30 匹配测试 (`section + title + evidence-substring overlap`) 保持接近，因此跨轮和轮内重复数据删除的行为一致。
 
-**Pre-existing entries with a `dedup-key` HTML comment:** entries written by the prior format carry a trailing `<!-- dedup-key: ... -->` comment. Ignore it for matching (the visible-text key above is authoritative) and strip the comment if the entry is otherwise edited. Do not write new ones.
+**带有 `dedup-key` HTML 注释的预先存在的条目：** 按照先前格式编写的条目带有尾随 `<!-- dedup-key: ... -->` 注释。忽略它进行匹配（上面的可见文本键是权威的），如果条目被编辑，则删除注释。不要写新的。
 
-On collision, record the no-op in the completion report so the user sees the duplicate was suppressed. Cross-subsection collisions (same compound key, different dates) are not deduplicated — each review is allowed to re-raise the same concern.
-
----
-
-## Concurrent edit safety
-
-Document edits happen via the platform's edit tool (Edit in Claude Code, or equivalent). Before every append, re-read the document from disk to reduce the window for user-in-editor concurrent-write collisions. If the document's mtime or content has changed unexpectedly between a prior read and the append attempt, abort the append and report the situation via the failure path below. The user may be editing in their editor during the review session and simultaneous writes would corrupt the document.
-
-The orchestrator only holds the most recent read in memory, not a persistent lock. Interactive review does not need lock coordination; it needs a fresh read before each write.
+发生冲突时，在完成报告中记录无操作，以便用户看到重复项已被抑制。跨小节冲突（相同的复合键，不同的日期）不会进行重复数据删除——每次审查都可以重新提出相同的问题。
 
 ---
 
-## Failure path
+## 并发编辑安全
 
-In non-interactive mode, an append that cannot complete records nothing more and asks nothing; the structured result says which items were not recorded in the document and why. In interactive mode, when the append cannot complete (the document is read-only on disk, the path is invalid, the platform's edit tool returns an error, a concurrent-edit collision is detected, or any other write failure), report the failure to the user right away via the platform's blocking question tool with the following sub-question:
+文档编辑通过平台的编辑工具进行（在 Claude Code 中编辑，或同等工具）。在每次追加之前，从磁盘重新读取文档，以减少编辑器中用户并发写入冲突的窗口。如果文档的修改时间或内容在之前的读取和追加尝试之间发生意外更改，请中止追加并通过下面的失败路径报告情况。用户可能在审阅会话期间在其编辑器中进行编辑，并且同时写入会损坏文档。
 
-**Stem:** `Couldn't append the finding to Open Questions. What should the agent do?`
+Orchestrator 仅保留内存中的最新读取，而不是持久锁。交互式审阅不需要锁协调；每次写入之前都需要重新读取。
 
-**Options (exactly three; fixed order):**
+---
+
+## 失败路径
+
+在非交互模式下，无法完成的追加不再记录任何内容，也不询问任何内容；结构化结果说明哪些项目未记录在文档中以及原因。在交互模式下，当追加无法完成时（文档在磁盘上是只读的、路径无效、平台的编辑工具返回错误、检测到并发编辑冲突或任何其他写入失败），请立即通过平台的阻塞问题工具向用户报告失败，并包含以下子问题：
+
+**茎：** `该发现写入 Open Questions 失败。接下来如何处理？`
+
+**选项（正好三个；固定顺序）：**
 
 ```
-A. Retry the append
-B. Record the deferral in the completion report only (don't mutate the document)
-C. Convert this finding to Skip
+A. 重试追加
+B. 仅在完成报告中记录延期（不要修改文档）
+C. 将此结果转换为“跳过”
 ```
 
-**Dispatch:**
+**派遣：**
 
-- **A Retry** — try the append again. On repeated failure, loop back to the same sub-question.
-- **B Record only** — skip the document mutation; record the Deferred action in the completion report with a note that the append failed. The finding does not end up in the document but the user sees in the report that they deferred it.
-- **C Convert to Skip** — record the finding as Skip with an explanatory reason ("append to Open Questions failed: <error>"). The finding is treated as no-action for the remainder of the session.
+- **重试** — 再次尝试追加。如果重复失败，则循环回到同一子问题。
+- **B Record only** — 跳过文档突变；在完成报告中记录延迟操作，并注明附加失败。结果并未最终出现在文档中，但用户在报告中看到他们推迟了该结果。
+- **C 转换为跳过** — 将结果记录为跳过并附上解释性原因（“附加到开放问题失败：<error>”）。该发现将被视为在会议剩余时间内不采取任何行动。
 
-Silent failure is not acceptable. If the user does not respond to the sub-question (session ends, terminal disconnects), default to option B so the in-memory decision state stays consistent even if the document wasn't written.
-
----
-
-## Removing resolved entries
-
-This is the removal rule. A recorded entry stays only while its item is open. When anyone applies or dismisses a recorded item, they remove its entry. That can be a later review pass, the skill that called this review, or a session that settles the item in code. Find the entry by its Step 4 compound key. If its `From YYYY-MM-DD review` subsection is then empty, remove it, and if the section is then empty, remove that too. An entry left behind for a settled item tells every later reader the item is still open.
+无声的失败是不可接受的。如果用户没有响应子问题（会话结束、终端断开连接），则默认选择选项 B，这样即使文档未写入，内存中的决策状态也保持一致。
 
 ---
 
-## Upstream availability signal
+## 删除已解析的条目
 
-The walk-through and bulk-preview check append-availability before offering Defer as an option. When the document is known-unwritable (e.g., initial read shows it's on a read-only filesystem), the orchestrator caches an `append_available: false` signal at Phase 4 start and Defer is suppressed in the walk-through menu and in the routing question's option C. See `references/walkthrough.md` under "Adaptations" for the menu behavior and `references/bulk-preview.md` under "Edge cases" for the preview behavior.
-
-When append-availability is true at Phase 4 start but an individual append fails mid-flow, the failure path above handles that specific finding. This does not flip the session-level cached signal; other findings may still append successfully if the failure was transient.
+这就是删除规则。记录的条目仅在其项目打开时保留。当任何人应用或驳回记录的项目时，他们会删除其条目。这可以是稍后的审核通过、调用此审核的技能或在代码中解决该项目的会话。通过步骤 4 复合键查找条目。如果其 `From YYYY-MM-DD review` 子节为空，则将其删除，如果该节随后为空，则也将其删除。为已解决的项目留下的条目告诉每个后来的读者该项目仍然是开放的。
 
 ---
 
-## Example appended content
+## 上游可用性信号
 
-Starting document state:
+在提供“延迟”选项之前，演练和批量预览会检查附加可用性。当文档已知不可写时（例如，初始读取显示它位于只读文件系统上），编排器会在第 4 阶段开始时缓存 `append_available: false` 信号，并在演练菜单和路由问题的选项 C 中抑制 Defer。有关菜单行为，请参阅“适应”下的 `references/walkthrough.md`，有关预览行为，请参阅“边缘情况”下的 `references/bulk-preview.md`。
+
+当第 4 阶段开始时追加可用性为真，但单个追加在流程中失败时，上面的失败路径将处理该特定发现。这不会翻转会话级缓存信号；如果故障是暂时的，其他结果仍可能成功附加。
+
+---
+
+## 附加内容示例
+
+起始文档状态：
 
 ```markdown
-## Risks
+## 风险
 
-...existing content...
+...现有内容...
 
 ## Deferred / Open Questions
 
-### From 2026-04-10 review
+### 2026-04-10 评论
 
-- **Alias compatibility-theater concern** — Risks (P1, scope-guardian, confidence 75)
+- **别名兼容性-剧院问题** — 风险（P1，范围守护者，置信度 75）
 
-  The alias exists without documented external consumers...
+  该别名的存在没有记录外部消费者......
 
 ```
 
-After appending two findings in a 2026-04-18 session:
+在 2026 年 4 月 18 日的会议上附加两项调查结果后：
 
 ```markdown
-## Risks
+## 风险
 
-...existing content...
+...现有内容...
 
 ## Deferred / Open Questions
 
-### From 2026-04-10 review
+### 2026-04-10 评论
 
-- **Alias compatibility-theater concern** — Risks (P1, scope-guardian, confidence 75)
+- **别名兼容性-剧院问题** — 风险（P1，范围守护者，置信度 75）
 
-  The alias exists without documented external consumers...
+  该别名的存在没有记录外部消费者......
 
-### From 2026-04-18 review
+### 2026-04-18 评论
 
-- **Unit 2/3 merge judgment call** — Scope Boundaries (P2, scope-guardian, confidence 75)
+- **单元 2/3 合并判断调用** — 范围边界（P2，范围守护者，置信度 75）
 
-  The two units update consumer sites that deploy together. Splitting
-  adds dependency tracking without enabling independent delivery.
+  这两个单元更新一起部署的消费者站点。分裂
+  添加依赖性跟踪而不启用独立交付。
 
-- **Strawman alternatives on migration strategy** — Unit 3 Files (P2, coherence, confidence 75)
+- **关于迁移策略的稻草人替代方案** — 第 3 单元文件（P2，连贯性，置信度 75）
 
-  The fix options list (a) through (c) as alternatives, but (b) and (c)
-  are "accept the regression" framings that don't solve the problem the
-  finding describes.
+  修复选项列出 (a) 到 (c) 作为替代方案，但 (b) 和 (c)
+  是“接受回归”框架，但不能解决问题
+  发现描述。
 ```

@@ -1,47 +1,47 @@
-# Decision primer — round 2+
+# 决策入门 — 第 2 轮以上
 
-Read this file at Phase 2 (dispatch) only when the current interactive session has already completed at least one review round. Round 1 uses the inline `<prior-decisions>` block in `references/dispatch.md` and does not need this file.
+仅当当前交互式会话已完成至少一轮审核时，才在第 2 阶段（调度）读取此文件。第 1 轮使用 `references/dispatch.md` 中的内联 `<prior-decisions>` 块，不需要此文件。
 
-The primer tells each persona what the user already decided, so round N+1 neither reports rejected findings again nor assumes an applied fix landed correctly.
+底漆告诉每个角色用户已经决定了什么，因此第 N+1 轮既没有报告再次拒绝调查结果，也没有假设应用的修复正确落地。
 
-## Rendering
+## 渲染
 
-Accumulate every prior round's decisions and render them as:
+累积之前每一轮的决策并将其呈现为：
 
 ```
 <prior-decisions>
-Round 1 — applied (N entries):
+第一轮——已申请（N 项）：
 - {section}: "{title}" ({reviewer}, {confidence})
-  Evidence: "{evidence_snippet}"
+  证据：“{evidence_snippet}”
 
-Round 1 — rejected (M entries):
-- {section}: "{title}" — Skipped because {reason}
-  Evidence: "{evidence_snippet}"
-- {section}: "{title}" — Deferred to Open Questions because {reason or "no reason provided"}
-  Evidence: "{evidence_snippet}"
-- {section}: "{title}" — Acknowledged without applying because {reason or "no suggested_fix — user acknowledged"}
-  Evidence: "{evidence_snippet}"
-- {section}: "{title}" — Withdrawn because {triggering decision}
-  Evidence: "{evidence_snippet}"
+第 1 轮 — 被拒绝（M 个条目）：
+- {section}: "{title}" — 跳过，因为 {reason}
+  证据：“{evidence_snippet}”
+- {section}: "{title}" — 推迟到开放问题，因为{原因或“未提供原因”}
+  证据：“{evidence_snippet}”
+- {section}: "{title}" — 无需申请即可确认，因为{原因或“否 suggested_fix — 用户已确认”}
+  证据：“{evidence_snippet}”
+- {section}: "{title}" — 撤回，因为{触发决定}
+  证据：“{evidence_snippet}”
 
-Round 2 — applied (N entries):
+第 2 轮 — 应用（N 项）：
 ...
 </prior-decisions>
 ```
 
-**Every entry carries an `Evidence:` line.** Synthesis rules R29 (rejected-finding suppression) and R30 (fix-landed verification) both compare evidence substrings as part of deciding whether a new finding matches a prior one. Without the snippet the orchestrator cannot compute the `>50%` overlap test and falls back to fingerprint-only matching, which either shows rejected findings again or suppresses too aggressively. Use the finding's **first** evidence quote, truncated to ~120 characters on a word boundary, with internal quotes escaped. Remaining evidence entries live in the run artifact and are not needed for the overlap check.
+**每个条目都带有一个 `Evidence:` 行。** 综合规则 R29（拒绝发现抑制）和 R30（固定着陆验证）都比较证据子字符串，作为确定新发现是否与先前发现匹配的一部分。如果没有该片段，协调器无法计算 `>50%` 重叠测试，并回退到仅指纹匹配，这要么再次显示被拒绝的结果，要么过于积极地抑制。使用调查结果的**第一个**证据引用，在单词边界上截断为约 120 个字符，并转义内部引号。剩余的证据条目存在于运行产物中，重叠检查不需要。
 
-## Which actions count as rejected
+## 哪些操作算作被拒绝
 
-Skip, Defer, and Acknowledge are all **rejected-class** — each signals the user decided the finding wasn't worth actioning this round. (Acknowledge is the variant for findings with no `suggested_fix`: the user saw the finding and recorded acknowledgement instead of an explicit defer or skip. For suppression it means the same as Skip.)
+跳过、推迟和确认都是**拒绝级** - 每个信号都表明用户认为该发现不值得在本轮采取行动。 （确认是没有 `suggested_fix` 的结果的变体：用户看到了结果并记录了确认，而不是显式推迟或跳过。对于抑制，其含义与跳过相同。）
 
-**Withdraw is conditional.** A Withdraw records that an earlier decision resolved or contradicted the finding (see "Withdrawing findings the user's earlier answers resolved" in `walkthrough.md`):
+**撤回是有条件的。** A 撤回记录了先前的决定解决了或与结果相矛盾（请参阅`walkthrough.md` 中的“撤回用户先前已解决的答案的结果”）：
 
-- Counts as rejected-class **only** when a user decision retired it — a settled premise (Skip/Defer) or a user-asserted fact.
-- An **Apply-triggered Withdraw never does.** Whether it is resolved depends on the staged edit both landing and actually resolving the finding. Round N+1 synthesis checks that, not R29. Suppressing it would hide a fix that failed or landed ineffectively.
+- **仅**当用户决定将其退役时才算作拒绝类 - 已确定的前提 (Skip/Defer) 或用户断言的事实。
+- **应用触发的撤回永远不会这样做。** 问题是否得到解决取决于分阶段编辑着陆和实际解决问题。第 N+1 轮综合检查不是R29。抑制它会隐藏失败或无效的修复。
 
-Applied findings stay on the applied list so round-N+1 personas can verify the fixes landed (see R30 in `references/later-round-synthesis.md`).
+应用的发现保留在应用列表中，因此第 N+1 轮角色可以验证已修复的修复（请参阅 `references/later-round-synthesis.md` 中的 R30）。
 
-## Scope
+## 范围
 
-Decisions do not persist across sessions. A later review of the same document starts at round 1 with no primer carried over, even if prior sessions deferred findings into the document's Open Questions section.
+决策不会在各个会话中持续存在。对同一文件的后续审查从第一轮开始，没有底漆结转，即使之前的会议将调查结果推迟到文件的开放问题部分。

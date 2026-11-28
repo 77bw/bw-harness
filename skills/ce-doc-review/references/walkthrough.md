@@ -1,306 +1,306 @@
-# Per-finding Walk-through
+# 每次查找的演练
 
-This reference defines Interactive mode's routing question, the per-finding walk-through the user can choose from it, and the completion report every ending path emits.
+该参考定义了交互模式的路由问题、用户可以从中选择的每次查找的演练以及每个结束路径发出的完成报告。
 
-Interactive mode only.
-
----
-
-## Routing question (the one question)
-
-After the applied changes land, everything still pending is either the **grouped confirmation** (proposed fixes the agent has chosen that still need edit approval) or a **decision** the user must make. Ask about both in one question. Do not ask a separate batch confirmation first, and do not follow a choice with a preview-and-proceed question: the report rendered in the same turn already shows every proposed fix and the recommended action on every decision, and that report is what the user approves.
-
-Skip the question when nothing is pending. **Skipping the question never skips the completion report:** emit it, then continue to the Phase 5 completion return. When the user or calling agent already chose how to handle the pending items, follow that choice. A choice that covers only the decisions does not approve the proposed fixes; ask this question about the proposed fixes alone.
-
-**Same-turn presentation before routing (required).** Before asking, emit the Interactive Phase 4 presentation (`references/review-output-template.md`) as user-visible assistant text **in the same turn**. Content composed only in hidden thinking or reasoning does not count; this is the same bar as the Preview event in `references/bulk-preview.md`. If that presentation has not appeared in this turn, do not invoke the blocking-question tool.
-
-These do **not** satisfy the requirement:
-
-- a structured non-interactive result printed in an earlier turn (including one shown beside a `ce-plan` handoff menu)
-- a one-line count such as "1 confirmation, 1 decision"
-- relying on handoff-menu context or earlier scrollback
-
-On interactive entry after a same-session non-interactive pass (e.g. `ce-plan` "Decide on the review's open items"), still render the interactive presentation before routing, but only for what is still pending. Changes the earlier pass already applied and reported get one summary line, not a second list. Reusing the prior pass's applied-fix and R29 decision state is fine; skipping presentation is not.
-
-Use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability; do not search for another host's tool name. Fall back to presenting the options as a numbered list only when no such tool is in the list, a real question call errors, or the runtime mode does not expose one. When the user has not chosen a route, never silently skip the question. Rendering the routing question as narrative text without the numbered-list fallback is a bug.
-
-**Stem:** name what is pending by its themes, not a bare count, then ask. For example: `Five fixes align the tier names and add two missing cross-references, and two decisions need your call. How should I handle them?` A bare count makes the reader scroll back to answer.
-
-**Options (fixed order; drop the clauses about whichever of the two groups is empty):**
-
-```
-A. Auto-resolve with best judgment — apply the proposed fixes and the recommended action on each decision
-B. Review each finding one by one — accept the recommendation or choose another action
-C. Apply the proposed fixes and append the decisions to the doc's Open Questions section
-D. Report only — change nothing further
-```
-
-When only proposed fixes are pending, C has nothing to defer and is dropped. No option is labeled `(recommended)`: the right route depends on whether the user wants to engage, trust, triage, or skim, not on the shape of the finding set. The per-finding `(recommended)` marker lives inside the walk-through.
-
-**Append-availability adaptation.** When `references/open-questions-defer.md` has cached `append_available: false` at Phase 4 start (e.g., read-only document, unwritable filesystem), drop option C and add one line to the stem explaining why (e.g., `Append to Open Questions unavailable — document is read-only in this environment.`). The walk-through's per-finding Defer is suppressed by the same signal, so the user never sees Defer offered at one level and omitted at the other.
-
-**Dispatch by selection:**
-
-- **A** — apply every proposed fix and execute each decision's `recommended_action` from synthesis step 3.5b. The proposed fixes and the decisions' Applies land together in the single end-of-walk-through Apply pass; Defer → `references/open-questions-defer.md`; Skip → recorded as no-action. Before acting, run the withdrawal check below against each decision. When append is unavailable, a Defer recommendation becomes Skip, and the completion report says so. Then emit the completion report.
-- **B** — load this walk-through (per-finding loop) over the proposed fixes and then the decisions. Apply decisions accumulate in memory; Open-Questions defers run immediately via `references/open-questions-defer.md`; Skip decisions are recorded as no-action; `Auto-resolve with best judgment on the rest` goes through `references/bulk-preview.md`.
-- **C** — apply every proposed fix in the end-of-walk-through Apply pass, and route every decision through `references/open-questions-defer.md`. Then emit the completion report.
-- **D** — apply nothing further; report the proposed fixes as not applied and the decisions as open. Emit the completion report and continue to the Phase 5 completion return.
-
-Whichever option runs, when an Apply or Skip completes for a finding the document already records under `Deferred / Open Questions` (an earlier non-interactive pass wrote it), follow the removal rule in `references/open-questions-defer.md`.
+仅交互模式。
 
 ---
 
-## Entry (walk-through mode)
+## 路由问题（一题）
 
-The walk-through receives, from the orchestrator:
+所应用的更改落地后，仍然悬而未决的一切要么是**分组确认**（代理选择的建议修复仍需要编辑批准），要么是用户必须做出的**决定**。在一个问题中询问这两个问题。不要首先要求单独的批量确认，也不要在选择后提出预览和继续问题：同一轮中呈现的报告已经显示了每个建议的修复和每个决策的建议操作，并且该报告是用户批准的。
 
-- The proposed fixes in the grouped confirmation, then the decisions synthesis step 3.7 left for the user, each group in severity order (P0 → P1 → P2 → P3). A proposed fix's recommended action is Apply. Applied findings are already reported as changes, and FYI-subsection findings (anchor `50`) appear in the Phase 4 report only; neither has a walk-through entry.
-- The run id for artifact lookups (when applicable).
+当没有任何悬而未决的事情时，跳过该问题。 **跳过问题永远不会跳过完成报告：**发出它，然后继续到第 5 阶段完成返回。当用户或呼叫代理已经选择如何处理待处理项目时，请遵循该选择。仅涵盖决策的选择不会批准提议的修复；仅就建议的修复提出这个问题。
 
-Each finding's recommended action has already been settled by synthesis step 3.5b (Lead Recommended Action). The walk-through shows that recommendation from the merged finding's `recommended_action` field and does not recompute it.
+**路由前的同回合演示（必需）。** 在询问之前，在同一个回合中**将交互阶段 4 演示 (`references/review-output-template.md`) 作为用户可见的辅助文本发出。仅以隐藏的思维或推理所组成的内容不算在内；这是与 `references/bulk-preview.md` 中的预览事件相同的栏。如果该演示文稿本轮未出现，则不要调用阻塞问题工具。
+
+这些**不**满足要求：
+
+- 前一轮打印的结构化非交互式结果（包括显示在 `ce-plan` 切换菜单旁边的结果）
+- 一行计数，例如“1 个确认，1 个决定”
+- 依赖于切换菜单上下文或更早的回滚
+
+在同一会话非交互式传递后的交互式输入中（例如 `ce-plan`“决定审阅的未清项目”），仍然在路由之前呈现交互式演示文稿，但仅限于仍待处理的内容。更改已应用并报告的早期传递会获得一个摘要行，而不是第二个列表。重用之前的 pass 的 Applied-fix 和 R29 决策状态就可以了；跳过演示不是。
+
+使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配工具但未加载，请使用主机的工具发现原语来加载该功能；不要搜索其他主机的工具名称。仅当列表中没有此类工具、真正的问题调用错误或运行时模式未公开此类工具时，才会回退到将选项显示为编号列表。当用户还没有选择路线时，永远不要默默地跳过问题。将路由问题渲染为叙述性文本而不使用编号列表后备是一个错误。
+
+**主干：**按其主题列出待决的内容，而不是简单的计数，然后询问。例如：`有五项修订用于统一档位名称并补上两处引用，另有两项取舍需要你决定。怎么处理？` 简单的计数会让读者滚动回答案。
+
+**选项（固定顺序；删除有关两组中哪一个为空的子句）：**
+
+```
+A. 通过最佳判断自动解决 - 对每个决策应用建议的修复和建议的操作
+B. 逐一审查每项发现——接受建议或选择其他行动
+C. 应用建议的修复并将决定附加到文档的开放问题部分
+D. 仅报告 — 不再做任何更改
+```
+
+当只有提议的修复待决时，C 没有什么可推迟的，因此被丢弃。没有选项被标记为`(recommended)`：正确的路线取决于用户是否想要参与、信任、分类或浏览，而不是结果集的形状。每次发现的 `(recommended)` 标记位于演练内。
+
+**附加可用性适应。** 当`references/open-questions-defer.md`在第4阶段开始时缓存了`append_available: false`（例如，只读文档、不可写文件系统），删除选项C并向主干添加一行解释原因（例如，`当前环境中的文档只读，无法追加到 Open Questions。`）。演练的每次查找的 Defer 被同一信号抑制，因此用户永远不会看到在一个级别提供 Defer 而在另一级别省略。
+
+**按选择发送：**
+
+- **A** — 应用每个建议的修复并执行综合步骤 3.5b 中每个决策的 `recommended_action`。提议的修复和决策的“应用”一起出现在单个演练结束“应用”通道中；推迟 → `references/open-questions-defer.md`；跳过→记录为无动作。在采取行动之前，请针对每个决定进行下面的提款检查。当追加不可用时，“推迟”建议将变为“跳过”，完成报告也是如此。然后发出完成报告。
+- **B** — 在建议的修复和决策上加载此演练（每个发现循环）。应用记忆中积累的决策；开放式问题延迟通过 `references/open-questions-defer.md` 立即运行；跳过决定被记录为不采取行动； `其余项按最佳判断自动处理`经过`references/bulk-preview.md`。
+- **C** — 在演练结束时应用每个建议的修复，并通过 `references/open-questions-defer.md` 路由每个决策。然后发出完成报告。
+- **D** — 不再应用；将提议的修复报告为未应用，并将决定报告为开放。发出完成报告并继续进行第 5 阶段完成回报。
+
+无论运行哪个选项，当“应用”或“跳过”完成发现文档已记录在`Deferred / Open Questions`（早期的非交互式传递写入它）下时，请遵循`references/open-questions-defer.md`中的删除规则。
 
 ---
 
-## Per-finding presentation
+## 进入（漫游模式）
 
-Each finding is presented in two parts: a terminal output block carrying the explanation, and a question via the platform's blocking question tool carrying the decision. Never merge the two into a single surface: the terminal block uses markdown and remains mandatory; the question uses plain text. On modal harnesses, text immediately before a blocking dialog is easy to miss, so the question string **also duplicates** a compact decision-first copy of What's wrong / Proposed fix / If left as-is (see "Question string" below). That duplication is additive: emitting only the question, or stuffing the fix into an option label instead of the question string, is a bug. The no-fix sub-question and the Defer-failure sub-question appear in the same modal dialogs but keep their existing shorter stems. The regular per-finding question is the high-volume path whose option labels alone are not enough to decide.
+该演练从协调器接收：
 
-### Terminal output block (print before asking the question)
+- 分组确认中建议的修复，然后决策综合步骤 3.7 留给用户，每个组按严重性顺序（P0 → P1 → P2 → P3）。修复建议的建议操作是“应用”。应用的发现已作为更改报告，仅供参考的小节发现（锚`50`）仅出现在第 4 阶段报告中；两者都没有演练条目。
+- 产物查找的运行 ID（如果适用）。
 
-Render as markdown. Labels on their own line, blank lines between sections:
+每个发现的建议行动已通过综合步骤 3.5b（主要建议行动）解决。该演练显示来自合并结果的 `recommended_action` 字段的建议，并且不会重新计算它。
+
+---
+
+## 每次发现的演示
+
+每个发现都分为两部分：一个包含解释的终端输出块，以及一个通过平台的阻塞问题工具提出的问题，该工具包含决策。切勿将两者合并为一个表面：接线盒使用 markdown 并保持强制；问题使用纯文本。在模态宿主上，紧邻阻塞对话框之前的文本很容易被错过，因此问题字符串**也复制**一个紧凑的决策优先副本“出了什么问题/建议的修复/如果保持原样”（请参阅下面的“问题字符串”）。这种重复是累加性的：仅发出问题，或者将修复内容填充到选项标签而不是问题字符串中，都是一个错误。无修复子问题和延迟失败子问题出现在相同的模式对话框中，但保留其现有的较短主干。每次发现的常规问题是大容量路径，仅凭其选项标签不足以做出决定。
+
+### 终端输出块（在提问之前打印）
+
+渲染为 markdown。标签独占一行，各部分之间有空行：
 
 ```
-## Finding {N} of {M} — {severity} {plain-English title}
+## 找到 {M} 的 {N} — {severity} {简单英文标题}
 
-Section: {section}
+部分：{section}
 
-**What's wrong**
+**怎么了**
 
-{plain-English problem statement from why_it_matters}
+{依据 why_it_matters，用清楚的中文写出问题}
 
 **Proposed fix**
 
-{suggested_fix — rendered per the substitution rules below: prose-first, intent-language}
+{suggested_fix：按下方替换规则，先用正文说清意图}
 
-**If this is left as-is**
+**如果保持原样**
 
-{one sentence naming the concrete downstream cost}
+{用一句话说明具体的下游代价}
 
 {Conflict-context line, when applicable — see below}
 ```
 
-The substitutions below are how this block applies the shared rendering floor (`references/rendering-floor.md`), which is the canonical source for the decision-first field order, the opaque-token policy across all three token classes, and the code-span budget. The terminal block's field order (title → What's wrong → Proposed fix → If this is left as-is) is the floor's order rendered as a labeled block; keep the two in sync.
+下面的替换是该块如何应用共享渲染层 (`references/rendering-floor.md`)，它是决策优先字段顺序、跨所有三个令牌类别的不透明令牌策略以及代码跨度预算的规范源。输出块的字段顺序（标题→出了什么问题→建议的修复→如果保持原样）是呈现为标记块的楼层顺序；保持两者同步。
 
-Substitutions:
+替补：
 
-- **`{plain-English title}`** — a 3–8 word summary suitable as a heading. Derived from the merged finding's `title` field but rephrased so it reads as observable consequence (e.g., "Implementers will pick different tiers" rather than "Section X-Y lists four tiers"). For document-review findings, observable consequence is the *effect on a reader, implementer, or downstream decision*, not runtime behavior.
-- **`{section}`** — from the finding's `section` field.
-- **Opaque identifiers** — any token the user would have to open the document or the code to understand carries a short plain-language handle on its first mention. This covers both document-defined IDs (`R6`, `U3`, `KTD2`) and implementation identifiers the document happens to name — functions, files, variables, and line references such as `run_codex_cmd`, `$PEERLOG`, or `peer-job-runner.py`. Gloss each on first mention (e.g., `R6 (suppress peer panels on low-stakes calls)`); never leave a bare identifier as the block's only description of what it names. Keep the ID itself: it anchors the finding for anyone editing the document, and later mentions within the same block stay bare so the block scans. The handle arrives with the finding — the reviewer that raised it wrote it into the finding's fields, so render what you were given rather than rebuilding it here. If a finding arrives without one, look it up in the document before rendering rather than passing a bare token through, and treat that as a defect in the reviewer's output, not the normal path. This applies to `{section}` and to the body fields below. It is the one exception to rendering those fields as-is, and it is narrow: gloss the identifier at first mention and leave the surrounding prose untouched. This follows the self-contained-rendered-lines rule in `references/synthesis-and-presentation.md`. Respect the code-span budget below.
-- **`why_it_matters`** — from the merged finding's `why_it_matters` field, held to the same limit on detail as `suggested_fix` below. Rules:
-  - **First sentence states the consequence, and contains no identifier at all.** What goes wrong, for whom. A reader who skimmed the document once must be able to judge it without looking anything up.
-  - **At most two further sentences of mechanism**, glossed per the identifier rule above. Mechanism explains *how* the problem arises; it is supporting detail, not the finding.
-  - **Everything past that is detail the user can ask for.** When the merged field carries more (file-level tracing, multi-hop interactions, competing call paths), leave it out and add one closing line offering it (e.g. `Ask for the trace if you want the call-path detail.`). Do not print it by default. A block that traces internals across several paragraphs is not more rigorous; it moves the reading cost onto a user who has less document context than the review does, and serving that user is why this walk-through exists.
-- **`suggested_fix`** — from the merged finding's `suggested_fix` field. Render as prose describing intent, not as raw markup. The user's job is to trust or reject the action — they don't need to review exact text. Rules:
-  - **Default — one sentence describing the effect.** What does the fix achieve, and where does it live? Prefer intent language over quoted text.
-    - Good: `Drop the Advisory tier from the enum; advisory-style findings surface in an FYI subsection at the presentation layer.`
-    - Good: `Add a deployment-ordering constraint requiring Units 3 and 4 in a single commit.`
-    - Bad: `Change "autofix_class: [auto, gated_auto, advisory, present]" to "autofix_class: [safe_auto, gated_auto, manual]" in findings-schema.json on line 48.` — too syntax-focused for a decision loop
-  - **Code-span budget** — at most 2 inline backtick spans per sentence, each a single identifier, flag, or short phrase (e.g., `` `safe_auto` ``, `` `<work-context>` ``). Always leave a space before and after each backtick span.
-  - **Raw code blocks** — only for short (≤5-line) genuinely additive content where no before-state exists. Above 5 lines, switch to a summary.
-  - **No diff blocks.** Document mutations render as prose.
-- **`If this is left as-is`** — one sentence naming the concrete downstream cost of not acting: what breaks, for whom, at what point. This is the line the user's decision turns on when they have not read the document as closely as the review did, so it must be evaluable on its own — no identifier the user would have to look up, no appeal to a claim only the reviewer can verify. When the honest answer is that the cost is small or speculative, say so plainly rather than inflating it.
-- **Conflict-context line (when applicable)** — when contributing personas implied different actions for this finding and step 3.5b resolved the disagreement, explain that briefly. Example: `Coherence recommends Apply; scope-guardian recommends Skip. Agent's recommendation: Skip.` The orchestrator's recommendation, the value chosen by the lead agent, is what the menu labels "recommended."
+- **`{plain-English title}`** — 适合作为标题的 3-8 个字的摘要。源自合并结果的 `title` 字段，但经过重新措辞，使其读作可观察的结果（例如，“实施者将选择不同的层”而不是“X-Y 部分列出了四个层”）。对于文档审查结果，可观察的结果是*对读者、实施者或下游决策的影响*，而不是运行时行为。
+- **`{section}`** — 来自调查结果的 `section` 字段。
+- **不透明标识符** - 用户必须打开文档或代码才能理解的任何标记在首次提及时都带有一个简短的简单语言句柄。这涵盖了文档定义的 ID（`R6`、`U3`、`KTD2`）和文档恰好命名的实现标识符 — 函数、文件、变量和行引用，例如 `run_codex_cmd`、`$PEERLOG` 或 `peer-job-runner.py`。在第一次提及时对每个内容进行光泽化（例如，`R6 (suppress peer panels on low-stakes calls)`）；永远不要留下一个裸露的标识符作为块对其名称的唯一描述。保留 ID 本身：它为编辑文档的任何人锚定查找结果，并且稍后同一块中的提及保持裸露，以便块扫描。句柄随发现一起到达 - 提出该句柄的审查者将其写入发现的字段中，因此呈现给您的内容而不是在此处重建它。如果发现结果没有，请在渲染之前在文档中查找它，而不是传递一个裸标记，并将其视为审查者输出中的缺陷，而不是正常路径。这适用于 `{section}` 和下面的正文字段。这是按原样呈现这些字段的唯一例外，而且它的范围很窄：在第一次提到时就对标识符进行修饰，并保持周围的散文不变。这遵循 `references/synthesis-and-presentation.md` 中的自包含渲染线规则。遵守下面的代码跨度预算。
+- **`why_it_matters`** — 来自合并结果的 `why_it_matters` 字段，与下面的 `suggested_fix` 保持相同的详细限制。规则：
+  - **第一句话说明了结果，并且根本不包含任何标识符。**出了什么问题，对谁来说。浏览过一次该文档的读者必定能够在不查找任何内容的情况下对其进行判断。
+  - **最多另外两句机制**，根据上面的标识符规则进行注释。机制解释了问题“如何”出现；它是支持细节，而不是发现。
+  - **过去的所有内容都是用户可以要求的详细信息。**当合并的字段包含更多内容（文件级跟踪、多跳交互、竞争调用路径）时，请将其保留并添加一个提供它的结束行（例如 `如果需要调用路径细节，可以让我展开追踪记录。`）。默认情况下不打印。跨多个段落追踪内部结构的块并不更严格；它将阅读成本转移到文档上下文少于评论的用户身上，而为该用户提供服务就是此演练存在的原因。
+- **`suggested_fix`** — 来自合并结果的 `suggested_fix` 字段。呈现为描述意图的散文，而不是原始标记。用户的工作是信任或拒绝该操作——他们不需要查看确切的文本。规则：
+  - **默认 — 用一句话描述效果。** 修复实现了什么，它位于哪里？更喜欢意图语言而不是引用的文本。
+    - 好：`从枚举删除 Advisory 档；说明性发现由展示层放进 FYI 小节。`
+    - 好：`增加部署顺序约束：单元 3 和 4 必须放在同一提交。`
+    - 坏：`Change "autofix_class: [auto, gated_auto, advisory, present]" to "autofix_class: [safe_auto, gated_auto, manual]" in findings-schema.json on line 48.`——对于决策循环来说过于注重语法
+  - **代码跨度预算** - 每个句子最多 2 个内联反引号跨度，每个跨度一个标识符、标志或短语（例如，`` `safe_auto` ``, `` `<work-context>` ``）。在每个反引号跨度之前和之后始终留一个空格。
+  - **原始代码块** - 仅适用于不存在之前状态的短（≤5 行）真正附加内容。以上5行，切换到摘要。
+  - **没有差异块。** 文档突变呈现为散文。
+- **`If this is left as-is`** — 一句话指出了不采取行动的具体下游成本：什么会破坏，对谁来说，在什么时候破坏。这是用户在没有像审查者那样仔细阅读文档时做出的决定，因此它本身必须是可评估的——用户不需要查找标识符，也不需要对只有审查者才能验证的声明提出上诉。当诚实的答案是成本很小或具有投机性时，请直白地说出来，而不是夸大其词。
+- **冲突上下文线（适用时）** - 当贡献角色暗示此发现的不同操作并且步骤 3.5b 解决了分歧时，请简要解释。示例：`Coherence recommends Apply; scope-guardian recommends Skip. Agent's recommendation: Skip.` 协调器的推荐（首席代理选择的值）是菜单标记为“推荐”的值。
 
-### Question string (decision-focused; self-sufficient on modal harnesses)
+### 问题串（以决策为中心；模态宿主自给自足）
 
-After the terminal block renders, call the host's blocking question tool already in the current tool list. Most adapters expose a single question string, so the stem and the compact decision fields share that string. Shape:
+输出块渲染完成后，调用当前工具列表中已有的主机堵问工具。大多数适配器公开单个问题字符串，因此主干和紧凑决策字段共享该字符串。形状：
 
 ```
-Finding {N} of {M} — {severity} {short handle}.
-What's wrong: {consequence-first sentence, no opaque identifier}
-Proposed fix: {intent sentence}
-If left as-is: {one-sentence downstream cost}
+找到 {M} — {severity} {短句柄} 的 {N}。
+出了什么问题：{结果第一句，没有不透明的标识符}
+建议的修复：{意图句}
+如果保持原样：{一句话下游成本}
 {Action framing in a phrase}?
 ```
 
-Where:
+在哪里：
 
-- **Short handle** matches the `{plain-English title}` from the terminal block heading.
-- **What's wrong / Proposed fix / If left as-is** — the same three fields as the terminal block, compressed to one sentence each, obeying the shared rendering floor (`references/rendering-floor.md`) opaque-token policy and two-anchor budget. Derive them from the block already rendered; do not invent a second narrative. Always emit all three labeled lines. When the merged finding has no `suggested_fix`, write `Proposed fix: none` — do not drop the line.
-- **Action framing** — one phrase describing what the single recommended action does, as a yes/no question. Examples: `Apply the rename?`, `Defer to Open Questions since the tradeoff is genuine?`, `Skip since the document already resolves this elsewhere?`.
+- **简称** 与输出块标题中的 `{plain-English title}` 匹配。
+- **出了什么问题/建议的修复/如果保持原样** — 与终端块相同的三个字段，每个字段压缩为一句话，遵守共享渲染层 (`references/rendering-floor.md`) 不透明令牌策略和两个锚点预算。从已经渲染的块中派生它们；不要发明第二种叙述。始终发出所有三个标记线。当合并的结果没有 `suggested_fix` 时，写 `Proposed fix: none` — 不要删除该行。
+- **操作框架** — 一个短语描述单个推荐操作的作用，作为一个 yes/no 问题。示例：`应用这次重命名吗？`、`确有取舍，是否放到 Open Questions 待定？`、`其他段落已经解决，是否跳过？`。
 
-Never enumerate alternatives in the question string. Ask one recommendation as a yes/no; the option list carries the alternatives. When the recommendation is close, show the disagreement in the terminal block's conflict-context line, not as a multi-option stem. Do not put the proposed-fix text into the Apply option label; keep labels short per "Options" below.
+切勿在问题字符串中枚举替代项。要求一项推荐为 yes/no；选项列表包含替代方案。当建议接近时，在输出块的冲突上下文行中显示分歧，而不是作为多选项主干。不要将提议的修复文本放入“应用”选项标签中；根据下面的“选项”保持标签简短。
 
-If the blocking-question tool rejects the multi-line question string (schema / length / single-prompt constraints on a host), retry once with a short action-framing stem only; the terminal block already carries What's wrong / Proposed fix / If left as-is. Do not skip the question, and do not treat that retry as license to omit the three fields on hosts that accept the full string.
+如果阻塞问题工具拒绝多行问题字符串（主机上的架构/长度/单提示约束），则仅使用短动作框架重试一次；接线盒已经带有什么问题/建议的修复/如果保持原样。不要跳过该问题，也不要将重试视为省略接受完整字符串的主机上的三个字段的许可证。
 
-### Confirmation between findings
+### 调查结果之间的确认
 
-After the user answers and before printing the next finding's terminal block, emit a one-line confirmation of the action taken. Examples: `→ Applied. Edit staged at "Scope Boundaries" section.`, `→ Deferred. Entry appended to "## Deferred / Open Questions".`, `→ Skipped.`
+用户回答后，在打印下一个结果的接线盒之前，发出对所采取操作的单行确认。示例：`→ Applied. Edit staged at "Scope Boundaries" section.`、`→ Deferred. Entry appended to "## Deferred / Open Questions".`、`→ Skipped.`
 
-### Options (four; adapted as noted)
+### 选项（四个；按说明进行调整）
 
-These four options are the **complete, exclusive set** for the regular per-finding question. Fixed order: never reorder, never add, never substitute. In particular, **`Acknowledge` is NOT one of these options.** It appears only in the no-fix sub-question described under "Per-finding routing" below, which is asked only when the user picks Apply on a finding that lacks a `suggested_fix`. Importing `Acknowledge` into the regular menu (in place of D, or as a fifth option) is a bug: it silently drops the `Auto-resolve with best judgment on the rest` workflow shortcut, and offering `Acknowledge` outside the no-fix path mislabels the user's choice in the completion report's bucket counts.
-
-```
-A. Apply the proposed fix
-B. Defer — append to the doc's Open Questions section
-C. Skip — don't apply, don't append
-D. Auto-resolve with best judgment on the rest
-```
-
-**Mark the recommendation chosen by the lead agent with `(recommended)` on its option label.** Required, not optional. Only A, B, or C can carry it: synthesis emits `recommended_action` as Apply/Defer/Skip, which maps to A/B/C. D (`Auto-resolve with best judgment on the rest`) is a workflow shortcut for bulk execution across remaining findings, not a finding-level resolution action, so it is never marked `(recommended)`.
+这四个选项是针对常规的每次发现问题的**完整、独特的设置**。固定顺序：从不重新排序、从不添加、从不替换。特别是，**`Acknowledge` 不是这些选项之一。** 它仅出现在下面的“按查找结果路由”下描述的无修复子问题中，仅当用户在缺少 `suggested_fix` 的查找结果上选择“应用”时才会询问该子问题。将 `Acknowledge` 导入常规菜单（代替 D，或作为第五个选项）是一个错误：它会默默地删除 `其余项按最佳判断自动处理` 工作流程快捷方式，并且在无修复路径之外提供 `Acknowledge` 会错误地标记用户在完成报告的存储桶计数中的选择。
 
 ```
-A. Apply the proposed fix  (recommended)
-B. Defer — append to the doc's Open Questions section
-C. Skip — don't apply, don't append
-D. Auto-resolve with best judgment on the rest
+A. 应用建议的修复
+B. 推迟 — 附加到文档的开放问题部分
+C. Skip — 不应用、不追加
+D. 自动解决并对其余问题进行最佳判断
 ```
 
-When reviewers disagreed or evidence cuts against the default, still mark one option, whichever synthesis produced, and show the disagreement in the conflict-context line.
-
-### Remedy sub-question (asked before the regular menu)
-
-Ask this only when the finding actually carries competing remedies. **The reviewer contract does not produce them in the ordinary case.** `suggested_fix` is a single committed recommendation and `references/subagent-template.md` forbids alternative menus outright, so a plain `manual` finding arrives with one fix or none, and there is nothing to choose between.
-
-The source that does carry them is synthesis step 3.5 (Resolve Contradictions): a contradiction between personas becomes one combined finding holding both perspectives, framed as a tradeoff for the user to settle. That is a genuine fork, and it is what this sub-question exists for. Ask which perspective to take **before** the regular menu, rather than presenting one as though it were the only one.
-
-When the finding carries a single remedy, skip this and go straight to the regular menu. Do not manufacture a second option to make the fork appear; an invented alternative is worse than the four-option menu, which at least states the choice honestly.
-
-This is a sub-question in the same sense as the no-fix `Acknowledge` sub-question below: the four options above remain the complete, exclusive set for the regular per-finding question, and this is asked ahead of it.
+**在选项标签上用 `(recommended)` 标记首席代理选择的推荐。** 必填，非可选。只有 A、B 或 C 可以携带它：合成将 `recommended_action` 发出为 Apply/Defer/Skip，映射到 A/B/C。 D (`其余项按最佳判断自动处理`) 是对剩余结果进行批量执行的工作流程快捷方式，而不是结果级别的解决操作，因此它永远不会被标记为 `(recommended)`。
 
 ```
-This problem is settled; the remedy is not. Which do you want?
-
-A. <first remedy, one line of what it commits to>
-B. <second remedy, one line of what it commits to>
+A. 应用建议的修复（推荐）
+B. 推迟 — 附加到文档的开放问题部分
+C. Skip — 不应用、不追加
+D. 自动解决并对其余问题进行最佳判断
 ```
 
-Name what *differs* between the options, not what they share; the reader already accepted the problem. Carry the answer into the regular menu as "the proposed fix," then run A-D as normal, so Defer and Skip stay reachable after a remedy is chosen.
+当审稿人不同意或证据反对默认值时，仍然标记一个选项，无论产生哪种综合，并在冲突上下文行中显示分歧。
 
-Do not ask this sub-question with a single option. One option means there is nothing to choose, which makes it a report rather than a question; route the finding by the ordinary table instead.
+### 补救子问题（在常规菜单之前询问）
 
-### Adaptations
+仅当发现确实存在竞争性补救措施时才询问此问题。 **审查者合同在普通情况下不会产生它们。** `suggested_fix` 是单个承诺的建议，而 `references/subagent-template.md` 完全禁止替代菜单，因此简单的 `manual` 发现要么有一个修复，要么没有，没有什么可以选择的。
 
-- **N=1 (exactly one pending finding):** the terminal block's heading omits `Finding N of M` and renders as `## {severity} {plain-English title}`. The question string's first line drops the position counter, becoming `{severity} {short handle}.` The three compact decision-field lines and the action-framing line remain. Option D (`Auto-resolve with best judgment on the rest`) is suppressed because no subsequent findings exist; the menu shows three options: Apply / Defer / Skip.
+确实承载它们的来源是综合步骤 3.5（解决矛盾）：人物角色之间的矛盾成为持有两种观点的综合发现，被框定为用户需要解决的权衡。这是一个真正的分叉，这就是这个子问题存在的目的。询问在常规菜单之前**采取哪种观点，而不是像唯一的那样呈现一种观点。
 
-- **Open-Questions append unavailable** (read-only document, write-failed): when `references/open-questions-defer.md` reports the in-doc append mechanic cannot run, option B is omitted. The question string appends one line explaining why (e.g., `Defer unavailable — document is read-only in this environment.`). The menu shows three options: Apply / Skip / Auto-resolve with best judgment on the rest. Before rendering options, remap any per-finding `Defer` recommendation from synthesis to `Skip` so the `(recommended)` marker lands on an option that's actually in the menu. Show the remap on the conflict-context line (e.g., `Synthesis recommended Defer; downgraded to Skip — document is read-only.`).
+当发现只有一种补救措施时，请跳过此步骤并直接进入常规菜单。不要制造第二个选项来使叉子出现；一个发明的替代方案比四个选项的菜单更糟糕，它至少诚实地说明了选择。
 
-- **Combined N=1 + no-append:** the menu shows two options: Apply / Skip.
+这是一个与下面的无修复`Acknowledge`子问题相同意义的子问题：上面的四个选项仍然是常规的每次发现问题的完整、排他集，并且这是在它之前提出的。
 
-Only when no such tool is in the list, a real question call errors, or the platform has no blocking question tool, fall back to presenting the options as a numbered list and waiting for the user's next reply.
+```
+这个问题已经解决了；补救办法不是。你想要哪个？
+
+A. <第一个补救措施，一行承诺的内容>
+B. <第二个补救措施，一行承诺>
+```
+
+列出选项之间的“不同之处”，而不是它们共有的内容；读者已经接受了这个问题。将答案作为“建议的修复”放入常规菜单中，然后正常运行 A-D，以便在选择补救措施后，延迟和跳过仍然可以访问。
+
+不要用单个选项来问这个子问题。一个选项意味着没有什么可选择的，这使得它成为一份报告而不是一个问题；相反，通过普通表路由查找结果。
+
+### 改编
+
+- **N=1（正好有一个待定的发现）：** 输出块的标题省略 `Finding N of M` 并呈现为 `## {severity} {plain-English title}`。问题字符串的第一行删除位置计数器，变成 `{severity} {short handle}.` 三个紧凑的决策字段行和动作框架行保留。选项 D（`其余项按最佳判断自动处理`）被抑制，因为不存在后续发现；菜单显示三个选项：应用/推迟/跳过。
+
+- **开放问题追加不可用**（只读文档，写入失败）：当 `references/open-questions-defer.md` 报告文档内追加机制无法运行时，选项 B 被省略。问题字符串附加一行解释原因（例如，`当前环境下文档只读，无法把该项写入待定区。`）。菜单显示三个选项：应用/跳过/自动解决，并对其余部分进行最佳判断。在渲染选项之前，将任何每次查找的 `Defer` 建议从合成重新映射到 `Skip`，以便 `(recommended)` 标记落在菜单中实际存在的选项上。在冲突上下文行上显示重新映射（例如，`Synthesis recommended Defer; downgraded to Skip — document is read-only.`）。
+
+- **组合 N=1 + no-append：** 菜单显示两个选项：应用/跳过。
+
+仅当列表中没有此类工具、真正的问题调用错误或平台没有阻止问题工具时，才会回退以将选项呈现为编号列表并等待用户的下一个回复。
 
 ---
 
-## Per-finding routing
+## 每次查找路由
 
-For each finding's answer:
+对于每个发现的答案：
 
-- **Apply the proposed fix** — add the finding's id to an in-memory Apply set. Advance to the next finding. Do not edit the document now; Apply accumulates for end-of-walk-through batch execution. **No-fix check:** if the merged finding has no `suggested_fix` (possible on `manual` findings where the persona flagged the issue as observation without a concrete resolution), Apply is not executable. Do not add the finding to the Apply set. Instead, ask the no-fix sub-question described below before advancing.
-- **Defer — append to Open Questions section** — invoke the append flow from `references/open-questions-defer.md`. The walk-through's position indicator stays on the current finding during any failure-path sub-question (Retry / Fall back / Convert to Skip). On success, record the append location and reference in the in-memory decision list and advance. On conversion-to-Skip from the failure path, advance with the failure noted in the completion report.
-- **Skip — don't apply, don't append** — record Skip in the in-memory decision list. Advance. No side effects.
-- **Auto-resolve with best judgment on the rest** — exit the walk-through loop. Show the bulk preview from `references/bulk-preview.md`, scoped to the current finding and everything not yet decided. The preview header reports the count of already-decided findings ("K already decided"). If the user picks Cancel from the preview, return to the current finding's per-finding question (not to the routing question). If the user picks Proceed, execute the plan per `references/bulk-preview.md`: Apply findings join the in-memory Apply set with the ones the user already picked, Defer findings go through `references/open-questions-defer.md`, Skip is a no-op. Then proceed to end-of-walk-through execution.
+- **应用建议的修复** — 将结果的 id 添加到内存中的应用集中。前进到下一个发现。现在不要编辑文档；应用累加以完成逐步执行批处理。 **无修复检查：** 如果合并的结果没有 `suggested_fix`（可能在 `manual` 结果中，角色将问题标记为没有具体解决方案的观察），则“应用”不可执行。不要将结果添加到“应用”集中。相反，在继续之前，请先询问下面描述的无固定子问题。
+- **推迟 — 附加到开放问题部分** — 从 `references/open-questions-defer.md` 调用附加流程。在任何失败路径子问题（重试/回退/转换为跳过）期间，演练的位置指示器都会停留在当前发现上。成功后，在内存决策列表中记录追加位置和引用并前进。从故障路径转换为跳过时，按照完成报告中记录的故障继续前进。
+- **跳过 - 不应用，不追加** - 将 Skip 记录在内存决策列表中。进步。无副作用。
+- **自动解决，并对其余部分进行最佳判断** - 退出演练循环。显示从 `references/bulk-preview.md` 开始的批量预览，范围为当前发现以及尚未决定的所有内容。预览标题报告已决定的结果的计数（“K 已决定”）。如果用户从预览中选择“取消”，则返回到当前结果的每个结果问题（而不是路由问题）。如果用户选择继续，则按照`references/bulk-preview.md`执行计划：应用结果将内存中的应用集与用户已经选择的结果结合起来，延迟结果经过`references/open-questions-defer.md`，跳过是无操作。然后继续执行结束演练。
 
-### No-fix sub-question (Apply picked on a finding with no `suggested_fix`)
+### 无修复子问题（适用于没有 `suggested_fix` 的发现）
 
-This sub-question, and the `Acknowledge without applying` option in particular, is **exclusive to the no-fix path**. It is asked only after the user picks Apply on a finding whose merged record has no `suggested_fix`. Do not show this sub-question, or its `Acknowledge` option, in the regular per-finding menu. The regular menu's fourth option is always `Auto-resolve with best judgment on the rest` (per "Options" above), never `Acknowledge`.
+这个子问题，特别是 `Acknowledge without applying` 选项，是**不修复路径所独有的**。仅当用户对合并记录没有 `suggested_fix` 的结果选择“应用”后才会询问。不要在常规的每次查找菜单中显示此子问题或其 `Acknowledge` 选项。常规菜单的第四个选项始终是`其余项按最佳判断自动处理`（根据上面的“选项”），而不是`Acknowledge`。
 
-Synthesis step 3.5b demotes the default recommendation from Apply to Defer for any merged finding without a `suggested_fix`, so `(recommended)` never lands on Apply for these findings. But the menu still lets the user pick Apply manually. When that happens, do not add the finding to the Apply set: the execution pass has no edit to apply, which would either fail the batch or record a misleading "applied" outcome.
+对于任何没有 `suggested_fix` 的合并结果，综合步骤 3.5b 将默认建议从“应用”降级为“推迟”，因此 `(recommended)` 永远不会针对这些结果应用“应用”。但菜单仍然允许用户手动选择“应用”。发生这种情况时，请勿将结果添加到“应用”集中：执行过程没有要应用的编辑，这会导致批处理失败或记录误导性的“已应用”结果。
 
-Ask a blocking sub-question using the platform's question tool. The stem explains why Apply is not executable in one line, then offers three self-contained options. The position indicator stays on the current finding while the sub-question is open.
+使用平台的问题工具提出阻塞子问题。词干解释了为什么Apply 不能在一行中执行，然后提供了三个独立的选项。当子问题打开时，位置指示器停留在当前结果上。
 
-**Stem:** `Apply isn't executable for this finding — the review surfaced the issue without a concrete fix. How should the agent proceed?`
+**茎：** `审查指出问题但没有可执行的修复，这一项不能直接应用。下一步怎么处理？`
 
-**Options (fixed order):**
-
-```
-A. Defer to Open Questions  (recommended)
-B. Skip — don't apply, don't append
-C. Acknowledge without applying — record the decision, no document edit
-```
-
-**Routing:**
-
-- **A. Defer to Open Questions** — invoke the append flow from `references/open-questions-defer.md` as though the user had originally picked Defer. Failure-path handling is identical (Retry / Fall back / Convert to Skip). On success, record the append location in the decision list (annotated `redirected from Apply — no suggested_fix`) and advance.
-- **B. Skip** — record Skip in the decision list (annotated `redirected from Apply — no suggested_fix`). Advance. No side effects.
-- **C. Acknowledge without applying** — record the finding in the decision list as `acknowledged` (annotated `Apply picked but no suggested_fix — no edit dispatched`). Do not add to the Apply set. Advance. The completion report lists each Acknowledged finding with its reason and counts them separately (see the unified completion report below). For round-to-round suppression (distinct from report display), Acknowledged decisions carry forward in the multi-round decision primer as a rejected-class decision alongside Skip and Defer, so round-N+1 synthesis suppresses re-raises via R29. The user saw the finding, chose not to act, and wants it recorded; that is equivalent to Skip for suppression purposes but is reported separately.
-
-**Availability adaptation.** When `references/open-questions-defer.md` has cached `append_available: false` for the session, omit option A and add one line to the stem explaining why (e.g., `Defer unavailable — document is read-only in this environment.`). The menu becomes Skip / Acknowledge without applying, with Skip labeled `(recommended)`.
-
----
-
-## Withdrawing findings the user's earlier answers resolved
-
-Earlier decisions carry information forward. Apply stages a fix that does not execute until end-of-walk-through, so later findings are still being presented against the pre-edit document. Skip and Defer settle a premise. Freeform text, an `Other` answer, or per-option notes may assert a fact the document does not state; the no-freeform-authoring rule below forbids the user hand-writing a *fix*, not supplying information.
-
-**When a finding's turn arrives, judge it against everything the user has said so far.** If earlier answers already resolve or contradict it, do not render its terminal block or ask its question. Say succinctly, in plain user-facing language, what the finding was and which earlier answer settled it, enough that the user can tell it was handled rather than lost, and can object if the agent read them wrong. Follow the one-line shape of "Confirmation between findings" above. Then advance to the next finding, or to the completion report if none remain.
-
-Evaluate this at the point the finding would have been presented; do not scan ahead after every answer.
-
-**An explicit user decision outranks an automatic withdrawal.** Withdrawal is the agent's inference about a finding the user has not yet answered. When the user has already decided a finding, or has explicitly asked to see a particular finding, honor that; do not retroactively convert it to `withdrawn` on the strength of a later answer.
-
-Record each as `withdrawn` in the decision list, noting which decision retired it. The completion report counts withdrawn findings separately. It carries forward in the decision primer as a rejected-class decision, alongside Skip, Defer, and Acknowledge, **only when a user decision durably settled it**: a settled premise (Skip/Defer) or a user-asserted fact. Those are user judgments that the finding need not be acted on, so R29 should suppress a round N+1 re-raise since the document itself never changed.
-
-**An Apply-triggered withdrawal never carries forward as rejected-class.** It is a *prediction* that a staged fix will resolve the finding, not a user judgment that it needn't be. The Apply runs only at end-of-walk-through, and its landing is neither certain nor proof that the finding is resolved: it can fail outright, or land in the wrong place and leave the withdrawn finding's evidence untouched (R30 verifies the applied fix's own fingerprint, not the withdrawn finding's). So round N+1 re-synthesis, not R29, is the check. If the fix genuinely resolved the finding, fresh personas will not regenerate it against the edited document. If it did not, whether the Apply failed or landed ineffectively, the finding comes back to the user instead of being silently suppressed. When such an Apply fails outright during execution (write error, or the defensive no-fix fallback), also list its reverted withdrawals in the completion report's failure section as returned to scope, so the user sees them in-run rather than only next round.
-
----
-
-## Override rule
-
-"Override" means the user picks a different preset action (Defer or Skip in place of Apply, or Apply in place of the agent's recommendation). No inline freeform custom-fix authoring: the walk-through is a decision loop, not a pair-editing session. A user who wants a variant of the proposed fix picks Skip and hand-edits outside the flow; if they also want the finding tracked, they can Defer first and edit afterward.
-
----
-
-## State
-
-Walk-through state is **in-memory only**. The orchestrator maintains:
-
-- An Apply set (finding ids the user picked Apply on)
-- A decision list (every answered finding with its action and any metadata like `append_location` for Deferred or `reason` for Skipped)
-- The current position in the findings list
-
-Nothing is written to disk per decision except the in-doc Open Questions appends (which are external side effects and cannot be rolled back). An interrupted walk-through (user cancels the prompt, session compacts, network dies) discards all in-memory state. Apply decisions have not been dispatched yet (they batch at end-of-walk-through), so they are cleanly lost with no document changes.
-
-State does not persist across sessions. This mirrors `ce-code-review`'s walk-through state rules.
-
----
-
-## End-of-walk-through execution
-
-After the loop ends, either because every finding has been answered or because the user took `Auto-resolve with best judgment on the rest → Proceed`, the walk-through hands off to the execution phase:
-
-1. **Apply set:** in a single pass, the orchestrator applies every accumulated Apply-set finding's `suggested_fix` to the document. Document edits happen directly via the platform's edit tool; ce-doc-review has no batch-fixer subagent (per scope boundary), so the orchestrator performs the single-file edits itself in the document's native format, preserving its existing structure and never inserting markdown syntax into HTML. **Defensive no-fix check:** before making the edit for each Apply-set entry, verify the merged finding carries a `suggested_fix`. If it does not (the decision-time no-fix check in "Per-finding routing" should prevent this, but treat it as a defensive fallback), skip the edit, record the finding in the completion report's failure section with reason `Apply skipped — no suggested_fix available`, and continue the batch. Do not fail the entire pass because one Apply-set entry lacks a fix.
-2. **Defer set:** already executed during the walk-through via `references/open-questions-defer.md`. Nothing to do here.
-3. **Skip:** no-op.
-
-After execution completes (or after `Auto-resolve with best judgment on the rest → Cancel` followed by the user working through remaining findings one at a time, or after the loop runs to completion), emit the unified completion report described below.
-
----
-
-## Unified completion report
-
-Every ending path of Interactive mode emits a completion report: the walk-through finishing or bailing via `Auto-resolve with best judgment on the rest → Proceed`, any routing choice, and the case where nothing was pending so the question was skipped.
-
-The reader has already seen the Phase 4 report and every per-finding confirmation in this session. The completion report tells them only what they cannot already see: what failed, which outcomes differ from what the report showed, and the state the document is now in. Do not list the applied fixes, FYI observations, or residual concerns a second time.
-
-### Required content
-
-- **Failures first:** any Apply that failed (e.g., document write error, or the defensive no-fix fallback skipping an Apply-set entry), and any Open-Questions append that failed.
-- **Outcomes the reader did not choose one at a time:** after a bulk path (routing A or C, or `Auto-resolve with best judgment on the rest`), one line per finding that was Deferred (with its append location), Skipped (with a one-line reason), or Withdrawn (with the decision that retired it). Applied findings were already shown with their fix; count them instead of listing them. After a full one-by-one walk-through, the per-finding confirmations already carried each outcome, so this list is empty.
-- **Acknowledged entries, on every path:** one line each with the acknowledgement reason (e.g., `Apply picked but no suggested_fix available`), since that outcome is easy to mistake for an applied fix.
-- **One count line by action:** e.g., `Applied 19 changes (16 proposed fixes, 3 decisions); deferred 1 to Open Questions; skipped 1.` Include an `acknowledged` or `withdrawn` count only when non-zero.
-- **The document's state:** one line saying whether it is ready to use, or what is still open and where.
-
-### Nothing-pending case
-
-When the applied changes left nothing to ask, the report is the Phase 4 presentation plus one closing line. For example:
+**选项（固定顺序）：**
 
 ```
-All findings resolved — 3 fixes applied. The plan is ready.
+A. 遵循开放式问题（推荐）
+B. 跳过 — 不应用、不追加
+C. 确认而不申请——记录决定，无需编辑文档
+```
+
+**路由：**
+
+- **一个。推迟到开放问题** — 从 `references/open-questions-defer.md` 调用追加流程，就好像用户最初选择了推迟一样。故障路径处理是相同的（重试/回退/转换为跳过）。成功后，在决策列表中记录追加位置（注释为`由应用改为待定：没有 suggested_fix`）并前进。
+- **B。 Skip** — 在决策列表中记录 Skip（注释为 `由应用改为待定：没有 suggested_fix`）。进步。无副作用。
+- **C。确认而不应用** — 将决策列表中的发现记录为 `acknowledged`（注释为 `选择了应用，但无 suggested_fix，未执行编辑`）。不要添加到应用集中。进步。完成报告列出了每个已确认的发现及其原因并单独计数（请参阅下面的统一完成报告）。对于逐轮抑制（与报告显示不同），已确认的决策在多轮决策引物中作为拒绝类决策与 Skip 和 Defer 一起进行，因此 N+1 轮综合通过 R29 抑制重新加注。用户看到了发现结果，选择不采取行动，并希望将其记录下来；这相当于用于抑制目的的 Skip，但单独报告。
+
+**可用性适应。** 当 `references/open-questions-defer.md` 为会话缓存了 `append_available: false` 时，省略选项 A 并在词干中添加一行解释原因（例如，`当前环境下文档只读，无法把该项写入待定区。`）。菜单变为“跳过/确认”而不应用，“跳过”标记为`(recommended)`。
+
+---
+
+## 撤回用户之前已解决的答案的调查结果
+
+早期的决定会传递信息。应用阶段的修复程序直到演练结束后才会执行，因此后续发现的结果仍会针对预编辑文档呈现。 Skip和Defer解决了一个前提。自由格式的文本、`Other`答案或每个选项的注释可能会断言文档未陈述的事实；下面的无自由形式创作规则禁止用户手写*修复*，而不是提供信息。
+
+**轮到发现结果时，根据用户迄今为止所说的所有内容进行判断。**如果之前的答案已经解决或矛盾，请不要呈现其终端块或提出其问题。用面向用户的简单语言简洁地说出结果是什么以及哪个早期答案解决了这个问题，足以让用户知道它已被处理而不是丢失，并且如果代理读错了，可以提出反对。按照上面“结果之间的确认”的单线形状进行操作。然后前进到下一个发现，或者如果没有剩余，则前进到完成报告。
+
+在提出调查结果时对此进行评估；不要在每个答案后都向前浏览。
+
+**明确的用户决定胜过自动撤回。**撤回是代理对用户尚未回答的发现的推断。当用户已经决定某个发现，或者明确要求查看特定发现时，请尊重；不要根据后来的答案将其追溯为 `withdrawn`。
+
+在决策列表中将每个记录为`withdrawn`，并注明哪个决策将其淘汰。完成报告单独统计撤回的调查结果。它在决策入门中作为拒绝类决策与跳过、推迟和确认一起进行，**仅当用户决策持久解决时**：已解决的前提 (Skip/Defer) 或用户断言的事实。这些是用户的判断，不需要对结果采取行动，因此R29应该抑制第N+1轮重新加注，因为文档本身从未改变。
+
+**应用触发的撤回永远不会作为拒绝类继续进行。** 这是“预测”，分阶段修复将解决问题，而不是用户判断不需要这样做。应用仅在演练结束时运行，其着陆既不确定也不能证明发现已得到解决：它可能会彻底失败，或者着陆在错误的地方，而撤回的发现的证据不会受到影响（R30验证所应用的修复程序自己的指纹，而不是撤回的发现的指纹）。因此，检查是 N+1 轮重新合成，而不是 R29。如果修复确实解决了问题，新的角色将不会针对已编辑的文档重新生成它。如果没有，无论应用失败还是无效落地，结果都会返回给用户，而不是被默默地压制。当此类应用在执行期间彻底失败（写入错误或防御性无修复回退）时，还要在完成报告的失败部分中将其恢复的提款列为返回范围，以便用户在运行中看到它们，而不仅仅是下一轮。
+
+---
+
+## 覆盖规则
+
+“覆盖”意味着用户选择不同的预设操作（推迟或跳过代替应用，或应用代替客服人员的建议）。没有内联自由格式自定义修复创作：演练是一个决策循环，而不是配对编辑会话。想要提议修复的变体的用户选择“跳过”并在流程外进行手动编辑；如果他们还希望跟踪结果，可以先推迟，然后再编辑。
+
+---
+
+## 状态
+
+演练状态**仅在内存中**。协调器维护：
+
+- 应用集（查找用户选择应用的 id）
+- 决策列表（每个已回答的发现及其操作和任何元数据，例如`append_location`表示延迟或`reason`表示跳过）
+- 当前在调查结果列表中的位置
+
+除了文档内的开放问题附加（这是外部副作用并且无法回滚）之外，每个决策不会将任何内容写入磁盘。中断的演练（用户取消提示、会话压缩、网络终止）会丢弃所有内存中状态。应用决策尚未发送（它们在演练结束时批处理），因此它们完全丢失，没有文档更改。
+
+状态不会跨会话持续存在。这反映了 `ce-code-review` 的演练状态规则。
+
+---
+
+## 演练结束执行
+
+循环结束后，要么因为每个发现都已得到解答，要么因为用户采取了 `其余项按最佳判断自动处理 → Proceed`，演练将转入执行阶段：
+
+1. **应用集：** 在一次传递中，编排器将每个累积的应用集结果的 `suggested_fix` 应用到文档。文档编辑直接通过平台的编辑工具进行； ce-doc-review 没有批处理修复程序子代理（每个范围边界），因此编排器以文档的本机格式自行执行单文件编辑，保留其现有结构，并且从不将 Markdown 语法插入 HTML。 **防御性无修复检查：** 在对每个应用集条目进行编辑之前，验证合并的结果带有 `suggested_fix`。如果没有（“每个发现路由”中的决策时无修复检查应该可以防止这种情况，但将其视为防御性回退），请跳过编辑，在完成报告的失败部分中记录发现，原因为 `跳过应用：没有 suggested_fix`，然后继续批处理。不要因为一个应用集条目缺少修复而导致整个传递失败。
+2. **延迟设置：**已经在通过 `references/open-questions-defer.md` 的演练过程中执行。这里没什么可做的。
+3. **跳过：** 无操作。
+
+执行完成后（或在 `其余项按最佳判断自动处理 → Cancel` 之后，用户一次处理剩余的结果，或在循环运行完成后），发出如下所述的统一完成报告。
+
+---
+
+## 统一完成报告
+
+交互模式的每个结束路径都会发出一个完成报告：通过`其余项按最佳判断自动处理 → Proceed`进行的演练完成或退出，任何路由选择，以及没有任何待处理的情况，因此跳过问题。
+
+读者已经在本次会议中看到了第四阶段报告和每项发现确认。完成报告只告诉他们他们看不到的内容：失败的内容、哪些结果与报告显示的内容不同以及文档现在所处的状态。不要再次列出已应用的修复、仅供参考的观察结果或剩余问题。
+
+### 必填内容
+
+- **首先失败：**任何失败的应用（例如，文档写入错误，或跳过应用集条目的防御性无修复回退），以及任何失败的开放问题附加。
+- **读者没有一次选择一个结果：**在批量路径（路由 A 或 C，或 `其余项按最佳判断自动处理`）之后，每个发现的一行被推迟（及其附加位置）、跳过（由于一行原因）或撤回（由于决定停用它）。应用的结果已经通过修复显示出来了；计算它们而不是列出它们。经过完整的逐一演练后，每个发现的确认已经包含每个结果，因此此列表为空。
+- **每条路径上的已确认条目：** 每行包含确认原因（例如，`已选应用，但缺少 suggested_fix`），因为该结果很容易被误认为是已应用的修复。
+- **按操作对行进行计数：** 例如，`已应用 19 处变更（16 项拟议修复、3 项决定）；1 项记入 Open Questions，1 项已跳过。` 仅当非零时才包含 `acknowledged` 或 `withdrawn` 计数。
+- **文档的状态：**一行表明它是否可以使用，或者什么仍然打开以及在哪里。
+
+### 无待决案件
+
+当所应用的更改没有什么可问的时，报告就是第四阶段的演示文稿加上一条结束语。例如：
+
+```
+所有发现均已解决 - 应用了 3 个修复。计划已经准备好了。
 ```
 
 ---
 
-## What the walk-through may write
+## 演练可能会写什么
 
-The walk-through is read-only with respect to the project except for three permitted writes: the in-memory Apply set / decision list (managed by the orchestrator), the in-doc Open Questions appends (external side effects managed by `references/open-questions-defer.md`), and the end-of-walk-through batch document edits (the orchestrator's final Apply pass). Persona agents remain strictly read-only. Unlike `ce-code-review`, there is no fixer subagent; the orchestrator makes the document edits directly.
+除了三个允许的写入之外，演练对于项目来说是只读的：内存中的应用集/决策列表（由协调器管理）、文档内开放问题附加（由`references/open-questions-defer.md`管理的外部副作用）以及演练结束时的批处理文档编辑（协调器的最终应用传递）。 Persona 代理严格保持只读状态。与`ce-code-review`不同，没有修复子代理；编排器直接对文档进行编辑。

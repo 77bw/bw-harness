@@ -1,33 +1,33 @@
-# Phase 1.5 topic-surface decomposition
+# 阶段 1.5 主题表面分解
 
-This file defines the axis criteria, the worked examples, and the skip conditions. SKILL.md decides when this file is read.
+该文件定义了轴标准、工作示例和跳过条件。 SKILL.md 决定何时读取该文件。
 
-### Phase 1.5: Topic-Surface Decomposition
+### 阶段 1.5：主题表面分解
 
-Before dispatching frame agents in Phase 2, decompose the topic into 3-5 orthogonal **axes** naming *what aspects of the subject to think about*. Frames determine *how* to think (the lens); axes determine *what* to think on (which parts of the subject). Without an explicit axis list, parallel frames converge on whichever interpretation is most salient at first read and the rest of the subject goes unexamined. Lens diversity alone does not cover the whole subject.
+在第 2 阶段调度框架代理之前，将主题分解为 3-5 个正交**轴**，命名*要考虑主题的哪些方面*。镜框决定“如何”思考（镜头）；轴决定思考什么（主题的哪些部分）。如果没有明确的轴列表，平行框架会集中在第一次阅读时最显着的解释上，而主题的其余部分则未经检查。仅镜头多样性并不能涵盖整个主题。
 
-The axis analysis is a single orchestrator-side pass against the grounding summary already in context: no additional grounding read, no user-facing question, and no dispatch.
+轴分析是针对上下文中已经存在的基础摘要的单个协调器端传递：没有额外的基础读取，没有面向用户的问题，并且没有调度。
 
-**Axis criteria:**
+**轴标准：**
 
-- **3-5 axes** (3 max under tactical scope, per Phase 0.5). Fewer than 3 means the topic is atomic — skip per the rule below. More than 5 fragments dispatch and produces thin coverage on each.
-- **Orthogonal.** A single idea should naturally fall on one axis, not span multiple. Merge axes that overlap heavily.
-- **Derived from grounding**, not from a generic template (e.g., "discovery / engagement / retention" applied to every topic).
-- **At the same level.** Don't mix "the entire pricing page" with "the $9.99 tier copy" in one list.
-- **Named in the topic's language.** "Send mechanics" beats "outbound flow optimization" — words a reader of the topic would recognize, not meta-language about ideation.
+- **3-5 个轴**（战术范围内最多 3 个轴，每阶段 0.5）。少于 3 意味着该主题是原子的 - 根据以下规则跳过。超过 5 个碎片会发送并在每个碎片上产生薄弱的覆盖范围。
+- **正交。** 单个想法自然应该落在一个轴上，而不是跨越多个轴。合并严重重叠的轴。
+- **源自基础**，而不是源自通用模板（例如，适用于每个主题的“发现/参与/保留”）。
+- **处于同一级别。** 不要将“整个定价页面”与“$9.99 层副本”混合在一个列表中。
+- **以主题语言命名。** “发送机制”胜过“出站流优化”——该主题的读者会识别的单词，而不是关于构思的元语言。
 
-**Worked examples (illustrative, not a template — derive from actual grounding):**
+**工作示例（说明性的，不是模板 - 来自实际基础）：**
 
-| Topic | Axes |
+| 话题 | 轴 |
 |---|---|
-| Improve our authentication system | Sign-in flow; session management; account recovery; permissions; identity providers |
-| Cache invalidation in the data layer | Trigger surfaces; coordination across replicas; staleness tolerance per data class; observability of invalidation events |
-| Social sharing of a published page | Send mechanics; discovery (receive side); arrival/dwell experience; compounding over time; actor types (first-party, expert, reader) |
+| 完善我们的认证系统 | 签到流程；会话管理；帐户恢复；权限；身份提供者 |
+| 数据层缓存失效 | 触发面；跨副本的协调；每个数据类的过时容忍度；失效事件的可观察性 |
+| 已发布页面的社交共享 | 派遣机械师；发现（接收方）； arrival/dwell经验；随着时间的推移复利；参与者类型（第一方、专家、读者） |
 
-The third row is there to widen the range, not to be copied: axes do not have to be subsystems. "Actor types" and "compounding over time" cut the same topic along dimensions a component list would never reveal. If your axes read like a directory listing of the code, decompose again.
+第三行是为了扩大范围，而不是复制：轴不必是子系统。 “参与者类型”和“随着时间的推移复合”沿着组件列表永远不会揭示的维度切割相同的主题。如果您的轴读起来像代码的目录列表，请再次分解。
 
-**Skip condition.** Some subjects are atomic and resist meaningful decomposition — a single string output (a name, a tagline), a narrowly-scoped tactical fix ("the typo on line 47 of README"), or a topic where the candidate axes *are* the deliverable (e.g., "what surface should the API expose?"). When 3+ orthogonal axes that pass the criteria above cannot be generated, skip decomposition. Note `Decomposition skipped — atomic subject` in the grounding summary so the artifact records the choice.
+**跳过条件。** 有些主题是原子的，并且抵制有意义的分解 - 单个字符串输出（名称、口号）、范围狭窄的战术修复（“README 第 47 行上的拼写错误”），或者候选轴*是*可交付成果的主题（例如，“API 应该暴露什么表面？”）。当无法生成3个以上满足上述标准的正交轴时，跳过分解。请注意基础摘要中的`Decomposition skipped — atomic subject`，以便产物记录选择。
 
-**Surprise-me skip.** Skip this phase entirely in surprise-me mode and note `Decomposition skipped — surprise-me mode` — apply the 0.2 table's `1.5 axes` row.
+**跳过惊喜。** 在惊喜模式下完全跳过此阶段，并注意 `Decomposition skipped — surprise-me mode` — 应用 0.2 表的 `1.5 axes` 行。
 
-Append the axis list (or skip-reason) to the grounding summary under `Topic axes`. Phase 2 threads it into sub-agent prompts, Phase 3 scores axis spread from it, and the Phase 4 artifact records it.
+将轴列表（或跳过原因）附加到 `Topic axes` 下的基础摘要中。第 2 阶段将其串入子代理提示，第 3 阶段得分轴从其展开，第 4 阶段产物记录它。

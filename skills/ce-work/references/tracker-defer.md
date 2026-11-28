@@ -1,150 +1,150 @@
-# Tracker Detection and Defer Execution
+# 跟踪器检测和延迟执行
 
-This reference covers how residual actionable findings are filed in the project's tracker. Loaded by caller workflows (for example `ce-work` Residual Work Gate, or `lfg` residual handling), not by `ce-code-review`, which stops after the report.
-
----
-
-## Execution Modes
-
-Tracker-defer has two execution modes. The caller selects one; the detection, fallback chain, and ticket composition are shared. A "sink" below is any place a finding can be durably filed.
-
-### Interactive mode
-
-Used by `ce-work` Residual Work Gate and similar caller flows when the user chooses to file tickets. All user-facing prompts are asked:
-
-- First Defer of the session with a generic (non-named) label confirms the effective tracker choice.
-- Execution failures prompt with Retry / Fall back to next sink / Convert to Skip.
-- Labels in the routing question name the tracker when `named_sink_available` is true, and use generic wording when a fallback is in use.
-
-### Non-interactive mode
-
-Used by autonomous callers like `lfg` that must not prompt. All blocking questions are skipped; the fallback chain is executed silently in order. Behavior:
-
-- No confirmation on the first generic-label Defer; proceed directly.
-- On execution failure, automatically fall to the next tier without prompting. Record the failure.
-- On total chain exhaustion (every tier failed or no sink available), return findings in the `no_sink` bucket so the caller can record them somewhere else (e.g., inline them in a PR description).
-- Return a structured result: `{ filed: [{ finding_id, tracker, url }], failed: [{ finding_id, tracker, reason }], no_sink: [{ finding_id, title, severity, file, line }] }`.
-
-The caller decides how to show the result to the user. The non-interactive mode treats "no sink available" as a data-producing outcome, not a prompt trigger.
+该参考资料涵盖了如何将剩余的可操作调查结果归档到项目的跟踪器中。由调用方工作流程（例如 `ce-work` 剩余工作门或 `lfg` 剩余处理）加载，而不是由 `ce-code-review` 加载，后者在报告后停止。
 
 ---
 
-## Detection
+## 执行模式
 
-The agent determines the project's tracker from whatever documentation is obvious. Primary source: the project's active instructions and conventions already in its context — no need to open or name specific instruction files. Read a file directly only when the relevant instructions aren't already in context: a subdirectory-scoped instruction file governing the area you're working in, or when you're a fresh subagent that wasn't given the project's instructions. Supplementary signals (when primary documentation is ambiguous): `CONTRIBUTING.md`, `README.md`, PR templates under `.github/`, visible tracker URLs in the repo.
+Tracker-defer 有两种执行模式。呼叫者选择一个；检测、后备链和票据组成是共享的。下面的“水槽”是指可以持久归档调查结果的任何地方。
 
-A tracker can be reached through an MCP tool (e.g., a Linear MCP server), a CLI (e.g., `gh`), or a direct API. All are acceptable. The detection output is a tuple with two availability flags. One is for the named tracker specifically and drives label confidence in Interactive mode. The other is for the full fallback chain and drives whether Defer is offered at all:
+### 交互模式
+
+当用户选择提交工单时，由 `ce-work` Residual Work Gate 和类似的呼叫者流程使用。所有面向用户的提示都会被询问：
+
+- 带有通用（未命名）标签的会话的首次延迟确认了有效的跟踪器选择。
+- 执行失败时会提示重试/回退到下一个接收器/转换为跳过。
+- 当 `named_sink_available` 为真时，路由问题中的标签命名跟踪器，并在使用后备时使用通用措辞。
+
+### 非交互模式
+
+由像 `lfg` 这样的自主呼叫者使用，不得提示。跳过所有阻塞问题；后备链按顺序静默执行。行为：
+
+- 第一个通用标签 Defer 没有确认；直接进行。
+- 执行失败时，自动跳至下一层而不提示。记录失败情况。
+- 在总链耗尽时（每个层都失败或没有可用的接收器），返回`no_sink`存储桶中的结果，以便调用者可以将它们记录在其他地方（例如，将它们内联在PR描述中）。
+- 返回结构化结果：`{ filed: [{ finding_id, tracker, url }], failed: [{ finding_id, tracker, reason }], no_sink: [{ finding_id, title, severity, file, line }] }`。
+
+调用者决定如何向用户显示结果。非交互模式将“无可用接收器”视为数据生成结果，而不是提示触发。
+
+---
+
+## 检测
+
+代理根据任何明显的文档来确定项目的跟踪器。主要来源：项目的活动指令和约定已经在其上下文中 - 无需打开或命名特定的指令文件。仅当相关说明尚未在上下文中时才直接读取文件：管理您正在工作的区域的子目录范围的说明文件，或者当您是未获得项目说明的新子代理时。补充信号（当主要文档不明确时）：`CONTRIBUTING.md`、`README.md`、`.github/`下的PR模板、存储库中可见的跟踪器 URL。
+
+可以通过 MCP 工具（例如 Linear MCP 服务器）、CLI（例如`gh`）或直接API 来访问跟踪器。一切都可以接受。检测输出是一个具有两个可用性标志的元组。一种是专门针对指定的跟踪器，并在交互模式下提高标签的信心。另一个用于完整的后备链，并决定是否提供 Defer：
 
 ```
 { tracker_name, confidence, named_sink_available, any_sink_available }
 ```
 
-Where:
-- `tracker_name` — human-readable name ("Linear", "GitHub Issues", "Jira"), or `null` when detection cannot identify a specific tracker
-- `confidence` — `high` when the tracker is named explicitly in documentation (or via a linked URL to a specific project/workspace) and is unambiguously the project's canonical tracker; `low` when the signal is thin, conflicting, or implied only
-- `named_sink_available` — `true` only when the agent can actually invoke the detected tracker (MCP tool is loaded, CLI is authenticated, or API credentials are in environment); `false` when the tracker is documented but no tool reaches it, or when no tracker is found at all. Drives label confidence: inline tracker naming requires this to be `true`.
-- `any_sink_available` — `true` when any tier in the fallback chain (named tracker or GitHub Issues via `gh`) can be invoked this session. Drives whether Defer is offered in Interactive mode, and drives the `no_sink` bucket in Non-interactive mode.
+在哪里：
+- `tracker_name` — 人类可读的名称（“Linear”、“GitHub Issues”、“Jira”），或当检测无法识别特定跟踪器时为 `null`
+- `confidence` — `high` 当跟踪器在文档中明确命名（或通过链接到特定 project/workspace 的 URL）并且明确是项目的规范跟踪器时； `low` 当信号微弱、冲突或仅暗示时
+- `named_sink_available` — `true` 仅当代理可以实际调用检测到的跟踪器时（MCP 工具已加载，CLI 已通过身份验证，或 API 凭证位于环境中）； `false` 当跟踪器被记录但没有工具到达它时，或者根本没有找到跟踪器时。提高标签信心：内联跟踪器命名要求为`true`。
+- `any_sink_available` — `true` 当后备链中的任何层（名为跟踪器或GitHub问题通过`gh`）可以调用此会话时。交互模式下驱动是否提供Defer，非交互模式下驱动`no_sink`桶。
 
-Detection is reasoning-based. Do not maintain an enumerated checklist of files to read. Read the obvious sources and form a confident conclusion; when the obvious sources don't resolve, the label falls back to generic wording and the agent confirms with the user before executing (Interactive mode only).
-
----
-
-## Probe timing and caching
-
-Availability probes run **at most once per session** and **only when Defer execution is imminent**. Never speculatively at review start, never per-Defer, never per-walk-through-finding. The cached tuple is reused for every Defer action in the same run.
-
-Typical probe sequence:
-
-1. Consult the project's instructions already in context for tracker references — don't open or name specific instruction files; read one directly only when the relevant instructions aren't in context (subdirectory scope, or a fresh subagent). If nothing found, set `tracker_name = null`, `confidence = low`.
-2. **Probe the named tracker when one was found.** For GitHub Issues, run `gh auth status` and `gh repo view --json hasIssuesEnabled`. For Linear or other connector/MCP-backed trackers, first discover available tools via the platform's tool-discovery primitive (e.g., `ToolSearch` in Claude Code) rather than assuming absence from an unloaded tool, then verify the discovered tool is responsive. For API-backed trackers, verify credentials wherever the platform exposes them (environment, connector auth, or a documented secrets location), not only shell env vars. Set `named_sink_available` from the probe result.
-3. **Probe the GitHub Issues fallback to compute `any_sink_available`.** Even when the named tracker was found and probed, `gh` matters for the `no_sink` bucket decision so that a run with no documented tracker but working `gh` still offers Defer.
-   - If `named_sink_available = true`: `any_sink_available = true` (no further probes needed).
-   - Otherwise, probe GitHub Issues via `gh auth status` + `gh repo view --json hasIssuesEnabled` (skip if already probed in step 2). If it works, `any_sink_available = true`.
-   - Otherwise, `any_sink_available = false`.
-
-When Interactive mode's routing question is skipped entirely (R2 zero-findings case), no probes run. When the cached tuple is reused across a session, any `named_sink_available = true` from the session's first probe stays cached — do not re-probe per Defer.
+检测是基于推理的。不要维护要读取的文件的枚举清单。阅读明显的来源并得出自信的结论；当明显的来源无法解决时，标签会回退到通用措辞，并且代理在执行之前与用户确认（仅限交互模式）。
 
 ---
 
-## Label logic (Interactive mode)
+## 探测定时和缓存
 
-- When `confidence = high` AND `named_sink_available = true`: the routing question's option C and the walk-through's per-finding Defer option both include the tracker name verbatim. Example: `File a Linear ticket per finding`, `Defer — file a Linear ticket`.
-- When `any_sink_available = true` but either `confidence = low` or `named_sink_available = false` (a fallback tier is working instead): the labels read generically — `File an issue per finding`, `Defer — file a ticket`. Before executing the first Defer of the session, the agent confirms the effective tracker choice with the user using the platform's blocking question tool.
-- When `any_sink_available = false`: option C is omitted from the routing question, option B (Defer) is omitted from the walk-through per-finding options, and the agent tells the user why in the routing question's stem.
+可用性探测**每个会话最多运行一次**并且**仅在延迟执行即将到来时**。绝不在审查开始时进行推测，绝不是每次推迟，绝不是每次走查发现。缓存的元组可重复用于同一运行中的每个 Defer 操作。
 
-Non-interactive mode skips label decisions entirely; it acts silently on the detected sink.
+典型的探针序列：
 
----
+1. 请查阅上下文中已有的项目说明以获取跟踪器参考 - 不要打开或命名特定的说明文件；仅当相关指令不在上下文中（子目录范围或新的子代理）时才直接读取。如果没有找到，则设置`tracker_name = null`，`confidence = low`。
+2. **发现指定跟踪器时对其进行探测。** 对于 GitHub 问题，运行 `gh auth status` 和 `gh repo view --json hasIssuesEnabled`。对于 Linear 或其他 connector/MCP-backed 跟踪器，首先通过平台的工具发现原语发现可用工具（例如，Claude Code 中的 `ToolSearch`），而不是假设未加载的工具不存在，然后验证发现的工具是否响应。对于 API 支持的跟踪器，请在平台暴露凭证的任何地方（环境、连接器身份验证或记录的机密位置）验证凭证，而不仅仅是 shell 环境变量。根据探测结果设置`named_sink_available`。
+3. **探测GitHub问题回退到计算`any_sink_available`。**即使找到并探测了指定的跟踪器，`gh`对于`no_sink`存储桶决策也很重要，因此没有记录的跟踪器但工作`gh`的运行仍然提供延迟。
+   - 如果`named_sink_available = true`：`any_sink_available = true`（无需进一步探测）。
+   - 否则，通过 `gh auth status` + `gh repo view --json hasIssuesEnabled` 探测 GitHub 问题（如果已在步骤 2 中探测过，则跳过）。如果有效，`any_sink_available = true`。
+   - 否则，`any_sink_available = false`。
 
-## Fallback chain
-
-When the named tracker is unavailable or no tracker is named, fall back in this order. Prefer the project's detected tracker; use `gh` only when no named tracker was found or the named one is unreachable.
-
-1. **Named tracker** (MCP tool, CLI, or API the agent can invoke directly, identified via Detection above)
-2. **GitHub Issues via `gh`**: when `gh auth status` succeeds and the current repo has issues enabled (`gh repo view --json hasIssuesEnabled` returns `true`)
-3. **No sink** — findings remain in the review report's residual-work section (Interactive mode) or are returned in the `no_sink` bucket for the caller to route (Non-interactive mode). The agent does not re-display them somewhere that does not persist, such as chat.
-
-Previously this chain included a third in-session fallback tier. That tier was removed because in-session tasks do not survive past the session and therefore do not meet the "durable filing" intent of a Defer action. When no durable tracker exists, the correct behavior is to leave findings in the report (Interactive) or return them to the caller (Non-interactive).
+当交互模式的路由问题被完全跳过（R2零结果情况）时，不会运行任何探测器。当缓存的元组在会话中重用时，会话第一个探测中的任何 `named_sink_available = true` 都会保持缓存状态 - 不要在每次延迟时重新探测。
 
 ---
 
-## Ticket composition
+## 标签逻辑（交互模式）
 
-Every Defer action creates a ticket with the following content, adapted to the tracker's capabilities:
+- 当 `confidence = high` AND `named_sink_available = true` 时：路由问题的选项 C 和演练的每次查找的延迟选项都逐字包含跟踪器名称。例如：`每个发现分别创建一条 Linear 工作项`、`延后处理——创建 Linear 工作项`。
+- 当`any_sink_available = true`但`confidence = low`或`named_sink_available = false`（后备层正在工作）时：标签一般为`File an issue per finding`、`Defer — file a ticket`。在执行第一次会话延迟之前，代理使用平台的阻塞问题工具与用户确认有效的跟踪器选择。
+- 当 `any_sink_available = false`：从路由问题中省略选项 C 时，选项 B（延迟）从演练每次查找选项中省略，并且代理会在路由问题的主干中告诉用户原因。
 
-- **Title:** the merged finding's `title` (schema-capped at 10 words).
-- **Body:**
-  - Plain-English problem statement — reads the persona-produced `why_it_matters` from the contributing reviewer's artifact file at `<artifact-path>/{reviewer}.json`, using the same `file + line_bucket(line, +/-3) + normalize(title)` matching agent mode uses (see SKILL.md Stage 6 detail enrichment). Falls back to the merged finding's `title`, `severity`, `file`, and `suggested_fix` (when present) when no artifact match is available — these fields are guaranteed in the merge-tier compact return.
-  - Suggested fix (when present in the finding's `suggested_fix`).
-  - Evidence (direct quotes from the reviewer's artifact).
-  - Source: a link to the PR carrying this change when one already exists at filing time; otherwise the branch and head commit SHA, so the ticket points at the code even before a PR is opened. When the same run opens a PR after the ticket is filed, back-fill the PR link into the ticket (best-effort; never block shipping on the update).
-  - Metadata block: `Severity: <level>`, `Confidence: <score>`, `Reviewer(s): <list>`, `Finding ID: <fingerprint>`.
-- **Labels** (when the tracker supports labels): severity tag (`P0`, `P1`, `P2`, `P3`) and, when the tracker convention supports it, a category label sourced from the reviewer name.
-- **Length cap:** when the composed body would exceed a tracker's body length limit, truncate with `... (continued in ce-code-review run artifact: <artifact-path>/)` and include the finding_id in both the truncated body and the metadata block so the artifact is discoverable.
-
-The finding_id is a stable fingerprint composed as `normalize(file) + line_bucket(line, +/-3) + normalize(title)` — the same fingerprint used by the merge pipeline.
+非交互模式完全跳过标签决策；它默默地作用于检测到的接收器。
 
 ---
 
-## Failure path
+## 后备链
 
-When ticket creation fails at execution (API error, auth expiry mid-session, rate limit, malformed body rejected, 4xx/5xx response):
+当指定的跟踪器不可用或没有指定跟踪器时，按此顺序回退。更喜欢项目检测到的跟踪器；仅当未找到指定跟踪器或指定跟踪器无法访问时才使用 `gh`。
 
-**Interactive mode:** report the failure inline and ask the user using the platform's blocking question tool.
+1. **命名跟踪器**（MCP工具，CLI或API代理可以直接调用，通过上面的检测识别）
+2. **GitHub 通过 `gh`** 发出问题：当 `gh auth status` 成功且当前存储库已启用问题时（`gh repo view --json hasIssuesEnabled` 返回 `true`）
+3. **无接收器** — 结果保留在审核报告的剩余工作部分（交互模式）中，或者返回到 `no_sink` 存储桶中以供调用者路由（非交互模式）。代理不会在不持久的地方（例如聊天）重新显示它们。
 
-Stem:
-> Defer failed: <tracker name> returned <error summary>. How should the agent handle this finding?
-
-Options:
-- `Retry on <tracker>` — re-attempt the same tracker once more (useful for transient errors)
-- `Fall back to next sink` — move this finding's Defer to the next tier in the fallback chain (e.g., from Linear to GitHub Issues)
-- `Convert to Skip — record the failure` — abandon this Defer, note the failure in the completion report's failure section, and continue the walk-through or bulk flow
-
-**Non-interactive mode:** do not prompt. Automatically fall through to the next tier. If every tier fails, record the finding in the `failed` bucket of the structured return and continue. If the chain exhausts with no sink ever available, the finding ends up in the `no_sink` bucket.
-
-When a high-confidence named tracker fails at execution, the cached `named_sink_available` is set to `false` for the rest of the session. Subsequent Defer actions fall straight through to the next tier without retrying a confirmed-broken sink. `any_sink_available` is only downgraded to `false` when every tier has been confirmed broken; a failed Linear call that succeeds via `gh` keeps `any_sink_available = true`.
-
-When no such tool is in the list, a real question call errors, or the platform has no blocking question tool, fall back to presenting numbered options in the host's chat and waiting for the user's reply (Interactive mode only).
+此前，该链包括第三个会话中后备层。该层已被删除，因为会话中的任务在会话结束后无法继续存在，因此不符合推迟操作的“持久归档”意图。当不存在持久跟踪器时，正确的行为是将结果保留在报告中（交互式）或将其返回给调用者（非交互式）。
 
 ---
 
-## Per-tracker behavior
+## 门票构成
 
-Concrete behavior per tracker at execution time. The agent may invoke any of these through the appropriate interface (MCP, CLI, or API); the choice depends on what is available in the current environment.
+每个延迟操作都会创建一个包含以下内容的票证，并适应跟踪器的功能：
 
-| Tracker | Interface | Invocation sketch | Body format | Labels |
+- **标题：** 合并结果的 `title`（模式上限为 10 个单词）。
+- **身体：**
+  - 简单英语问题陈述 — 使用相同的 `file + line_bucket(line, +/-3) + normalize(title)` 匹配代理模式使用的内容，从 `<artifact-path>/{reviewer}.json` 处的审查者产物文件中读取角色生成的`why_it_matters`（请参阅SKILL.md 第 6 阶段细节丰富）。当没有可用的产物匹配时，回退到合并结果的 `title`、`severity`、`file` 和 `suggested_fix`（如果存在） — 这些字段在合并层紧凑返回中得到保证。
+  - 建议的修复（当存在于调查结果的 `suggested_fix` 中时）。
+  - 证据（直接引用审稿人的产物）。
+  - 来源：当提交时已经存在时，指向携带此更改的PR的链接；否则，分支和头会提交 SHA，因此即使在打开 PR 之前，票证也会指向代码。当同一次运行在提交票证后打开 PR 时，将 PR 链接回填到票证中（尽力而为；切勿阻止更新的发送）。
+  - 元数据块：`Severity: <level>`、`Confidence: <score>`、`Reviewer(s): <list>`、`Finding ID: <fingerprint>`。
+- **标签**（当跟踪器支持标签时）：严重性标签（`P0`、`P1`、`P2`、`P3`），以及当跟踪器约定支持时，来自审查者姓名的类别标签。
+- **长度上限：**当组成的正文超出跟踪器的正文长度限制时，使用 `... (continued in ce-code-review run artifact: <artifact-path>/)` 进行截断，并将 finding_id 包含在截断的正文和元数据块中，以便可以发现产物。
+
+finding_id 是由 `normalize(file) + line_bucket(line, +/-3) + normalize(title)` 组成的稳定指纹 — 与合并管道使用的指纹相同。
+
+---
+
+## 失败路径
+
+当票证创建在执行时失败时（API错误、身份验证在会话中过期、速率限制、格式错误的正文被拒绝、4xx/5xx响应）：
+
+**交互模式：**内联报告失败并使用平台的阻塞问题工具询问用户。
+
+干：
+> 延迟失败：<跟踪器名称> 返回<错误摘要>。代理人应如何处理这一发现？
+
+选项：
+- `Retry on <tracker>` — 再次尝试相同的跟踪器（对于暂时性错误很有用）
+- `Fall back to next sink` — 将此发现的 Defer 移动到回退链中的下一层（例如，从 Linear 到 GitHub 问题）
+- `转为跳过——记录失败` — 放弃此延迟，在完成报告的失败部分中记下失败，并继续演练或批量流程
+
+**非交互模式：**不提示。自动下降到下一层。如果每一层都失败，则将结果记录在结构化回报的 `failed` 存储桶中并继续。如果链条耗尽而没有可用的水槽，则发现的东西最终会进入`no_sink`桶中。
+
+当高置信度命名跟踪器执行失败时，缓存的 `named_sink_available` 将在会话的其余部分设置为 `false`。随后的延迟操作将直接进入下一层，而无需重试已确认损坏的接收器。 `any_sink_available`只有在每一层都被确认被破坏后才会降级为`false`；通过 `gh` 成功的失败的线性调用将保留 `any_sink_available = true`。
+
+当列表中没有此类工具、真正的问题调用错误或平台没有阻止问题工具时，将回退到在主持人的聊天中显示编号选项并等待用户的回复（仅限交互模式）。
+
+---
+
+## 每个跟踪器的行为
+
+每个跟踪器在执行时的具体行为。代理可以通过适当的接口（MCP、CLI或API）调用其中任何一个；选择取决于当前环境中可用的内容。
+
+| 追踪器 | 界面 | 调用草图 | 正文格式 | 标签 |
 |---------|-----------|-------------------|-------------|--------|
-| Linear | MCP (preferred) or API | Create issue in the project/workspace identified by documentation; assign to the reporter if the MCP tool exposes user context | Markdown | Severity priority field if the MCP exposes it; otherwise include severity in body |
-| GitHub Issues | `gh issue create` | Repo defaults to the current repo. Use `--label` for severity tag when labels exist; omit `--label` if the repo has no label fixture. Fall back to a label-less issue on first failure. | Markdown | `--label P0` / `--label P1` / etc. when labels exist |
-| Jira | MCP or API | Create issue in the project identified by documentation; Jira's markdown dialect differs from GitHub's — use plain text in the body when MCP does not handle conversion | Plain text when MCP does not handle markdown | Severity priority field |
-| No sink available | — | Interactive: Defer option omitted, findings remain in the report's residual-work section. Non-interactive: findings returned in the `no_sink` bucket for caller routing. | — | — |
+| 线性 | MCP（首选）或 API | 在文档标识的project/workspace中创建问题；如果 MCP 工具公开用户上下文，则分配给报告者 | Markdown | 严重性优先级字段（如果 MCP 公开）；否则包括身体的严重程度 |
+| GitHub 问题 | `gh issue create` | 存储库默认为当前存储库。当标签存在时，使用`--label`作为严重性标签；如果仓库没有标签固定装置，则省略 `--label`。在第一次失败时回退到无标签问题。 | Markdown | `--label P0` / `--label P1` / 等，当标签存在时 |
+| 吉拉 | MCP 或 API | 在文档确定的项目中创建问题； Jira 的 markdown 方言与 GitHub 不同 — 当 MCP 不处理转换时，在正文中使用纯文本 | MCP 不处理 Markdown 时的纯文本 | 严重性优先级字段 |
+| 没有可用的水槽 | — | 互动：省略推迟选项，调查结果保留在报告的剩余工作部分。非交互式：在 `no_sink` 存储桶中返回结果以用于呼叫者路由。 | — | — |
 
-When uncertain, prefer "drop with explicit user-facing notice" over "pass through silently and hope." A Defer that produces no durable artifact and no user message is data loss.
+当不确定时，更喜欢“带有明确的面向用户的通知丢弃”而不是“默默地通过并希望”。不产生持久产物且不产生用户消息的 Defer 就是数据丢失。
 
 ---
 
-## Cross-platform notes
+## 跨平台笔记
 
-The question-tool name varies by platform. In Interactive mode, use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options in the host's chat only when no such tool is in the list, a real question call errors, or the runtime mode does not expose one. Never silently skip the question.
+问题工具名称因平台而异。在交互模式下，使用当前工具列表中已有的主机阻塞问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具、真正的问题调用错误或运行时模式未公开此类工具时，才会回退到主持人聊天中的编号选项。永远不要默默地跳过这个问题。
 
-Non-interactive mode is platform-agnostic: it never prompts, so the platform's question tool is not relevant.
+非交互模式与平台无关：它从不提示，因此平台的提问工具不相关。

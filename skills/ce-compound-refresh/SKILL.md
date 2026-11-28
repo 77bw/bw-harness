@@ -1,24 +1,26 @@
 ---
 name: ce-compound-refresh
-description: Old name for refreshing learnings, which now lives in `ce-compound`. Use only when a prompt or standing instruction names `ce-compound-refresh`; use `ce-compound` for every other learnings audit.
-argument-hint: "[optional: scope hint — directory, filename, module, or keyword] [mode:non-interactive] "
+description: "令人耳目一新的学习的旧名称，现在位于`ce-compound`。仅当提示或常设指令名称为 `ce-compound-refresh` 时使用；使用 `ce-compound` 进行其他所有学习审核。"
+argument-hint: "[可选：范围提示 — 目录、文件名、模块或关键字] [mode:non-interactive]"
 ---
 
-# Compound Refresh (deprecated)
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-This name still works, so existing prompts and schedules keep running. The refresh itself now lives in `ce-compound`.
+# 复合刷新（已弃用）
 
-**Done:** the notice was shown before and after the refresh, and the refresh ran with the scope and mode it was asked for.
+该名称仍然有效，因此现有的提示和计划将继续运行。刷新本身现在位于`ce-compound`。
 
-Render the invocations in the notice for the active host: `/skill-name` by default, and `$skill-name` on Codex or another host that documents dollar-prefixed invocation. Output one form only.
+**完成：** 通知在刷新之前和之后显示，并且刷新按照要求的范围和模式运行。
 
-Do these in order:
+在活动主机的通知中呈现调用：默认为 `/skill-name`，在 Codex 或记录美元前缀调用的其他主机上渲染 `$skill-name`。只输出一种形式。
 
-1. Print this notice, unchanged apart from the rendering:
+按顺序执行这些操作：
 
-   > ⚠️ `/ce-compound-refresh` has merged into `/ce-compound` and will go away in an upcoming release. This run continues as normal. Next time, use `/ce-compound refresh`.
+1. 打印此通知，除渲染外未做任何更改：
 
-   If your arguments contain `mode:non-interactive` or `mode:headless`, end the notice with this instead, because nobody is present and the plain word would run a capture: Next time, use `/ce-compound mode:refresh mode:non-interactive`.
+   > ⚠️ `/ce-compound-refresh` 已合并到 `/ce-compound` 并将在即将发布的版本中消失。此运行正常进行。下次使用`/ce-compound refresh`。
 
-2. Invoke the `ce-compound` skill with `mode:refresh` followed by every argument you received, unchanged. `mode:refresh` must be present: without it, an unattended run does a capture rather than a refresh.
-3. When that finishes, print the notice again as your last line. A refresh report is long, and a scheduled run may show only its final message.
+   如果您的参数包含 `mode:non-interactive` 或 `mode:headless`，请以此结束通知，因为没有人在场，并且普通单词将运行捕获：下次，使用 `/ce-compound mode:refresh mode:non-interactive`。
+
+2. 使用 `mode:refresh` 调用 `ce-compound` 技能，后跟您收到的每个参数，保持不变。 `mode:refresh` 必须存在：没有它，无人值守运行将执行捕获而不是刷新。
+3. 完成后，再次打印通知作为最后一行。刷新报告很长，并且计划的运行可能仅显示其最终消息。

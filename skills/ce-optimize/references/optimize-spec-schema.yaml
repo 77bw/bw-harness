@@ -1,14 +1,14 @@
-# Optimization Spec Schema
-# This is the canonical schema for optimization spec files created by users
-# to configure a /ce-optimize run. The orchestrating agent validates specs
-# against this schema before proceeding.
+# 优化规范架构
+# 这是用户创建的优化规范文件的规范模式
+# 配置 /ce-optimize 运行。编排代理验证规范
+# 在继续之前针对此模式。
 #
 # Usage: Create a YAML file matching this schema and pass it to /ce-optimize.
-# The agent reads this spec, validates required fields, and uses it to
-# configure the entire optimization run.
+# 代理读取此规范，验证必填字段，并使用它来
+# 配置整个优化运行。
 
 # ============================================================================
-# REQUIRED FIELDS
+# 必填字段
 # ============================================================================
 
 required_fields:
@@ -16,22 +16,22 @@ required_fields:
   name:
     type: string
     pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
-    description: "Unique identifier for this optimization run (lowercase kebab-case, safe for git refs and worktree paths)"
+    description: "此优化运行的唯一标识符（小写的 kebab-case，对于 git refs 和工作树路径是安全的）"
     example: "improve-issue-clustering"
 
   description:
     type: string
-    description: "Human-readable description of the optimization goal"
+    description: "优化目标的人类可读描述"
     example: "Improve coherence and coverage of issue/PR clusters"
 
   metric:
     type: object
-    description: "Three-tier metric configuration"
+    description: "三层指标配置"
     required_children:
 
       primary:
         type: object
-        description: "The metric the loop optimizes against"
+        description: "循环优化的指标"
         required_children:
 
           type:
@@ -39,11 +39,11 @@ required_fields:
             values:
               - hard    # scalar metric from measurement command (e.g., build time, test pass rate)
               - judge   # LLM-as-judge quality score from sampled outputs
-            description: "Whether the primary metric comes from the measurement command directly or from LLM-as-judge evaluation"
+            description: "主要指标是直接来自测量命令还是来自LLM作为法官的评估"
 
           name:
             type: string
-            description: "Metric name: must match a key in the measurement command's JSON output (for hard type) or a scoring field (for judge type)"
+            description: "指标名称：必须与测量命令的 JSON 输出中的键（对于硬类型）或评分字段（对于判断类型）匹配"
             example: "cluster_coherence"
 
           direction:
@@ -51,39 +51,39 @@ required_fields:
             values:
               - maximize
               - minimize
-            description: "Whether higher or lower is better"
+            description: "是越高好还是越低越好"
 
         optional_children:
 
           baseline:
             type: number
             default: null
-            description: "Filled automatically during Phase 1 baseline measurement. Do not set manually."
+            description: "在第 1 阶段基线测量期间自动填充。不要手动设置。"
 
           target:
             type: number
             default: null
-            description: "Optional target value. Loop stops when this is reached. When metric.objectives is set, target_reached instead requires every required objective that declares a target."
+            description: "可选目标值。达到此值时循环停止。设置 metric.objectives 后，target_reached 需要声明目标的每个必需目标。"
             example: 4.2
 
       degenerate_gates:
         type: array
-        description: "Fast boolean checks that reject obviously broken solutions before expensive evaluation. Run first, before the primary metric or judge."
+        description: "快速布尔检查，在昂贵的评估之前拒绝明显损坏的解决方案。在主要指标或判断之前先运行。"
         required: true
         items:
           type: object
           required_children:
             name:
               type: string
-              description: "Metric name: must match a key in the measurement command's JSON output"
+              description: "指标名称：必须与测量命令的 JSON 输出中的键匹配"
             check:
               type: string
-              description: "Comparison operator and threshold. Supported operators: >=, <=, >, <, ==, !="
+              description: "比较运算符和阈值。支持的运算符：>=、<=、>、<、==、!="
               example: "<= 0.10"
           optional_children:
             description:
               type: string
-              description: "Human-readable explanation of what this gate catches"
+              description: "该门捕获的内容的人类可读的解释"
 
     optional_children:
 
@@ -103,7 +103,7 @@ required_fields:
           required_children:
             name:
               type: string
-              description: "Metric name: must match a key in the measurement command's JSON output"
+              description: "指标名称：必须与测量命令的 JSON 输出中的键匹配"
             direction:
               type: enum
               values:
@@ -116,20 +116,20 @@ required_fields:
                 - required
                 - secondary
               default: required
-              description: "required objectives participate in eligibility and completion; secondary objectives are logged only"
+              description: "参与资格和完成所需的目标；仅记录次要目标"
             type:
               type: enum
               values:
                 - hard
               default: hard
-              description: "Always hard. Additional objectives come from the measurement command."
+              description: "总是很难。附加目标来自测量命令。"
             target:
               type: number
               default: null
-              description: "Declared success value for this objective. target_reached requires every required objective that sets this."
+              description: "宣布该目标的成功价值。 target_reached 需要设定此目标的每个必需目标。"
             max_regression:
               type: object
-              description: "Optional explicit violation bound. When set, violation uses this bound rather than the comparison threshold, including when the bound is looser. When unset, a comparison-threshold regression is a violation."
+              description: "可选的显式违反界限。设置后，违规使用此界限而不是比较阈值，包括当界限较宽松时。未设置时，比较阈值回归是违规的。"
               required_children:
                 type:
                   type: enum
@@ -142,22 +142,22 @@ required_fields:
       diagnostics:
         type: array
         default: []
-        description: "Metrics logged for understanding but never gated on. Useful for understanding WHY a primary metric changed."
+        description: "记录指标是为了理解，但从未开启。对于理解主要指标发生变化的原因很有用。"
         items:
           type: object
           required_children:
             name:
               type: string
-              description: "Metric name: must match a key in the measurement command's JSON output"
+              description: "指标名称：必须与测量命令的 JSON 输出中的键匹配"
 
       judge:
         type: object
-        description: "LLM-as-judge configuration. Required when metric.primary.type is 'judge'. Ignored when type is 'hard'."
+        description: "法学硕士作为法官的配置。当 metric.primary.type 为 'judge' 时需要。当类型为“hard”时被忽略。"
         required_when: "metric.primary.type == 'judge'"
         required_children:
           rubric:
             type: string
-            description: "Multi-line rubric text sent to the judge model. Must instruct the judge to return JSON."
+            description: "发送给判断模型的多行标题文本。必须指示法官返回JSON。"
             example: |
               Rate this cluster 1-5:
               - 5: All items clearly about the same issue/feature
@@ -170,13 +170,13 @@ required_fields:
             required_children:
               primary:
                 type: string
-                description: "Field name from judge JSON output to use as the primary optimization target"
+                description: "判断JSON输出中用作主要优化目标的字段名称"
                 example: "mean_score"
             optional_children:
               secondary:
                 type: array
                 default: []
-                description: "Additional scoring fields to log (not optimized against)"
+                description: "要记录的其他评分字段（未针对其进行优化）"
         optional_children:
           model:
             type: enum
@@ -184,93 +184,93 @@ required_fields:
               - cheap    # the host's fastest, lowest-cost tier
               - strong   # the host's most capable tier
             default: cheap
-            description: "Capability tier for the judge. The active harness resolves the tier to a concrete model; the spec never names one. Legacy values haiku and sonnet read as cheap and strong."
+            description: "法官的能力等级。主动线束将层解析为具体模型；该规范从未提及其中之一。俳句和十四行诗的传统价值观被解读为廉价而强大。"
           confirmation_seed:
             type: integer
             default: null
-            description: "Seed for a second, held-out judge sample scored only before a keep and at final confirmation. Must differ from sample_seed. A different seed alone does not make the sample held out: draw it only from items of that same output the selection sample did not draw, so the two share no item. An output with no item left outside the selection sample cannot be confirmed this way, so its candidate is not kept; a spec whose outputs are that small needs measurement.holdout.command instead. This is the judge-type holdout when measurement.holdout is unset; see the holdout validation rules."
+            description: "第二个、保留的裁判样本的种子仅在保持之前和最终确认时得分。必须不同于 sample_seed。仅使用不同的种子并不能使样本保留下来：仅从选择样本未提取的相同输出的项目中提取样本，因此两者不共享任何项目。没有项目留在选择样本之外的输出无法通过这种方式确认，因此不保留其候选；输出那么小的规范需要measurement.holdout.command。这是未设置measurement.holdout时的判断型holdout；请参阅保留验证规则。"
           calibration:
             type: object
             default: null
-            description: "Optional evidence that the judge scores the way a person would, checked in Phase 1 when labels are set. Without it the approval gate states that the judge is unchecked. Required (labels or an explicit waiver) only when the run waits between ticks through a wake after turn end."
+            description: "法官按照人的评分方式评分的可选证据，在设置标签时在第一阶段进行检查。如果没有它，批准门就表明法官不受控制。仅当运行在回合结束后通过唤醒在滴答之间等待时才需要（标签或显式放弃）。"
             optional_children:
               labels:
                 type: string
                 default: null
-                description: "Path to a human-labeled sample: items with the user's rubric score and, when given, the reason. Phase 1 writes it for the user during the guided check (default <state-root>/judge-labels.yaml); a sample kept in the repo is reusable across runs. Around ten items shows a pattern; 20-50 makes the agreement figure dependable."
+                description: "人工标记样本的路径：带有用户评分的项目以及给出的原因。第 1 阶段在引导检查期间为用户写入（默认<state-root>/judge-labels.yaml）；保存在存储库中的样本可以在运行中重复使用。大约十个项目显示出一种模式； 20-50 使协议数字可靠。"
               min_agreement:
                 type: number
                 default: 0.8
-                description: "Fraction of labeled items on which the judge's score must agree with the human label for the harness to be accepted."
+                description: "法官的分数必须与人类标签一致才能接受安全带的标记项目的分数。"
               waived:
                 type: boolean
                 default: false
-                description: "True only when the user explicitly waived calibration for a run that would otherwise require it. Record who waived and when in the experiment log's harness_validation."
+                description: "仅当用户明确放弃对原本需要校准的运行进行校准时，才为 true。在实验日志的 harness_validation 中记录谁放弃以及何时放弃。"
           sample_size:
             type: integer
             default: 10
-            description: "Total number of output items to sample for judge evaluation per experiment"
+            description: "每个实验进行评审评估的输出项目总数"
           stratification:
             type: array
             default: null
-            description: "Stratified sampling buckets. If null, uses uniform random sampling."
+            description: "分层采样桶。如果为空，则使用均匀随机抽样。"
             items:
               type: object
               required_children:
                 bucket:
                   type: string
-                  description: "Bucket name for this stratum"
+                  description: "该层的存储桶名称"
                 count:
                   type: integer
-                  description: "Number of items to sample from this bucket"
+                  description: "从此存储桶中采样的项目数"
           singleton_sample:
             type: integer
             default: 0
-            description: "Number of singleton items to sample for false-negative evaluation"
+            description: "用于假阴性评估的采样单项数量"
           singleton_rubric:
             type: string
             default: null
-            description: "Rubric for evaluating sampled singletons. Required if singleton_sample > 0."
+            description: "用于评估采样单例的标题。如果 singleton_sample > 0，则为必需。"
           sample_seed:
             type: integer
             default: 42
-            description: "Fixed seed for reproducible sampling across experiments"
+            description: "固定种子用于跨实验的可重复采样"
           batch_size:
             type: integer
             default: 5
-            description: "Number of samples per judge sub-agent batch. Controls parallelism vs overhead."
+            description: "每个判断子代理批次的样品数量。控制并行性与开销。"
           minimum_improvement:
             type: number
             default: 0.3
-            description: "Minimum judge score improvement required to accept an experiment as 'better'. Accounts for sample-composition variance when output structure changes between experiments. Distinct from measurement.stability.noise_threshold which handles run-to-run flakiness."
+            description: "接受实验“更好”所需的最低评判分数提高。当输出结构在实验之间发生变化时考虑样本组成差异。与measurement.stability.noise_threshold不同，后者处理运行期间的不稳定情况。"
           max_total_cost_usd:
             type: number
             default: 5
-            description: "Do not start a judge pass whose estimated cost would take cumulative judge spend past this cap. Counts judge scoring only; stopping.max_total_cost_usd caps the whole run. This is a first-run safety default; raise it only after the rubric and harness are trustworthy. Set to null only with explicit user approval."
+            description: "不要启动法官通行证，其估计成本将使累计法官支出超过此上限。只计算裁判打分；停止。max_total_cost_usd 限制整个运行。这是首次运行的安全默认值；仅在标题和安全带值得信赖后才提出它。仅在用户明确批准的情况下设置为 null。"
 
   measurement:
     type: object
-    description: "How to run the measurement harness"
+    description: "如何运行测量线束"
     required_children:
       command:
         type: string
-        description: "Shell command that runs the evaluation and outputs JSON to stdout. The JSON must contain keys matching all gate names and diagnostic names."
+        description: "运行评估并将 JSON 输出到标准输出的 Shell 命令。 JSON 必须包含与所有门名称和诊断名称匹配的键。"
         example: "python evaluate.py"
     optional_children:
       timeout_seconds:
         type: integer
         default: 600
-        description: "Maximum seconds for the measurement command to run before being killed"
+        description: "测量命令在被终止之前运行的最大秒数"
       output_format:
         type: enum
         values:
           - json
         default: json
-        description: "Format of the measurement command's stdout. Currently only JSON is supported."
+        description: "测量命令的标准输出的格式。目前仅支持JSON。"
       working_directory:
         type: string
         default: "."
-        description: "Working directory for the measurement command, relative to the repo root"
+        description: "测量命令的工作目录，相对于存储库根目录"
       holdout:
         type: object
         default: null
@@ -288,15 +288,15 @@ required_fields:
           command:
             type: string
             default: null
-            description: "Shell command that runs the harness on the held-out set and prints the same JSON shape as measurement.command. For a judge primary, metric.judge.confirmation_seed may stand in for this command."
+            description: "在保留的集合上运行线束并打印与测量命令相同的 JSON 形状的 Shell 命令。对于初级判断，metric.judge.confirmation_seed可以代替这个命令。"
       per_case:
         type: boolean
         default: false
-        description: "When true, the measurement JSON also carries a `cases` object mapping a stable case id to a boolean pass/fail (1/0 accepted). decide.mjs then reports `regressions`: cases the reference passed and the candidate fails. Report only; it does not change the decision."
+        description: "当为真时，测量JSON还携带一个`cases`对象，将稳定的案例ID映射到布尔值pass/fail（接受1/0）。 decide.mjs然后报告`regressions`：参考通过而候选人失败的情况。仅报告；它不会改变决定。"
       stability:
         type: object
         default: { mode: "stable" }
-        description: "How to handle metric variance across runs"
+        description: "如何处理运行中的指标方差"
         required_children:
           mode:
             type: enum
@@ -309,7 +309,7 @@ required_fields:
           repeat_count:
             type: integer
             default: 5
-            description: "Number of times to run the harness when mode is 'repeat', and the confirmation sample count when mode is 'ladder'"
+            description: "模式为“重复”时运行线束的次数，以及模式为“阶梯”时的确认样本计数"
           aggregation:
             type: enum
             values:
@@ -318,15 +318,15 @@ required_fields:
               - min
               - max
             default: median
-            description: "How to combine repeated measurements into a single value"
+            description: "如何将重复测量值合并为单个值"
           noise_threshold:
             type: number
             default: 0.02
-            description: "Absolute improvement that must be exceeded when comparison.method is absolute (the default). Applied to hard metrics only."
+            description: "当 Comparison.method 为绝对值（默认值）时必须超过的绝对改进。仅适用于硬指标。"
           comparison:
             type: object
             default: { method: "absolute" }
-            description: "How to decide keep / revert / inconclusive. Unset method preserves the legacy absolute noise_threshold rule."
+            description: "如何决定保留/恢复/不确定。 Unset 方法保留了传统的绝对 noise_threshold 规则。"
             required_children:
               method:
                 type: enum
@@ -335,58 +335,58 @@ required_fields:
                   - relative
                   - paired
                 default: absolute
-                description: "absolute uses noise_threshold; relative uses relative_threshold; paired uses sample ranges / paired diffs and may return inconclusive"
+                description: "绝对使用noise_threshold；相对使用relative_threshold；配对使用样本范围/配对差异，可能会返回不确定的结果"
             optional_children:
               relative_threshold:
                 type: number
                 default: 0.05
-                description: "Fraction of the current-best value that counts as a real change when method is relative or paired"
+                description: "当方法是相对或配对时，当前最佳值的分数算作实际变化"
           ladder:
             type: object
-            description: "Cost-aware measurement stages. Used when mode is ladder; ignored otherwise."
+            description: "成本意识测量阶段。当模式为梯形时使用；否则忽略。"
             optional_children:
               smoke_command:
                 type: string
                 default: null
-                description: "Cheap correctness check. Failure is degenerate and skips timed measurement."
+                description: "便宜的正确性检查。失败是退化的并且跳过定时测量。"
               exploratory_pairs:
                 type: integer
                 default: 1
-                description: "Paired exploratory samples before deciding whether to spend more. Must be a positive integer."
+                description: "在决定是否花费更多之前配对探索性样本。必须是正整数。"
               confirmation_repeats:
                 type: integer
                 default: null
-                description: "Full protocol sample count before keep. Defaults to repeat_count. Must be a positive integer at least as large as exploratory_pairs."
+                description: "保留前的完整协议样本计数。默认为 repeat_count。必须是至少与exploratory_pairs一样大的正整数。"
               futility:
                 type: object
-                description: "Predeclared abort bound for a clearly noncompetitive live run"
+                description: "预先宣布的中止注定是一场明显非竞争性的现场比赛"
                 optional_children:
                   worse_factor:
                     type: number
                     default: 1.2
-                    description: "Censor after the first sample if the candidate is this multiple worse than the current best (minimize: candidate >= best * factor)"
+                    description: "如果候选值比当前最佳值差很多倍，则在第一个样本之后进行审查（最小化：候选值 >= 最佳 * 因子）"
                   after_elapsed_seconds:
                     type: number
                     default: null
-                    description: "Censor a still-noncompetitive live run once elapsed time reaches this bound. When set, must be a positive number."
+                    description: "一旦经过的时间达到这个界限，就审查仍然非竞争性的实时运行。设置后，必须为正数。"
 
   scope:
     type: object
-    description: "What the experiment agent is allowed to modify"
+    description: "实验代理可以修改什么"
     required_children:
       mutable:
         type: array
-        description: "Files and directories the agent MAY modify during experiments"
+        description: "代理在实验期间可能修改的文件和目录"
         items:
           type: string
-          description: "File path or directory (relative to repo root). Directories match all files within."
+          description: "文件路径或目录（相对于存储库根目录）。目录匹配其中的所有文件。"
         example:
           - "src/clustering/"
           - "src/preprocessing/"
           - "config/clustering.yaml"
       immutable:
         type: array
-        description: "Files and directories the agent MUST NOT modify. The measurement harness should always be listed here."
+        description: "代理不得修改文件和目录。测量工具应始终列在此处。"
         items:
           type: string
         example:
@@ -395,7 +395,7 @@ required_fields:
           - "data/"
 
 # ============================================================================
-# OPTIONAL FIELDS
+# 可选字段
 # ============================================================================
 
 optional_fields:
@@ -403,7 +403,7 @@ optional_fields:
   execution:
     type: object
     default: { mode: "parallel", backend: "worktree", max_concurrent: 4 }
-    description: "How experiments are executed"
+    description: "实验是如何进行的"
     optional_children:
       mode:
         type: enum
@@ -418,29 +418,29 @@ optional_fields:
           - codex     # Codex sandboxes for isolation
           - remote    # detached workers with their own checkout; results arrive as a pushed ref or store file
         default: worktree
-        description: "Where experiments run. remote needs a detached-worker capability (SKILL.md Execution Surface); without one the run falls back to worktree. remote workers measure paired on their own machine, so it requires a relative or paired comparison."
+        description: "进行实验的地方。远程需要独立工作人员能力（SKILL.md执行面）；如果没有，运行就会回到工作树。远程工作人员在自己的机器上进行配对测量，因此需要相对或配对比较。"
       max_concurrent:
         type: integer
         default: 4
         minimum: 1
-        description: "Maximum experiments to run in parallel. Capped at 6 for worktree backend. 8+ only valid for Codex or remote backends. For remote this caps dispatched workers, not local worktrees."
+        description: "并行运行的最大实验。工作树后端的上限为 6。 8+ 仅对 Codex 或远程后端有效。对于远程，这限制了派遣的工作人员，而不是本地工作树。"
       max_experiments_per_tick:
         type: integer
         default: null
         minimum: 1
-        description: "Optional cap on experiments dispatched in one tick (one batch) of the loop. Bounds how much a single wake or session does before it checkpoints. Unset means max_concurrent alone bounds the batch."
+        description: "在循环的一个周期（一批）中调度的实验的可选上限。限制单个唤醒或会话在检查点之前执行的操作。未设置意味着 max_concurrent 单独限制批次。"
       codex_security:
         type: enum
         values:
           - full-auto                                # --full-auto (workspace write)
           - yolo                                     # --dangerously-bypass-approvals-and-sandbox
         default: null
-        description: "Codex security posture. If null, user is asked once per session."
+        description: "Codex 安全态势。如果为空，则每个会话都会询问用户一次。"
 
   parallel:
     type: object
     default: {}
-    description: "Parallelism configuration discovered or set during Phase 1"
+    description: "在第 1 阶段发现或设置的并行配置"
     optional_children:
       port_strategy:
         type: enum
@@ -448,44 +448,44 @@ optional_fields:
           - parameterized  # use env var for port
           - none           # no port parameterization needed
         default: null
-        description: "If null, auto-detected during Phase 1 parallelism probe"
+        description: "如果为空，则在第 1 阶段并行性探测期间自动检测"
       port_env_var:
         type: string
         default: null
-        description: "Environment variable name for port parameterization (e.g., EVAL_PORT)"
+        description: "端口参数化的环境变量名称（例如，EVAL_PORT）"
       port_base:
         type: integer
         default: null
-        description: "Base port number. Each experiment gets port_base + experiment_index."
+        description: "基本端口号。每个实验得到 port_base + experiment_index。"
       shared_files:
         type: array
         default: []
-        description: "Files that must be copied into each experiment worktree (e.g., SQLite databases)"
+        description: "必须复制到每个实验工作树中的文件（例如 SQLite 数据库）"
         items:
           type: string
       exclusive_resources:
         type: array
         default: []
-        description: "Resources requiring exclusive access (e.g., 'gpu'). If non-empty, forces serial mode."
+        description: "需要独占访问的资源（例如“gpu”）。如果非空，则强制串行模式。"
         items:
           type: string
 
   dependencies:
     type: object
     default: { approved: [] }
-    description: "Dependency management for experiments"
+    description: "实验的依赖管理"
     optional_children:
       approved:
         type: array
         default: []
-        description: "Pre-approved new dependencies that experiments may add"
+        description: "预先批准的实验可能添加的新依赖项"
         items:
           type: string
 
   constraints:
     type: array
     default: []
-    description: "Free-text constraints that experiment agents must follow"
+    description: "实验代理必须遵循的自由文本约束"
     items:
       type: string
     example:
@@ -495,40 +495,40 @@ optional_fields:
   stopping:
     type: object
     default: { max_iterations: 100, max_hours: 8, max_wall_hours: 72, plateau_iterations: 10, target_reached: true }
-    description: "When the optimization loop should stop. Any criterion can trigger a stop."
+    description: "优化循环何时应停止。任何标准都可以触发停止。"
     optional_children:
       max_iterations:
         type: integer
         default: 100
-        description: "Stop after this many total experiments"
+        description: "经过这么多次实验后停止"
       max_hours:
         type: number
         default: 8
-        description: "Stop after this many active hours: time spent inside loop ticks since Phase 3 started, summed across ticks. Time spent waiting between ticks does not count. In one uninterrupted session this equals wall-clock time."
+        description: "在这么多活动时间后停止：自第 3 阶段开始以来在循环滴答内花费的时间，跨滴答的总和。滴答之间等待所花费的时间不计算在内。在一次不间断的会话中，这相当于挂钟时间。"
       max_wall_hours:
         type: number
         default: 72
-        description: "Calendar backstop: stop once this many hours have passed since Phase 3 started, whether or not the run was active. No wake or resume extends it. Must be >= max_hours."
+        description: "日历逆止：自第 3 阶段开始以来经过这么多小时后停止，无论运行是否处于活动状态。没有唤醒或恢复可以延长它。必须 >= max_hours。"
       plateau_iterations:
         type: integer
         default: 10
-        description: "Stop if no improvement for this many consecutive experiments"
+        description: "如果连续多次实验没有改善，则停止"
       target_reached:
         type: boolean
         default: true
-        description: "Stop when the primary metric reaches the target value (if set)"
+        description: "当主要指标达到目标值（如果设置）时停止"
       max_total_cost_usd:
         type: number
         default: null
-        description: "Do not start a dispatch whose estimated cost would take model spend for the whole run (experiment workers, judges, and research subagents) past this cap. Counted from host-reported usage where available and estimated otherwise."
+        description: "不要启动一个调度，其估计成本将使整个运行（实验人员、法官和研究子代理）的模型支出超过此上限。根据主机报告的使用情况（如果可用）计算，并以其他方式进行估计。"
 
   max_runner_up_merges_per_batch:
     type: integer
     default: 1
-    description: "Maximum number of file-disjoint runner-up experiments to attempt merging per batch after keeping the best experiment"
+    description: "在保留最佳实验后，每批次尝试合并的文件不相交亚军实验的最大数量"
 
 # ============================================================================
-# VALIDATION RULES
+# 验证规则
 # ============================================================================
 
 validation_rules:

@@ -1,3 +1,3 @@
-# Terminology
+# 术语
 
-Make sentences easier to understand without shortening away content. Keep exact identifiers, paths, commands, thresholds, and technical terms needed for precision. Explain unfamiliar technical terms when the reader needs them to understand or act. Replace internal workflow jargon and invented labels with the action or consequence they mean, unless the caller requires that exact wording. The protections and user-voice limits in `SKILL.md` still apply.
+在不缩短内容的情况下使句子更容易理解。保留精确所需的准确标识符、路径、命令、阈值和技术术语。当读者需要理解或采取行动时，解释不熟悉的技术术语。将内部工作流程术语和发明的标签替换为它们所表示的操作或结果，除非调用者需要确切的措辞。 `SKILL.md` 中的保护和用户语音限制仍然适用。

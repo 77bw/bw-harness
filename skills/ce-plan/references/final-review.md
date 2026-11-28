@@ -1,135 +1,134 @@
-# Final Review and Plan Write
+# 最终审查和计划撰写
 
-Phase 5.1 through 5.3.2 of `ce-plan`, on the Durable path only. Read this before writing the plan file.
+`ce-plan` 的阶段 5.1 到 5.3.2，仅在持久路径上。在编写计划文件之前请阅读本文。
 
-### Phase 5: Final Review, Write File, and Handoff
+### 第 5 阶段：最终审核、写入文件和移交
 
-#### 5.1 Review Before Writing
+#### 5.1 写作前的回顾
 
-Before finalizing, check:
-- The plan does not invent product behavior that should have been defined in `ce-brainstorm`
-- If there was no origin document, the bounded planning bootstrap established enough product clarity to plan responsibly
-- Every major decision is grounded in the origin document or research
-- Material claims about existing code and fixtures match repository evidence; unresolved prerequisites that prevent implementation are recorded as blockers. Planned additions need not exist yet.
-- Each implementation unit is concrete, dependency-ordered, and implementation-ready
-- When the work ships as several PRs, every group except the first names a reason Phase 3.3 accepts for being a separate PR, and the PR grouping meets the three delivery conditions there: one creator per shared artifact, safe after every merge and deploy, and parallel PRs that do not conflict. Each group's `Waits on:` line gives the kind of every wait and names any deployment that must be live first
-- If test-first proof, characterization coverage, smoke-first verification, or another execution direction was explicit or strongly implied, the relevant units carry it forward with a lightweight natural-language `Execution note`
-- Each feature-bearing unit has test scenarios for the behavior it builds (happy path, plus edge cases, error handling, or integration where the unit has them), right-sized to the unit's complexity, not padded or skimped
-- Test scenarios name specific inputs, actions, and expected outcomes without becoming test code
-- Feature-bearing units with blank or missing test scenarios are flagged as incomplete — feature-bearing units must have actual test scenarios, not just an annotation. The `Test expectation: none -- [reason]` annotation is only valid for non-feature-bearing units (pure config, scaffolding, styling)
-- Deferred items are explicit and not hidden as fake certainty
-- Every implementation unit that implements a session-settled decision cites the entry that settled it in Requirements or Approach: the labeled KTD by `KTD<N>` for a planning decision, or the governing R-IDs for a product decision whose labeled Key Decision `Governs` them. The cited excerpt — the KTD directly, or the Key Decision reverse-resolved through its `Governs R…` links (found by following those links back from the unit's cited R-IDs) — is how executors receive the label
-- Every meaning-preserving R split or ownership move re-points affected `Governs R…`, `Covers R…`, and inline `per R…` citations to the IDs that now state those requirements; no pre-restructure catch-all link silently excludes a split-out requirement
-- **High-Level Technical Design presence audit (required).** For each architecture trigger in Phase 3.4 (High-Level Technical Design) that the plan content satisfies (3+ components with directed relationships, 3+ protocol steps, 3+ state machine states, lifecycle, 3+ decision points, 3+ data-flow stages, mode/flag combinations, DSL/API surface design, non-obvious single-component shape), verify a corresponding sketch/diagram is present in the High-Level Technical Design section. Count the triggers that apply; count the sketches; the sketch count must be at least the count of distinct trigger categories that apply. Missing the section when a trigger applied, OR including the section but skipping a triggered sketch within it, is incomplete — return to Phase 3.4 and add the missing sketch. Token cost is not a valid reason to fail this check.
-- If a High-Level Technical Design section is included, it uses the right medium for the work, carries the non-prescriptive framing, and does not contain implementation code (no imports, exact signatures, or framework-specific syntax)
-- Per-unit technical design fields, if present, are concise and directional rather than copy-paste-ready
-- If the plan creates a new directory structure, would an Output Structure tree help reviewers see the overall shape?
-- If Scope Boundaries lists items that are planned work for a separate PR, issue, or repo, are they under `### Deferred to Follow-Up Work` rather than mixed with true non-goals?
-- U-IDs are unique within the plan and follow the stability rule — no two units share an ID; reordering or splitting did not renumber existing units; gaps from deletions are preserved
-- Would a visual aid (dependency graph, interaction diagram, comparison table) help a reader grasp the plan structure faster than scanning prose alone?
+在最终确定之前，请检查：
+- 该计划没有发明本应在 `ce-brainstorm` 中定义的产品行为
+- 如果没有原始文档，有界规划引导程序会建立足够的产品清晰度来负责任地进行规划
+- 每个重大决策都以原始文件或研究为基础
+- 关于现有代码和固定装置的重要声明与存储库证据相匹配；阻碍实施的未解决先决条件被记录为阻碍因素。计划中的添加不一定存在。
+- 每个实现单元都是具体的、依赖顺序的且可实现的
+- 当工作作为多个PRs交付时，除了第一个之外的每个组都指定了第3.3阶段接受的单独PR的原因，并且PR分组满足其中的三个交付条件：每个共享产物有一个创建者，每次合并和部署后都是安全的，以及不冲突的并行PRs。每个组的 `Waits on:` 行给出了每次等待的类型，并命名了必须首先上线的部署
+- 如果测试优先证明、特征覆盖、烟雾优先验证或其他执行方向是明确或强烈暗示的，相关单位将用轻量级自然语言来推进`Execution note`
+- 每个承载功能的单元都有针对其构建的行为的测试场景（快乐路径，加上边缘情况，错误处理或单元具有这些功能的集成），大小适合单元的复杂性，而不是填充或精简
+- 测试场景命名特定的输入、操作和预期结果，但不会成为测试代码
+- 具有空白或缺失测试场景的功能单元被标记为不完整 - 功能单元必须具有实际的测试场景，而不仅仅是注释。 `Test expectation: none -- [reason]`注释仅对非功能单元有效（纯配置、脚手架、样式）
+- 延期项目是明确的，不会被隐藏为虚假的确定性
+- 实施会话解决决策的每个实施单元都引用在要求或方法中解决该决策的条目：对于规划决策，标记为`KTD<N>`的KTD，或者对于标记为关键决策`Governs`的产品决策的管理R-ID。引用的摘录 - 直接 KTD，或通过其 `Governs R…` 链接反向解析的关键决策（通过从单位引用的 R-ID 跟踪这些链接找到） - 是执行者接收标签的方式
+- 每个保留意义的 R 分割或所有权移动都会将受影响的 `Governs R…`、`Covers R…` 和内联 `per R…` 引用重新指向现在陈述这些要求的 ID；没有预重组包罗万象的链接默默地排除了拆分要求
+- **高级技术设计存在审核（必需）。** 对于计划内容满足的阶段 3.4（高级技术设计）中的每个架构触发器（具有定向关系的 3+ 个组件、3+ 个协议步骤、3+ 个状态机状态、生命周期、3+ 个决策点、3+ 个数据流阶段、mode/flag 组合、DSL/API 表面设计、非明显的单组件形状），验证相应的sketch/diagram 出现在高级技术设计部分。计算适用的触发因素；数一下草图；草图计数必须至少是应用的不同触发类别的计数。应用触发器时缺少该部分，或者包括该部分但跳过其中的触发草图，都是不完整的 - 返回阶段 3.4 并添加丢失的草图。令牌成本不是此检查失败的有效原因。
+- 如果包含高级技术设计部分，则它使用正确的工作媒介，带有非规定性框架，并且不包含实现代码（无导入、精确签名或特定于框架的语法）
+- 每个单元的技术设计字段（如果存在）是简洁且有方向性的，而不是复制粘贴就绪的
+- 如果计划创建新的目录结构，输出结构树是否可以帮助审查者查看整体形状？
+- 如果范围边界列出了计划为单独的 PR、问题或存储库工作的项目，那么它们是否位于 `### Deferred to Follow-Up Work` 下，而不是与真正的非目标混合在一起？
+- U-ID 在计划内是唯一的，并遵循稳定性规则 — 没有两个设备共享一个 ID；重新排序或拆分并未对现有单位进行重新编号；删除的间隙被保留
+- 视觉辅助工具（依赖图、交互图、比较表）是否可以帮助读者比单独浏览散文更快地掌握计划结构？
 
-If the plan originated from a requirements document, re-read that document and verify:
-- The chosen approach still matches the product intent
-- Scope boundaries and success criteria are preserved
-- Blocking questions were either resolved, explicitly assumed, or sent back to `ce-brainstorm`
-- Every section of the origin document is addressed in the plan — scan each section to confirm nothing was silently dropped
-- If origin supplies A/F/AE IDs: every origin R/F/AE that *affects implementation* is referenced in Requirements, a U-ID unit, test scenarios, verification, scope boundaries, or explicitly deferred. Actors are carried forward when they affect behavior, permissions, UX, orchestration, handoff, or verification. The standard is preservation of product intent, not mandatory ID spam — irrelevant origin IDs may be omitted
-- If origin was Deep-product (origin contains an `Outside this product's identity` subsection): the plan's Scope Boundaries preserves the three-way split — `Deferred for later` and `Outside this product's identity` carried verbatim from origin, `Deferred to Follow-Up Work` reserved for plan-local implementation sequencing
+如果计划源自需求文档，请重新阅读该文档并验证：
+- 所选择的方法仍然符合产品意图
+- 保留范围边界和成功标准
+- 阻塞问题要么被解决，要么被明确假设，要么被发送回`ce-brainstorm`
+- 原始文档的每个部分都在计划中得到解决 - 扫描每个部分以确认没有任何内容被悄悄丢弃
+- 如果源提供A/F/AE ID：每个*影响实现*的源R/F/AE都会在需求、U-ID单元、测试场景、验证、范围边界或显式推迟中引用。当参与者影响行为、权限、用户体验、编排、移交或验证时，他们就会被继承。该标准是保留产品意图，而不是强制性的 ID 垃圾邮件 — 可以省略不相关的来源 ID
+- 如果原点是 Deep-product（原点包含 `Outside this product's identity` 小节）：计划的范围边界保留三向分割 — `Deferred for later` 和 `Outside this product's identity` 从原点逐字携带，`Deferred to Follow-Up Work` 保留用于计划本地实现排序
 
-#### 5.1.5 Brainstorm-Sourced Scoping Synthesis
+#### 5.1.5 头脑风暴法范围界定综合
 
-Show the user the plan-time call-outs before Phase 5.2 (Write Plan File) commits the plan to disk — the latest cheap moment to catch plan-time scope errors. The brainstorm already validated WHAT to build; this phase shows HOW the plan will execute on the forks that matter.
+在阶段 5.2（写入计划文件）将计划提交到磁盘之前向用户显示计划时间标注 — 这是捕获计划时间范围错误的最新廉价时刻。头脑风暴已经验证了要构建什么；这个阶段展示了计划将如何在重要的分叉上执行。
 
-Run this step **whenever Phase 0.2 resolved an upstream Product Contract source** (Phase 0.2 is Find Upstream Product Contract). That source is either a requirements-only unified plan (an explicit path, or a discovered `product_contract_source: ce-brainstorm` plan in `<root>/plans/`) **or** a legacy `*-requirements.{md,html}` brainstorm doc. Do not run it on the Phase 0.1 fast paths (resume normal, deepen-intent). The new `ce-brainstorm` -> `ce-plan <unified-plan>` enrichment flow is brainstorm-sourced and must run this check, just like legacy flows. Skip Phase 5.1.5 only in solo invocation (no upstream source found; `product_contract_source: ce-plan-bootstrap`) — solo plans handled their synthesis in Phase 0.7 (Solo-Mode Scoping Synthesis).
+**每当阶段 0.2 解决上游产品合同源时**运行此步骤（阶段 0.2 是查找上游产品合同）。该来源要么是仅满足需求的统一计划（显式路径，或在`<root>/plans/`中发现的`product_contract_source: ce-brainstorm`计划）**或**遗留的`*-requirements.{md,html}`头脑风暴文档。不要在阶段 0.1 快速路径上运行它（恢复正常，深化意图）。新的 `ce-brainstorm` -> `ce-plan <unified-plan>` 丰富流程源自头脑风暴，必须运行此检查，就像旧流程一样。仅在单独调用中跳过阶段 5.1.5（未找到上游源；`product_contract_source: ce-plan-bootstrap`）- 单独计划在阶段 0.7（单独模式作用域综合）中处理其综合。
 
-**Read `references/synthesis-summary.md` before composing the scoping synthesis.** It defines what the user sees, the confirmation and auto-proceed lines, the revision loop, doc-body reading rules, soft-cut, self-redirect, headless routing, and where the internal draft lands in the plan.
+**在撰写范围综合之前阅读`references/synthesis-summary.md`。**它定义了用户看到的内容、确认和自动继续行、修订循环、文档正文阅读规则、软剪切、自重定向、无头路由以及内部草稿在计划中的位置。
 
-**Required output — do not skip; silent proceeding is not allowed.** Compose an internal three-bucket scope draft (Stated / Inferred / Out of scope — internal thinking that feeds plan-body routing at Phase 5.2, not the chat output). Derive call-outs (specific forks where user input materially changes the plan), then emit the **brainstorm-sourced** synthesis and **wait for user confirmation before continuing to Phase 5.2.** Its summary is two parts — a one-sentence anchor naming the brainstorm's scope in the brainstorm's own vocabulary, then the plan-specific scoping decisions the brainstorm did not make (full-brainstorm coverage vs. narrowed subset; adjacent refactors in or out; test scope at scenario level) — each affirmable without reading code, and never an enumeration of Implementation Units, file paths, or PR/sequencing shape. Use the confirmation or auto-proceed lines in `references/synthesis-summary.md` (loaded above) rather than reconstructing them here.
+**必需的输出——不要跳过；不允许静默进行。** 撰写内部三桶范围草案（陈述/推断/超出范围 - 在阶段 5.2 提供计划主体路由的内部思维，而不是聊天输出）。派生标注（用户输入实质上改变计划的特定分支），然后发出**源自头脑风暴的**综合，并**在继续进行阶段 5.2 之前等待用户确认。** 它的摘要分为两部分：用一句话锚点在头脑风暴自己的词汇中命名头脑风暴的范围，然后是头脑风暴未做出的特定于计划的范围决定（完全头脑风暴覆盖与缩小的子集；相邻的重构或排除；测试范围场景级别）——每个都可以在不阅读代码的情况下确认，并且从不枚举实施单元、文件路径或PR/sequencing形状。使用`references/synthesis-summary.md`（上面加载）中的确认或自动继续行，而不是在此处重建它们。
 
-**Blocking decision:** auto-proceed — send the user the auto-proceed announcement in chat, then continue without waiting — only when plan depth is **Lightweight AND zero call-outs survive**. Standard and Deep always ask for confirmation, even with zero call-outs.
+**阻止决策：**自动继续 - 在聊天中向用户发送自动继续公告，然后无需等待即可继续 - 仅当计划深度为 **轻量级且零调用存活**时。标准和深度总是要求确认，即使是零呼出。
 
-**Headless / opt-in skip:** in headless mode, or when `SKIP_SCOPING_CONFIRM` resolved to skip in Phase 0.0, do not block — compose the internal draft, skip the chat-time confirmation, and route Inferred bets to a `## Assumptions` section at plan-write (Phase 5.2). The skip covers only this scoping confirmation; Phase 0.4 routing, Phase 0.5 blockers, Phase 2 questions, source-doc disambiguation, and the Phase 5.4 menu still run. Announcement wording and full routing: `references/synthesis-summary.md` ("Headless mode", "When to skip the blocking confirmation").
+**无头/选择加入跳过：**在无头模式下，或者当 `SKIP_SCOPING_CONFIRM` 决定在阶段 0.0 中跳过时，不要阻止 - 撰写内部草稿，跳过聊天时间确认，并将推断赌注路由到计划编写时的 `## Assumptions` 部分（阶段 5.2）。跳过仅涵盖此范围确认；阶段 0.4 路由、阶段 0.5 拦截器、阶段 2 问题、源文档消歧以及阶段 5.4 菜单仍在运行。公告措辞和完整路由：`references/synthesis-summary.md`（“无头模式”，“何时跳过阻塞确认”）。
 
-#### 5.2 Write Plan File
+#### 5.2 写入计划文件
 
-**Before the write, on an interactive run from an upstream Product Contract, check the chat:** the user must already have seen this run's Phase 5.1.5 synthesis or its auto-proceed announcement. Answers to your own planning questions are not that checkpoint, because the synthesis is where those answers show up as scope. If neither is in chat, send it now.
+**在写入之前，在上游产品合同的交互式运行中，检查聊天：**用户必须已经看到此运行的第 5.1.5 阶段综合或其自动进行公告。对你自己的规划问题的答案不是那个检查点，因为综合是这些答案显示为范围的地方。如果两者都不在聊天中，请立即发送。
 
-Return to SKILL.md for its Model elevation step (Phase 5 workflow item 8), which decides whether a different model authors the plan. Resume here only after that step has finished; this reference does not dispatch the authoring route itself.
+返回到 SKILL.md 进行模型提升步骤（第 5 阶段工作流程项目 8），该步骤决定是否由不同的模型编写计划。仅在该步骤完成后才在此处恢复；此参考不会分派创作路线本身。
 
-**REQUIRED: Write the plan file to disk before presenting any options.**
+**必需：在提供任何选项之前将计划文件写入磁盘。**
 
-Both markdown and HTML plans continue through `ce-doc-review`; fixes apply in
-the artifact's native format while preserving its existing structure.
+Markdown 和 HTML 计划都将持续到 `ce-doc-review`；修复适用于产物的本机格式，同时保留其现有结构。
 
-Use the Write tool to save the complete plan to the resolved format's extension:
+使用写入工具将完整计划保存到已解析格式的扩展名中：
 
 ```text
 <root>/plans/YYYY-MM-DD-HHMM-<type>-<descriptive-name>-plan.<md|html>
 ```
 
-Extension follows `OUTPUT_FORMAT` from Phase 0.0 — `.md` when markdown, `.html` when HTML. The filename prefix is the local wall-clock time at write, so ordering comes from the clock rather than a daily counter. Reserve the final path atomically; when creating a new artifact, an exact-path collision retries with the smallest available numeric suffix rather than overwriting. Explicit format conversion is not a new artifact and is exempt from that suffix: it keeps the existing basename, changes only the extension, and writes that exact sibling path, updating it in place when it already exists. A suffixed conversion output would break the staleness check that Phase 0.2 and `ce-work` discovery make by comparing files that share a basename.
+扩展遵循阶段 0.0 中的 `OUTPUT_FORMAT` — markdown 时为 `.md`，HTML 时为 `.html`。文件名前缀是写入时的本地挂钟时间，因此排序来自时钟而不是每日计数器。原子保留最终路径；创建新产物时，会使用最小的可用数字后缀重试精确路径碰撞，而不是覆盖。显式格式转换不是一个新的产物，并且不受该后缀的影响：它保留现有的基本名称，仅更改扩展名，并写入确切的同级路径，并在其已存在时将其更新到位。带后缀的转换输出将破坏阶段 0.2 和 `ce-work` 发现通过比较共享基名的文件进行的陈旧性检查。
 
-Compose the plan using the content from `references/plan-sections.md` and the format-specific principles from the rendering reference loaded at Phase 0.0 (`markdown-rendering.md` OR `html-rendering.md`).
+使用 `references/plan-sections.md` 中的内容和阶段 0.0 加载的渲染参考中的格式特定原则（`markdown-rendering.md` 或 `html-rendering.md`）来编写计划。
 
-**Write tight.** A section being material is not license to pad it. Hold every kept section to the prose-economy discipline in `references/plan-sections.md`: lead with the decision or outcome, one idea per sentence, a requirement or unit is intent plus at most one qualifier, defer forks to Open Questions rather than specifying both arms, resolve superseded text in place rather than stacking strata. Before declaring the plan written, run the named test there — could the implementer find a contradiction in each section in one pass?
+**写紧。** 重要的部分不允许填充它。将每一个保留的部分保留在`references/plan-sections.md`中的散文经济学科：以决定或结果为主导，每句话一个想法，一个要求或单元是意图加上最多一个限定符，将分支推迟到开放问题而不是指定双臂，就地解决被取代的文本而不是堆叠分层。在宣布编写的计划之前，在那里运行指定的测试 - 实施者能否一次性找到每个部分中的矛盾？
 
-Write the unified plan artifact according to `references/plan-sections.md`.
+根据`references/plan-sections.md`编写统一计划产物。
 
-- If the source is a requirements-only unified plan, update that file in place unless `OUTPUT_FORMAT`, pipeline mode, or an explicit conversion requires a new canonical path. Preserve Product Contract meaning and stable IDs under Phase 0.3 step 3; meaning-preserving restructuring that Phase 0.3 permits is still allowed and carries its preservation-note and citation-repointing obligations. Add Planning Contract, Implementation Units, Verification Contract, and Definition of Done. When a new canonical path *is* required (format conversion), preserve the original artifact and add a visible supersession notice linking to the new canonical path. Write the notice only after the converted artifact is complete. Discovery follows that notice; same-basename copies without one need disambiguation.
-- If the source is a legacy requirements doc, create a new unified plan in `<root>/plans/` and carry the legacy path in `origin:`.
-- If this is direct planning, create a complete unified plan in `<root>/plans/` with `product_contract_source: ce-plan-bootstrap`.
-- Set `artifact_contract: ce-unified-plan/v1` and `execution: code` for software implementation plans.
-- Do not set `artifact_contract: ce-unified-plan/v1` on universal-planning outputs, answer-seeking outputs, or approach-plans unless they include the full software implementation contract.
-- Do not write a launch prompt into the doc. An executor reads the Goal Capsule, Verification Contract, Definition of Done, and U-IDs from the plan's current content, so a baked prompt would only duplicate them and go stale.
+- 如果源是仅满足需求的统一计划，请就地更新该文件，除非 `OUTPUT_FORMAT`、管道模式或显式转换需要新的规范路径。在阶段 0.3 步骤 3 下保留产品合同含义和稳定 ID；第 0.3 阶段允许的意义保留重组仍然被允许，并承担其保留注释和引用重新指向义务。添加计划合同、实施单位、验证合同和完成定义。当需要新的规范路径（格式转换）时，保留原始产物并添加链接到新规范路径的可见取代通知。仅在转换产物完成后才写通知。该通知之后即有发现；相同基名的副本无需消除歧义。
+- 如果源是遗留需求文档，则在`<root>/plans/`中创建新的统一计划，并在`origin:`中携带遗留路径。
+- 如果是直接规划，则在`<root>/plans/`和`product_contract_source: ce-plan-bootstrap`中创建一个完整的统一规划。
+- 为软件实施计划设置`artifact_contract: ce-unified-plan/v1`和`execution: code`。
+- 不要在通用规划输出、寻求答案输出或方法计划上设置`artifact_contract: ce-unified-plan/v1`，除非它们包含完整的软件实施合同。
+- 不要将启动提示写入文档中。执行者从计划的当前内容中读取目标胶囊、验证合同、完成定义和 U-ID，因此烘焙的提示只会复制它们并变得陈旧。
 
-**Session-settled decisions at plan-write.** A settled *planning* decision (a how-level choice made this session) is authored as a numbered, labeled Key Technical Decision carrying the annotation `(session-settled: user-directed — chosen over <alternative>: <one-line reason>)` (class per `references/settled-decisions.md`: `user-directed` or `user-approved`). A settled *product* decision already lives on its Product Contract Key Decision with `Governs R…` links — do **not** mirror it into a KTD; a KTD that makes the how-level choice instantiating it inherits the label and cites the governed R-IDs.
+**计划编写时的会话解决决策。** 解决的*规划*决策（本次会话的级别选择）被编写为带有注释`(session-settled: user-directed — chosen over <alternative>: <one-line reason>)`（每个`references/settled-decisions.md`的类别：`user-directed`或`user-approved`）的编号、标记的关键技术决策。已确定的*产品*决策已经存在于其具有 `Governs R…` 链接的产品合同密钥决策中 — 不要**将其镜像到 KTD 中；进行实例化的级别选择的 KTD 继承标签并引用受管理的 R-ID。
 
-**HTML composition timing.** When `OUTPUT_FORMAT=html`, Phase 5.3 deepening runs before this write completes its final form, then `ce-doc-review` applies any fixes directly in the HTML artifact's native structure. The artifact returned after Phase 5.3.8 reflects both deepening synthesis and document review.
+**HTML 组合时间。** 当 `OUTPUT_FORMAT=html` 时，阶段 5.3 深化在此写入完成其最终形式之前运行，然后 `ce-doc-review` 直接在 HTML 产物的本机结构中应用任何修复。阶段 5.3.8 之后返回的产物反映了深化综合和文档审查。
 
-Confirm (use absolute path so the reference is clickable in modern terminals):
+确认（使用绝对路径，以便在现代终端中可以单击引用）：
 
 ```text
-Plan written to <absolute path to plan>
+计划写入<计划的绝对路径>
 ```
 
-**The pipeline-mode exception SKILL.md points here for:** when research produced invalidating evidence (infeasible, wrong-thing, destructive) against any session-settled decision in play for the run — whether carried in the caller brief or already carried as a `session-settled:` label in the artifact being enriched (brainstorm Key Decisions or plan KTDs) — do not write the plan and do not resolve silently — return a blocked report to the caller containing the token `settled-decision-invalidated`, the decision, and the reason, parallel to the non-software pipeline stop in `references/universal-planning.md`, so the caller can stop.
+**管道模式异常SKILL.md在这里指向：**当研究针对运行中的任何会话解决决策产生无效证据（不可行、错误、破坏性）时——无论是在调用者简报中携带还是已经作为正在丰富的产物中的`session-settled:`标签携带（集体讨论关键决策或计划KTD）——不要编写计划，也不要默默解决——向包含令牌的调用者返回阻止的报告`settled-decision-invalidated`，决定和原因，与`references/universal-planning.md`中的非软件管道停止并行，因此调用者可以停止。
 
-**CONCEPTS.md gap-fill (only if the file already exists):** If the plan body uses a domain term whose definition is missing from `CONCEPTS.md`, add the entry. **Domain entities, named processes, and status concepts with project-specific meaning only** — not file paths, class names, function signatures, or implementation decisions. `CONCEPTS.md` is a glossary, not a spec or catch-all. A term whose whole meaning an existing entry already carries is a refinement of that entry, not a new heading. Follow the format set by existing entries. Apply silently. Skip entirely if `CONCEPTS.md` does not exist — only ce-compound creates the file or folds entries together, and only its refresh job retires or deletes an entry.
+**词汇表空白填充（仅更新）。** 按照根 `GLOSSARY-MAP.md` 到达相关上下文，或使用根 `GLOSSARY.md` 而不使用地图。当其词汇表不存在或所有权不明确时，Skip 会写道。仅在缺失时添加已确定的、有证据的领域实体、命名流程或状态概念；优化现有条目而不是复制同义词。使用[通用输入格式](../../domain-modeling/GLOSSARY-FORMAT.md)，而不是计划步骤、代码路径或实现细节。如果提议的含义发生冲突，请保持定义不变并将其显示为 `domain-modeling`。这里没有折叠、退休或删除。
 
-#### 5.3 Confidence Check and Deepening
+#### 5.3 置信度检查和深化
 
-A deepen run enters here from Phase 0.1 without passing intake. For a material Durable run, use the host's task-tracking capability when available to show route-level outcomes and meaningful transitions; if unavailable, continue without simulating it in chat.
+深化运行从阶段 0.1 进入此处，无需通过入口。对于实质性持久运行，请使用主机的任务跟踪功能（如果可用）来显示路线级别的结果和有意义的转换；如果不可用，请继续而不在聊天中进行模拟。
 
-Auto mode is the default during plan generation and synthesizes subagent findings directly into the plan. Interactive mode is activated by the Phase 0.1 re-deepen fast path and presents each finding for the user to accept or reject. Pipeline runs always use auto mode.
+自动模式是计划生成期间的默认模式，并将子代理结果直接合成到计划中。交互模式由阶段 0.1 重新深化快速路径激活，并呈现每个发现供用户接受或拒绝。管道运行始终使用自动模式。
 
-Interactive mode exists because on-demand deepening is a different situation for the user — they already have a plan they are invested in and wants to be surgical about what changes. This applies whether the plan was generated by this skill, written by hand, or produced by another tool.
+交互模式的存在是因为按需深化对于用户来说是一种不同的情况——他们已经有了自己投资的计划，并希望对哪些变化进行手术。无论计划是由该技能生成、手工编写还是由其他工具生成，这都适用。
 
-##### 5.3.1 Classify Plan Depth and Topic Risk
+##### 5.3.1 对计划深度和主题风险进行分类
 
-Determine the plan depth from the document:
-- **Lightweight** - small, bounded, low ambiguity, usually 2-4 implementation units
-- **Standard** - moderate complexity, some technical decisions, usually 3-6 units
-- **Deep** - cross-cutting, high-risk, or strategically important work, usually 4-8 units
+从文档中确定计划深度：
+- **轻量级** - 小、有界、低歧义，通常 2-4 个实现单元
+- **标准** - 中等复杂度，一些技术决策，通常 3-6 个单元
+- **深度** - 交叉、高风险或具有战略重要性的工作，通常为 4-8 个单元
 
-Build a risk profile. Treat these as high-risk signals:
-- Authentication, authorization, or security-sensitive behavior
-- Payments, billing, or financial flows
-- Data migrations, backfills, or persistent data changes
-- External APIs or third-party integrations
-- Privacy, compliance, or user data handling
-- Cross-interface parity or multi-surface behavior
-- Significant rollout, monitoring, or operational concerns
+建立风险概况。将这些视为高风险信号：
+- 身份验证、授权或安全敏感行为
+- 付款、账单或资金流
+- 数据迁移、回填或持久数据更改
+- 外部 API 或第三方集成
+- 隐私、合规性或用户数据处理
+- 跨接口奇偶校验或多表面行为
+- 重大的部署、监控或运营问题
 
-##### 5.3.2 Gate: Decide Whether to Deepen
+##### 5.3.2 门：决定是否深化
 
-- **Lightweight** plans usually do not need deepening unless they are high-risk
-- **Standard** plans often benefit when one or more important sections still look thin
-- **Deep** or high-risk plans often benefit from a targeted second pass
-- **Thin local grounding override:** If Phase 1.2 (Decide on External Research) triggered external research because local patterns were thin (fewer than 3 direct examples or adjacent-domain match), always proceed to scoring regardless of how grounded the plan appears. When the plan was built on unfamiliar territory, claims about system behavior are more likely to be assumptions than verified facts. The scoring pass is cheap — if the plan is genuinely solid, scoring finds nothing and exits quickly
-- **External-research-shaped-the-plan override:** If Phase 1.4 (Consolidate Research) recorded that external research materially shaped a KTD, Alternative, Scope boundary, or Risk, always proceed to scoring — **even when local implementation patterns are strong**. A landscape or prior-art finding can shape recommendations the local codebase cannot verify, and the thin-grounding override above would miss it. This enters the scoring pass only; it does not force deepening
+- **轻量级**计划通常不需要深化，除非它们是高风险的
+- 当一个或多个重要部分看起来仍然很薄弱时，**标准**计划通常会受益
+- **深度**或高风险计划通常受益于有针对性的第二次通过
+- **薄弱本地基础覆盖：** 如果阶段 1.2（决定外部研究）由于本地模式薄弱（少于 3 个直接示例或相邻域匹配）而触发外部研究，则无论计划看起来如何接地，始终继续评分。当计划建立在不熟悉的领域时，有关系统行为的主张更有可能是假设，而不是经过验证的事实。得分传球很便宜——如果计划确实可靠，得分什么也找不到并很快退出
+- **外部研究塑造计划优先：**如果第 1.4 阶段（整合研究）记录外部研究实质性地塑造了 KTD、替代方案、范围边界或风险，则始终继续评分 — **即使当地实施模式很强**。景观或现有技术的发现可能会形成本地代码库无法验证的建议，并且上面的薄弱覆盖会错过它。这仅进入得分传球；它不强制加深
 
-If the plan already appears sufficiently grounded and neither the thin-grounding override nor the external-research-shaped-the-plan override applies, report "Confidence check passed — no sections need strengthening", then **load `references/plan-handoff.md` now and execute 5.3.8 → 5.3.9 → 5.4 in sequence**. Document review is mandatory for both markdown and HTML plans — do not skip it because the confidence check passed. The two tools catch different classes of issues.
+如果计划已经显得足够接地气，并且薄弱接地覆盖和外部研究塑造计划覆盖均不适用，则报告“置信度检查已通过 - 没有部分需要加强”，然后**立即加载 `references/plan-handoff.md` 并按顺序执行 5.3.8 → 5.3.9 → 5.4**。对于 Markdown 和 HTML 计划来说，文档审查都是强制性的——不要因为置信度检查已通过而跳过它。这两个工具捕获不同类别的问题。
 
-##### 5.3.3–5.3.7 Deepening Execution
+##### 5.3.3–5.3.7深化执行
 
-When deepening is warranted, read `references/deepening-workflow.md` for confidence scoring checklists, section-to-agent dispatch mapping, execution mode selection, research execution, interactive finding review, and plan synthesis instructions. Execute steps 5.3.3 through 5.3.7 from that file, then hand control back to SKILL.md at 5.3.8. Deepening is not a terminal state — the run always continues to the handoff, and `deepening-workflow.md` states which step it re-enters at, including its interactive no-accepted-findings path straight to 5.4.
+当需要深化时，请阅读`references/deepening-workflow.md`了解置信度评分清单、部门到代理调度映射、执行模式选择、研究执行、交互式发现审查和计划综合说明。从该文件执行步骤 5.3.3 到 5.3.7，然后将控制权交还给 5.3.8 处的SKILL.md。深化不是最终状态——运行总是继续到切换，并且 `deepening-workflow.md` 说明它在哪一步重新进入，包括直接到 5.4 的交互式不接受结果路径。

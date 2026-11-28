@@ -1,15 +1,15 @@
-# Structural Pass
+# 结构通行证
 
-`references/standalone-report.md` says when to read this. It adds evidence and one reviewer to Step 2, and a grouping step between Step 2 and the report.
+`references/standalone-report.md` 表示何时阅读此内容。它向步骤 2 添加了证据和一名审查者，并在步骤 2 和报告之间添加了分组步骤。
 
-## Before dispatching
+## 交付前
 
-Gather two kinds of evidence for the scope, and keep the output in OS temp:
+收集两种范围证据，并将输出保留在 OS temp 中：
 
-- **What changes together:** pairs of files that often change in the same commits, especially pairs in different directories.
-- **What imports what:** the import graph for the scope, with how often each file changes in that same history.
+- **一起更改的内容：**在同一提交中经常更改的文件对，尤其是不同目录中的文件对。
+- **什么导入什么：**范围的导入图，以及每个文件在同一历史记录中更改的频率。
 
-The bundled script gathers both for JavaScript, TypeScript, and Python. Run it directly from the repository, passing the scope paths; do not read it first:
+捆绑脚本收集 JavaScript、TypeScript 和 Python。直接从存储库运行它，传递范围路径；先不要阅读它：
 
 ```
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just read>";
@@ -17,24 +17,24 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 "$PY" "$SKILL_DIR/scripts/structure-evidence.py" <scope paths>
 ```
 
-It prints JSON. `imports_not_parsed` counts files in other languages; build their import evidence yourself. If the script fails, gather the evidence with short commands of your own.
+它打印JSON。 `imports_not_parsed` 统计其他语言的文件；自己建立他们的重要证据。如果脚本失败，请使用您自己的简短命令收集证据。
 
-When the scope is too large for one reviewer to read in full, also make an outline of it: each file's exports and function signatures, without bodies. Every reviewer gets the outline in place of the full file set, and opens the files it needs.
+当范围太大而一位审查者无法完整阅读时，还应列出一个大纲：每个文件的导出和函数签名，不带正文。每个审查者都会获取大纲来代替完整的文件集，并打开所需的文件。
 
-Dispatch `references/personas/structure-reviewer.md` with the other Step 2 reviewers, in the same way, and pass it the evidence.
+以同样的方式与其他步骤 2 评审员一起发送 `references/personas/structure-reviewer.md`，并将证据传递给它。
 
-## After the reviewers return
+## 审稿人返回后
 
-Before writing the report, group the findings from every reviewer under the change that removes them. Work out each change as if the system had known today's requirements from the start. One change often removes several findings that look unrelated, and it often looks nothing like any of them. A special case is grouped under a change only when that change makes it unnecessary. A special case the system still needs stays as its own finding.
+在编写报告之前，将每个审查者的发现分组到删除它们的更改下。计算每个更改，就好像系统从一开始就知道今天的需求一样。一项更改通常会删除几个看起来不相关的发现，而且通常看起来与其中任何一个都不相同。仅当更改变得不必要时，特殊情况才会分组在更改下。系统仍然需要一个特殊情况，作为它自己的发现。
 
-A grouping is kept only when all three of these hold after its change: pieces that change together end up together, pieces that do not are no longer tied, and dependencies point toward code that changes less. Drop a grouping that fails, and keep its findings as separate findings.
+仅当所有这三个因素在更改后都成立时，才会保留分组：一起更改的部分最终会在一起，不更改的部分不再相互关联，并且依赖项指向更改较少的代码。删除失败的分组，并将其结果保留为单独的结果。
 
-A grouped change still follows Step 3. It must preserve outputs, errors, side effects, and ordering, and it must stay inside the scope. That holds for every exported function and other public interface on its own, not only for the code paths the tests exercise: code you cannot see may call it directly. So a redesign may move logic behind an export, but the export keeps its signature and does what it did before. When it cannot, do not apply it; list it as not applicable. A change that would correct a bug is reported as a possible defect, not applied as a simplification.
+分组更改仍然遵循步骤 3。它必须保留输出、错误、副作用和顺序，并且必须保留在范围内。这适用于每个导出函数和其他公共接口本身，而不仅仅是测试练习的代码路径：您看不到的代码可以直接调用它。因此，重新设计可能会改变导出背后的逻辑，但导出会保留其签名并执行之前所做的操作。当不能时，不要应用；将其列为不适用。纠正错误的更改会被报告为可能的缺陷，而不是作为简化来应用。
 
-Keep the groupings and their reasons in a file in OS temp while you work, so they survive if the context is compacted.
+当您工作时，将分组及其原因保存在操作系统临时文件中，以便在压缩上下文时它们仍然存在。
 
-## In the report
+## 报告中
 
-In the **Refactor** group, each grouped change gets its own number, with the findings it removes indented beneath it and not numbered. Findings no change removes follow, numbered as usual. Applying a grouped change applies it whole. Changes that are not applicable go last in the group, one line each: the change and why it cannot be applied.
+在 **Refactor** 组中，每个分组的更改都有自己的编号，其删除的结果在其下方缩进且未编号。发现没有变化删除以下内容，编号如常。应用分组更改会应用整个更改。不适用的更改位于组的最后，每行：更改及其无法应用的原因。
 
-When a grouped change was applied, run the structure reviewer once more on the files it changed. Report what it finds instead of starting another round.
+应用分组更改后，对更改的文件再次运行结构审阅器。报告发现的内容，而不是开始另一轮。

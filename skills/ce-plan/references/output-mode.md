@@ -1,45 +1,45 @@
-# Output Mode and Artifact Root
+# 输出模式和产物根
 
-Read this before interpreting any planning phase. It defines how prompt tokens are parsed, which configuration layer wins, how the renderer is selected, and how the artifact root is resolved. Parse immediate prompt and contextual signals now. Defer every repository-backed fallback until resume and domain routing establish that this run will compose a rooted path or artifact; an answer-seeking run or a run with an explicit plan path may never need repository discovery.
+在解释任何计划阶段之前请阅读本文。它定义了如何解析提示标记、哪个配置层获胜、如何选择渲染器以及如何解析产物根。现在解析即时提示和上下文信号。推迟每个存储库支持的回退，直到恢复和域路由确定此运行将构成根路径或产物；寻求答案的运行或具有明确计划路径的运行可能永远不需要存储库发现。
 
-## Artifact Root
+## 神器根
 
-**Repository file references inside the plan are repo-relative** (`src/models/user.rb`), including unit file lists, pattern references, origin links, and prose mentions. Kept local prototypes use absolute source citations under the Prototype sources contract in `references/plan-sections.md`, so another worktree on the same machine can find them. Paths printed to the user in chat stay absolute so they are clickable.
+**计划内的存储库文件引用是相对于存储库的** (`src/models/user.rb`)，包括单元文件列表、模式引用、原始链接和散文提及。保留的本地原型在`references/plan-sections.md`中的原型源合同下使用绝对源引用，因此同一台机器上的另一个工作树可以找到它们。在聊天中打印给用户的路径保持绝对，因此可以单击。
 
-This skill writes plans under `<root>/plans/` and reads learnings under `<root>/solutions/`. Resolve `<root>` when you first compose a `<root>/` path, never before you need it. A write to `<root>/...` and a read of `<root>/solutions/` both count, so either one triggers resolution; only a run that touches no `<root>/` path at all — a scratch-only or no-repo flow — skips it. Pass the resolved path to any subagent, not the config.
+该技能在`<root>/plans/`下编写计划并在`<root>/solutions/`下阅读学习内容。当您第一次构建 `<root>/` 路径时解析 `<root>`，而不是在您需要它之前。对 `<root>/...` 的写入和对 `<root>/solutions/` 的读取都计数，因此任一者都会触发解析；只有根本不涉及 `<root>/` 路径的运行（仅限暂存或无回购流程）才会跳过它。将解析的路径传递给任何子代理，而不是配置。
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## 0.0 Resolve Output Mode
+## 0.0 解析输出模式
 
-Output mode is **exclusive** — a plan is written as either markdown (`.md`) OR HTML (`.html`), never both. Its precedence is in-prompt request > user-stated preference > config > default (`md`). There is no pipeline override: a headless or non-interactive run resolves the format by the same steps. Before routing, resolve any tier that needs no repository. If those tiers do not settle the format, keep config/default resolution pending until an artifact-producing route is known; settle it before selecting a renderer or composing the artifact path. A terminal no-artifact route never probes config merely to resolve an unused format.
+输出模式是**独占** - 计划被编写为 markdown (`.md`) 或 HTML (`.html`)，而不是两者兼而有之。它的优先级是提示请求 > 用户声明的首选项 > 配置 > 默认 (`md`)。没有管道覆盖：无头或非交互式运行通过相同的步骤解析格式。在路由之前，解析不需要存储库的任何层。如果这些层没有确定格式，则保持 config/default 分辨率悬而未决，直到知道产物生成路线为止；在选择渲染器或构建产物路径之前解决它。终端无产物路由绝不会仅仅为了解析未使用的格式而探测配置。
 
-1. **In-prompt request.** Reason over the user's prompt for this run for a request about *this document's* output format, expressed either as the `output:` shorthand or in plain language ("make the plan a webpage"). Match an explicit format case-insensitively to `md`/`html`, and ignore the `output:` token when reading the rest of the prompt as the feature description. Distinguish a request about the document's format from a format named as subject matter: "add an HTML export feature" is the work, not a doc-format request.
-   - `output:` alone (no value) → no-op, fall through to step 2.
-   - `output:<unknown>` (e.g., `output:pdf`) → drop the token, fall through, and emit a one-line note above the post-generation menu after final resolution: `Ignored unknown output: value '<value>' — using <resolved_format> instead.` Do not hardcode `md` in the note — that misleads users when config has set HTML.
-2. **User-stated preference.** If this prompt holds no format request, honor an output-format preference the user established earlier that is already in your context, matching `md`/`html` case-insensitively. A remembered preference is more current than the rarely-edited config, so it **overrides** the config in step 3. Do not open or search instruction files to find it.
-3. **Config.** Once an artifact-producing route is known, apply the ordinary-key rule below: the first **active (non-commented)** `plan_output:` matching `md` or `html` (case-insensitively) wins. Missing, invalid, or commented values continue to the next layer, then step 4. The shipped template's commented examples are not settings.
-4. **Default.** Otherwise `OUTPUT_FORMAT=md`. If `<repo-root>` cannot be resolved so the config cannot be read, fall through to this default rather than failing.
-5. **Pipeline mode and model elevation.** Pipeline mode skips interactive questions but does **not** disable model elevation — `plan_model` config (and a `plan_model:<alias>` token passed by the caller) is still honored (see the model-elevation sub-step below and `references/reasoning-elevation.md`). It does not change the output format.
+1. **即时请求。** 原因是用户针对此运行的提示，请求有关*此文档的*输出格式，以 `output:` 简写形式或简单语言（“将计划设为网页”）表示。将不区分大小写的显式格式与 `md`/`html` 匹配，并在将提示的其余部分作为功能描述读取时忽略 `output:` 标记。区分有关文档格式的请求和名为主题的格式：“添加 HTML 导出功能”是工作，而不是文档格式请求。
+   - `output:` 单独（无值）→ 无操作，进入步骤 2。
+   - `output:<unknown>`（例如，`output:pdf`）→ 丢弃令牌，掉落，并在最终解决后在生成后菜单上方发出一行注释： `Ignored unknown output: value '<value>' — using <resolved_format> instead.` 不要在注释中硬编码 `md` — 当配置设置 HTML 时，这会误导用户。
+2. **用户声明的首选项。** 如果此提示不包含格式请求，请遵循用户之前在您的上下文中建立的输出格式首选项，匹配 `md`/`html` 不区分大小写。记住的首选项比很少编辑的配置更新，因此它**覆盖**步骤 3 中的配置。请勿打开或搜索指令文件来查找它。
+3. **配置。** 一旦知道了产物生成路径，请应用以下普通密钥规则：第一个 **活动（未注释）** `plan_output:` 匹配 `md` 或 `html` （不区分大小写）获胜。缺失、无效或带注释的值将继续到下一层，然后执行步骤 4。随附模板的带注释示例不是设置。
+4. **默认值。** 否则`OUTPUT_FORMAT=md`。如果 `<repo-root>` 无法解析，因此无法读取配置，则采用此默认值而不是失败。
+5. **管道模式和模型提升。**管道模式会跳过交互式问题，但**不会**禁用模型提升 - `plan_model`配置（以及调用者传递的`plan_model:<alias>`令牌）仍然受到尊重（请参阅下面的模型提升子步骤和`references/reasoning-elevation.md`）。它不会更改输出格式。
 
-**Token-parsing convention:** only literal-prefix flag tokens (`output:`, `mode:`, the exact `confirm:auto`/`confirm:ask` forms, `plan_model:<alias>`, `delegate:` where applicable) are consumed and stripped. Other `<word>:<word>` tokens — including commit prefixes like `feat:` and any unrecognized `confirm:<value>` — pass through verbatim into the feature description. A stripped `plan_model:<alias>` token is kept for the Phase 5.2 model-elevation step.
+**令牌解析约定：** 仅消耗和剥离文字前缀标志令牌（`output:`、`mode:`、确切的 `confirm:auto`/`confirm:ask` 形式、`plan_model:<alias>`、`delegate:`（如果适用））。其他 `<word>:<word>` 标记 — 包括像 `feat:` 这样的提交前缀和任何无法识别的 `confirm:<value>` — 逐字传递到功能描述中。为阶段 5.2 模型提升步骤保留剥离的 `plan_model:<alias>` 令牌。
 
-**For an artifact-producing route, load the format-rendering reference only after the value settles:** `references/markdown-rendering.md` when `OUTPUT_FORMAT=md`, `references/html-rendering.md` when `OUTPUT_FORMAT=html`. Section content is the same either way; presentation differs. Both are paired with `references/plan-sections.md`.
+**对于产物生成路线，仅在值稳定后加载格式渲染参考：** `OUTPUT_FORMAT=md`时为`references/markdown-rendering.md`，`OUTPUT_FORMAT=html`时为`references/html-rendering.md`。两种方式的部分内容都是相同的；演示有所不同。两者都与`references/plan-sections.md`配对。
 
 <!-- ce-config-layers:start -->
-**Resolve ordinary CE yaml keys from the two repo files.**
+**解析两个存储库文件中的普通 CE yaml 密钥。**
 
-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
+- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
+- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
 <!-- ce-config-layers:end -->
 
-Also resolve the immediate `SKIP_SCOPING_CONFIRM` signals here. `confirm:auto` skips the scoping-synthesis confirmation for this run and `confirm:ask` forces it on; honor an equivalent plain-language instruction the same way ("just write it, don't ask me to confirm" skips; "ask me before writing the plan" asks). Only those two literal values are consumed as a flag — any other `confirm:<value>` stays verbatim in the feature description. Then use a preference already in your context. If neither settles the value, defer the first **active (non-commented)** `plan_skip_scoping_confirm:` matching `true` or `false`, then the default of asking, until `references/intake.md` reaches the scoping-confirmation step where the value matters. A route that never reaches that step does not probe config for it.
+还要在这里解析即时 `SKIP_SCOPING_CONFIRM` 信号。 `confirm:auto` 跳过本次运行的范围综合确认，`confirm:ask` 强制其开启；以同样的方式遵守等效的简单语言指令（“只写它，不要让我确认”跳过；“在写计划之前询问我”询问）。只有这两个文字值被用作标志 - 任何其他 `confirm:<value>` 都在功能描述中逐字保留。然后使用您的上下文中已有的首选项。如果两者都没有解决该值，则推迟第一个 **活动（未注释）** `plan_skip_scoping_confirm:` 匹配 `true` 或 `false`，然后默认询问，直到 `references/intake.md` 到达值重要的范围确认步骤。从未到达该步骤的路由不会探测它的配置。
 
-**Model-elevation visibility.** Treat a stripped `plan_model:<alias>` token, or a `plan_model` config value you have found, as a pending Phase 5.2 input, not a resolved choice. Phase 5.2 resolves the choice from the current conversation, that token, and config immediately before authoring, so later user intent cannot be lost.
+**模型标高可见性。** 将剥离的 `plan_model:<alias>` 标记或您找到的 `plan_model` 配置值视为待处理的阶段 5.2 输入，而不是已解决的选择。阶段 5.2 在创作之前立即解析当前对话、该令牌和配置的选择，因此以后的用户意图不会丢失。

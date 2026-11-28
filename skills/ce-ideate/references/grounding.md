@@ -1,14 +1,14 @@
-# Phase 1 grounding
+# 第一相接地
 
-Required read before dispatching any grounding agent. This file defines the scratch-directory resolution, the per-mode dispatch sets and their prompts, web research, user-supplied research routing, and the consolidated grounding summary.
+在派遣任何接地剂之前需要阅读。该文件定义了暂存目录分辨率、每个模式的调度集及其提示、网络研究、用户提供的研究路由以及综合基础摘要。
 
-### Phase 1: Mode-Aware Grounding
+### 第 1 阶段：模式感知接地
 
-Before generating ideas, gather grounding. The dispatch set depends on the mode chosen in Phase 0.3. Web research and user-supplied research handling run in all modes (skip phrases honored). Learnings runs in repo mode and elsewhere-software, and is **skipped by default in elsewhere-non-software** — `<root>/solutions/` holds engineering patterns that do not transfer to naming, narrative, personal, or non-digital business topics.
+在产生想法之前，先收集基础知识。调度集取决于阶段 0.3 中选择的模式。网络研究和用户提供的研究处理在所有模式下运行（跳过短语）。学习在回购模式和其他软件中运行，并且**在其他非软件中默认跳过** - `<root>/solutions/` 拥有不会转移到命名、叙述、个人或非数字业务主题的工程模式。
 
-**Surprise-me grounding depth.** In surprise-me mode, grounding goes deeper than specified mode — apply the 0.2 table's `1 grounding` row, and pass issue themes as first-class input rather than a footnote when issue intelligence runs. Specified mode keeps the shallower scan: the user's named subject anchors what is relevant.
+**让我惊喜的基础深度。** 在让我惊喜的模式下，基础比指定模式更深 — 应用 0.2 表的 `1 grounding` 行，并在问题智能运行时将问题主题作为一流输入而不是脚注传递。指定模式保持较浅的扫描：用户命名的主题锚定相关内容。
 
-**Pre-resolve the scratch directory.** Generate a `<run-id>` once (8 hex chars) and reuse it for the web-research cache and the Phase 2/4 checkpoints so they share one per-run directory. Scratch lives beneath the effective user's private CE root — `/tmp/compound-engineering-<uid>` when it is usable, else the validated `$TMPDIR` fallback the block below selects — never `.context/`. Run this to validate the owner-private root, create the run directory, and capture its absolute path:
+**预解析暂存目录。** 生成一次 `<run-id>`（8 个十六进制字符）并将其重新用于网络研究缓存和阶段 2/4 检查点，以便它们共享一个每次运行目录。 Scratch 位于有效用户的私有 CE 根目录下 — `/tmp/compound-engineering-<uid>`（当可用时），否则经过验证的 `$TMPDIR` 回退到下面的块选择 — 永远不会 `.context/`。运行此命令以验证所有者私有根、创建运行目录并捕获其绝对路径：
 
 ```bash
 SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
@@ -22,117 +22,115 @@ SCRATCH_DIR="$SCRATCH_ROOT/ce-ideate/<run-id>";
 echo "$SCRATCH_DIR";
 ```
 
-Use the echoed absolute path as `<scratch-dir>` for every checkpoint write and cache read in this run. It is **not** deleted on completion — the web-research cache is reused across run-ids in a session, and in the no-repo case the deliverable itself is written here.
+对于此运行中的每个检查点写入和缓存读取，使用回显的绝对路径作为 `<scratch-dir>`。它在完成后不会被删除——网络研究缓存在会话中的 run-id 之间重用，并且在无存储库的情况下，可交付成果本身被写入此处。
 
-**Before either dispatch block, run the research-artifact routing test** from "User-Supplied Research Artifacts" below over any file the prompt or intake named. It has to run here, ahead of both blocks, because each one has a way to swallow an evidence file it was never told to skip: the repo scan reads a named root-level `*.md` into `User-named references`, and elsewhere-mode synthesis reads "any rich-prompt material". Without the test, a long survey or analytics export would be dispatched to synthesis *and* to a distiller, duplicating the file and polluting `Topic context`. Each file takes exactly one path.
+**在任一调度块之前，从下面的“用户提供的研究产物”中对提示或输入指定的任何文件运行研究产物路由测试**。它必须在这里运行，在两个块之前，因为每个块都有一种方法吞下从未被告知要跳过的证据文件：存储库扫描将命名的根级别`*.md`读取到`User-named references`，而其他模式合成读取“任何丰富的提示材料”。如果没有测试，长时间的调查或分析导出将被分派到合成*和*到蒸馏器，复制文件并污染`Topic context`。每个文件只占用一个路径。
 
-**If that test routes anything to evidence, read `references/user-research-artifacts.md` now, before the batch below.** Distillers belong *in* the same parallel foreground batch as the other grounding agents; loading their dispatch spec after the batch has already run serializes the most expensive read in the phase behind everything else.
+**如果该测试有任何证据，请立即在下面的批次之前阅读`references/user-research-artifacts.md`。**蒸馏器与其他接地剂属于*同一平行前景批次；在批处理已经运行后加载其调度规范会序列化该阶段中最昂贵的读取，落后于其他所有读取。
 
-Run grounding agents in parallel in the **foreground** (do not background — results are needed before Phase 2):
+在 **前台** 并行运行接地代理（不要在后台 - 在第 2 阶段之前需要结果）：
 
-**Repo mode dispatch:**
+**回购模式调度：**
 
-1. **Quick context scan** — dispatch a general-purpose subagent using the platform's cheapest capable model when the harness exposes a known override; otherwise inherit. Per the routing test above, any named file already classified as evidence goes on the prompt's research-artifacts line rather than into `User-named references`. Dispatch with this prompt:
+1. **快速上下文扫描** - 当宿主暴露已知覆盖时，使用平台最便宜的模型调度通用子代理；否则继承。根据上面的路由测试，任何已分类为证据的命名文件都会出现在提示的研究产物行中，而不是进入`User-named references`。发送时提示如下：
 
-   > **Grounding scope:** use the supplied project context and go directly to current patterns bearing on the focus, pain points, leverage points, applicable workflow constraints, and in surprise-me mode representative files plus recent activity. If the focus cannot be scoped, use one targeted root or workspace probe.
+   > **基础范围：**使用提供的项目上下文，直接转到与焦点、痛点、杠杆点、适用的工作流程约束有关的当前模式，以及在“惊喜”模式下的代表性文件和最近的活动。如果无法确定焦点范围，请使用一个目标根或工作区探针。
    >
-   > Start with the files and areas named by the focus or caller context. Read the applicable current project instructions when operational rules affect the scan, `STRATEGY.md` when product alignment matters (a legacy `PRODUCT.md` or `VISION.md` only when `STRATEGY.md` is absent or lacks a meaning you need), and `CONCEPTS.md` when canonical vocabulary matters.
+   > 从焦点或调用者上下文命名的文件和区域开始。当操作规则影响扫描时，请阅读适用的当前项目说明；当产品对齐很重要时，请阅读 `STRATEGY.md`（仅当 `STRATEGY.md` 不存在或缺乏您需要的含义时，才使用旧版 `PRODUCT.md` 或 `VISION.md`）；当规范词汇很重要时，请阅读适用的术语表。如果存储库有`GLOSSARY-MAP.md`，则首先解析其范围内上下文；否则使用 root `GLOSSARY.md`。
    >
-   > If the focus names a root-level `*.md` file, read it and include its relevant content under `User-named references`. When that file is listed on the research-artifacts line below, leave its full distillation to the research agent and include only a one-line gist here.
+   > 如果焦点命名为根级`*.md`文件，请读取该文件并将其相关内容包含在`User-named references`下。当该文件列在下面的研究产物行中时，将其完整的提炼留给研究代理，并在此处仅包含一行要点。
    >
-   > Return a concise summary (under 40 lines, longer if user-named references include substantive content) covering:
+   > 返回简洁的摘要（40 行以下，如果用户命名的引用包含实质性内容，则更长），涵盖：
    >
-   > - current patterns and conventions relevant to the focus
-   > - pain points or gaps relevant to the focus
-   > - likely leverage points
-   > - relevant product strategy and boundaries, if a product doc was read
-   > - `User-named references` section (when the focus hint named root-level `*.md` files)
+   > - 与焦点相关的当前模式和惯例
+   > - 与焦点相关的痛点或差距
+   > - 可能的杠杆点
+   > - 相关的产品策略和边界（如果阅读了产品文档）
+   > - `User-named references` 部分（当焦点提示名为根级`*.md` 文件时）
    >
-   > Keep the scan shallow. Do not analyze unrelated issues, templates, contribution guidelines, or code.
+   > 保持扫描浅层。不要分析不相关的问题、模板、贡献指南或代码。
    >
-   > Focus hint: {focus_hint}
+   > 焦点提示：{focus_hint}
    >
-   > Research artifacts (gist-only under `Additional context` — do not fully read; a separate agent distills these): {research_artifact_files, or "none"}
+   > 研究产物（`Additional context`下的仅要点 - 未完全阅读；单独的代理提取这些）：{research_artifact_files，或“无”}
 
-2. **Learnings search** — when `<root>/solutions/` holds at least one markdown file, read `references/agents/learnings-researcher.md` and dispatch a generic subagent seeded with that local prompt plus a brief summary of the ideation focus. An empty or missing store has nothing to search, so skip it.
+2. **学习搜索** - 当 `<root>/solutions/` 包含至少一个 Markdown 文件时，读取 `references/agents/learnings-researcher.md` 并分派一个通用子代理，该子代理以本地提示以及构思焦点的简短摘要为种子。空的或丢失的商店没有什么可搜索的，所以跳过它。
 
-3. **Web research** (always-on; see "Web research" subsection below for skip-phrase and cache handling).
+3. **网络研究**（始终在线；有关跳过短语和缓存处理的信息，请参阅下面的“网络研究”小节）。
 
-4. **Issue intelligence** (conditional) — only when issue-tracker intent was detected in **Phase 0.2**. Unlike the other grounding agents this one is **not** fire-and-forget: it is an ordered two-call protocol with a question in the middle that only you can ask, because a subagent cannot block for user input.
+4. **问题情报**（有条件）——仅当在 **阶段 0.2** 检测到问题跟踪者意图时。与其他接地代理不同，这个代理不是“即发即忘”：它是一种有序的两次调用协议，中间有一个只有您可以问的问题，因为子代理无法阻止用户输入。
 
-   **Read `references/issue-intelligence.md` before dispatching anything here.** It defines the payload of each call, the persistence contract, the scoping question's option construction and platform option-cap handling, and the exact fallback markers. The four steps below name the *sequence*, not the calls — do not compose either dispatch from them.
+   **在此处分派任何内容之前，请先阅读`references/issue-intelligence.md`。**它定义了每个调用的有效负载、持久性契约、范围问题的选项构造和平台选项上限处理，以及确切的后备标记。下面的四个步骤命名*序列*，而不是调用 - 不要从它们组成任何调度。
 
-   Then run these four steps in order:
+   然后按顺序运行这四个步骤：
 
-   **a. Scan** — dispatch the analyst in SCAN mode. It probes tracker access and persists what it fetched; it does **not** cluster.
-   **b. Fall back or scope** — no reachable tracker, or fewer than 5 eligible issues, ends the lens here: log the reason, continue with the remaining grounding, and fall back to the six default frames — keeping the scaling this run already resolved and recomputing only what the frame count itself determines. Otherwise resolve the scope yourself, asking **at most one** blocking question and only on irreducible ambiguity.
+   **一个。扫描** — 在扫描模式下派遣分析人员。它探测跟踪器访问并保留其获取的内容；它**不**集群。 **b。回退或范围** — 没有可到达的跟踪器，或少于 5 个符合条件的问题，镜头在此结束：记录原因，继续剩余的接地，然后回退到六个默认帧 — 保持本次运行已经解决的缩放比例，并仅重新计算帧计数本身确定的内容。否则，请自行解决范围，仅在不可约的歧义上询问**至多一个**阻塞问题。
 
-   **c. Cluster** — dispatch the analyst again in CLUSTER mode with the resolved scope, reusing the scan's persisted set rather than re-fetching.
-   **d. Await** — consolidation and Phase 1.5 depend on the returned themes. Do not close the consolidated grounding summary before the cluster result lands.
+   **c。集群** — 在集群模式下再次分派分析人员并解析范围，重用扫描的持久集而不是重新获取。 **d。等待** — 整合和阶段 1.5 取决于返回的主题。在集群结果落地之前，请勿关闭综合接地摘要。
 
-**Elsewhere mode dispatch (skip the codebase scan; user-supplied context is the primary grounding):**
+**其他模式调度（跳过代码库扫描；用户提供的上下文是主要基础）：**
 
-1. **User-context synthesis** — dispatch a general-purpose sub-agent (cheapest capable model) to read the user-supplied context from Phase 0.4 intake plus any rich-prompt material — **excluding any file the routing test above classified as evidence**, which goes to a distiller instead and must not also reach synthesis — and return a structured grounding summary that mirrors the codebase-context shape (project shape → topic shape; notable patterns → stated constraints; pain points → user-named pain points; leverage points → opportunity hooks the context implies). This keeps Phase 2 sub-agents agnostic to grounding source.
+1. **用户上下文综合** - 调度一个通用子代理（最便宜的模型）来读取来自阶段 0.4 摄入的用户提供的上下文以及任何丰富的提示材料 - **排除上述路由测试分类为证据的任何文件**，该文件会转至蒸馏器，并且不能同时达到合成 - 并返回反映代码库上下文形状的结构化基础摘要（项目形状 → 主题形状；显着模式 → 规定的约束；痛点 → 用户命名的痛点点；杠杆点→机会挂钩上下文暗示）。这使得第 2 阶段子代理与接地源无关。
 
-2. **Learnings search** *(elsewhere-software only; skipped by default in elsewhere-non-software)* — read `references/agents/learnings-researcher.md` and dispatch a generic subagent seeded with that local prompt plus the topic summary in case relevant institutional knowledge exists (skill-design patterns, prior solutions in similar shape). As in repo mode, skip it when `<root>/solutions/` holds no markdown file. Skip for elsewhere-non-software: the CWD's `<root>/solutions/` is unlikely to be topically relevant for non-digital topics, and running it risks polluting generation with unrelated engineering patterns.
+2. **学习搜索** *（仅限其他软件；默认在其他非软件中跳过）* — 读取 `references/agents/learnings-researcher.md` 并调度一个通用子代理，该子代理以本地提示加上主题摘要作为种子，以防相关机构知识存在（技能设计模式、类似形状的先前解决方案）。和repo模式一样，当`<root>/solutions/`没有markdown文件时跳过它。跳过其他非软件：CWD 的 `<root>/solutions/` 不太可能与非数字主题相关，并且运行它可能会因不相关的工程模式而污染发电。
 
-3. **Web research** — same as repo mode (see subsection below).
+3. **网络研究** - 与回购模式相同（参见下面小节）。
 
-Issue intelligence does not apply in elsewhere mode. Slack research is opt-in for both modes (see "Slack context" below).
+问题情报不适用于其他模式。 Slack 研究可以选择加入这两种模式（请参阅下面的“Slack 上下文”）。
 
-#### Web Research
+#### 网络研究
 
-Always-on for both modes. Skip when the user said "no external research", "skip web research", or equivalent in their prompt or earlier answers; in that case, omit the `web-researcher` local prompt from dispatch and note the skip in the consolidated grounding summary.
+两种模式均始终开启。当用户在提示或之前的回答中说“不进行外部研究”、“跳过网络研究”或类似内容时跳过；在这种情况下，请忽略调度中的 `web-researcher` 本地提示，并注意综合接地摘要中的跳过。
 
-Reuse prior web research within a session via a sidecar cache — see `references/web-research-cache.md` for the cache file shape, reuse check, append behavior, and platform-degradation rules. Read it the first time the `web-researcher` local prompt would be dispatched in this run (and on every subsequent dispatch where the cache might apply).
+通过 sidecar 缓存在会话中重用先前的 Web 研究 - 有关缓存文件形状、重用检查、附加行为和平台降级规则，请参阅 `references/web-research-cache.md`。第一次在本次运行中调度 `web-researcher` 本地提示时阅读它（以及在可能应用缓存的每个后续调度中）。
 
-When dispatching web research, read `references/agents/web-researcher.md` and seed a generic subagent with that prompt. Pass the focus hint, a brief planning context summary (one or two sentences), and the mode. Do not pass codebase content — the prompt operates externally. Use the platform's mid-tier model when a known override exists; otherwise omit the override and inherit.
+发送网络研究时，请阅读 `references/agents/web-researcher.md` 并根据该提示播种通用子代理。传递焦点提示、简短的计划上下文摘要（一两句话）和模式。不要传递代码库内容——提示在外部运行。当存在已知覆盖时，使用平台的中间层模型；否则忽略覆盖并继承。
 
-#### User-Supplied Research Artifacts
+#### 用户提供的研究产物
 
-Applies in all modes whenever the prompt or intake names a file of *gathered evidence* — a social-listening or search-research report, survey export, analytics dump, interview notes — at any path, inside or outside the repo.
+每当提示或摄入在存储库内部或外部的任何路径上命名一个“收集的证据”文件（社交聆听或搜索研究报告、调查导出、分析转储、采访记录）时，都适用于所有模式。
 
-**Routing test (directive vs evidence) — apply it before dispatching the Phase 1 quick context scan.** A named file is *directive* when ideas that ignore or contradict it would be wrong (a spec, a TODO list, feedback the user wants addressed); in repo mode that is the User-named references path, and it rides in `<constraints>` at dispatch. A file is *evidence* when it is signal about the world that ideas may draw on and cite. Research artifacts are evidence: they enter the evidence layer, never `<constraints>` — engagement-ranked chatter must inform ideas, not veto them. Each file takes exactly one path, never both, and the test has to run *before* the scan so the scan knows which files to leave alone.
+**路由测试（指令与证据）——在分派第一阶段快速上下文扫描之前应用它。**当忽略或与之矛盾的想法是错误的（规范、TODO 列表、用户想要解决的反馈）时，命名文件就是“指令”；在 repo 模式下，这是用户命名的引用路径，并且在调度时位于 `<constraints>` 中。当文件是关于世界的信号并且可以借鉴和引用想法时，它就是“证据”。研究成果就是证据：它们进入证据层，而不是`<constraints>`——参与度排名的聊天必须传达想法，而不是否决它们。每个文件只采用一个路径，而不是同时采用两个路径，并且测试必须在扫描“之前”运行，以便扫描知道要保留哪些文件。
 
-When the test routes a file here, the reference decides by size whether it needs a distiller at all: a small artifact folds into the grounding summary inline and dispatches nothing. **When it does route to a distiller, await that result** before closing the consolidated grounding summary. Either way its content lands under `User-supplied research`, kept distinct from web research so provenance stays visible.
+当测试在此处路由文件时，参考会根据大小决定是否需要蒸馏器：一个小产物折叠到内联的基础摘要中，并且不发送任何内容。 **当它确实路由到蒸馏器时，请等待结果**，然后再关闭综合接地摘要。无论哪种方式，其内容都位于 `User-supplied research` 之下，与网络研究保持不同，因此出处保持可见。
 
-Read `references/user-research-artifacts.md` and follow it for the distiller dispatch prompt, the small-vs-large handling, the scan-coordination line, and why this enriches rather than replaces web research. Do not compose the dispatch from this summary.
+阅读 `references/user-research-artifacts.md` 并按照它了解蒸馏器调度提示、小与大处理、扫描协调线，以及为什么这丰富而不是取代网络研究。不要根据此摘要撰写调度。
 
-#### Consolidated Grounding Summary
+#### 综合接地总结
 
-Consolidate all dispatched results into a short grounding summary using these sections (omit any section that produced nothing). Phase 1.5 will append a `Topic axes` section to this same summary after consolidation completes:
+使用这些部分将所有发送的结果合并为一个简短的基础摘要（忽略任何没有产生任何结果的部分）。合并完成后，第 1.5 阶段将在同一摘要中附加 `Topic axes` 部分：
 
-- **Codebase context** *(repo mode)* — project shape, notable patterns, pain points, leverage points OR **Topic context** *(elsewhere mode)* — topic shape, stated constraints, user-named pain points, opportunity hooks
-- **User-named references** *(repo mode)* — full content from directive files the user named. Phase 2 treats these as constraint
-- **Additional context** *(repo mode)* — one-line gists of root-level markdown discovered but not named. Phase 2 treats these as background, not direction
-- **Past learnings** — relevant institutional knowledge from `<root>/solutions/`
-- **Issue intelligence** *(when present)* — theme summaries plus the cluster call's coverage accounting (see `references/issue-intelligence.md` §d)
-- **External context** *(when web research ran)* — prior art, adjacent solutions, market signals, cross-domain analogies. Note "(reused from earlier dispatch)" when the web-research cache supplied the result instead of a fresh dispatch
-- **User-supplied research** *(when present)* — dossier gists with paths, or inline content for small artifacts; kept distinct from External context so source provenance stays visible
-- **Slack context** *(when present)* — organizational context
+- **代码库上下文** *（回购模式）* — 项目形状、显着模式、痛点、杠杆点或 **主题上下文** *（其他模式）* — 主题形状、规定的约束、用户命名的痛点、机会挂钩
+- **用户命名的引用** *（repo 模式）* — 用户命名的指令文件的完整内容。第 2 阶段将这些视为约束
+- **附加上下文** *（repo 模式）* - 发现但未命名的根级Markdown的一行要点。第二阶段将这些视为背景，而不是方向
+- **过去的学习**——来自`<root>/solutions/`的相关机构知识
+- **问题情报** *（如果存在）* - 主题摘要加上集群调用的覆盖范围统计（请参阅`references/issue-intelligence.md`§d）
+- **外部背景** *（当进行网络研究时）* - 现有技术、相邻解决方案、市场信号、跨领域类比。当网络研究缓存提供结果而不是新的调度时，请注意“（从早期调度中重用）”
+- **用户提供的研究** *（如果存在）* - 带有路径的档案要点，或小产物的内联内容；与外部环境保持不同，因此源出处保持可见
+- **松弛环境** *（如果存在）* — 组织环境
 
-**Failure handling.** Grounding subagent failures follow "warn and proceed" — never block on grounding failure. If the web-research local prompt fails (network, tool unavailable), log a warning ("External research unavailable: {reason}. Proceeding with internal grounding only.") and continue. If elsewhere-mode intake produced no usable context, note in the grounding summary that context is thin so Phase 2 subagents can compensate with broader generation.
+**故障处理。** 接地子代理故障遵循“警告并继续” - 永远不会因接地故障而阻塞。如果网络研究本地提示失败（网络、工具不可用），则记录警告（“外部研究不可用：{reason}。仅继续内部接地。”）并继续。如果其他模式的摄入没有产生可用的上下文，请在基础摘要中注意，上下文很薄弱，因此第 2 阶段子代理可以通过更广泛的生成进行补偿。
 
-**Slack context** (opt-in, both modes) — never auto-dispatch. When the user asks for Slack context and Slack tools are available, read `references/agents/slack-researcher.md` and dispatch a generic subagent seeded with that local prompt plus the focus hint in parallel with other Phase 1 subagents. When tools are present but the user did not ask, mention availability in the grounding summary so they can opt in. When the user asked but no Slack tools are reachable, show the user the install hint instead.
+**Slack context**（选择加入，两种模式）——从不自动调度。当用户请求 Slack 上下文并且 Slack 工具可用时，读取 `references/agents/slack-researcher.md` 并调度一个通用子代理，该子代理以该本地提示加上焦点提示与其他阶段 1 子代理并行。当工具存在但用户没有询问时，请在基础摘要中提及可用性，以便他们可以选择使用。当用户询问但没有可用的 Slack 工具时，请向用户显示安装提示。
 
-## Model tiers (applies to every dispatch in this skill)
+## 模型层（适用于该技能中的每个调度）
 
-Sub-agent dispatch is tiered by task shape, never hardcoded to a model name:
+子代理调度按任务形状分层，从不硬编码为模型名称：
 
-- **Extraction tier** — retrieval and quoting work, such as the quick context scan and research distillers. Use the platform's cheapest capable model when the harness exposes a known override; escalate to the generation tier when the repo is large or the stack obscure.
-- **Generation tier** — evidence-driven ideation frames and basis verification. Use the platform's mid-tier model when the harness exposes a known override.
-- **Ceiling tier** — ceiling ideation frames, cross-cutting synthesis, and final arbitration. Inherit the orchestrator's model by omitting the model parameter.
+- **提取层** — 检索和引用工作，例如快速上下文扫描和研究蒸馏器。当宿主暴露已知的覆盖时，使用平台最便宜的型号；当存储库很大或堆栈模糊时，升级到生成层。
+- **一代层**——证据驱动的构思框架和基础验证。当宿主暴露已知覆盖时，使用平台的中间层模型。
+- **天花板层**——天花板构思框架、横切综合和最终仲裁。通过省略模型参数来继承协调器的模型。
 
-If model names are unknown, omit the override and inherit rather than guessing.
+如果模型名称未知，请忽略覆盖并继承而不是猜测。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-**Degradation rule.** When the platform's subagent primitive does not support per-agent model selection, dispatch everything on the inherited model and keep the read budgets and dossier caps — cost control then comes from structure, not tiering.
+**降级规则。** 当平台的子代理原语不支持每个代理模型选择时，在继承模型上分派所有内容并保留读取预算和档案上限 - 成本控制来自结构，而不是分层。
 
-For every native dispatch in this skill, classify rejection by whether an agent launched: correct a pre-launch argument rejection once, leave capacity-limited work queued, and send any other failure to that phase's stated degraded path.
+对于此技能中的每个本机调度，根据代理是否启动对拒绝进行分类：更正一次启动前参数拒绝，将容量有限的工作留在队列中，并将任何其他故障发送到该阶段的规定降级路径。
 
-Two overrides raise the whole ideation fleet to the ceiling tier: surprise-me mode and the `go deep` depth override (Phase 0.5).
+两个覆盖将整个创意团队提升到最高层：惊喜模式和 `go deep` 深度覆盖（阶段 0.5）。
 
-## Asking inside this phase
+## 在这个阶段内询问
 
-The issue-scoping question below is the only blocking question this phase may ask. Ask it through the host's blocking question tool, with the fallback SKILL.md Boundary 4 states.
+下面的问题范围问题是此阶段可能提出的唯一阻碍性问题。通过主持人的屏蔽提问工具提问，后备SKILL.md边界4状态。

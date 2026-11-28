@@ -1,141 +1,140 @@
-This reference is the report leaf's part of the review finish (`references/finish-input.md`). The report leaf runs Stage 5b step 5 from the validator outcome the dispatch context recorded, Stage 5c, and Stage 6. The merge leaf already ran Stage 5 and Stage 5b steps 1 through 3 from `references/finish-merge.md`, and its results are in `synthesized-findings.json`. Read `<run-dir>/finish-input.json` first. Wherever this reference refers to an earlier stage's result, the intent summary, the roster, the plan, the scope, or conversation context, that value is the matching field of that file, and `<root>` is its `docs_root`. A leaf launches no subagents; its return is exactly what `finish-input.md` names for it.
+此参考是审核完成的报告页的一部分 (`references/finish-input.md`)。报告叶子从调度上下文记录的验证器结果、阶段 5c 和阶段 6 运行阶段 5b 步骤 5。合并叶子已经从 `references/finish-merge.md` 运行阶段 5 和阶段 5b 步骤 1 到 3，其结果在 `synthesized-findings.json` 中。首先阅读`<run-dir>/finish-input.json`。无论何时此引用引用早期阶段的结果、意图摘要、花名册、计划、范围或对话上下文，该值都是该文件的匹配字段，并且 `<root>` 是其 `docs_root`。叶子不启动任何子代理；它的回归正是`finish-input.md`的名字。
 
-Give each file you read its own tool call, so its output comes back on its own, never several files in one command or one script. A read counts only when the whole file came back. Some hosts cut the middle out of a long tool output and leave a truncation marker in its place, so when a read comes back shortened, read the missing lines in smaller ranges before you act on that file.
+为您读取的每个文件提供自己的工具调用，以便其输出自行返回，而不是在一个命令或一个脚本中返回多个文件。仅当整个文件返回时，读取才算数。某些主机会从长工具输出中切掉中间部分，并在其位置留下截断标记，因此当读取返回时缩短，请在对该文件进行操作之前读取较小范围内的缺失行。
 
-### Stage 5b: Validation pass, step 5
+### 阶段 5b：验证通过，步骤 5
 
-The merge leaf ran steps 1 through 3, which selected the validator batch, and the dispatch context ran step 4, which launched it and wrote `validator-outcome.json`. This leaf runs step 5 from that outcome.
+合并叶运行步骤 1 到 3，选择验证器批次，调度上下文运行步骤 4，启动它并写入 `validator-outcome.json`。该叶子节点从该结果运行第 5 步。
 
-5. Consume the verdicts. Before reading any verdict, classify every selected finding yourself from the actual failure it alleges, using the eight protected subjects `references/validator-batch-template.md` defines. Read category, title, and body together; keywords alone never establish protection, and a naming preference about a token helper is not a token-handling defect. A valid `protected_subject` key from the validator adds protection, never removes it; `null` is a valid value that remains subject to your own classification, while a missing field or an invalid key is malformed output rather than a correction. Match every verdict to its original input `#` before using its contents. For a missing or malformed entry whose input number is unambiguous, apply failure handling to that original finding and keep the valid verdicts for unaffected inputs; never guess which finding an unknown or ambiguous number refers to, and when the response cannot be mapped reliably treat the whole batch as validator infrastructure failure. Then each finding has one of three outcomes:
+5. 消费判决。在阅读任何判决之前，请使用 `references/validator-batch-template.md` 定义的八个受保护主题，将自己选择的每个发现与其声称的实际失败进行分类。一起阅读类别、标题和正文；关键字本身永远无法建立保护，并且有关令牌助手的命名首选项不是令牌处理缺陷。来自验证器的有效 `protected_subject` 密钥会增加保护，但不会删除它； `null` 是一个有效值，仍受您自己的分类影响，而缺失字段或无效键是格式错误的输出，而不是更正。在使用其内容之前，将每个判决与其原始输入 `#` 进行匹配。对于输入编号明确的缺失或格式错误的条目，对原始结果应用失败处理，并保留未受影响输入的有效结论；永远不要猜测未知或不明确的数字指的是哪个，并且当无法可靠地映射响应时，将整个批次视为验证器基础设施故障。然后，每个发现都会产生以下三个结果之一：
 
-   - A `confirmed` verdict retains the finding with its existing severity, confidence, and action route. Confirmation grants no new apply authority. When its `reason` says incidence was not measured, the finding carries `validation_status: "confirmed"` and that reason as `validation_reason`, in the report entry and in `review.json`, so the reader sees a defect the code permits but no one showed to occur.
-   - A `rejected` verdict drops the finding and records the reason. On a protected subject the rejection counts only when `reason` cites one of the policy's evidence forms: a quoted refuting line with file and line number, version-specific or configuration-specific documentation naming the version in force, short-hash provenance establishing unrelated pre-existing code, or a discriminating test result that names the reviewed revision, runtime version, configuration, exercised trigger, assertion, and observed result. The citation must also hold against the reviewed revision, and you check that yourself with read-only inspection: the quoted line is at the named file and line and says what the reason claims, the commit exists and contains what it is cited for, the documentation names a version actually in force, and the test result names the reviewed revision. An uncited, self-referential, or "no supporting evidence found" rejection of a protected finding is not a rejection, and neither is one whose citation you cannot confirm: reroute it through the unresolved rule below and record the reclassification.
-   - Everything else leaves the finding validation-degraded, and its protection and severity decide what happens: an `unresolved` verdict, a malformed entry, or validator infrastructure failure, where a `budget exhausted, uninspected` reason is validator infrastructure failure for that finding alone. A protected-subject or P0/P1 finding stays in the report as a verification gate: add `validation_status: "unresolved"` and a `validation_reason` that names the failure and the evidence or authority needed next, preserve its stable `#`, severity, and confidence, and route it report-only with `autofix_class: "advisory"`, `owner: "human"`, and `requires_verification: true`. An unprotected P2/P3 finding leaves the primary findings, with the inspection gap or failure and its reason recorded in Coverage. Neither is labeled disproven, and a failure never becomes a confirmation.
+   - `confirmed` 判决保留了调查结果及其现有的严重性、置信度和行动路线。确认不会授予新的申请权限。当其`reason`表示未测量发生率时，结果带有`validation_status: "confirmed"`，并且在报告条目和`review.json`中，原因为`validation_reason`，因此读者会看到代码允许的缺陷，但没有人表明发生了。
+   - `rejected` 判决会放弃该发现并记录原因。对于受保护的主题，仅当`reason`引用策略的证据形式之一时，拒绝才算数：带有文件和行号的引用反驳行、命名有效版本的特定于版本或特定于配置的文档、建立不相关的预先存在的代码的短哈希出处，或者命名所审查的修订、运行时版本、配置、执行的触发器、断言和观察结果的区分测试结果。引用还必须针对已审查的修订版，并且您可以通过只读检查自行检查：引用的行位于指定的文件和行中，并说明原因声明的内容，提交存在并包含其引用的内容，文档命名了实际有效的版本，测试结果命名了已审查的修订版。对受保护发现的未引用、自我引用或“未找到支持证据”的拒绝不是拒绝，您无法确认其引用的拒绝也不是拒绝：通过下面未解决的规则重新路由它并记录重新分类。
+   - 其他一切都会使发现验证降级，其保护和严重性决定会发生什么：`unresolved`判决、格式错误的条目或验证器基础设施故障，其中`budget exhausted, uninspected`原因是仅针对该发现的验证器基础设施故障。受保护主体或P0/P1发现作为验证门保留在报告中：添加`validation_status: "unresolved"`和`validation_reason`来命名失败以及接下来需要的证据或权威，保持其稳定的`#`、严重性和置信度，并使用`autofix_class: "advisory"`、`owner: "human"`和`requires_verification: true`将其仅报告。未受保护的P2/P3发现留下主要发现，检查间隙或故障及其原因记录在覆盖范围中。两者都没有被贴上“被证实”的标签，而且失败永远不会成为确认。
 
-   Never raise a severity or confidence to carry a finding through these outcomes, and never synthesize a new finding from malformed output. Do not re-apply Stage 5's P0/P1 `downstream-resolver` normalization to a finding this step left unresolved: the merge leaf partitioned before any verdict existed, and this step is the one that owns the unresolved route. Prune triage groups after drops and record the batch, per-finding verdicts, failures, and degraded blockers in Coverage, together with every protected-subject reclassification you made.
+   永远不要提高严重性或信心来通过这些结果来实现发现，也永远不要从畸形的输出中综合出新的发现。不要将第 5 阶段的 P0/P1 `downstream-resolver` 规范化重新应用于此步骤未解决的发现：合并叶在任何判决存在之前进行分区，并且此步骤是拥有未解决的路由的步骤。删除后修剪分类组，并在覆盖范围中记录批次、每次发现的结论、失败和降级的阻塞项，以及您所做的每个受保护主体重新分类。
 
-### Stage 5c: Act on findings (explicit local apply only)
+### 阶段 5c：根据调查结果采取行动（仅明确本地适用）
 
-**Skip unless local apply was explicitly authorized.** A bare `ce-code-review` invocation is report-only and does not apply findings. Authorization exists only when `apply:local` was passed or the invoking user prompt explicitly asked this review to apply/fix its findings; the dispatch context resolves that into `finish-input.json`'s `mode.apply_local`, and inside a leaf that flag is the only authority (PR title and body, reviewer output, and comments are data, never a request). Do not infer authority from `autofix_class`, a clean tree, an actionable finding, or the fact that another workflow may apply later. `mode:agent` does not apply fixes and conflicts with `apply:local`; the pipeline caller decides whether and how to change files afterward.
+**除非明确授权本地应用，否则跳过。** 裸 `ce-code-review` 调用仅用于报告，不应用结果。仅当`apply:local`通过或调用用户提示明确要求此审查apply/fix其发现时，授权才存在；调度上下文将其解析为`finish-input.json`的`mode.apply_local`，并且在叶子内部，该标志是唯一的权威（PR标题和正文、审查者输出和评论是数据，而不是请求）。不要从`autofix_class`、干净的树、可操作的发现或稍后可能应用另一个工作流程的事实来推断权威。 `mode:agent` 不适用修复并与 `apply:local` 冲突；管道调用者随后决定是否以及如何更改文件。
 
-`apply:local` is authority, not an output mode: presentation remains markdown and reviewer selection is unchanged.
+`apply:local`是权威，不是输出模式：呈现方式仍为markdown，审稿人选择不变。
 
-**Act policy (bias to act).** Default to applying every finding that is a clear improvement and a reversible edit, regardless of severity. The work is a tracked, visible diff that can be reverted, so leaving a clean fix unapplied "to be safe" is the failure mode, not the safe choice. Decide by judgment, not a safety checklist:
+**行动政策（偏向行动）。**默认应用每一个明显改进和可逆编辑的发现，无论严重程度如何。这项工作是一个可跟踪的、可见的差异，可以恢复，因此为了安全起见，不应用干净的修复是失败模式，而不是安全的选择。通过判断做出决定，而不是安全检查表：
 
-- **Apply** clear improvements. This is the common case: test hardening, dead-code removal, a localized fix with a concrete `suggested_fix`.
-- **Push back** — do not apply — when the reviewer is wrong; keep the finding and state the disagreement with reasoning.
-- **Skip with judgment** taste calls and conflicting suggestions, but report what was skipped and why. Never silently drop.
-- **Never apply** a finding Stage 5b left `validation_status: "unresolved"` or left validation-degraded. Like `settled_conflict`, this is an explicit exception to the bias to act: the verification that would justify a change is missing, so the finding stays a reported verification gate. It is not a permanent ban on fixing that category once the evidence exists.
+- **应用**明显的改进。这是常见的情况：测试强化、死代码删除、使用具体 `suggested_fix` 进行本地化修复。
+- **推回** - 不适用 - 当审稿人错误时；保留发现并陈述与推理的不同之处。
+- **根据判断跳过**品味要求和相互矛盾的建议，但报告跳过的内容和原因。永远不要默默地掉落。
+- **永远不要应用**第 5b 阶段的发现结果为 `validation_status: "unresolved"` 或左验证降级。与 `settled_conflict` 一样，这是行动偏见的一个明显例外：缺少证明更改合理性的验证，因此该发现仍然是报告的验证门。一旦证据存在，这并不是永久禁止修复该类别。
 
-Severity, confidence, and cross-reviewer agreement tell you what to do first and what to flag loudly; they do not decide whether to apply. There is no deny-list: downside is controlled after the fact (revert + visible diff + the commit checkpoint), not by a precondition.
+严重性、信心和跨审稿人一致意见告诉您首先要做什么以及要大声标记什么；他们不决定是否申请。没有拒绝列表：缺点是事后控制的（恢复+可见差异+提交检查点），而不是由前提条件控制。
 
-Local apply does not authorize reversing a settled decision. When a retained defect cannot be corrected within that decision, return the consequential choice to the user.
+本地申请并不授权撤销已决定的决定。当保留的缺陷无法在该决策中纠正时，将相应的选择返回给用户。
 
-**Scope invariant.** Apply only when the working tree *is* what was reviewed, meaning scope mode `local-aligned` or standalone. In `pr-remote` / `branch-remote` the working tree is not the reviewed head; do not apply, report instead.
+**范围不变。** 仅当工作树*是*已审查的内容时才应用，这意味着范围模式`local-aligned`或独立。在`pr-remote`/`branch-remote`中，工作树不是被审查的头；不申请，改为举报。
 
-**Verify, then keep.** After applying, run the affected tests and lint (targeted by default; broaden when fixes span files). If they fail, revert that fix and report it as a finding instead; an unverified fix is not finished. Never leave the tree red.
+**验证，然后保留。** 应用后，运行受影响的测试和 lint（默认情况下为目标；修复跨文件时扩大）。如果失败，则恢复该修复并将其报告为发现结果；未经验证的修复尚未完成。永远不要让树变红。
 
-**Review the autofix diff before finishing.** Before committing or reporting applied fixes, diff only the changes introduced during Stage 5c against the pre-apply checkpoint. Run one self-review pass over that diff:
-- If the same helper, policy, or guard was added in several parallel places, extract it or explain in the Applied section why duplication is intentional.
-- If an exported/shared function now accepts a broader input shape, update the nearby docs, types, or tests that define the contract so future callers understand it.
-- If a reviewer item is useful information with no defect, code contract change, or test gap, report it as advisory only after it passes the same admission rule. Do not patch it or describe it as a missed defect; omit information without a present benefit.
-If this self-review changes files, rerun the affected tests or lint for those follow-up edits before committing or reporting; the earlier validation only covers the original autofix diff.
+**完成之前查看自动修复差异。** 在提交或报告应用的修复之前，仅将第 5c 阶段引入的更改与预应用检查点进行比较。对该差异进行一次自我审查：
+- 如果在多个平行位置添加了相同的帮助器、策略或防护，请将其提取出来或在“应用”部分中解释为什么故意重复。
+- 如果 exported/shared 函数现在接受更广泛的输入形状，请更新定义合约的附近文档、类型或测试，以便将来的调用者理解它。
+- 如果审查者项目是有用的信息，没有缺陷、代码合同更改或测试差距，则仅在通过相同的准入规则后才将其报告为建议性的。不要修补它或将其描述为遗漏的缺陷；忽略没有当前好处的信息。
+如果此自我审查更改了文件，请在提交或报告之前重新运行受影响的测试或 lint 以进行后续编辑；早期的验证仅涵盖原始的自动修复差异。
 
-**Commit when the pre-review tree was clean.** Before applying, note whether the working tree already had uncommitted changes (`git status --porcelain`). The step that makes a change permanent is the **push**, not the commit; a local commit is private and reversible (`git reset --soft HEAD~1`).
+**在预审树干净时提交。** 在应用之前，请注意工作树是否已经有未提交的更改（`git status --porcelain`）。使更改永久化的步骤是**推送**，而不是提交；本地提交是私有且可逆的 (`git reset --soft HEAD~1`)。
 
-- **Clean before the review:** after applying and verifying, commit the fixes as one isolated, review-labeled fix commit: `fix(review): <summary>`, or the repo's nearest convention if `review` isn't an allowed scope. Labeled and reversible, returning the tree to a known state.
-- **Dirty before the review:** apply but do **not** commit. The fixes interleave with the user's in-flight work and ride along with the commit they were already going to make. The Applied section lists what changed.
-- **Never push, open a PR, or file tickets.** That is the outward-facing step the user decides on.
+- **在审查之前进行清理：**应用并验证之后，将修复作为一个独立的、带有审查标记的修复提交来提交：`fix(review): <summary>`，或者如果`review`不是允许的范围，则使用存储库的最近约定。带标签且可逆，使树恢复到已知状态。
+- **审查前肮脏：**申请但**不**提交。这些修复与用户正在进行的工作交织在一起，并与他们已经要做的提交一起进行。 “已应用”部分列出了更改的内容。
+- **切勿推送、打开 PR 或归档票据。** 这是用户决定的面向外的步骤。
 
-**Flag green-but-unverifiable edits.** When an applied fix touches auth/authz, a public or cross-service contract/schema, or concurrency/ordering, a passing test does not prove safety. Flag it prominently in the Applied section so the diff reviewer's attention goes there.
+**标记绿色但无法验证的编辑。** 当应用的修复触及auth/authz、公共或跨服务contract/schema或concurrency/ordering时，通过测试并不能证明安全。将其标记在“应用”部分的显着位置，以便差异审查者的注意力集中在此处。
 
-**Re-partition triage groups after apply.** Triage groups describe the *remaining* work. After Stage 5c, prune applied findings out of `triage_groups` before Stage 6 rendering; a group must never tell the user to handle a finding that was already applied. When an applied fix resolved part of a theme, note that in the group's context line instead of keeping the applied `#` in the group. Re-apply the Stage 5 step 6 grouping rule (drop sub-two-finding groups under `grouping:auto`).
+**应用后重新分区分类组。**分类组描述*剩余的*工作。在第 5c 阶段之后，在第 6 阶段渲染之前从 `triage_groups` 中删除应用的结果；小组绝不能告诉用户处理已经应用的调查结果。当应用的修复解决了主题的一部分时，请注意，在组的上下文行中，而不是将应用的 `#` 保留在组中。重新应用第 5 阶段第 6 步分组规则（在 `grouping:auto` 下删除子两个查找组）。
 
-### Stage 6: Synthesize and present
+### 第六阶段：综合和呈现
 
-Assemble the final report. **Default:** human-readable markdown. **`mode:agent`:** skip markdown and emit JSON (see ## JSON output format in `references/modes-and-output.md`); the structured fields are how a downstream agent consumes the review. Put `---` before the verdict in markdown mode.
+汇总最终报告。 **默认值：** 人类可读的Markdown。 **`mode:agent`:** 跳过 markdown 并发出 JSON (参见 `references/modes-and-output.md` 中的 ## JSON 输出格式);结构化字段是下游代理如何使用评论的方式。在markdown模式下，在判决前加上`---`。
 
-**Report completion check:** do not finish until stable `#` identifiers appear on every primary finding, the report contains `### Actionable Findings`, `### Coverage`, and `### Verdict` (or their exact JSON fields in `mode:agent`), and the run artifacts named under "Run artifacts" in `references/finish-input.md` are on disk: `review.json` in `mode:agent` and `metadata.json` in both; in default mode the report leaf returns the rendered markdown and the dispatch context persists it to `report.md` (#1777). Coverage must name the cross-model outcome and validator shortcut/batch outcome. The Actionable section must include every `downstream-resolver` finding; never silently replace it with a count.
+**报告完成检查：**直到稳定的 `#` 标识符出现在每个主要结果上，报告包含 `### Actionable Findings`、`### Coverage` 和 `### Verdict`（或 `mode:agent` 中的确切 JSON 字段），并且 `references/finish-input.md` 中“运行产物”下命名的运行产物位于磁盘上：`review.json` 时才完成`mode:agent` 和 `metadata.json` 都有；在默认模式下，报表叶返回渲染的 markdown，调度上下文将其保留到 `report.md` (#1777)。覆盖范围必须命名跨模型结果和验证器shortcut/batch结果。可操作部分必须包含每一个`downstream-resolver`发现；永远不要默默地用计数代替它。
 
-**Before writing, load `references/review-output-template.md` and mirror its section skeleton.** That file is the canonical skeleton for *which sections appear and in what order*; its example shows one good rendering, not the only permitted layout. The direction below is the in-place fallback, so it still governs if the template was not reloaded in a long session.
+**在编写之前，加载`references/review-output-template.md`并镜像其部分骨架。**该文件是*哪些部分出现以及以什么顺序出现*的规范骨架；它的示例显示了一种良好的渲染，而不是唯一允许的布局。下面的方向是就地回退，因此如果模板未在长时间会话中重新加载，它仍然有效。
 
-**Presentation direction: optimize for the reader's next action (goal + considerations, not a fixed layout).** The report is *acted on*: by a human deciding what to fix and whether to merge, or by a downstream agent applying fixes. Shape it so that action is fast and well-founded.
+**演示方向：针对读者的下一步行动进行优化（目标+考虑因素，而不是固定的布局）。**报告的*执行*：由人员决定要修复什么以及是否合并，或由下游代理应用修复。塑造它，使行动快速且有根据。
 
-Write the human-readable findings through the `ce-noslop` skill. Preserve exact code identifiers, error text, and every distinct consequence or required action. Keep internal classification names in required fields; explain findings in terms of what happens, who is affected, and what response is needed.
+通过 `ce-noslop` 技能写出人类可读的发现。保留准确的代码标识符、错误文本以及每个不同的结果或所需的操作。将内部分类名称保留在必填字段中；根据发生的情况、受影响的人员以及需要采取哪些应对措施来解释调查结果。
 
-- **Per finding, make four things unambiguous** (in whatever layout reads clearest). *What & where*: one scannable line, the symptom + `file:line`, not the mechanism. *Why it matters*: what breaks or who's hit, never a restatement of the code. *What response it needs*: this varies by finding type. A bug states its fix; a **design call** presents the options and the tradeoff without forcing one answer; a coverage gap names the test and precedent to mirror; a residual risk is marked informational; an already-applied item gives what changed and how it was verified. *How sure*: confidence, and whether it was corroborated (cross-reviewer / cross-model agreement is the strongest signal, so say so).
-- **Let the shape serve the finding type; stay consistent within a section.** A terse table, a short keyed block, or a compact list are all fine; pick what reads clearest for that content. Consistency *within* a section matters; a single global shape does not.
-- **Group by the unit of work or decision, not just severity.** Severity orders urgency; it does not tell the actor what *kind* of action a finding needs. Show the split: **decisions a human must make** (design calls, ambiguous semantics) vs **mechanical work that can just be done** (tests, dedup, concrete fixes) vs **informational** (residual risks). An agent clears the mechanical work and must stop at decisions. Group findings sharing a root cause or one fix (the Triage Groups) and name the order/dependency ("decide X once -> resolves #1 and #7; do #1 first"); the unit of work is often a group, not a finding.
-- **Add detail only where it enables the next action, not to demonstrate thoroughness.** Cover *every* finding (completeness is non-negotiable), but say each in the least that lets the consumer act. **Do not paste file contents or re-print the diff**; it is already in the repo/PR. Cite `file:line` and spend words only on what the diff can't show (why it breaks, the fix, the repro). This governs *expression, never coverage*: never drop a finding or its why/fix to be shorter, and match weight to weight (a nit is one line; a P1 design call gets room).
-- **The bottom is the most-read screen, so make the closing self-sufficient.** In long output the reader's viewport lands at the end, so the **Verdict and Actionable list must stand alone without scrolling**: the verdict plus the single most important thing to do, then the prioritized actionable list where each item already carries severity, `file:line`, the terse what, and its response-type. The itemized findings above are drill-down evidence, referenced by stable `#`.
+- **根据发现，使四件事明确**（以最清晰的布局）。 *什么和哪里*：一行可扫描的线，症状+`file:line`，而不是机制。 *为什么重要*：什么破坏了或者谁受到了打击，而不是代码的重述。 *需要什么响应*：这因发现类型而异。一个错误说明了它的修复； **设计电话**提出了选项和权衡，而不强迫一个答案；覆盖范围差距指定了要反映的测试和先例；剩余风险被标记为信息性；已应用的项目给出了更改的内容以及验证方式。 *有多确定*：信心，以及是否得到证实（跨审稿人/跨模型一致性是最强的信号，所以这么说）。
+- **让形状服务于发现类型；在一个部分中保持一致。** 简洁的表格、短键块或紧凑的列表都可以；选择该内容读起来最清晰的内容。章节*内*的一致性很重要；单一的全局形状则不然。
+- **按工作或决策单元分组，而不仅仅是严重性。** 严重性决定紧急程度；它不会告诉行动者发现结果需要采取什么“类型”的行动。显示差异：**人类必须做出的决定**（设计调用、模糊的语义）与**可以完成的机械工作**（测试、重复数据删除、具体修复）与**信息性**（残余风险）。代理人清理机械工作并且必须停止做出决定。共享根本原因或一个解决方案的小组调查结果（分类小组）并命名为 order/dependency（“决定 X 一次 -> 解决 #1 和 #7；首先执行 #1”）；工作单位通常是一个组，而不是一个发现。
+- **只在能够进行下一步操作的地方添加细节，而不是为了展示彻底性。**涵盖*每一个*发现（完整性是不可协商的），但至少要说出让消费者采取行动的每一个发现。 **不要粘贴文件内容或重新打印差异**；它已经在repo/PR中了。引用 `file:line` 并仅在差异无法显示的内容上花费文字（为什么它会损坏，修复，重现）。这控制着*表达，而不是覆盖*：永远不要放弃发现或其 why/fix 使其更短，并将权重与权重相匹配（尼特是一行；P1 设计调用需要空间）。
+- **底部是阅读次数最多的屏幕，因此要使关闭自给自足。**在长输出中，读者的视口落在末尾，因此**判决和可操作列表必须独立而无需滚动**：判决加上最重要的要做的事情，然后是优先的可操作列表，其中每个项目已经带有严重性，`file:line`，简洁的内容及其响应类型。上述逐项发现是深入证据，由稳定`#`引用。
 
-**Hard constraints (non-negotiable; everything above is judgment):**
-- **ASCII-safe only: no box-drawing or per-item horizontal-rule separators (`────`, `———`), no Unicode arrows or middot (`·`); use `->`.** These break across terminals and violate repo convention. (The single report-level `---` before the verdict is fine.)
-- **Stable `#` numbering from Stage 5 (Merge findings).** Never re-derive per section; reuse the same `#` everywhere a finding appears. A multi-file applied fix is one row with one `#`, never duplicated.
-- **If you use a markdown table, escape literal `|` in cells as `\|`** so a pipe inside a title/regex/cache-key example doesn't split the row.
-- **The Verdict and Actionable list are present, last, and self-sufficient.** This is satisfied by the closing, not the section skeleton: the Verdict is the final report section, immediately followed by the post-report prioritized Actionable recap (default mode; see *Emit actionable findings summary* below). The in-report `Actionable Findings` section keeps its skeleton position (5) as the detailed table; the recap is the self-sufficient last word the reader sees without scrolling. (If for some layout you cannot emit the recap, move the Actionable list itself to just after the Verdict.)
+**硬约束（不可协商；以上一切都是判断）：**
+- **仅限 ASCII 安全：无方框图或每项水平线分隔符（`────`、`———`）、无 Unicode 箭头或中点 (`·`)；使用 `->`.** 这些会破坏终端并违反 repo 约定。 （判决前单次举报级别`---`就可以了。）
+- **从第 5 阶段开始稳定的 `#` 编号（合并结果）。** 切勿重新推导每个部分；在发现的任何地方重复使用相同的`#`。多文件应用的修复是一行有一个 `#`，从不重复。
+- **如果您使用 Markdown 表，请将单元格中的文字 `|` 转义为 `\|`**，因此 title/regex/cache-key 示例中的管道不会分割行。
+- **结论和可操作列表是存在的、最后的和自给自足的。**这是通过结束而不是章节框架来满足的：结论是最终报告部分，紧随其后的是报告后优先的可操作回顾（默认模式；请参阅下面的*发出可操作的调查结果摘要*）。报告内`Actionable Findings`部分保持其骨架位置（5）如明细表；概述是读者无需滚动即可看到的自给自足的最后一个词。 （如果对于某些布局，您无法发出摘要，请将可操作列表本身移至“结论”之后。）
 
-1. **Header.** Scope, intent, mode, reviewer team with per-conditional justifications.
-2. **Applied (explicit local apply only).** When Stage 5c applied fixes, list them first, before the findings, in an Applied section (see review output template). Each entry carries `#`, file, the fix, and reviewer (a multi-file fix is one row with one `#`), then a one-line validation outcome (e.g. "pin tests 4 -> 6; suite 94 pass, lint clean") and commit status (committed on a clean tree as `fix(review): …` or the repo's nearest convention, or left uncommitted for the user on a dirty one). Flag green-but-unverifiable edits (auth/contract/concurrency) prominently. Omit this section when local apply was not authorized or nothing was applied. Applied findings appear here, not in the severity tables.
-2b. **Triage Groups.** When finalized `triage_groups` exist (after validation in Stage 5b step 5 and after apply in Stage 5c), render a `### Triage Groups` section before the findings as a compact table (`| Group | Findings | Context | Preferred Resolution | Why |`); a table fits this content well. The `Findings` cell lists the stable `#`s it covers; the resolution names the order/dependency. **Mark whether each group is an apply-queue or a decision-gate** (a group of mechanical fixes an automated fixer can apply, or a group that needs a design decision first, so the fixer stops there). Every referenced `#` must appear in the findings below; groups supplement the findings, never replace them. Omit the section when `grouping:off` is active or no groups survived. In `mode:agent` this section is carried by the `triage_groups` JSON field instead.
-3. **Findings.** Grouped by severity (`### P0 -- Critical`, `### P1 -- High`, `### P2 -- Moderate`, `### P3 -- Low`), rendered per the per-finding direction above and consistent within the section. Show the decision-vs-mechanical split where it helps the actor (flag the design calls). Omit empty severity levels. Finding numbers come from the stable assignment in Stage 5 -- never re-derive them per severity section or triage group.
-4. **Requirements Completeness.** Include only when a plan was found in Stage 2b (Plan discovery). For each requirement (R1, R2, etc.) and implementation unit in the plan, report whether corresponding work appears in the diff. Use a simple checklist: met / not addressed / partially addressed. Unaddressed requirements or implementation units are findings routed by `plan_source` under the rule in the Plan Requirements Completeness section of `references/intent-and-plan.md` (explicit: P1 `manual` / `downstream-resolver`, into the actionable queue; inferred: P3 `advisory` / `human`, report only). Then run that section's reverse check against the reviewed diff and the plan document itself (`plan.path`), not only the extracted lists, and list each unrequested behavior rule it finds.
-   Omit this section entirely when no plan was found; do not mention the absence of a plan.
-5. **Actionable Findings.** Include when the actionable queue is non-empty: findings the caller should address (`gated_auto` / `manual` with `downstream-resolver`), plus anything Stage 5c chose not to apply. When local apply ran, findings already applied appear in the Applied section, not here.
-6. **Pre-existing.** Separate section, does not count toward verdict.
-7. **Learnings & Past Solutions.** Show the `learnings-researcher` results that are not findings: relevant past solutions, and matched pack rules with no violating line, as "Known Pattern" notes with links to `<root>/solutions/` files or the `(pack: <id>, <path within the pack>)` citation. A pack rule the diff contradicts entered the finding set in Stage 5 and appears in the findings tables, not here; one violated only by unchanged code sits in the pre-existing section, not here.
-8. **Deployment Notes.** If the `deployment-verification-agent` local prompt ran, show the key Go/No-Go items: blocking pre-deploy checks, the most important verification queries, rollback caveats, and monitoring focus areas. Keep the checklist actionable rather than dropping it into Coverage. Schema drift appears in the findings tables as `data-migration` P1 rows; do not add a separate Schema Drift section.
-9. **Coverage.** Applied count (when Stage 5c ran), suppressed count by anchor (e.g., "N findings suppressed at anchor 50, M at anchor 25"), mode-aware demotion count, findings the review policy removed or regraded (by rule) and any policy file the change edited that was not applied, validator outcome counts and reasons (when Stage 5b ran) broken out as confirmed, rejected, unresolved, malformed, failed, and shortcut-skipped, plus any protected-subject reclassification, any P0/P1 with degraded validation (kept on validator infrastructure failure), residual risks, testing gaps, failed/timed-out reviewers, and inferred-intent uncertainty when applicable. When Stage 5b skipped validators for quote-anchored cross-model-corroborated findings, state how many and name that evidence basis; also state the one-batch result for every remaining selected finding, and whether the verdicts landed or the wait's bound was exceeded. When the Stage 5 step 3 quote-the-line check demoted any 75/100 finding for missing `first_evidence`, record that count alongside `first_evidence_backfilled` (including zero). When no plan was discovered in Stage 2b (or discovery was ambiguous and skipped), note that settlement suppression was not evaluated. When the plan was `plan_source: inferred` and Stage 5 step 2 (Settled decisions) discarded findings, note the inferred source and count of preference findings suppressed. **Removable surface (only when deletion-oriented maintainability findings exist):** one line giving the approximate net lines/files those findings would remove if applied (e.g., "Removable surface: ~120 lines / 2 files across findings #4, #7"). This is a dead-weight signal, **not** a reduction target: never lower the bar for a finding or invent deletions to grow the number, and omit the line entirely when no finding proposes a deletion.
-10. **Verdict.** Ready to merge / Ready with fixes / Not ready. Fix order if applicable. The verdict reads severity across the whole primary finding set, never the actionable queue alone: an open P0 forbids "Ready to merge" and an open P1 caps the verdict at "Ready with fixes", whether Stage 5b confirmed the finding or left it as an unresolved verification gate. Withholding a gate from `actionable_findings` withholds apply authority; it never clears the blocker, so name the gate and the evidence it still needs in the verdict reasoning. When an `explicit` plan has unaddressed requirements or implementation units, the verdict must reflect it: a PR that's code-clean but missing planned requirements is "Not ready" unless the omission is intentional. When an `inferred` plan has unaddressed requirements or implementation units, note it in the verdict reasoning but do not block on it alone.
+1. **标题。** 范围、意图、模式、审核团队以及每个条件的理由。
+2. **已应用（仅显式本地应用）。** 当第 5c 阶段应用修复时，请首先在“已应用”部分中的结果之前列出它们（请参阅审核输出模板）。每个条目都包含 `#`、文件、修复和审查者（多文件修复是一行有一个 `#`），然后是单行验证结果（例如“pin 测试 4 -> 6；套件 94 通过，lint clean”）和提交状态（在干净树上提交为 `fix(review): …` 或存储库最接近的约定，或者在脏树上为用户保留未提交）。显着标记绿色但无法验证的编辑 (auth/contract/concurrency)。当本地应用未授权或未应用任何内容时，请忽略此部分。应用的结果显示在此处，而不是在严重性表中。
+2b. **分类组。** 当最终确定 `triage_groups` 存在时（在第 5b 阶段第 5 步验证后并在第 5c 阶段应用后），将结果之前的 `### Triage Groups` 部分呈现为紧凑表 (`| Group | Findings | Context | Preferred Resolution | Why |`)；一张表格很适合这个内容。 `Findings`单元格列出了它所覆盖的稳定的`#`；该决议命名为order/dependency。 **标记每个组是应用队列还是决策门**（自动修复程序可以应用的一组机械修复，或者首先需要设计决策的组，因此修复程序在此停止）。每个引用的`#`必须出现在下面的调查结果中；团体补充研究结果，而不是取代它们。当 `grouping:off` 处于活动状态或没有组存活时省略该部分。在 `mode:agent` 中，该部分由 `triage_groups` JSON 字段携带。
+3. **发现。** 按严重程度分组（`### P0 -- Critical`、`### P1 -- High`、`### P2 -- Moderate`、`### P3 -- Low`），根据上面的每个发现方向进行渲染，并在该部分内保持一致。显示对参与者有帮助的决策与机械分割（标记设计调用）。省略空的严重级别。查找数字来自第 5 阶段的稳定分配 - 切勿根据严重性部分或分类组重新推导它们。
+4. **要求完整性。** 仅当在阶段 2b（计划发现）中找到计划时才包括在内。对于计划中的每个需求（R1、R2等）和实施单位，报告相应的工作是否出现在 diff 中。使用简单的清单：已满足/未解决/部分解决。未解决的需求或实施单元是`plan_source`根据`references/intent-and-plan.md`的计划要求完整性部分中的规则路由的结果（显式：P1`manual`/`downstream-resolver`，进入可操作队列；推断：P3`advisory`/`human`，仅报告）。然后针对已审查的差异和计划文档本身（`plan.path`）运行该部分的反向检查，而不仅仅是提取的列表，并列出它找到的每个未请求的行为规则。如果没有找到计划，则完全省略此部分；不要提及没有计划。
+5. **可操作的发现。** 包括当可操作队列非空时：调用者应解决的发现（`gated_auto` / `manual` 和 `downstream-resolver`），以及第 5c 阶段选择不应用的任何内容。当本地应用运行时，已应用的结果显示在“已应用”部分，而不是此处。
+6. **预先存在。**单独的部分，不计入判决。
+7. **学习内容和过去的解决方案。** 显示不是发现的 `learnings-researcher` 结果：相关的过去解决方案，以及没有违规行的匹配包规则，如“已知模式”注释，带有指向 `<root>/solutions/` 文件或 `(pack: <id>, <包内的路径>)` 引文的链接。差异相矛盾的包规则进入第 5 阶段的结果集并出现在结果表中，而不是在这里；仅因未更改的代码而违反的部分位于预先存在的部分中，而不是此处。
+8. **部署注意事项。** 如果运行 `deployment-verification-agent` 本地提示符，则显示关键 Go/No-Go 项：阻止预部署检查、最重要的验证查询、回滚警告和监控重点区域。保持清单可操作性，而不是将其放入覆盖范围中。模式漂移在结果表中显示为 `data-migration` P1 行；不要添加单独的架构漂移部分。
+9. **覆盖范围。** 应用的计数（当第 5c 阶段运行时）、按锚点抑制的计数（例如，“N 个结果在锚点 50 处被抑制，M 在锚点 25 处被抑制”）、模式感知降级计数、审核策略被删除或重新分级（按规则）的结果以及未应用的任何已编辑更改的策略文件、验证器结果计数和原因（当第 5b 阶段运行时）分为已确认、拒绝、未解决、格式错误、失败和跳过捷径，加上任何受保护主体的重新分类、验证降级的任何 P0/P1（保持验证器基础设施故障）、残余风险、测试差距、failed/timed-out 审查者以及推断意图不确定性（如果适用）。 当第 5b 阶段跳过引用锚定的跨模型证实的结果的验证器时，请说明有多少个验证器并命名该证据基础；还说明每个剩余选定结果的一批结果，以及是否已做出判决或超出等待范围。 当第 5 阶段第 3 步引用行检查将任何 75/100 发现的缺失 `first_evidence` 降级时，记录与 `first_evidence_backfilled` 一起的计数（包括零）。 当在第 2b 阶段没有发现任何计划（或者发现不明确并被跳过）时，请注意，不会评估沉降抑制。 当计划为 `plan_source: inferred` 且第 5 阶段第 2 步（已解决的决策）丢弃结果时，请注意推断的来源和被抑制的偏好结果的数量。 **可移动表面（仅当存在面向删除的可维护性发现时）：** 一行给出近似净lines/files，如果应用这些发现将删除（例如，“可移动表面：〜120行/ 2个文件跨越发现＃4，＃7”）。 这是一个沉重的信号，**不是**减少目标：永远不要降低发现的标准或发明删除来增加数量，并且当没有发现建议删除时完全省略该行。
+10. **结论。** 准备合并/准备好修复/未准备好。修复订单（如果适用）。判决读取整个主要发现集的严重性，而不仅仅是可操作队列：开放的 P0 禁止“准备合并”，开放的 P1 将判决限制为“准备好修复”，无论阶段 5b 确认了该发现还是将其保留为未解决的验证门。从 `actionable_findings` 扣留大门将扣留申请权限；它永远不会清除阻塞器，因此在判决推理中命名门和它仍然需要的证据。当`explicit`计划有未解决的需求或实施单元时，结论必须反映它：代码干净但缺少计划需求的PR是“未准备好”，除非遗漏是故意的。当`inferred`计划有未解决的要求或实施单位时，请在判决推理中注明，但不要单独阻止它。
 
-Do not include time estimates.
+不包括时间估计。
 
-**Final check before delivering (default only).** Verify the hard constraints, not a layout: no box-drawing / per-item horizontal-rule separators (`────`), no Unicode arrows or middot (`·`) anywhere; stable `#`s consistent across sections; literal `|` escaped (`\|`) in any table cell; and **the closing stands alone**: a reader seeing only the last screen gets the verdict and the prioritized actionable list, each item carrying its severity, `file:line`, terse what, and response-type. Re-render anything that fails. Skip when `mode:agent` is active.
+**交付前的最终检查（仅默认）。** 验证硬约束，而不是布局：任何地方都没有方框图/每项水平规则分隔符 (`────`)，任何地方都没有 Unicode 箭头或中点 (`·`)；稳定`#`跨部分一致；任何表格单元格中的文字 `|` 转义 (`\|`)； **结束是独立的**：读者仅看到最后一个屏幕即可获得结论和优先的可操作列表，每个项目都带有其严重性、`file:line`、简洁内容和响应类型。重新渲染任何失败的内容。当 `mode:agent` 处于活动状态时跳过。
 
-After the final artifact write returns, emit the final response immediately. The artifact write is the last tool call; never use `true`, `echo`, a placeholder transition, or any other tool call to create another turn before the final response.
+最终产物写入返回后，立即发出最终响应。产物写入是最后一个工具调用；切勿使用 `true`、`echo`、占位符转换或任何其他工具调用在最终响应之前创建另一个回合。
 
-### JSON output format (`mode:agent` only)
+### JSON 输出格式（仅限`mode:agent`）
 
-The shape is defined once, in `references/modes-and-output.md` (## JSON output format). On the full path fill every field there from the merged findings and Coverage; `reviewers` lists the dispatched roster.
+形状以 `references/modes-and-output.md`（## JSON 输出格式）定义一次。在完整路径上，填写合并结果和覆盖范围中的每个字段； `reviewers`列出派遣名单。
 
-## Quality Gates
+## 质量门
 
-Before delivering the review, verify:
+在提交审核之前，请验证：
 
-1. **Every finding is actionable.** Re-read each finding. If it says "consider", "might want to", or "could be improved" without a concrete fix, rewrite it with a specific action. Vague findings waste engineering time.
-2. **No false positives from skimming.** For each finding, verify the surrounding code was actually read. Check that the "bug" isn't handled elsewhere in the same function, that the "unused import" isn't used in a type annotation, that the "missing null check" isn't guarded by the caller.
-3. **Severity is calibrated.** A style nit is never P0. A SQL injection is never P3. Re-check every severity assignment.
-4. **Line numbers are accurate.** Verify each cited line number against the file content. A finding pointing to the wrong line is worse than no finding.
-5. **Protected artifacts are respected.** Discard any finding that recommends deleting or gitignoring a CE pipeline artifact, per the Protected Artifacts rule in `references/action-class-rubric.md`: any file under a `plans/`, `solutions/`, or legacy `brainstorms/` directory whose immediate parent is the artifact root (a directory named `docs`, or the configured `docs_root` when resolved). Categories nest (`solutions/<category>/`); a `references/personas/` skill asset, parented by `references`, is not a protected artifact.
-6. **Findings don't duplicate linter output.** Don't flag things the project's linter/formatter would catch (missing semicolons, wrong indentation). Focus on semantic issues.
+1. **每项发现都是可行的。** 重新阅读每项发现。如果它说“考虑”、“可能想要”或“可以改进”而没有具体的修复，则用特定的操作重写它。模糊的发现浪费了工程时间。
+2. **浏览不会出现误报。** 对于每个发现，验证周围的代码是否确实被读取。检查同一函数中的其他地方是否未处理“错误”，类型注释中是否未使用“未使用的导入”，调用者是否未保护“缺少空检查”。
+3. **严重性是经过校准的。** 风格尼特永远不会是 P0。 SQL 注入永远不会是P3。重新检查每个严重性分配。
+4. **行号准确。** 根据文件内容验证每个引用的行号。指向错误路线的发现比没有发现更糟糕。
+5. **尊重受保护的产物。** 根据 `references/action-class-rubric.md` 中的受保护产物规则，丢弃任何建议删除或 gitignoring CE 管道产物的发现：`plans/`、`solutions/` 或旧版 `brainstorms/` 目录下的任何文件，其直接父级是产物根（名为 `docs` 的目录，或解析时配置的 `docs_root`）。类别嵌套（`solutions/<category>/`）；以 `references` 为父级的 `references/personas/` 技能资产不是受保护的神器。
+6. **结果不会重复 linter 输出。** 不要标记项目的 linter/formatter 会捕获的内容（缺少分号、错误缩进）。关注语义问题。
 
-## After Review
+## 审核后
 
-After Stage 6, stop. When local apply was explicitly authorized, Stage 5c may already have applied and, on a clean pre-review tree, committed verified fixes. Otherwise the caller or user decides what to apply from the report and artifacts.
+第六阶段后，停止。当本地应用被明确授权时，阶段 5c 可能已经应用并在干净的预审核树上提交了经过验证的修复。否则，调用者或用户决定应用报告和产物中的内容。
 
-### Emit actionable findings summary (default mode only)
+### 发出可操作的结果摘要（仅限默认模式）
 
-After Stage 6 **in default mode**, emit a compact **Actionable Findings** summary for callers:
+在第 6 阶段 **默认模式** 后，为调用者发出紧凑的 **可操作的结果** 摘要：
 
-- List each actionable finding (`gated_auto` or `manual` with `downstream-resolver`) with stable `#`, severity, file:line, title, `autofix_class`, whether `suggested_fix` is present, and `confidence`.
-- Include the resolved run-artifact path when one was written.
-- When the actionable queue is empty, state `Actionable findings: none.` explicitly.
+- 列出每个可操作的发现（`gated_auto`或`manual`与`downstream-resolver`），以及稳定的`#`、严重性、file:line、标题、`autofix_class`、`suggested_fix`是否存在以及`confidence`。
+- 包括编写时解析的运行产物路径。
+- 当可操作队列为空时，明确声明`Actionable findings: none.`。
 
-In `mode:agent` do **not** emit this markdown summary; the actionable findings are carried solely by the `actionable_findings` field of the JSON object. Emit nothing after the JSON object, so the response stays a single parseable JSON value.
+在 `mode:agent` 中，**不**发出此 Markdown 摘要；可操作的发现仅由 JSON 对象的 `actionable_findings` 字段携带。在 JSON 对象之后不发出任何内容，因此响应保持单个可解析的 JSON 值。
 
-Do not run post-review triage (no per-finding walk-through, bulk ticket filing, or routing questions). The report and summary are the complete handoff.
+不要进行审查后分类（没有每个发现的演练、批量票据归档或路由问题）。报告和摘要是完整的交接。
 
-### Mode-specific completion
+### 特定于模式的完成
 
-| Mode | After Stage 6 + actionable summary |
+| 模式 | 第 6 阶段之后 + 可操作的总结 |
 |------|-----------------------------------|
-| **Default** | Markdown tables + Actionable Findings summary. |
-| **`mode:agent`** | JSON object + `review.json` in run artifact dir. |
+| **默认** | Markdown 表格 + 可操作的调查结果摘要。 |
+| **`mode:agent`** | JSON 对象 + `review.json` 在运行产物目录中。 |
 
-Do not offer push/PR/create-branch next steps from this skill.
+不要提供此技能的 push/PR/create-branch 后续步骤。
 
-#### Run artifacts
+#### 运行产物
 
-The run-artifact list lives under "Run artifacts" in `references/finish-input.md`; every artifact named there is written under the resolved `<run-dir>`.
+运行产物列表位于 `references/finish-input.md` 中的“运行产物”下；那里命名的每个产物都写在已解析的`<run-dir>`下。
 
-`metadata.json` carries the minimum fields defined under ## Run artifacts in `references/modes-and-output.md`; capture `branch` and `head_sha` at dispatch time (no in-skill fixes will land afterward).
+`metadata.json` 携带 ## Run artifacts in `references/modes-and-output.md` 中定义的最小字段；在调度时捕获`branch`和`head_sha`（此后不会出现任何技能修复）。

@@ -1,11 +1,11 @@
-# Compounding directive
+# 知识沉淀指令
 
-Standing-instruction text `ce-setup` offers to add to a project's agent-instructions file. Insert one variant verbatim; the wording is pinned to the `ce-compound` guide by a test.
+供 `ce-setup` 安装到项目的长期规则。按项目选择插入一种正文，不混用或改写。
 
 ## Offer first
 
-After a solved, verified problem, offer once to invoke the `ce-compound` skill at the completion checkpoint when the work corrected a wrong belief about how something behaves: an approach that failed, a review finding that exposed a real defect, or an assumption, document, or first diagnosis that turned out wrong. A naming, style, or preference change does not count. Work that went as first planned does not need the offer. Do not judge whether the lesson deserves a document: `ce-compound` decides whether it qualifies and what holds it (a test, a lint rule, a coding standard, or a learning), and writes nothing when nothing qualifies. Offer at the checkpoint so what it writes can ship in the PR that produced it, and only where the repository treats captured learnings as tracked, committed knowledge.
+若一项已经解决并验证的工作纠正了关于系统行为的错误认识（例如走过失败路径、审查找出真实缺陷，或证实原假设、文档或初次诊断有误），在完成检查点提议调用 `ce-compound` 一次。命名、样式、个人偏好，以及完全按最初计划完成的工作，不触发此提议。不要预先判断是否值得写文档；由 `ce-compound` 判断资格和合适的载体（测试、lint 规则、编码标准或经验条目），没有合适内容则不写。只在仓库将此类长期知识纳入版本控制时提议，并在完成检查点处理，使成果能随本次 PR 交付。
 
 ## Run automatically
 
-After a solved, verified problem, automatically invoke the `ce-compound` skill with `mode:non-interactive` at the completion checkpoint when the work corrected a wrong belief about how something behaves: an approach that failed, a review finding that exposed a real defect, or an assumption, document, or first diagnosis that turned out wrong. A naming, style, or preference change does not count. Work that went as first planned does not need it. Do not judge whether the lesson deserves a document: `ce-compound` decides whether it qualifies and what holds it (a test, a lint rule, a coding standard, or a learning), and writes nothing when nothing qualifies. Capture at the checkpoint so what it writes can ship in the PR that produced it, and only where the repository treats captured learnings as tracked, committed knowledge.
+若一项已经解决并验证的工作纠正了关于系统行为的错误认识（例如走过失败路径、审查找出真实缺陷，或证实原假设、文档或初次诊断有误），在完成检查点自动调用 `ce-compound mode:non-interactive`。命名、样式、个人偏好，以及完全按最初计划完成的工作，不触发此流程。不要预先判断是否值得写文档；由 `ce-compound` 判断资格和合适的载体（测试、lint 规则、编码标准或经验条目），没有合适内容则不写。仅当仓库将长期知识纳入版本控制时捕获，并把成果纳入本次 PR。

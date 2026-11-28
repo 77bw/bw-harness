@@ -1,60 +1,62 @@
 ---
 name: ce-plan
-description: "Create structured plans for multi-step work, including software and non-software tasks. Use when asked to plan, break down implementation, plan from requirements, or deepen an existing plan; prefer ce-brainstorm for exploratory framing."
-argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [output:html]"
+description: "为多步骤工作创建结构化计划，包括软件和非软件任务。当需要计划、分解实施、根据需求进行计划或深化现有计划时使用；更喜欢 ce-brainstorm 进行探索性框架。"
+argument-hint: "[可选：功能描述、需求文档路径、深化计划路径或任何要计划的任务] [output:html]"
 ---
 
-# Create Technical Plan
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-**Outcome:** a plan for carrying out and checking the agreed work while preserving its outcome and constraints. Resolve technical choices from evidence; leave adequate instructions unchanged. `ce-brainstorm` defines **WHAT**, `ce-plan` plans **HOW**, and `ce-work` executes. A prior brainstorm is optional.
+# 制定技术计划
 
-**An explicit invocation always produces a plan.** Never classify a direct invocation as "not a planning task" and route out. It may select any output contract below, and the smallest valid plan is a few sentences in chat.
+**结果：** 执行和检查商定工作的计划，同时保留其结果和限制。从证据中解决技术选择；保留足够的说明不变。 `ce-brainstorm` 定义 **什么**，`ce-plan` 计划 **如何**，以及 `ce-work` 执行。事先进行头脑风暴是可选的。
 
-**Research, decide, and write the plan — never implement.** Do not write production code, run tests, or learn from execution-time results. Directional pseudo-code and grammar sketches may communicate design; changing code to see what happens belongs in `ce-work`.
+**显式调用始终会生成计划。**切勿将直接调用归类为“不是计划任务”并路由出去。它可以选择下面任意一个输出合约，最小的有效方案是聊天中的几句话。
 
-## Mandatory Completion Contract
+**研究、决定和编写计划——切勿实施。**不要编写生产代码、运行测试或从执行时结果中学习。定向伪代码和语法草图可以传达设计；更改代码以查看发生的情况属于`ce-work`。
 
-A run is complete when its output contract's done condition is met. Every normal interactive branch that produces a plan artifact or checkpoint is incomplete until the user has been asked what to do next. A request that already authorizes the next action is that answer. For a Durable software implementation-plan run that continues past the resume check, that means the Phase 5.4 menu has been presented and the selected action has actually fired. For Direct, the change stated and the handoff offered; for a Chat brief, the brief and its one-line save-or-`ce-work` offer in chat. Neither presents the Phase 5.4 menu. Non-software plans and approach-level plans end with the handoff their reference workflow defines. A run that only answers a question may end after the answer unless its reference requires a save or share step.
+## 强制竣工合同
 
-Writing the file, checking confidence, and running or explicitly skipping `ce-doc-review` are intermediate milestones. In pipeline mode, the run is complete only when the plan, the confidence check, and the non-interactive document-review state have been returned to the caller, which decides what happens next.
+当满足输出契约的完成条件时，运行就完成了。每个产生计划产物或检查点的正常交互式分支都是不完整的，直到用户被询问下一步要做什么。已经授权下一步操作的请求就是该答案。对于持续通过恢复检查的持久软件实施计划运行，这意味着第 5.4 阶段菜单已经出现并且所选操作实际上已经触发。对于 Direct，规定的变更和提供的移交；对于聊天简报，简报及其在聊天中的单行保存或`ce-work`优惠。两者均未显示 Phase 5.4 菜单。非软件计划和方法级计划以其参考工作流程定义的交接结束。仅回答问题的运行可能会在回答后结束，除非其引用需要保存或共享步骤。
 
-## Interaction Method
+编写文件、检查置信度以及运行或显式跳过 `ce-doc-review` 是中间里程碑。在管道模式下，仅当计划、置信度检查和非交互式文档审阅状态已返回给调用者（由调用者决定接下来发生什么）时，运行才完成。
 
-Ask one question at a time through the host's blocking question tool already in the current tool list. Match by capability; never probe a user-facing tool to discover it. If none is listed or a real question call errors, render numbered choices in chat; never silently skip a required question. If no feature description was supplied, ask what to plan and wait.
+## 互动方式
 
-When a question is a yes/no or a batch confirm, word it so that agreeing accepts the recommendation. Numbered choices stay numbered choices.
+通过当前工具列表中已有的主持人屏蔽问题工具一次提出一个问题。按能力匹配；永远不要通过探测面向用户的工具来发现它。如果没有列出或真正的问题调用错误，则在聊天中呈现编号的选项；永远不要默默地跳过必答问题。如果未提供功能描述，请询问要计划什么并等待。
 
-## Output Contract
+当问题是 yes/no 或批量确认时，请用措辞表达同意并接受建议。编号选择保留编号选择。
 
-Decide which output contract applies at the start of scoping (Phase 0.6), before choosing depth and before the scoping synthesis. It applies only when no resume route (Phase 0.1) fired and the source check (Phase 0.2) found no upstream artifact. Ground it with bounded inline reads of what the request names, without dispatching a subagent. Select one:
+## 产出合约
 
-- **Direct** — the work can be stated, done, and verified in one pass with no decision the user would weigh. State the change in a few sentences and offer the handoff to `ce-work` or the user; execution starts only with implementation authority, as `references/output-contracts.md` defines.
-- **Chat brief** — bounded work with at most one decision the user would weigh and no risk surface. Deliver it in chat and stop.
-- **Durable** — everything else. Continue the workflow below.
+在范围界定开始时（阶段 0.6）、选择深度之前和范围界定综合之前决定应用哪个输出合同。它仅适用于未触发恢复路由（阶段 0.1）且源检查（阶段 0.2）未发现上游产物的情况。通过对请求名称的有界内联读取来将其接地，而无需分派子代理。选择一项：
 
-`references/output-contracts.md` defines Direct and Chat brief; read it when either is selected. When the tier is still uncertain after those reads, take the heavier one. If a read surfaces a decision the user would weigh, a risk surface, or multi-pass verification, move to the heavier tier before emitting anything. Durable regardless of size: a run with no synchronous user to act on chat this turn (pipeline, headless, goal- or scheduler-driven), a request whose wording asks for a plan, a plan file, or an output format, a request that continues an existing plan's item, and a risk surface — authentication, payments, migrations, external contracts.
+- **直接** — 工作可以一次性陈述、完成和验证，无需用户权衡任何决定。用几句话说明变化并将交接给`ce-work`或用户；正如 `references/output-contracts.md` 所定义的，执行仅在具有实施权限的情况下开始。
+- **聊天简介** — 有限的工作，最多由用户权衡一项决定，并且没有风险。在聊天中传递它并停止。
+- **耐用**——其他一切。继续下面的工作流程。
 
-## Workflow
+`references/output-contracts.md` 定义 Direct 和 Chat 简介；当选择其中一个时请阅读它。当阅读完这些内容后仍然不确定级别时，请选择较重的级别。如果读取结果表明用户会权衡决策、风险面或多遍验证，请在发出任何内容之前移至较重的层。无论大小如何，都具有持久性：本轮没有同步用户对聊天进行操作的运行（管道、无头、目标或调度程序驱动）、措辞要求计划、计划文件或输出格式的请求、继续现有计划项目的请求以及风险面 - 身份验证、支付、迁移、外部合同。
 
-Phases run in order unless a reference routes out or short-circuits. Read a phase's required reference in full when you enter that phase; a read made before that phase does not satisfy it, and a reference named for the final steps is read again at its step even when already in context. If a required reference cannot be read, stop before the action it governs and report the blocker and recovery path; never reconstruct the missing rules from memory. In pipeline mode, every required-reference failure returns `status: blocked`, `phase`, `blocker`, and `recovery_path`; include `artifact_path` and preserve the artifact when one exists. Report blocked even when an artifact exists.
+## 工作流程
 
-### Phase 0: Output, Resume, and Scope
+除非参考路由退出或短路，否则各阶段将按顺序运行。当您进入该阶段时，请完整阅读该阶段所需的参考资料；在该阶段之前进行的读取不满足它，并且即使已经在上下文中，也会在其步骤中再次读取为最终步骤命名的引用。如果无法读取所需的参考，请在其管辖的操作之前停止并报告阻塞项和恢复路径；永远不要从记忆中重建缺失的规则。在管道模式下，每个必需引用失败都会返回`status: blocked`、`phase`、`blocker`和`recovery_path`；包含 `artifact_path` 并在存在时保留该产物。即使存在产物，报告也会被阻止。
 
-1. **Output first.** Read `references/output-mode.md` before interpreting any phase. It defines token parsing, output and confirmation precedence, renderer selection, artifact location, and when a repository may be resolved.
-2. **Resume, deepen, approach, and domain.** Read `references/resume.md` before acting. It defines resuming an existing plan, enriching a requirements-only plan, deepening, approach-level planning, and the software/non-software split. Follow any terminal route it selects; otherwise continue.
-3. **Source and scope.** Read `references/intake.md` before Phase 0.2 and follow it through Phase 0.7. It defines finding and preserving the upstream artifact, routing out to bootstrap work, blocking questions, depth, named resources, and the scoping synthesis; the Output Contract decision above happens inside it. Do not pass a decision point that has not resolved.
+### 阶段 0：输出、恢复和范围
 
-### Phases 1-4: Research and Compose
+1. **先输出。** 在解释任何阶段之前读取`references/output-mode.md`。它定义了令牌解析、输出和确认优先级、渲染器选择、产物位置以及何时可以解析存储库。
+2. **继续、深化、方法和领域。** 在行动之前阅读`references/resume.md`。它定义了恢复现有计划、丰富仅需求计划、深化方法级计划以及software/non-software拆分。遵循其选择的任何终端路线；否则继续。
+3. **来源和范围。** 在阶段 0.2 之前阅读`references/intake.md`，并遵循它完成阶段 0.7。它定义了查找和保留上游产物、路由到引导工作、阻止问题、深度、命名资源和范围综合；上面的输出合约决策发生在其中。不要通过尚未解决的决策点。
 
-4. Read `references/research.md` before gathering context.
-5. Read `references/structure.md` before resolving questions or structuring the plan.
-6. Compose from `references/plan-sections.md` plus the format-rendering reference selected by `output-mode.md`.
+### 第 1-4 阶段：研究和撰写
 
-### Phase 5: Review, Write, Deepen, and Hand Off
+4. 在收集上下文之前阅读`references/research.md`。
+5. 在解决问题或制定计划之前，请阅读`references/structure.md`。
+6. 由 `references/plan-sections.md` 加上 `output-mode.md` 选择的格式渲染参考组成。
 
-7. Read `references/final-review.md` before the pre-write review; it defines Phase 5.1 through 5.3.2. On an interactive run from a brainstorm, the user sees the Phase 5.1.5 scoping synthesis in chat before the write: a confirmation to wait on, or its one-line auto-proceed announcement.
-8. **Model elevation.** Immediately before authoring, read `references/reasoning-elevation.md`, resolve the choice at this boundary, and follow it. Do not author until activation resolution has completed and any selected dispatch or transparent fallback has settled.
-9. In pipeline mode, evidence that invalidates a decision settled earlier in the session stops the write. Return the exact token `settled-decision-invalidated`, the decision, and the reason; do not resolve it silently.
-10. Write the plan before presenting options, then complete the confidence path `final-review.md` defines.
+### 第五阶段：回顾、写作、深化和移交
 
-**STOP. Read `references/plan-handoff.md` immediately before Phase 5.3.8 and 5.4** (document review and the handoff menu). Document review is mandatory for a Durable plan and the default is non-interactive (`mode:non-interactive`). In interactive software runs, ask exactly: "Plan ready at `<absolute path to plan>`. What would you like to do next?" Present its menu and wait. If the selection arrives after a user turn, reload `references/plan-handoff.md` before acting. Rendering the menu, receiving a selection, or announcing a route is not completion; execute the selected action.
+7. 预写审稿前阅读`references/final-review.md`；它定义了阶段 5.1 到 5.3.2。在头脑风暴的交互式运行中，用户在写入之前在聊天中看到阶段 5.1.5 范围界定综合：等待确认，或其单行自动继续公告。
+8. **模型高程。** 在创作之前，阅读 `references/reasoning-elevation.md`，解决此边界处的选择，并遵循它。在激活解决方案完成并且任何选定的调度或透明后备已解决之前，请勿进行创作。
+9. 在管道模式下，使会话中较早达成的决策无效的证据会停止写入。返回准确的 token `settled-decision-invalidated`、决定和原因；不要默默地解决它。
+10. 在提出选项之前编写计划，然后完成`final-review.md`定义的置信路径。
+
+**停止。在阶段 5.3.8 和 5.4** 之前阅读`references/plan-handoff.md`（文档审查和移交菜单）。对于持久计划，文档审查是强制性的，默认情况下是非交互式的 (`mode:non-interactive`)。在交互式软件运行中，准确询问：“计划在`<计划的绝对路径>`准备好。接下来你想做什么？”出示菜单并等待。如果选择是在用户轮流后到达的，请在执行操作之前重新加载 `references/plan-handoff.md`。渲染菜单、接收选择或宣布路线尚未完成；执行选定的操作。

@@ -1,15 +1,15 @@
-# Requested Destinations
+# 请求的目的地
 
-Load only when delivery to a destination was requested. Use the available capability for that destination and verify the resulting file, URL, or document reference. A calling workflow that owns the surrounding artifact also owns placement and publication; return the explanation to it instead.
+仅当请求运送到目的地时才加载。使用该目标的可用功能并验证生成的文件、URL 或文档引用。拥有周围产物的调用工作流也拥有放置和发布；相反，将解释返回给它。
 
-Resolve only the destination information needed to complete the request. Do not require a menu or offer to rewrite or improve the explanation. Adapt the content for its intended reader before asking for any required consent to publish it. On a delivery failure, preserve the canonical local artifact and report what did not complete. Do not substitute another publisher without authorization.
+仅解析完成请求所需的目标信息。不需要菜单或提议来重写或改进说明。在征求发布所需的同意之前，先针对目标读者调整内容。如果交付失败，请保留规范的本地产物并报告未完成的内容。未经授权，不得替代其他出版商。
 
-## Publish a copy
+## 发布副本
 
-Read `references/publishing.md` and follow it. It decides which publisher to use, the public-host confirmation, re-publishing, and failure handling. The canonical `$RUN_DIR/explainer.html` or `explainer.md` is the stored file it refers to. Hand a publisher the complete canonical file, already adapted for its reader; do not select a template or redesign it for the publisher. A publisher that adapts content for its own runtime owns that adaptation; do not pre-process the file for it.
+阅读`references/publishing.md`并遵循它。它决定使用哪个发布者、公共主机确认、重新发布和失败处理。规范的`$RUN_DIR/explainer.html`或`explainer.md`是它所引用的存储文件。向出版商提供完整的规范文件，并已针对其读者进行了调整；不要为发布者选择模板或重新设计模板。为自己的运行时调整内容的出版商拥有该调整；不要为其预处理文件。
 
-## Local file
+## 本地文件
 
-1. Ask nothing extra if the user already named a path; otherwise ask for the missing path under the skill body's interaction rule.
-2. Copy the artifact out of the run dir to that path (`cp "$RUN_DIR/explainer.html" <path>` — or `explainer.md` for a markdown run), creating parent directories if needed.
-3. Report the absolute path. Open it when requested and the host supports that action.
+1. 如果用户已经命名了路径，则无需询问任何额外信息；否则求技能体交互规则下缺失的路径。
+2. 将产物从运行目录复制到该路径（`cp "$RUN_DIR/explainer.html" <path>` — 或 `explainer.md` 对于 markdown 运行），如果需要，创建父目录。
+3. 报告绝对路径。根据要求打开它，并且主机支持该操作。

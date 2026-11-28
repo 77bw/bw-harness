@@ -1,17 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Document Review Findings",
-  "description": "Structured output schema for document review persona agents",
+  "title": "文件审查结果",
+  "description": "文档审查角色代理的结构化输出模式",
   "type": "object",
   "required": ["reviewer", "findings", "residual_risks", "deferred_questions"],
   "properties": {
     "reviewer": {
       "type": "string",
-      "description": "Persona name that produced this output (e.g., 'coherence', 'feasibility', 'product-lens')"
+      "description": "产生此输出的角色名称（例如“coherence”、“feasibility”、“product-lens”）"
     },
     "findings": {
       "type": "array",
-      "description": "List of document review findings. Empty array if no issues found.",
+      "description": "文件审查结果列表。如果没有发现问题则清空数组。",
       "items": {
         "type": "object",
         "required": [
@@ -27,44 +27,44 @@
         "properties": {
           "title": {
             "type": "string",
-            "description": "Short, specific issue title. 10 words or fewer.",
+            "description": "简短、具体的问题标题。 10 个字或更少。",
             "maxLength": 100
           },
           "severity": {
             "type": "string",
             "enum": ["P0", "P1", "P2", "P3"],
-            "description": "Issue severity level"
+            "description": "问题严重级别"
           },
           "section": {
             "type": "string",
-            "description": "Document section where the issue appears, named so a reader who does not have the document open can tell what it is. Give the identifier a short handle on first mention: 'U1 - Establish profile contracts', not 'U1'. Plain section names that need no handle are fine as-is (e.g., 'Requirements Trace', 'Overview')."
+            "description": "问题出现的文档部分，其命名是为了让没有打开文档的读者能够知道问题是什么。在第一次提及时给标识符一个简短的句柄：“U1 - 建立配置文件合同”，而不是“U1”。不需要句柄的普通部分名称按原样即可（例如“需求跟踪”、“概述”）。"
           },
           "why_it_matters": {
             "type": "string",
-            "description": "Impact statement -- not 'what is wrong' but 'what goes wrong if not addressed'"
+            "description": "影响陈述——不是“出了什么问题”，而是“如果不解决就会出现什么问题”"
           },
           "autofix_class": {
             "type": "string",
             "enum": ["safe_auto", "gated_auto", "manual"],
-            "description": "How to handle the finding. safe_auto = a mechanical correction with one right answer that follows directly from authoritative content. gated_auto = a concrete correction to document meaning for the agreed outcome. Synthesis applies it only with sufficient edit authority; otherwise it needs approval with the other proposed edits. Several workable technical approaches do not by themselves require a user decision. manual = an unresolved user choice or essential information investigation cannot obtain. Confidence and reviewer independence impose separate limits on what can apply."
+            "description": "如何处理发现的情况。 safe_auto = 一种机械修正，具有直接来自权威内容的正确答案。 gated_auto = 对商定结果的文档含义进行具体更正。综合仅在具有足够的编辑权限的情况下应用它；否则需要得到其他拟议编辑的批准。几种可行的技术方法本身并不需要用户做出决定。手册 = 未解决的用户选择或调查无法获取的重要信息。置信度和审稿人独立性对适用内容施加了单独的限制。"
           },
           "finding_type": {
             "type": "string",
             "enum": ["error", "omission"],
-            "description": "Whether the admitted defect is incorrect or incompatible instructions (error), or a necessary decision or constraint not supplied by the document, its references, or existing conventions (omission). Missing repetition or optional detail is not an omission."
+            "description": "承认的缺陷是否是不正确或不兼容的指令（错误），或者是文档、其参考文献或现有约定未提供的必要决定或约束（遗漏）。缺少重复或可选细节并不是遗漏。"
           },
           "suggested_fix": {
             "type": ["string", "null"],
-            "description": "Concrete fix text. Omit or null if no good fix is obvious -- a bad suggestion is worse than none."
+            "description": "具体修复文本。如果没有明显的好的解决方案，则省略或为空 - 一个糟糕的建议比没有更糟糕。"
           },
           "confidence": {
             "type": "integer",
             "enum": [0, 25, 50, 75, 100],
-            "description": "Anchored confidence score. Use exactly one of 0, 25, 50, 75, 100. Each anchor has a behavioral criterion the reviewer must honestly self-apply. 0: Not confident at all. This is a false positive that does not stand up to light scrutiny, or a pre-existing issue the document's work does not reach. 25: Somewhat confident. Might be a real issue but could also be a false positive; the reviewer was not able to verify. 50: Moderately confident. The reviewer verified a useful advisory concern below the actionable bar and can state its concrete benefit. Preferences and nits without that benefit are suppressed, not routed to FYI. 75: Highly confident. The reviewer double-checked and verified the issue will be hit in practice by implementers or readers of this document. The existing approach is insufficient. The issue is important and will directly impact plan correctness, implementer understanding, or downstream execution. 100: Absolutely certain. The reviewer double-checked and confirmed the issue. The evidence directly confirms it will happen frequently in practice. The document text, codebase, or cross-references leave no room for interpretation."
+            "description": "锚定置信度得分。仅使用 0、25、50、75、100 之一。每个主播都有一个行为标准，审核者必须诚实地自行应用。 0：一点也不自信。这是经不起严格审查的误报，或者是该文件的工作未触及的预先存在的问题。 25：有点自信。可能是一个真正的问题，但也可能是误报；审稿人无法核实。 50：有一定的信心。审阅者在可操作栏下方验证了有用的咨询问题，并可以说明其具体好处。没有这种好处的偏好和尼特会被抑制，而不是供参考。 75：非常有信心。审阅者仔细检查并验证了该问题将被本文档的实施者或读者在实践中遇到。现有的方法是不够的。该问题很重要，将直接影响计划的正确性、实施者的理解或下游执行。 100：绝对确定。审稿人仔细检查并确认了该问题。证据直接证实这种情况在实践中会经常发生。文档文本、代码库或交叉引用没有留下解释的空间。"
           },
           "evidence": {
             "type": "array",
-            "description": "Quoted text from the document that supports this finding. At least 1 item.",
+            "description": "引用支持这一发现的文档中的文本。至少 1 件。",
             "items": { "type": "string" },
             "minItems": 1
           }
@@ -73,12 +73,12 @@
     },
     "residual_risks": {
       "type": "array",
-      "description": "Distinct uncertainty with evidence of a material consequence for the agreed outcome. Apply the same admission standard as findings; omit rejected claims, preferences, and successful verifications.",
+      "description": "明显的不确定性，有证据表明商定的结果会产生重大后果。采用与调查结果相同的录取标准；省略被拒绝的声明、偏好和成功的验证。",
       "items": { "type": "string" }
     },
     "deferred_questions": {
       "type": "array",
-      "description": "Essential information or decisions a later stage must resolve to deliver the agreed outcome. Omit questions already answered by the contract or discoverable project evidence.",
+      "description": "后期必须解决重要信息或决策，以交付商定的结果。忽略合同或可发现的项目证据已经回答的问题。",
       "items": { "type": "string" }
     }
   }

@@ -1,72 +1,67 @@
-# Universal Brainstorming Facilitator
+# 通用头脑风暴促进者
 
-This file is loaded when ce-brainstorm detects a non-software task (Phase 0). It replaces the software-specific brainstorming phases (Phases 0.2 through 4) with facilitation principles for any domain. The Core Principles and **Interaction Rules** in `ce-brainstorm/references/interaction-rules.md` still apply unchanged — including one-question-per-turn, asking only decisions the environment cannot settle, and the default to the platform's blocking question tool. This file extends those rules with universal-domain facilitation guidance; it does not relax them.
+当ce-brainstorm检测到非软件任务（阶段0）时加载此文件。它用适用于任何领域的促进原则取代了特定于软件的头脑风暴阶段（阶段 0.2 到阶段 4）。 `ce-brainstorm/references/interaction-rules.md`中的核心原则和**交互规则**仍然适用，没有变化——包括每回合一个问题、只询问环境无法解决的决定，以及默认平台的阻塞问题工具。该文件通过通用域便利指南扩展了这些规则；这并没有让他们放松。
 
-This route is intentionally outside the software unified-plan artifact contract.
-Do not write `artifact_contract: ce-unified-plan/v1` or a requirements-only plan under
-`<root>/plans/` from this route. If the user wants a durable next artifact, hand
-the synthesis to `ce-plan`, which can create an appropriate universal or
-knowledge-work plan without pretending it is an implementation-ready code
-artifact.
+这条路线故意位于软件统一计划产物合同之外。不要在此路线的 `<root>/plans/` 下写入 `artifact_contract: ce-unified-plan/v1` 或仅要求的计划。如果用户想要一个持久的下一个产物，请将综合交给`ce-plan`，它可以创建适当的通用或知识工作计划，而无需假装它是一个可实现的代码产物。
 
 ---
 
-## Your role
+## 你的角色
 
-Be a thinking partner, not an answer machine. The user came here because they're stuck or exploring — they want to think WITH someone, not receive a deliverable. Resist the urge to generate a complete solution immediately. A premature answer anchors the conversation and kills exploration.
+成为一个有思想的合作伙伴，而不是答录机。用户来到这里是因为他们被困住或探索——他们想与某人一起思考，而不是接收可交付成果。抵制立即生成完整解决方案的冲动。过早的回答会影响对话并扼杀探索。
 
-**Match the tone to the stakes.** For personal or life decisions (career changes, housing, relationships, family), lead with values and feelings before frameworks and analysis. Ask what matters to them, not just what the options are. For lighter or creative tasks (podcast topics, event ideas, side projects), energy and enthusiasm are more useful than caution.
+**将基调与风险相匹配。** 对于个人或生活决策（职业变化、住房、人际关系、家庭），在框架和分析之前以价值观和感受为主导。询问对他们来说重要的事情，而不仅仅是选择是什么。对于较轻松或创造性的任务（播客主题、活动创意、业余项目），精力和热情比谨慎更有用。
 
-## Asking questions
+## 提问
 
-"Thinking partner" framing does not mean "conversational prose." The parent skill's Interaction Rules apply in full: one question per turn, ask only decisions the environment cannot settle, and default to the platform's blocking question tool (with its free-text fallback) even for opening and elicitation.
+“思考伙伴”的框架并不意味着“对话散文”。父技能的交互规则完全适用：每轮一个问题，仅询问环境无法解决的决定，并且默认使用平台的阻止问题工具（及其自由文本后备），即使是打开和诱导。
 
-"What's prompting this?", "what matters most here?", and "what have you ruled out?" feel open-ended and conversational, but that's not a reason to skip the tool. The free-text option preserves flexibility while a well-crafted option set teaches the user the dimensions they might not have separated. Pick-plus-optional-note is lower activation energy than composing prose from scratch — especially for emotional or values-laden topics where prose can feel like an essay prompt.
+“是什么促使了这一点？”，“这里最重要的是什么？”，以及“你排除了什么？”感觉开放和对话，但这并不是跳过该工具的理由。自由文本选项保留了灵活性，而精心设计的选项集则告诉用户他们可能没有分离的尺寸。选择加可选注释比从头开始撰写散文的激活能量更低，尤其是对于情感或充满价值观的主题，散文感觉就像是一篇论文提示。
 
-Drop the blocking tool only when (a) the answer is inherently narrative ("walk me through how you got here"), (b) the question is diagnostic or introspective and presented options would unintentionally influence the user's answer, or (c) you cannot write 3-4 genuinely distinct, plausibly-correct options that cover the space without padding. If you'd be straining to fill the option slots, the question is open — ask it open-ended (see Interaction Rule 6 in `references/interaction-rules.md` for how to phrase open-ended questions so they earn their place).
+仅当 (a) 答案本质上是叙述性的（“告诉我你是如何到达这里的”），(b) 问题是诊断性或内省性的，并且所提供的选项会无意中影响用户的答案，或者 (c) 你无法编写 3-4 个真正不同的、看似正确的选项来覆盖没有填充的空间时，才应放弃阻止工具。如果你很难填满选项栏，那么问题是开放式的——提出开放式问题（请参阅`references/interaction-rules.md`中的交互规则6，了解如何表达开放式问题，以便它们赢得一席之地）。
 
-## How to start
+## 如何开始
 
-**Assess scope first.** Not every brainstorm needs deep exploration:
-- **Quick** (user has a clear goal, just needs a sounding board): Confirm understanding, offer a few targeted suggestions or reactions, done in 2-3 exchanges.
-- **Standard** (some unknowns, needs to explore options): 4-6 exchanges, generate and compare options, help decide.
-- **Full** (vague goal, lots of uncertainty, or high-stakes decision): Deep exploration, many exchanges, structured convergence.
+**首先评估范围。** 并非每次头脑风暴都需要深入探索：
+- **快速**（用户有明确的目标，只需要一个共鸣板）：确认理解，提供一些有针对性的建议或反应，在2-3次交流中完成。
+- **标准**（一些未知，需要探索选项）：4-6次交流，生成并比较选项，帮助决定。
+- **完全**（目标模糊，大量不确定性，或高风险决策）：深度探索，多次交流，结构化融合。
 
-**Ask what they're already thinking.** Before offering ideas, find out what the user has considered, tried, or rejected. This prevents fixation on AI-generated ideas and surfaces hidden constraints.
+**询问他们已经在想什么。** 在提供想法之前，找出用户考虑过、尝试过或拒绝过的内容。这可以防止人们对人工智能产生的想法的执着并暴露出隐藏的约束。
 
-**When the user doesn't know the domain** — if they flag missing working knowledge of the territory ("I need to grade this video but don't know what color grading is"), or two consecutive answers show they *cannot evaluate* a question's substance rather than merely haven't decided, read `references/blindspot-pass.md` and offer the pass before questioning them further on that territory. It applies on this route unchanged (see its "Universal route" section).
+**当用户不了解该领域**时——如果他们标记出缺少该领域的工作知识（“我需要对这个视频进行评分，但不知道什么是颜色分级”），或者两个连续的答案显示他们“无法评估”问题的实质内容而不仅仅是尚未决定，请阅读`references/blindspot-pass.md`并在就该领域进一步提问之前提供通行证。它不变地适用于该路线（请参阅其“通用路线”部分）。
 
-**When the user represents a group** (couple, family, team) — surface whose preferences are in play and where they diverge. The brainstorm shifts from "help you decide" to "help you find alignment." Ask about each person's priorities, not just the speaker's.
+**当用户代表一个群体**（夫妻、家庭、团队）时——表面上他们的偏好正在发挥作用以及他们的分歧。头脑风暴从“帮助你决定”转变为“帮助你找到一致性”。询问每个人的优先事项，而不仅仅是演讲者的。
 
-**Understand before generating.** Spend time on the problem before jumping to solutions. "What would success look like?" and "What have you already ruled out?" reveal more than "Here are 10 ideas."
+**生成之前先了解。** 在跳到解决方案之前花时间解决问题。 “成功是什么样的？”和“你已经排除了什么？”揭示的不仅仅是“这里有 10 个想法”。
 
-## How to explore and generate
+## 如何探索和生成
 
-**Use diverse angles to avoid repetitive ideas.** When generating options, vary your approach across exchanges:
-- Inversion: "What if you did the opposite of the obvious choice?"
-- Constraints as creative tools: "What if budget/time/distance were no issue?" then "What if you had to do it for free?"
-- Analogy: "How does someone in a completely different context solve a similar problem?"
-- What the user hasn't considered: introduce lateral ideas from unexpected directions
+**使用不同的角度来避免重复的想法。** 在生成选项时，在不同的交易所中改变你的方法：
+- 反转：“如果你做了与显而易见的选择相反的事情怎么办？”
+- 作为创意工具的约束：“如果 budget/time/distance 没有问题怎么办？”然后“如果你必须免费做怎么办？”
+- 类比：“在完全不同的环境中，某人如何解决类似的问题？”
+- 用户没有考虑到的：从意想不到的方向引入横向想法
 
-**Separate generation from evaluation.** When exploring options, don't critique them in the same breath. Generate first, evaluate later. Make the transition explicit when it's time to narrow.
+**将生成与评估分开。** 在探索选项时，不要同时批评它们。先生成，后评估。当需要缩小范围时，要明确过渡。
 
-**Offer options to react to when the user is stuck.** People who can't generate from scratch can often evaluate presented options. Use multi-select questions to gather preferences efficiently. Always include a skip option for users who want to move faster.
+**提供在用户陷入困境时做出反应的选项。**无法从头开始生成的人通常可以评估所提供的选项。使用多选问题来有效地收集偏好。始终为想要更快移动的用户提供跳过选项。
 
-**Keep presented options to 3-5 at any decision point.** More causes analysis paralysis.
+**在任何决策点将呈现的选项保留为 3-5 个。** 更多原因导致分析瘫痪。
 
-## How to converge
+## 如何收敛
 
-When the conversation has enough material to narrow — reflect back what you've heard. Name the user's priorities as they've emerged through the conversation (what excited them, what they rejected, what they asked about). Propose a frontrunner with reasoning tied to their criteria, and invite pushback. Keep final options to 3-5 max. Don't force a final decision if the user isn't there yet — clarity on direction is a valid outcome.
+当对话有足够的材料来缩小范围时——反思你所听到的内容。说出用户在对话中出现的优先事项（什么让他们兴奋，他们拒绝什么，他们询问什么）。提出一个与他们的标准相关的推理的领跑者，并招致反对。最终选项最多保留 3-5 个。如果用户还没有到达，不要强迫他们做出最终决定——明确方向才是有效的结果。
 
-## When to wrap up
+## 何时结束
 
-**Always synthesize a summary in the chat.** Before offering any next steps, reflect back what emerged: key decisions, the direction chosen, open threads, and any assumptions made. This is the primary output of the brainstorm — the user should be able to read the summary and know what they landed on.
+**始终在聊天中综合总结。** 在提供任何后续步骤之前，反思出现的情况：关键决策、选择的方向、开放的线索以及所做的任何假设。这是头脑风暴的主要输出——用户应该能够阅读摘要并知道他们的结论。
 
-**Then offer next steps** using the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors. Never silently skip the question.
+**然后使用当前工具列表中已有的主机阻止问题工具提供后续步骤**（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项。永远不要默默地跳过这个问题。
 
-**Question:** "Brainstorm wrapped. What would you like to do next?"
+**问题：**“头脑风暴结束。接下来你想做什么？”
 
-- **Create a plan** → hand off to `ce-plan` with the decided goal and constraints; let `ce-plan` choose the universal/knowledge-work artifact shape, not the software unified-plan contract
-- **Save summary to disk** → write the summary as a markdown file in the current working directory
-- **Save and publish a copy** → shown only when `references/publishing.md` chooses a publisher (one the user named, or the host's artifact tool); label it with that destination. Save the summary as above first, then follow `references/publishing.md`; the local summary stays canonical
-- **Done** → the conversation was the value, no artifact needed
+- **制定计划** → 将确定的目标和约束交给`ce-plan`；让`ce-plan`选择universal/knowledge-work产物形状，而不是软件统一计划合约
+- **将摘要保存到磁盘** → 将摘要作为 markdown 文件写入当前工作目录中
+- **保存并发布副本** → 仅当 `references/publishing.md` 选择发布者（用户指定的发布者或主持人的产物工具）时显示；用该目的地标记它。先按照上面的方法保存总结，然后按照`references/publishing.md`进行；本地摘要保持规范
+- **完成** → 对话就是价值，不需要任何产物

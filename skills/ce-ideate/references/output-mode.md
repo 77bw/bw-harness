@@ -1,34 +1,34 @@
-# Resolving the output mode
+# 解决输出模式
 
-Required read at Phase 0.0, before anything writes or resumes an ideation artifact. The ordinary-key cascade block lives in `SKILL.md` and is not repeated here.
+在写入或恢复构思产物之前，需要在阶段 0.0 进行读取。普通键级联块位于`SKILL.md`，这里不再重复。
 
-#### 0.0 Resolve Output Mode
+#### 0.0 解析输出模式
 
-Determine `OUTPUT_FORMAT` for the ideation artifact this run might persist. Output mode is **exclusive** — the ideation doc is written as either HTML (`.html`) OR markdown (`.md`), never both. Precedence: in-prompt request > user-stated preference > config > default (`html`). There is no pipeline override: a headless or non-interactive run resolves the format by the same steps.
+确定此运行可能持续存在的构思产物的`OUTPUT_FORMAT`。输出模式是 **排他性** - 构思文档要么以 HTML (`.html`) 要么以 markdown (`.md`) 形式编写，绝不能同时使用两者。优先级：提示请求 > 用户声明的首选项 > 配置 > 默认 (`html`)。没有管道覆盖：无头或非交互式运行通过相同的步骤解析格式。
 
-Unlike `ce-plan` and `ce-brainstorm` (which default to `md`), ce-ideate defaults to **`html`** — ideation artifacts are read mainly by humans weighing candidate directions, and a rich self-contained HTML file makes the ideas easier to approach.
+与`ce-plan`和`ce-brainstorm`（默认为`md`）不同，ce-ideate默认为**`html`**——构思产物主要由人类权衡候选方向来读取，丰富的独立HTML文件使想法更容易实现。
 
-**Read config.** Resolve `<repo-root>` with `git rev-parse --show-toplevel`, then apply the ordinary-key cascade block in `SKILL.md`. Read both files when they exist. If the root cannot be resolved, fall through to the defaults below.
+**读取配置。** 用`git rev-parse --show-toplevel`解析`<repo-root>`，然后在`SKILL.md`中应用普通键级联块。当两个文件存在时读取它们。如果无法解析根，请使用以下默认值。
 
-Resolution steps:
+解决步骤：
 
-1. **In-prompt request.** Reason over the user's prompt for this run for a request about *this document's* output format, expressed either as the `output:` shorthand or in plain language ("give me this as markdown", "I want a webpage"). On an explicit format, match it case-insensitively to `md`/`html`, and ignore the `output:` shorthand token when reading the rest of the prompt as the focus hint. Distinguish a request about the document's format from a format named as subject matter: "ideate on an HTML export feature" is the work, not a doc-format request — do not switch on it.
-   - `output:` alone (no value) → no-op, fall through to step 2.
-   - `output:<unknown>` (e.g., `output:pdf`) → drop the token, fall through to step 2, and remember to emit a one-line note above the post-ideation menu after final resolution: `Ignored unknown output: value '<value>' — using <resolved_format> instead.` where `<resolved_format>` is the value `OUTPUT_FORMAT` actually resolved to after the remaining precedence steps. Do not hardcode a format in the note — that misleads users when config or the default differs from what you assume.
-2. **User-stated preference.** If this prompt holds no format request, honor an output-format preference (markdown vs HTML) the user established earlier — earlier in this session, in your memory, or written into their active instructions — that is already in your context (match `md`/`html` case-insensitively). A remembered preference is more current than the rarely-edited config, so it **overrides** the config in step 3. Do not open or search instruction files to find it — act only on a preference already present in your context; if none is, fall through to the config.
-3. **Config.** If steps 1-2 did not resolve, apply the ordinary-key rule: first **active (non-commented)** `ideate_output:` in `config.local.yaml` then `config.yaml` matching `md` or `html` (case-insensitive) wins. Missing, invalid, or commented values continue to the next layer, then step 4. Critical: lines starting with `#` are YAML comments and must be ignored — the shipped config template includes a commented example like `# ideate_output: md` to document the option, and matching that as an active setting would silently override the default on every run without the user having opted in.
-4. **Default.** Otherwise `OUTPUT_FORMAT=html`.
+1. **提示请求。** 原因是用户针对此运行有关*此文档的*输出格式的请求的提示，以 `output:` 速记或简单语言表示（“给我这个作为 markdown”，“我想要一个网页”）。在显式格式中，不区分大小写地与 `md`/`html` 进行匹配，并在阅读提示的其余部分作为焦点提示时忽略 `output:` 速记标记。区分有关文档格式的请求和名为主题的格式：“构思 HTML 导出功能”是工作，而不是文档格式请求 — 不要打开它。
+   - `output:` 单独（无值）→ 无操作，进入步骤 2。
+   - `output:<unknown>`（例如，`output:pdf`）→ 删除标记，进入步骤 2，并记住在最终解决后在构思后菜单上方发出一行注释：`Ignored unknown output: value '<value>' — using <resolved_format> instead.`，其中 `<resolved_format>` 是在剩余优先步骤之后实际解决的值 `OUTPUT_FORMAT`。不要在注释中硬编码格式——当配置或默认值与您假设的不同时，这会误导用户。
+2. **用户声明的首选项。** 如果此提示不包含任何格式请求，请遵循用户之前建立的输出格式首选项（Markdown 与 HTML） - 在此会话的早期，在您的记忆中，或写入他们的活动指令中 - 已经在您的上下文中（匹配 `md`/`html` 不区分大小写）。记住的首选项比很少编辑的配置更新，因此它**覆盖**步骤 3 中的配置。不要打开或搜索说明文件来查找它 - 仅对上下文中已存在的首选项进行操作；如果没有，则转到配置。
+3. **配置。** 如果步骤 1-2 未解决，请应用普通键规则：首先 **活动（未注释）** `config.local.yaml` 中的 `ideate_output:`，然后`config.yaml` 匹配 `md` 或 `html`（不区分大小写）获胜。缺失、无效或带注释的值继续到下一层，然后执行步骤 4。 关键：以 `#` 开头的行是 YAML 注释，必须忽略 — 附带的配置模板包含像 `# ideate_output: md` 这样的注释示例来记录该选项，并将其匹配为活动设置将在每次运行时默默地覆盖默认值，而无需用户选择。
+4. **默认值。** 否则`OUTPUT_FORMAT=html`。
 
-**Token-parsing convention:** only literal-prefix flag tokens (`output:`, `mode:` where applicable) are consumed and stripped. Other `<word>:<word>` tokens — including conventional commit prefixes like `feat:`, `fix:`, `chore:` that may appear inside a focus hint — pass through verbatim.
+**令牌解析约定：** 仅消耗和剥离文字前缀标志令牌（`output:`、`mode:`，如果适用）。其他 `<word>:<word>` 标记 — 包括可能出现在焦点提示内的传统提交前缀，如 `feat:`、`fix:`、`chore:` — 逐字传递。
 
-**Defer loading the format-rendering reference.** The deliverable is written at Phase 4 (after generation), so `references/ideation-sections.md` and the format-rendering references (`markdown-rendering.md` / `html-rendering.md`) are only needed then — loading them at Phase 0.0 would carry them through the entire grounding and ideation dispatch for no benefit. Resolve `OUTPUT_FORMAT` now, but load the section contract and the matching rendering reference at write time (see `references/post-ideation-workflow.md` §4.1). The `output:` preference does NOT auto-propagate to `ce-brainstorm` on handoff — see §5.2 there.
+**推迟加载格式渲染参考。** 可交付成果是在第 4 阶段（生成后）编写的，因此仅在那时才需要 `references/ideation-sections.md` 和格式渲染参考 (`markdown-rendering.md` / `html-rendering.md`) — 在第 0.0 阶段加载它们将在整个基础和构思调度中携带它们，但没有任何好处。现在解析`OUTPUT_FORMAT`，但在写入时加载节契约和匹配的渲染引用（参见`references/post-ideation-workflow.md`§4.1）。 `output:` 首选项不会在切换时自动传播到 `ce-brainstorm` — 请参阅第 5.2 节。
 
-#### 0.1 Check for Recent Ideation Work
+#### 0.1 检查最近的构思工作
 
-Look in `<root>/ideation/` for ideation documents (`*.md` or `*.html`) created within the last 30 days. This is a repo-mode convenience: when there is no git repository or `<root>` fails to resolve, skip the scan and continue — do not fail the run before 0.3 classifies mode, since elsewhere and no-repo runs write to a temp area and never touch `<root>/ideation/`.
+在 `<root>/ideation/` 中查找过去 30 天内创建的构思文档（`*.md` 或 `*.html`）。这是 repo 模式的便利：当没有 git 存储库或 `<root>` 无法解析时，跳过扫描并继续 — 在 0.3 分类模式之前不要运行失败，因为其他地方和 no-repo 运行写入临时区域并且永远不会触及 `<root>/ideation/`。
 
-A prior doc is relevant when its topic, path, or subsystem overlaps the requested focus, or the request is open-ended and one obvious recent open doc exists. Issue-grounded and non-issue ideations are distinct topics — never offer to resume across that line.
+当先前的文档的主题、路径或子系统与请求的焦点重叠，或者请求是开放式的并且存在一个明显的最近开放文档时，该文档就是相关的。基于问题的想法和非问题的想法是不同的主题——永远不要跨越这条线继续讨论。
 
-If a relevant doc exists, ask whether to continue from it or start fresh. If continuing: read it, summarize what has already been explored, preserve the previous ideas and rejection summary, and update that file rather than creating a duplicate.
+如果存在相关文档，请询问是继续还是重新开始。如果继续：阅读它，总结已经探索过的内容，保留以前的想法和拒绝摘要，并更新该文件而不是创建副本。
 
-**Write the update back in the existing file's format**, overriding the Phase 0.0 baseline. Resume precedence: explicit `output:` arg this run > resumed file's extension > config > default (`html`). An explicit `output:` that differs from the existing file switches format — write the new-format file and leave the original in place.
+**以现有文件的格式写回更新**，覆盖阶段 0.0 基线。恢复优先级：显式 `output:` arg 本次运行 > 恢复文件的扩展名 > 配置 > 默认值 (`html`)。与现有文件切换格式不同的显式 `output:` — 写入新格式文件并保留原始文件。

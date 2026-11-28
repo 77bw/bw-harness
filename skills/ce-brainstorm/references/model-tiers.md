@@ -1,13 +1,13 @@
-# Model Tiers
+# 模型层
 
-Read this when dispatching a sub-agent (the Phase 1.1 grounding scout, the Phase 2.6 claim verifier, or the opt-in Slack researcher). Sub-agent dispatch is tiered by task shape, never hardcoded to a model name:
+在派遣子代理（第 1.1 阶段接地侦察员、第 2.6 阶段索赔验证员或选择加入的 Slack 研究员）时请阅读此内容。子代理调度按任务形状分层，从不硬编码为模型名称：
 
-- **Extraction tier** — the grounding scout: retrieval and quoting work. Use the platform's cheapest capable model when the current harness exposes a known override. "Capable" is part of the spec — escalate to the generation tier when the repo is large or the stack obscure.
-- **Generation tier** — the claim verifier: evidence-driven mechanical verification. Use the platform's mid-tier model when the current harness exposes a known override. If model names are unknown, omit the override and inherit rather than guessing.
-- **Ceiling tier** — the dialogue itself. Questions, approaches, synthesis, and the requirements-only unified plan run in the main conversation on the orchestrator's model; nothing is dispatched for them.
+- **提取层** — 接地侦察：检索和引用工作。当当前宿主暴露已知覆盖时，使用平台最便宜的功能模型。 “有能力”是规范的一部分——当存储库很大或堆栈模糊时升级到生成层。
+- **一代层** — 声明验证者：证据驱动的机械验证。当当前宿主暴露已知覆盖时，使用平台的中间层模型。如果模型名称未知，请忽略覆盖并继承而不是猜测。
+- **天花板**——对话本身。问题、方法、综合以及仅需求的统一计划在协调器模型的主要对话中运行；没有为他们发送任何内容。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-**Degradation rule.** When the platform's subagent primitive does not support per-agent model selection, dispatch the scout and verifier on the inherited model and keep their read budgets and output caps — cost control then comes from structure, not tiering. When the platform has no subagent primitive at all, do the topic scan inline at Phase 1.1 — still writing the grounding dossier to the scratch path, because downstream consumers (the Phase 2.6 verifier, the ce-plan handoff) receive that path — and verify claims inline before the Phase 3 write, with the same budgets.
+**降级规则。** 当平台的子代理原语不支持每个代理模型选择时，在继承的模型上分派侦察者和验证者并保留其读取预算和输出上限 - 成本控制来自结构，而不是分层。当平台根本没有子代理原语时，在第 1.1 阶段进行内联主题扫描 - 仍然将基础档案写入临时路径，因为下游消费者（第 2.6 阶段验证者，ce-plan 切换）接收该路径 - 并在第 3 阶段写入之前以相同的预算内联验证声明。
 
-Classify a rejected native dispatch by whether an agent launched: correct a pre-launch argument rejection once, leave capacity-limited work queued, and send any other failure to the inline degradation above.
+根据代理是否启动对被拒绝的本机调度进行分类：更正一次预启动参数拒绝，将容量有限的工作留在队列中，并将任何其他故障发送到上面的内联降级。

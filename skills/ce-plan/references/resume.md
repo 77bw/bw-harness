@@ -1,61 +1,61 @@
-# Resume, Deepen, and Approach Altitude
+# 恢复、深化并接近高度
 
-Phase 0.1 and 0.1a of `ce-plan`. Read this when the run may target an existing plan or an approach-altitude request.
+`ce-plan` 的 0.1 相和 0.1a 相。当跑步可能针对现有计划或进场高度请求时，请阅读本文。
 
-#### 0.1 Resume Existing Plan Work When Appropriate
+#### 0.1 适当时恢复现有计划工作
 
-This resume check needs `<root>/plans/`, so it only applies to a repo-backed run. If there is no git repository, or resolving `<root>` fails (a bad `docs_root`), do **not** fail the run here — skip resume discovery and continue to Phase 0.1a/0.1b, which route non-software and answer-seeking work that never touches `<root>/plans/`. When a plan path was given explicitly, use it directly without resolving `<root>`.
+此恢复检查需要`<root>/plans/`，因此它仅适用于回购支持的运行。如果没有 git 存储库，或者解析 `<root>` 失败（糟糕的 `docs_root`），请不要**使此处的运行失败 — 跳过恢复发现并继续到阶段 0.1a/0.1b，该阶段将路由非软件和从未触及 `<root>/plans/` 的答案寻求工作。当显式给出计划路径时，直接使用它，而不解析`<root>`。
 
-If the user references an existing plan file or there is an obvious recent matching plan in `<root>/plans/`:
-- Read it. Follow an explicit supersession notice to its canonical path only when the linked document's contents establish that it represents the same requested work; otherwise stop for clarification. If discovery finds same-basename format siblings without a clear canonical path, ask which to use
-- Confirm whether to update it in place or create a new plan
-- If updating, revise only the still-relevant sections. Plans do not carry per-unit progress state — progress is derived from git by `ce-work`, so there is no progress to preserve across edits
+如果用户引用了现有的计划文件或者`<root>/plans/`中有明显的最近匹配的计划：
+- 阅读它。仅当链接文档的内容确定它代表相同的请求工作时，才遵循其规范路径的明确取代通知；否则停止澄清。如果发现发现相同基本名称格式的兄弟姐妹没有明确的规范路径，请询问使用哪个
+- 确认是否就地更新或创建新计划
+- 如果更新，仅修改仍然相关的部分。计划不包含每个单元的进度状态 - 进度是按 `ce-work` 从 git 派生的，因此在编辑过程中无需保留进度
 
-**A requirements-only unified plan is not a resume target.** A `<root>/plans/` file containing a Product Contract without implementation planning is an *enrichment input* — do not fire the update-or-create confirmation for it. Fall through to Phase 0.2, which enriches it in place. In pipeline mode the resume choice is made automatically (default to in-place update of the referenced plan) and is never prompted, because no user is present to answer.
+**仅包含需求的统一计划不是恢复目标。** 包含没有实施计划的产品合同的 `<root>/plans/` 文件是*丰富输入* - 不要为其触发更新或创建确认。进入阶段 0.2，并就地丰富它。在管道模式下，恢复选择是自动进行的（默认为引用计划的就地更新）并且永远不会提示，因为没有用户在场回答。
 
-**Deepen intent:** The word "deepen" (or "deepening") in reference to a plan is the primary trigger for the deepening fast path. When the user says "deepen the plan", "deepen my plan", "run a deepening pass", or similar, the target document is a **plan** in `<root>/plans/`, not a requirements document. Use any path, keyword, or context the user provides to identify the right plan. If a path is provided, verify it is actually a plan document. If the match is not obvious, confirm with the user before proceeding.
+**深化意图：** 涉及计划的“深化”（或“深化”）一词是深化快速路径的主要触发因素。当用户说“深化计划”、“深化我的计划”、“运行深化过程”或类似内容时，目标文档是`<root>/plans/`中的**计划**，而不是需求文档。使用用户提供的任何路径、关键字或上下文来确定正确的计划。如果提供了路径，请验证它实际上是计划文档。如果匹配不明显，请在继续之前与用户确认。
 
-Words like "strengthen", "confidence", "gaps", and "rigor" are NOT sufficient on their own to trigger deepening. These words appear in normal editing requests ("strengthen that section about the diagram", "there are gaps in the test scenarios") and should not cause a holistic deepening pass. Only treat them as deepening intent when the request clearly targets the plan as a whole and does not name a specific section or content area to change — and even then, prefer to confirm with the user before entering the deepening flow.
+“加强”、“信心”、“差距”和“严格”等词语本身不足以引发深化。这些词出现在正常的编辑请求中（“加强有关图表的部分”、“测试场景中存在差距”），并且不应导致整体深化通过。只有当请求明确针对整个计划并且没有指定要更改的特定部分或内容区域时，才将它们视为深化意图 - 即使这样，也更愿意在进入深化流程之前与用户确认。
 
-Once the plan is identified and appears complete (all major sections present, implementation units defined):
-- **Routing is keyed on file extension first, then frontmatter.** HTML plans (`.html`) are always software plans — the html-rendering invariant forbids YAML frontmatter, so frontmatter absence is not a non-software signal for HTML. Treat the visible metadata fields as the frontmatter equivalent, whether they sit in the header or in a "Document metadata" block.
-  - **`.html` plan:** short-circuit to Phase 5.3 (Confidence Check and Deepening) in **interactive mode**. Never route to `references/universal-planning.md` based on missing YAML.
-  - **`.md` plan WITH YAML frontmatter:** short-circuit to Phase 5.3 in **interactive mode**.
-  - **`.md` plan WITHOUT YAML frontmatter** (non-software plans use a simple `# Title` heading with `Created:` date instead): route to `references/universal-planning.md` for editing or deepening instead of Phase 5.3. Non-software plans do not use the software confidence check.
+一旦计划被确定并看起来完整（所有主要部分都存在，定义了实施单位）：
+- **路由首先取决于文件扩展名，然后是 frontmatter。** HTML 计划 (`.html`) 始终是软件计划 - html 渲染不变式禁止 YAML frontmatter，因此 frontmatter 缺失不是 HTML 的非软件信号。将可见元数据字段视为等效的 frontmatter，无论它们位于标头还是“文档元数据”块中。
+  - **`.html`计划：**在**交互模式**中短路至阶段5.3（置信度检查和深化）。切勿基于缺少 YAML 路由至 `references/universal-planning.md`。
+  - **`.md` 计划与 YAML frontmatter:** 在 **交互模式** 短路到阶段 5.3。
+  - **`.md` 计划没有 YAML frontmatter**（非软件计划使用简单的 `# Title` 标题和 `Created:` 日期）：路由到 `references/universal-planning.md` 进行编辑或深化，而不是阶段 5.3。非软件计划不使用软件置信度检查。
 
-The Phase 5.3 short-circuit avoids re-running the full planning workflow and gives the user control over which findings are integrated.
+第 5.3 阶段的短路避免了重新运行完整的规划工作流程，并让用户可以控制集成哪些结果。
 
-Normal editing requests (e.g., "update the test scenarios", "add a new implementation unit", "strengthen the risk section") should NOT trigger the fast path — they follow the standard resume flow.
+正常的编辑请求（例如，“更新测试场景”、“添加新的实施单元”、“加强风险部分”）不应触发快速路径——它们遵循标准的简历流程。
 
-If the plan already has a `deepened: YYYY-MM-DD` frontmatter field and there is no explicit user request to re-deepen, the fast path still applies the same confidence-gap evaluation — it does not force deepening.
+如果计划已经有 `deepened: YYYY-MM-DD` frontmatter 字段，并且没有明确的用户请求重新深化，则快速路径仍然应用相同的置信差距评估 - 它不会强制深化。
 
-**Resume preserves the existing artifact's format.** When resuming an existing plan, the resume run writes back in whatever format the existing artifact uses — markdown if the existing file is `.md`, HTML if it is `.html` — so a resume doesn't silently change the artifact shape. Explicit `output:` arguments on this run override (e.g., resuming an `.html` plan with `output:md` switches the artifact to markdown). A headless run resumes in the existing format like any other run. When the format switches, the resume writes the new-format file at the parallel path (`<plan-basename>.<ext>`) and the original is preserved with a visible supersession notice linking to the completed new-format file.
+**恢复保留现有产物的格式。** 恢复现有计划时，恢复运行会以现有产物使用的任何格式写回 — 如果现有文件为 `.md`，则为 markdown；如果为 `.html`，则为 HTML — 因此简历不会默默地更改产物形状。此运行覆盖上的显式 `output:` 参数（例如，使用 `output:md` 恢复 `.html` 计划会将产物切换为Markdown）。无头运行会像任何其他运行一样以现有格式恢复。当格式切换时，简历会在并行路径 (`<plan-basename>.<ext>`) 处写入新格式文件，并保留原始文件，并带有链接到已完成的新格式文件的可见替换通知。
 
-For an explicit format conversion, preserve the existing artifact basename and change only the extension; do not generate a new timestamp, so same-basename sibling discovery can mark the old artifact stale.
+对于显式格式转换，保留现有产物基本名称并仅更改扩展名；不生成新的时间戳，因此相同基名的同级发现可以将旧产物标记为过时。
 
-#### 0.1a Recognize Approach-Altitude Requests
+#### 0.1a 识别进近高度请求
 
-Some requests are better answered one level up: produce a grounded **approach-plan** — a plan for *how the deliverable will be made* — and hold there, rather than zero-shotting the deliverable. This runs **after** Phase 0.1's resume and deepen fast paths (so "deepen the plan" and resume short-circuit first) and **before** Phase 0.1b's domain split (so the capability is domain-general — it applies to software and knowledge-work alike).
+有些请求在上一级得到更好的答复：制定一个脚踏实地的**方法计划**——一个关于*如何制作可交付成果*的计划——并坚持下去，而不是对可交付成果进行零射击。它在**阶段 0.1 的恢复和深化快速路径之后（因此“深化计划”并首先恢复短路）和**在**阶段 0.1b 的领域分割之前运行（因此该功能是领域通用的 - 它同样适用于软件和知识工作）。
 
-There are two ways in, with very different conditions:
+有两种方式，条件截然不同：
 
-**Explicit (always honored, no conditions).** When the user asks for the approach itself — "plan for a plan", "plan the approach", "plan how you'll do X", "don't do it yet -- just plan how you'd approach it" — enter approach altitude and hold at the approach. Do NOT begin the deliverable. Key on language that asks for *the approach to producing something*, not the something. This is a distinct signal from "deepen"/"strengthen" (the Phase 0.1 deepening fast path) and from a normal plan request.
+**明确（总是受到尊重，没有条件）。** 当用户要求进场本身时 - “计划一个计划”，“计划进场”，“计划你将如何做 X”，“先不要做 - 只是计划你如何进场” - 输入进场高度并保持进场。不要开始交付成果。重点是要求“生产某物的方法”的语言，而不是某物。这是与“深化”/“加强”（0.1 阶段深化快速路径）和正常计划要求不同的信号。
 
-**Proactive (rare, conservative).** When the user gives a plain request with no approach-language, offer an approach-plan **only when both of these are clearly high**:
+**主动（罕见，保守）。**当用户给出没有接近语言的简单请求时，提供一个接近计划**仅当这两者都明显很高时**：
 
-- **Method uncertainty** — the *core* approach is genuinely unsettled: competing methodologies that would yield *different deliverables*, unclear how disparate sources or constraints combine, or an outcome stated only at the value level ("something I can actually use"). This is **not** satisfied by a task whose core method is obvious but whose *rollout, sequencing, scope, or ordering* has routine variants (big-bang vs. incremental, batch order, phased vs. one-shot) — those are ordinary plan decisions the Phase 0.7 scoping synthesis already surfaces as call-outs, not method-uncertainty. A large or mechanical change (a 40-endpoint migration, a wide rename, a framework bump) is typically **costly but method-obvious**; cost alone never triggers the offer.
-- **Cost of getting it wrong** — the deliverable is expensive or slow to produce and a wrong approach wastes real effort (heavy inputs to process, a long synthesis, a large or risky change).
+- **方法不确定性** - *核心*方法确实不稳定：相互竞争的方法会产生*不同的可交付成果*，不清楚不同的来源或约束如何组合，或者仅在价值层面陈述的结果（“我实际上可以使用的东西”）。如果一项任务的核心方法很明显，但它的“推出、排序、范围或排序”具有常规变体（大爆炸与增量、批量顺序、分阶段与一次性），那么“不能”满足这一点——这些是普通的计划决策，阶段 0.7 范围界定综合已经作为标注出现，而不是方法不确定性。大型或机械变更（40 个端点迁移、广泛重命名、框架变更）通常**成本高昂，但方法显而易见**；单独的成本永远不会触发报价。
+- **出错的成本** — 可交付成果的成本昂贵或生成速度缓慢，错误的方法会浪费真正的精力（流程的大量投入、漫长的综合、大型或有风险的变更）。
 
-If either is low, **stay silent and plan/do normally.** When borderline, stay silent. Assess this from request shape and input metadata only — do not read the inputs yet (recon happens after the offer is accepted). When the offer is made, it is a **single dismissible line** naming the specific signal (e.g., "Three heavy sources are about to get synthesized and you might want them weighted differently -- want my approach first, or should I just go?") — never a blocking question, never a ceremony. Because the explicit path above is always available, a missed offer is cheap; the failure to avoid is nagging — opening turns with "want me to plan the approach first?" when the method is obvious.
+如果其中一个较低，**保持沉默，正常情况下plan/do。**当处于临界状态时，保持沉默。仅根据请求形状和输入元数据来评估这一点 - 暂时不要读取输入（在接受报价后进行侦察）。当提出要约时，它是一个**可忽略的行**，命名特定的信号（例如，“三个重源即将被合成，你可能希望它们的权重不同——想要我先走，还是我应该走？”）——从来不是一个阻塞问题，从来不是一个仪式。因为上面的明确路径总是可用的，所以错过报价是便宜的；无法避免是令人烦恼的——开场白是“要我先计划一下进场吗？”当方法显而易见时。
 
-**Stay separate from the other approach mechanisms (R16).** An investigative or analytical request with no approach-language, where both signals are not clearly high, is NOT an approach-altitude request. It must pass through this check untouched to Phase 0.1b (Classify Task Domain), where answer-seeking's plan-of-attack handles it; this check runs earlier, but it must not intercept such a request. "Deepen the plan" and resume are already short-circuited by Phase 0.1. The Phase 0.7 / 5.1.5 scoping synthesis and the Phase 5.3 deepening pass operate on a deliverable already committed to; approach altitude operates *before* that commitment. Full distinctions: `references/approach-altitude.md`.
+**与其他进场机制保持分离 (R16)。** 没有进场语言的调查或分析请求，如果两个信号都不是明显高，则不是进场高度请求。它必须原封不动地通过此检查，进入阶段 0.1b（分类任务域），其中寻求答案的攻击计划将处理它；此检查较早运行，但不得拦截此类请求。 “深化计划”和简历到0.1阶段就已经短路了。阶段 0.7 / 5.1.5 范围界定综合和阶段 5.3 深化阶段对已承诺的交付成果进行操作；进近高度在该承诺“之前”运行。全部荣誉：`references/approach-altitude.md`。
 
-On entry (explicit, or an accepted offer), read `references/approach-altitude.md` and follow it. Otherwise continue to Phase 0.1b unchanged.
+进入时（明确的，或接受的报价），阅读`references/approach-altitude.md`并遵循它。否则继续进行阶段 0.1b 不变。
 
-#### 0.1b Classify Task Domain
+#### 0.1b 任务域分类
 
-If the task asks to build, modify, refactor, deploy, or architect software (code, schemas, infrastructure), the artifact-producing route is now known. Re-read `references/output-mode.md` and settle any pending config/default resolution before selecting the renderer or continuing to Phase 0.2.
+如果任务要求构建、修改、重构、部署或架构软件（代码、模式、基础设施），那么产物生成路径现在是已知的。在选择渲染器或继续阶段 0.2 之前，重新读取 `references/output-mode.md` 并解决任何待处理的 config/default 分辨率。
 
-Classify by task-type, not topic. A request that merely *references* code, a repo, an API, or a database is not automatically software work: building or modifying code is software; investigating or analyzing it is answer-seeking. If the domain is genuinely ambiguous, ask the user before routing.
+按任务类型而不是主题分类。仅“引用”代码、存储库、API 或数据库的请求不会自动成为软件工作：构建或修改代码是软件；调查或分析它是寻求答案。如果域确实不明确，请在路由之前询问用户。
 
-Otherwise, read `references/universal-planning.md` and follow that workflow instead. Skip all subsequent software phases. Named tools or source links are inputs and do not change this routing.
+否则，请阅读 `references/universal-planning.md` 并遵循该工作流程。跳过所有后续软件阶段。命名工具或源链接是输入，不会更改此路由。

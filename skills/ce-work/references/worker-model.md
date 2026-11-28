@@ -1,22 +1,22 @@
-# Choosing the model for a native worker
+# 为本地工人选择模型
 
-Read this before dispatching the first native implementation worker. It decides the model each worker runs on. The orchestrator keeps the session model, and so does every unit that runs inline. A cross-model unit takes its model from its route, not from this file.
+在分派第一个本地实现工作人员之前请阅读本文。它决定每个工作人员运行的模型。编排器保留会话模型，内联运行的每个单元也是如此。跨模型单元从其路线而不是此文件中获取其模型。
 
-**Pick the tier per unit, from the unit itself.** Decide it while you plan the wave and record it with the unit in the task list, so each dispatch passes the tier you chose for that unit.
+**从单位本身中选择每个单位的等级。** 在计划波次时决定它并将其与任务列表中的单位一起记录，以便每次派遣都会通过你为该单位选择的等级。
 
-- **Mid-tier** when the unit's plan section settles what to build: its Files, Approach, and test scenarios leave no design choice open, and the plan lists every file the change touches. Pass the balanced mid-tier model: the host's general-purpose model one tier below its most capable one, not its smallest or fastest.
-- **Session model** (no override) for every other unit: one that leaves the approach open, changes a contract other code depends on, needs debugging or investigation to find the change, or spans several subsystems. When you cannot tell which kind a unit is, it gets the session model.
+- **中层** 当单元的计划部分确定要构建的内容时：其文件、方法和测试场景没有留下任何设计选择，并且计划列出了更改涉及的每个文件。通过平衡的中间层模型：主机的通用模型比其最强大的模型低一层，而不是其最小或最快的模型。
+- **会话模型**（无覆盖）适用于所有其他单元：该模型使方法保持开放状态，更改其他代码所依赖的合同，需要调试或调查以找到更改，或跨越多个子系统。当你无法判断一个单元是哪种类型时，它会获取会话模型。
 
-Do not use a model cheaper than mid-tier. Cheaper models take more turns on multi-step work and end up costing more. When the session model is itself mid-tier or cheaper, every worker gets the session model with no override.
+不要使用比中端便宜的型号。较便宜的型号需要更多轮次进行多步骤工作，最终成本更高。当会话模型本身是中层或更便宜时，每个工作人员都会获得没有覆盖的会话模型。
 
-**Take the model name from the host, not from memory.** Choose the mid-tier model from the models the current dispatch tool says it accepts, such as the values its model parameter lists or an allowlist it reports. Do not copy a model name from a skill, an earlier session, or your own knowledge without checking it against that list, because hosts change which models they accept. When the host states no accepted models, use the plain tier alias its dispatch tool documents, if it has one. Otherwise omit the override.
+**从主机中获取模型名称，而不是从内存中获取。** 从当前调度工具表示接受的模型中选择中间层模型，例如其模型参数列表的值或其报告的允许列表。请勿在未对照该列表进行检查的情况下从技能、早期会话或您自己的知识中复制模型名称，因为主机会更改他们接受的模型。当主机声明没有接受的模型时，请使用其调度工具文档的普通层别名（如果有）。否则忽略覆盖。
 
-When the dispatch tool takes a reasoning effort, pass one together with the model. A model passed without an effort runs at that model's default effort, which can be much lower than the session's. Pass the session's own effort.
+当调度工具进行推理时，将其与模型一起传递。无需付出努力就通过的模型将以该模型的默认努力运行，该默认努力可能远低于会话的努力。通过会议自己的努力。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-**No model selector.** On a host whose subagent tool takes no model or custom-agent selector, omit the override and let every worker inherit the session model. Naming a model in the worker's prompt does not change the model it runs on.
+**无模型选择器。** 在子代理工具不采用模型或自定义代理选择器的主机上，忽略覆盖并让每个工作线程继承会话模型。在工作器提示中命名模型不会更改其运行的模型。
 
-**Refused model.** When the host refuses the requested model or effort, dispatch that worker once more with no override, so it inherits the session model. That retry is the one correction a pre-launch rejection gets in `references/execution-strategy.md`. Do not try a different model. Mention the refused model in the run summary. A dispatch refused because the host is at its agent limit is a capacity problem, which that file's dispatch rules handle.
+**拒绝模型。** 当主机拒绝请求的模型或工作时，再次分派该工作人员而不进行覆盖，因此它会继承会话模型。这次重试是在 `references/execution-strategy.md` 中对启动前拒绝进行的一次更正。不要尝试不同的模型。在运行摘要中提及被拒绝的模型。由于主机达到其代理限制而拒绝调度是一个容量问题，该文件的调度规则会处理该问题。
 
-**Escalate once on reasoning, not on environment.** Escalate when a mid-tier worker reports it could not work out how to build the unit, or when its change fails verification and the failure is not caused by a missing credential, tool, service, or other fact outside the code. Retire that worker without sending it a correction, and give the unit to one fresh worker on the session model. That worker starts from the first worker's changes in the workspace and gets the unit packet plus what the first worker reported. It may undo those changes within the unit's files. A step the first worker held because the environment blocked it is not a reason to escalate.
+**根据推理升级一次，而不是根据环境升级。** 当中间层工作人员报告无法弄清楚如何构建单元时，或者当其更改未通过验证并且失败不是由缺少凭证、工具、服务或代码之外的其他事实引起时，升级。退休该工作人员而不发送更正，并将该单元交给会话模型上的一名新工作人员。该工作人员从第一个工作人员在工作区中的更改开始，并获取单元数据包加上第一个工作人员报告的内容。它可能会撤消单元文件中的这些更改。第一个工人因环境阻碍而采取的步骤并不是升级的理由。

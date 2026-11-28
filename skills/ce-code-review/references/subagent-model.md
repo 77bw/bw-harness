@@ -1,21 +1,21 @@
-# Choosing the model for a spawned subagent
+# 为生成的子代理选择模型
 
-This rule decides the model and reasoning effort for every subagent this skill spawns: reviewers, the lite reviewer, checks, leaves, and validators. Read it before the first spawn. The orchestrator itself keeps the session model.
+该规则决定了该技能产生的每个子代理的模型和推理工作：审查者、精简审查者、检查、离开和验证者。在第一次生成之前阅读它。编排器本身保留会话模型。
 
-**Default tier.** The step that spawns the subagent names its default tier. In Codex (the host whose subagent tool is `spawn_agent`), the default tier for every subagent is instead `gpt-6.1-terra` with reasoning effort `high`, passed as the spawn's `model` and `reasoning_effort`. That replaces the step's tier, including a step that would otherwise run the subagent on the session model or a cheaper tier.
+**默认层。** 生成子代理的步骤命名其默认层。在Codex（子代理工具为`spawn_agent`的主机）中，每个子代理的默认层是`gpt-6.1-terra`，推理工作为`high`，作为生成的`model`和`reasoning_effort`传递。这将替换步骤的层，包括否则将在会话模型或更便宜的层上运行子代理的步骤。
 
-If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
+如果用户或项目的活动指令或实时提示为此子代理命名了模型，请使用该模型而不是上面的默认层。他们可以按子代理的层、提示资产名称或正在分派的子代理来命名。如果没有此类指令，为此子代理角色配置的模型将优先于默认层。
 
-**Configured model.** `review_subagents` in CE config is the model configured for this subagent's role. Read it under this rule:
+**配置的模型。** CE 配置中的`review_subagents` 是为此子代理角色配置的模型。根据此规则阅读：
 
 <!-- ce-config-layers:start -->
-**Resolve ordinary CE yaml keys from the two repo files.**
+**解析两个存储库文件中的普通 CE yaml 密钥。**
 
-- **Read** `<repo-root>/.compound-engineering/config.local.yaml`, then `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`). Missing files are skipped. Gitignore does not change resolution.
-- **Win** with the first active (non-commented) value. For scalars, empty is unset; an invalid value continues to the next layer, then the skill default. For lists and maps, a present key — including an empty list or map — replaces the whole key.
-- **Do not** use this rule for `docs_root` — that key is `config.yaml` only.
+- **读取** `<repo-root>/.compound-engineering/config.local.yaml`，然后读取 `config.yaml` (`<repo-root>` = `git rev-parse --show-toplevel`)。丢失的文件将被跳过。 Gitignore 不会改变分辨率。
+- **以第一个活动（未注释）值获胜**。对于标量，未设置空；无效值继续下一层，则技能默认。对于列表和地图，现有的键（包括空列表或地图）将替换整个键。
+- **不要**将此规则用于 `docs_root` — 该键仅是 `config.yaml`。
 <!-- ce-config-layers:end -->
 
-The key maps a harness name (`codex`, `claude`, `grok`, `cursor`, `opencode`, `antigravity`) to an entry with an optional `model` and an optional `effort`. Only the entry for the current harness applies, and it applies to every subagent this skill spawns. A field the entry leaves out keeps the default tier's value. A field that is not a string is ignored. Pass an effort only when the spawn tool takes one; otherwise say in Coverage that the configured effort was not applied.
+该键将宿主名称 (`codex`、`claude`、`grok`、`cursor`、`opencode`、`antigravity`) 映射到具有可选 `model` 和可选 `effort` 的条目。仅当前装备的条目适用，并且适用于该技能产生的每个子代理。条目省略的字段保留默认层的值。非字符串的字段将被忽略。仅当生成工具需要一个努力时才传递努力；否则，在覆盖范围中说明未应用配置的工作。
 
-**Refused model.** When the spawn is refused because the requested model or effort is not available, spawn that subagent once more with no model or effort override, so it inherits the session model. Do not try a different model. Say in Coverage which model was refused and, when the error lists them, which models the host offers. A spawn refused because the host is at its active-agent limit is not this case; the spawning step's own capacity handling covers it.
+**拒绝模型。** 当由于请求的模型或工作不可用而拒绝生成时，再次生成该子代理而不覆盖任何模型或工作，因此它继承会话模型。不要尝试不同的模型。在“覆盖范围”中说明哪个型号被拒绝，以及当错误列出它们时，主机提供哪些型号。生成被拒绝是因为主机处于其活动代理限制，但这种情况并非如此；生成步骤自身的容量处理覆盖了它。

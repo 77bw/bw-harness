@@ -1,45 +1,47 @@
 ---
 name: ce-noslop
-description: "Rewrite, check, or draft prose so it carries no AI writing tells, reads plainly on the first read, and keeps every source fact. Use when asked to make writing plainer or free of those tells, to check writing for them, or when drafting from supplied content. Use ce-promote for channel-specific marketing copy."
-argument-hint: "[mode:author|edit|detect] [text, file path, or nothing]"
+description: "重写、检查或起草散文，这样它就不会带有人工智能写作的痕迹，第一次阅读时就可以清楚地阅读，并保留每一个来源事实。当要求使写作更简单或摆脱这些暗示时使用，以检查它们的写作，或根据提供的内容起草时。特定于渠道的营销文案不属于此技能范围。"
+argument-hint: "[mode:author|编辑|检测] [文本、文件路径或无]"
 ---
 
-# Write without slop
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-Prose that carries no AI tells and that a reader understands on the first read, with every fact the source stated still there. Both goals hold at once: text that is free of tells but still dense has failed, and text that is plain but changes how certain a claim is has failed.
+# 书写无遗漏
 
-**Done:** the mode's output is returned, every fact, number, name, quote, and citation in the input survives, and nothing was added that the source or the caller did not supply.
+没有人工智能讲述的散文，读者在第一次阅读时就能理解，来源陈述的每一个事实仍然存在。这两个目标同时成立：没有任何线索但仍然密集的文本是失败的，而简单但改变主张确定性的文本是失败的。
 
-**Boundaries:** never touch code blocks, quoted text, frontmatter, link targets, identifiers, or a token the caller's own contract requires, unless the user names that content as the thing to fix. Never say whether text was written by a model. Write a named file in place only when the request asks for that; otherwise return the text.
+**完成：** 返回模式的输出，输入中的每个事实、数字、名称、引用和引文都将保留，并且不会添加来源或调用者未提供的任何内容。
 
-## Mode
+**边界：**永远不要触及代码块、引用文本、前言、链接目标、标识符或调用者自己的合约所需的令牌，除非用户将该内容命名为要修复的内容。永远不要说文字是否是由模特写的。仅当请求要求时才就地写入命名文件；否则返回文本。
 
-Take a `mode:` token when one is given. Otherwise: no draft means **author**; an imperative on a draft means **edit**; a question about a draft means **detect**.
+## 模式
 
-- **author.** Hold the tests below while the caller writes; return nothing. When handed content and asked to write, draft it under the same tests.
-- **edit.** Rewrite only the sentences a test fails on, and return the text. A sentence that passes stays as written, so a second pass on the returned text changes nothing. Say what changed in one line only when the caller asks for it, and keep that line outside the rewritten text and out of any artifact.
-- **detect.** Name each pattern found, quote the line, give the fix in a few words. Do not rewrite.
+当给定一个 `mode:` 令牌时，拿一个。否则：没有草稿意味着**作者**；草稿上的祈使句意味着**编辑**；关于草稿的问题意味着**检测**。
 
-For edit and detect, and for an author passage the tests alone do not settle, read `references/patterns.md`. On text that is not English, apply the tests only. Note that the pattern catalog did not apply inside detect findings or inside a change line the caller asked for, and nowhere else.
+- **作者。** 在调用者编写时进行以下测试；什么也不返回。当交给内容并要求写作时，在相同的测试下起草它。
+- **编辑。** 仅重写测试失败的句子，并返回文本。通过的句子保持原样，因此对返回文本的第二次传递不会改变任何内容。仅当调用者要求时才在一行中说出更改的内容，并将该行保留在重写的文本之外并且远离任何产物。
+- **检测。** 命名找到的每个模式，引用该行，用几句话给出修复方法。不要重写。
 
-## Register
+对于编辑和检测，以及对于作者段落，仅靠测试并不能解决问题，请阅读`references/patterns.md`。对于非英语文本，仅应用测试。请注意，模式目录不适用于检测结果或调用者要求的更改行内，也不适用于其他地方。
 
-Pick by who reads the result. The caller's own interaction contract wins over any line here.
+## 登记
 
-- **Agent talking to the user.** The reader is a teammate who knows the domain and did not watch the work. Write each sentence as you would say it to them.
-- **Repo or team artifact.** Neutral. Match the surrounding document's idiom. No first person, no opinion the artifact does not need. This is the default when no reader is named.
-- **The user's own writing.** Preserve voice; make the minimum effective edit. Understandability edits stop at sentence splits and actor restoration that keep the user's word choice.
+由阅读结果的人选择。调用者自己的交互合约胜过这里的任何一行。
 
-## The tests
+- **代理与用户交谈。**读者是了解该领域但没有观看作品的队友。按照您对他们说的方式写下每个句子。
+- **回购或团队产物。**中立。匹配周围文档的习语。没有第一人称，没有神器不需要的意见。当没有指定读者时，这是默认值。
+- **用户自己的书写。**保留语音；进行最小有效编辑。可理解性编辑停止于句子分割和演员恢复，以保留用户的单词选择。
 
-Apply these to every sentence, in author mode as constraints and in edit or detect mode as checks.
+## 测试
 
-1. **Mechanism.** Does the sentence say what the thing does, or how it feels or what it is like? Replace the feeling or figure with the fact it displaced, or cut the sentence.
-2. **Portability.** Could the sentence move to another project unchanged? Then it carries no fact about this one.
-3. **Actor.** Who does the verb? Name them when the source says who. Keep the passive when the actor is unknown or naming it adds nothing.
-4. **One idea.** Would the reader have to reread or decode the sentence? Split it or spell it out. A sentence the reader gets on the first pass stays, however long.
-5. **Density.** One device proves nothing. Three or more distinct patterns in a passage, or one repeated across passages, is a finding.
-6. **Decision first.** Does the first sentence carry the outcome the reader needs?
-7. **Reader.** Can someone without the document or the code open act on this? Gloss the identifier or name the consequence.
+将这些应用到每个句子，在作者模式下作为约束，在编辑或检测模式下作为检查。
 
-Keep exact identifiers, paths, commands, and thresholds. For wording choices, read `references/terminology.md`.
+1. **机制。** 这句话是否说明了该事物的作用、感觉如何或是什么样子？用它取代的事实替换感觉或形象，或者删掉句子。
+2. **可移植性。** 这句话可以原封不动地转移到另一个项目吗？那么它就没有任何关于这一点的事实。
+3. **演员。** 谁做动词？当消息来源说是谁时，说出他们的名字。当行动者未知或说出其名字没有任何帮助时，保持被动。
+4. **一个想法。** 读者是否需要重读或解码该句子？拆分它或拼写出来。读者在第一遍看到的句子无论多长都会保留下来。
+5. **密度。** 一台设备证明不了什么。一篇文章中出现三个或更多不同的模式，或者在各个段落中重复出现一个模式，就是一项发现。
+6. **先做决定。**第一句话是否包含了读者需要的结果？
+7. **读者。** 没有文档或代码开放的人可以对此采取行动吗？注释掉标识符或命名结果。
+
+保留准确的标识符、路径、命令和阈值。对于措辞选择，请阅读`references/terminology.md`。

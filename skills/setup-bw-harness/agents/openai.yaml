@@ -1,0 +1,5 @@
+interface:
+  display_name: "设置 BW 线束"
+  short_description: "将 BW 工作流规则合并到现有或新项目中"
+policy:
+  allow_implicit_invocation: false

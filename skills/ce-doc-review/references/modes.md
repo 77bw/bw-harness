@@ -1,22 +1,22 @@
-# Mode detection and the interactive question tool
+# 模式检测和交互式提问工具
 
-## Interactive mode rules
+## 交互模式规则
 
-- **Pre-load the host's blocking question tool already in the current tool list before you ask any question.** If the matching tool is listed but unloaded, use the host's tool-discovery primitive once at the start of the Interactive flow to load that capability — do not search for another host's tool name. Presence in the current tool list is proof; never call a user-facing question tool to discover whether it exists. The routing question, the per-finding walk-through, and the bulk-preview Proceed/Cancel question all depend on it.
-- **The numbered-list fallback applies only when the harness genuinely lacks a blocking question tool** — no matching tool is in the current list, a real question call errors, or the runtime mode does not expose one. In those cases, present the options as a numbered list on the host's user-visible chat surface and wait for the reply. A question that calls for a user decision must either call the tool or fall back loudly. Rendering it as narrative text because the tool feels inconvenient, because the model is in report-formatting mode, or because the instruction was buried in a long skill is a bug.
-- When a question is a yes/no or a batch confirm, word it so that agreeing accepts the recommendation. Numbered choices stay numbered choices.
+- **在提出任何问题之前，预加载当前工具列表中已有的主机的阻塞问题工具。**如果匹配的工具已列出但已卸载，请在交互流程开始时使用主机的工具发现原语一次来加载该功能 - 不要搜索其他主机的工具名称。当前工具列表中的存在就是证明；永远不要调用面向用户的提问工具来发现它是否存在。路由问题、每次查找的演练以及批量预览 Proceed/Cancel 问题都依赖于它。
+- **编号列表后备仅在工具确实缺少阻塞问题工具时适用** — 当前列表中没有匹配的工具、真正的问题调用错误或运行时模式未公开工具。在这些情况下，请将选项以编号列表的形式显示在主持人的用户可见聊天界面上，然后等待回复。需要用户做出决定的问题必须要么调用该工具，要么大声回退。因为该工具感觉不方便，因为模型处于报告格式模式，或者因为指令被埋在很长的技能中，所以将其渲染为叙述性文本是一个错误。
+- 当问题是 yes/no 或批量确认时，请用措辞表达同意并接受建议。编号选择保留编号选择。
 
-## Phase 0: Detect Mode
+## 阶段 0：检测模式
 
-Arguments may contain a document path, a mode token, or both; both tokens together is not a conflict. Tokens starting with `mode:` are flags, not paths — strip them, and use any remaining token as the document path for Phase 1 (getting the document). `depth:full` is also a flag: strip it and pass it to `references/depth.md`.
+参数可以包含文档路径、模式标记或两者；两个令牌在一起并不冲突。以 `mode:` 开头的标记是标志，而不是路径 - 剥离它们，并使用任何剩余的标记作为阶段 1（获取文档）的文档路径。 `depth:full`也是一个标志：将其剥离并传递给`references/depth.md`。
 
-`mode:non-interactive` (or its deprecated alias `mode:headless`) sets **non-interactive mode**. This mode changes how the findings that were not applied are delivered; it does not change how findings are classified. Use the same judgment about which tier each finding belongs in:
+`mode:non-interactive`（或其已弃用的别名`mode:headless`）设置**非交互模式**。这种模式改变了未应用的调查结果的交付方式；它不会改变调查结果的分类方式。使用相同的判断来判断每个发现属于哪一层：
 
-- fixes that synthesis classifies as Apply are applied and reported in the change list (same as interactive)
-- everything else — the grouped confirmation, decisions, and FYI observations — is returned as structured text with the original classifications intact, for the caller to handle. No blocking-question prompts, no interactive routing.
-- proposed fixes and decisions that were not applied are also recorded in the document, per `references/open-questions-defer.md`, so they outlive this session, unless the request restricts edits to the document
-- Phase 5 (routing) returns immediately with "Review complete" (no routing question, no terminal question)
+- 修复了综合分类为“应用”并在更改列表中应用并报告的问题（与交互式相同）
+- 其他所有内容（分组确认、决策和仅供参考的观察结果）均以结构化文本的形式返回，原始分类完好无损，供调用者处理。没有阻塞问题提示，没有交互式路由。
+- 根据`references/open-questions-defer.md`，建议的修复和未应用的决定也会记录在文档中，因此它们会在本次会话结束后持续存在，除非请求限制对文档的编辑
+- 第 5 阶段（路由）立即返回并显示“审核完成”（无路由问题，无终端问题）
 
-**Non-interactive argument contract:** `mode:non-interactive <document-path>`, for example `mode:non-interactive <path-to-doc>.{md,html}`. `mode:headless` is a deprecated alias for the same contract.
+**非交互式参数合约：** `mode:non-interactive <document-path>`，例如`mode:non-interactive <path-to-doc>.{md,html}`。 `mode:headless` 是同一合约的已弃用别名。
 
-Absent either token, run interactive, with the routing question, walk-through, and bulk-preview behaviors documented in `references/walkthrough.md` and `references/bulk-preview.md`.
+缺少任一令牌，运行交互式，路由问题、走查和批量预览行为记录在 `references/walkthrough.md` 和 `references/bulk-preview.md` 中。

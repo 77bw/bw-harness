@@ -1,6 +1,6 @@
-# Expensive-benchmark template (test-suite wall time, CI critical path, runner-minutes).
-# Use this shape when each evaluation costs minutes and "better" is more than one hard target.
-# Existing single-primary specs stay valid; this file is an opt-in example, not a new default.
+# 昂贵的基准模板（测试套件墙时间、CI关键路径、跑步者分钟数）。
+# 当每次评估都需要几分钟并且“更好”不只一个硬目标时，请使用此形状。
+# 现有的单基色规格仍然有效；该文件是一个选择加入的示例，而不是新的默认文件。
 
 name: reduce-test-suite-wall-time
 description: >
@@ -30,7 +30,7 @@ metric:
   degenerate_gates:
     - name: suite_passed
       check: "== 1"
-      description: The full suite must stay green
+      description: "全套产品必须保持绿色"
   diagnostics:
     - name: python_group_seconds
     - name: go_group_seconds

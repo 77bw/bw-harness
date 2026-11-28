@@ -1,60 +1,60 @@
-# Document Review Output Template
+# 文件审查输出模板
 
-This is the Phase 4 interactive presentation: what the user sees in the **same turn**, immediately before the routing question (`references/walkthrough.md`). A structured non-interactive result printed in an earlier turn, or a one-line finding count, does not satisfy that ordering. The non-interactive result is documented in `references/synthesis-and-presentation.md` (Phase 4 "Route Remaining Findings") and is separate from this template.
+这是第 4 阶段的交互式演示：用户在**同一个回合**中看到的内容，就在路由问题之前 (`references/walkthrough.md`)。前一轮打印的结构化非交互式结果或单行结果计数不满足该顺序。非交互式结果记录在`references/synthesis-and-presentation.md`（第 4 阶段“剩余路线调查结果”）中，并且与此模板分开。
 
-The reader wants to know three things: what the review changed, what it wants to change with their approval, and what only they can decide. Render only the items synthesis retained. Everything else the review did — which reviewers ran, how confident each was, how findings were merged, dropped, or promoted, which route a finding took internally — is the review's own bookkeeping. Leave it out unless it changes what the reader should trust: a reviewer that failed or did not run, or suppressed findings the reader may want back.
+读者想知道三件事：评论改变了什么，在他们的批准下想要改变什么，以及只有他们才能决定什么。仅渲染保留的项目合成。审查所做的其他所有事情——哪些审查者进行了审查，每个人的信心如何，发现如何合并、删除或升级，发现在内部采取了哪条路线——都是审查自己的簿记。将其保留，除非它改变了读者应该信任的内容：失败或未运行的审查者，或压制了读者可能想要返回的发现。
 
-Write it as a short markdown report with headings and bullets, not tables. Internal enum values (`safe_auto`, `gated_auto`, `manual`), confidence anchors, tier names, and reviewer attributions do not appear. Every line obeys the shared rendering floor (`references/rendering-floor.md`): consequence first, every identifier the reader cannot understand without opening the document, tracker, or code is glossed or translated to its role, and there are at most two such identifiers per finding.
+将其写为带有标题和项目符号的简短 Markdown 报告，而不是表格。内部枚举值（`safe_auto`、`gated_auto`、`manual`）、置信锚、层名称和审查者属性不会显示。每行都遵循共享渲染层 (`references/rendering-floor.md`)：结果首先，读者在不打开文档、跟踪器或代码的情况下无法理解的每个标识符都会被注释或翻译为其角色，并且每个发现最多有两个这样的标识符。
 
-## Example
+## 例子
 
 ```markdown
-## Doc review: user-auth plan
+## 文档审查：用户授权计划
 
-The plan holds together, but two places would send implementers the wrong way: Unit 6 rebuilds login flows the app already has, and the webhook endpoint is the only public route left without a rate limit. I fixed five smaller gaps directly. Two choices need you.
+该计划是一致的，但有两个地方会给实施者带来错误的方式：第 6 单元重建应用程序已有的登录流程，而 Webhook 端点是唯一没有速率限制的公共路由。我直接修复了五个较小的间隙。有两个选择需要你。
 
-### Changed
+### 已修改
 
-- Fixed three consistency slips: one term for the pipeline throughout, a cross-reference to the wrong section, and the unit count.
-- Added the rate-limit config update that Unit 3's new limits require to Unit 4.
-- Added token refresh to the test scenarios, since Unit 2 makes tokens expire.
+- 修复了三个一致性错误：整个管道的一个术语、对错误部分的交叉引用以及单位计数。
+- 向单元 4 添加了单元 3 的新限制所需的速率限制配置更新。
+- 在测试场景中添加了令牌刷新，因为第 2 单元使令牌过期。
 
-### Proposed fixes
+### 建议修复
 
-Four fixes bring units in line with decisions the plan already made.
+四个修复使单位与计划已经做出的决策保持一致。
 
-**Units that skip a standard the plan already sets**
+**跳过计划已设定标准的单位**
 
-- Implementers would rebuild the login and session flows the existing auth setup already ships, because no unit says to migrate off it — add the migration path to Unit 6 (custom auth).
-- A flood of webhook requests would reach the app unthrottled while every other public route is capped — apply the plan's standard rate limit to Unit 5 (webhooks).
+- 实施者将重建已发布的现有身份验证设置的登录和会话流程，因为没有单元说要迁移它 - 将迁移路径添加到单元 6（自定义身份验证）。
+- 大量的 Webhook 请求将不受限制地到达应用程序，而其他所有公共路由均受到限制 - 将计划的标准速率限制应用于第 5 单元（Webhooks）。
 
-**Unit 7 — Cutover**
+**第 7 单元 — 切换**
 
-- Two passages disagree on whether a production reset may run, so executors could take opposite actions at the destructive step — align both with the stop condition in Risks.
-- Diagnostics the plan requires would render nowhere, because no unit owns that UI — assign it to this unit.
+- 两段文章对于是否可以运行生产重置存在分歧，因此执行者可以在破坏性步骤中采取相反的操作 - 将两者与风险中的停止条件对齐。
+- 该计划所需的诊断将无处呈现，因为没有单位拥有该 UI - 将其分配给该单位。
 
-### Decisions
+### 决定
 
-1. **The plan promises offline support but every unit assumes a live connection.** Implementers will either build sync nobody scoped or ship something that breaks offline.
-   Recommendation: drop offline support from the goal, since no requirement depends on it.
-2. **Most of the work builds admin tooling, not the stated goal.** Eight of twelve units build admin infrastructure; two touch the goal.
-   Recommendation: defer to Open Questions, since cutting scope is your call.
+1. **该计划承诺离线支持，但每个单元都假设有实时连接。** 实施者将要么构建无人范围内的同步，要么发布离线的东西。
+   建议：从目标中删除离线支持，因为没有要求依赖于它。
+2. **大部分工作构建管理工具，而不是既定目标。**十二个单元中有八个构建管理基础设施；两个触球门。
+   建议：遵循开放问题，因为缩小范围是您的决定。
 
-### Also noted
+### 还指出
 
-- The manual fixture setup takes 15 minutes per run; the existing seed script produces the same fixture in 2.
-- Rollback for the Phase 2 data changes is not addressed.
-- Open question for later: should export recovery keep 7 or 30 days of data?
+- 每次运行手动夹具设置需要 15 分钟；现有的种子脚本在 2 中生成相同的装置。
+- 未解决第 2 阶段数据更改的回滚问题。
+- 稍后提出的问题：导出恢复应该保留 7 天还是 30 天的数据？
 
-Coverage: security-lens timed out, so auth risks were reviewed only by the general reviewers.
+覆盖范围：安全镜头超时，因此身份验证风险仅由一般审核人员审核。
 ```
 
-## Section rules
+## 章节规则
 
-- **Heading and opening:** name the document in the heading. Open with two to four plain sentences saying what the review concluded about the document as a whole: whether it is sound, what the consequential problems are, and what the reader is being asked for. Counts may appear in prose ("two choices need you"); never as a standalone tally line.
-- **Changed:** every fix synthesis step 3.7 routed to Apply. Give each fix that changes what someone would build or decide its own line, with enough substance that the reader need not diff the document. Collapse mechanical consistency fixes (counts, cross-references, terminology) into one line that names what kind they were. This is a report: no recommendation, no question. Omit the section if none.
-- **Proposed fixes:** the grouped confirmation, shaped by the floor's "Presenting a batch" rule. Lead with what the batch does as a whole, head each group with what its members share, and keep every member visible as one line: the consequence, then the change as intent. Entailed corrections (obligations) group under the implementation unit, or the section on a document with no units, that they affect. **No decision appears here.** Sweeping a choice the user must make into this batch turns a genuine fork into a batch answer. Omit the section if none.
-- **Decisions:** only the choices the user must still make, numbered, most severe first. Each carries a consequence-first title, one or two sentences on what goes wrong if left as-is, and the recommended action with its change in intent language. The recommendation must be visible here, because routing option A executes it without a further preview. When synthesis resolved a disagreement between reviewers, add one short line saying so. Omit the section if none.
-- **Also noted:** FYI observations, residual concerns, and deferred questions, one line each, with no recommendation and nothing to answer. Omit the section if none.
-- **Coverage:** one line, present only when something limits what the review covered: a reviewer that failed, timed out, or returned malformed output; a cross-model pass that was skipped or did not fold, named by target and requested model per the disclosure condition in `references/cross-model-review.md`; findings suppressed because the user rejected them in an earlier round; or a lite review, worded as `references/depth.md` says. Omit it when a full review ran as planned.
-- **Ending:** the routing question follows immediately. Do not add a closing summary or next-steps paragraph before it.
+- **标题和开头：** 在标题中命名文档。以两到四个简单的句子开头，说明审查对整个文件的结论：它是否合理，随之而来的问题是什么，以及读者的要求是什么。计数可能出现在散文中（“两个选择需要你”）；绝不作为独立的计数线。
+- **更改：** 每个修复综合步骤 3.7 都路由到“应用”。给出每个改变某人将要构建的内容或决定自己的路线的修复，并提供足够的实质内容，以使读者无需比较文档。将机械一致性修复（计数、交叉引用、术语）折叠到一行中，并命名它们是什么类型。这是一份报告：没有建议，没有问题。如果没有则省略该部分。
+- **建议的修复：** 分组确认，由会场的“呈现批次”规则决定。领导整个批次所做的事情，领导每个小组的成员共享的内容，并使每个成员都可见为一行：结果，然后是意图的更改。实施单位下的相应更正（义务）组，或无单位的文件中受其影响的部分。 **这里没有出现任何决定。** 将用户必须做出的选择扫入此批次会将真正的分叉变成批次答案。如果没有则省略该部分。
+- **决定：** 只有用户仍然必须做出的选择，编号，最严重的首先。每个都带有结果优先的标题，一两句话说明如果保持原样会出现什么问题，以及建议的行动及其意图语言的变化。该建议必须在此处可见，因为路由选项 A 会在没有进一步预览的情况下执行它。当综合解决审稿人之间的分歧时，添加一小行这样说。如果没有则省略该部分。
+- **另请注意：**仅供参考的观察结果、残留问题和延迟问题，每行一行，没有建议，也没有什么可回答的。如果没有则省略该部分。
+- **覆盖范围：**一行，仅当某些内容限制审查范围时才出现：审查者失败、超时或返回格式错误的输出；跳过或未折叠的跨模型传递，根据`references/cross-model-review.md`中的披露条件由目标和请求的模型命名；由于用户在前一轮中拒绝了结果，因此结果被抑制；或简短的评论，措辞如 `references/depth.md` 所说。当完整审查按计划进行时省略它。
+- **结束：** 路由问题紧随其后。不要在其前面添加结束摘要或后续步骤段落。

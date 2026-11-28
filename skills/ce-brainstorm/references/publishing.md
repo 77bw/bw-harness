@@ -1,27 +1,27 @@
-# Publishing a Copy
+# 发布副本
 
-Read this before opening, sharing, or publishing a document this skill wrote.
+在打开、共享或发布此技能编写的文档之前，请阅读本文。
 
-Publishing makes a copy. Write the document first to the place this skill normally stores it, such as the repo artifact root, or a temp path when there is no repo. That stored file stays the record other skills read. A published copy never replaces it, and nothing syncs back from the copy.
+出版制作副本。首先将文档写入该技能通常存储它的位置，例如存储库产物根目录，或者没有存储库时的临时路径。该存储的文件保留其他技能读取的记录。已发布的副本永远不会取代它，并且副本中不会同步任何内容。
 
-Never publish in a headless run, one with no user present to answer, such as a pipeline or an automated caller. Keep the stored file and report its path.
+切勿在无头运行中发布，即没有用户在场应答，例如管道或自动调用程序。保留存储的文件并报告其路径。
 
-## Choose the destination
+## 选择目的地
 
-1. Use the publisher the user asked for, or one they named in their own instructions or stated preferences. A publishing skill, CLI, or connector that is merely installed counts only when the user named it. Being installed is not permission to upload.
-2. Otherwise, offer the host's own artifact tool when this session has one. That is a tool the host itself provides for publishing pages or documents, not an installed add-on.
-3. Otherwise, keep the local file and open it in the browser where the host can. If it cannot, print the file's absolute path.
+1. 使用用户要求的发布者，或者他们在自己的说明或规定的偏好中指定的发布者。发布技能、CLI或仅安装的连接器仅在用户命名时才计数。正在安装是不允许上传的。
+2. 否则，当本次会议有主持人自己的产物工具时，请提供该工具。这是主机本身提供的用于发布页面或文档的工具，而不是安装的附加组件。
+3. 否则，保留本地文件并在主机可以的浏览器中打开它。如果不能，则打印文件的绝对路径。
 
-Reach the chosen publisher through its own skill, tool, or documented interface, and follow that interface's current contract. Do not guess an API shape. Proof (`ce-proof`) accepts markdown only: never upload HTML to it. For an HTML document, tell the user Proof cannot take it, and offer to publish a markdown rendering of the same content instead.
+通过其自己的技能、工具或记录的界面联系所选的发布者，并遵循该界面的当前合同。不要猜测 API 形状。仅当其记录的接口在此处可用时才提供指定的外部目的地。首先验证其可接受的格式；如有必要，提供受支持的渲染而不替换本地记录。
 
-When a menu offers this step, label the option with the destination chosen here, for example **Open in browser** or **Publish a copy to <destination>**.
+当菜单提供此步骤时，请使用此处选择的目标标记该选项，例如 **在浏览器中打开** 或 **将副本发布到 <destination>**。
 
-## Public hosts
+## 公共主机
 
-A public host is one where anyone who has or finds the link can read the page without signing in. Before sending anything to a public host, tell the user the page will be public and may be indexed, copied, or archived. Then get their explicit confirmation for this document. The request that named the host does not count as confirmation. A document that changed materially since the confirmation needs a new confirmation. If confirmation cannot be obtained, do not publish; keep the local file and report its path.
+公共主机是任何拥有或找到链接的人都可以在不登录的情况下阅读页面的主机。在向公共主机发送任何内容之前，请告诉用户该页面将是公共的，并且可以被索引、复制或存档。然后获得他们对此文件的明确确认。指定主机的请求不算作确认。自确认以来发生重大变化的文件需要重新确认。若无法获得确认，请勿发布；保留本地文件并报告其路径。
 
-## Re-publishing and failure
+## 重新发布并失败
 
-When the document changed after it was published, update the existing published artifact if the destination supports updates, instead of creating a new one. Do not write the published URL into the document. Give the user the link the publisher returns for sharing, even when that link carries an access token. Treat a separate management credential the publisher returns, such as an owner secret or update key, as a secret: do not print it in chat or embed it in the document.
+当文档发布后发生更改时，如果目标支持更新，则更新现有的已发布产物，而不是创建新产物。不要将发布的 URL 写入文档中。向用户提供发布者返回的用于共享的链接，即使该链接带有访问令牌也是如此。将发布者返回的单独管理凭据（例如所有者机密或更新密钥）视为机密：不要在聊天中打印它或将其嵌入到文档中。
 
-If publishing fails, keep the local file and report what failed along with the local path. Do not switch to another publisher unless the user authorizes it.
+如果发布失败，请保留本地文件并报告失败的内容以及本地路径。除非用户授权，否则不要切换到其他发布者。

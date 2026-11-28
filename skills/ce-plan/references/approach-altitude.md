@@ -1,55 +1,55 @@
-# Approach Altitude
+# 进场高度
 
-Loaded from SKILL.md Phase 0.1a when a request is answered one level up — produce a grounded **approach-plan** (a plan for *how the deliverable will be made*), hold at a checkpoint, then execute now or save for later. Entered explicitly ("plan for a plan") or via an accepted proactive offer. Domain-general: the deliverable may be a document, a synthesis, a study artifact, or a software implementation plan. The boundary this preserves is **code vs. knowledge-work**, not plan vs. execute — `ce-plan` never writes or runs code (Phase 4 / SKILL.md line 15); code execution always belongs to `ce-work`.
+从 SKILL.md 阶段 0.1a 加载，当请求得到上一级的答复时 — 制定一个接地气的**方法计划**（关于*如何交付成果*的计划），保留在检查点，然后立即执行或保存以供以后使用。明确输入（“计划的计划”）或通过接受的主动要约输入。领域通用：可交付成果可以是文档、综合、研究产物或软件实施计划。它保留的边界是**代码与知识工作**，而不是计划与执行——`ce-plan`从不编写或运行代码（第4阶段/SKILL.md第15行）；代码执行始终属于`ce-work`。
 
-## Stage 1: Light recon (cheap grounding)
+## 第一阶段：轻型侦察（廉价接地）
 
-The whole point of the approach-plan is to be specific enough to judge. Generic methodology ("read the book, extract themes, synthesize") is not worth approving. So before composing it, skim the provided inputs enough to ground the approach in specifics — **not** the full read; that is the deliverable's work, deferred to execution.
+方法计划的重点是要足够具体以进行判断。通用方法论（“阅读书籍，提取主题，综合”）不值得认可。因此，在撰写之前，请充分浏览所提供的输入，以便使该方法具体化——**而不是**完整阅读；这就是可交付成果的工作，推迟到执行。
 
-- **Bound the recon per input type** so the checkpoint stays cheap. Directional guidance, not a rule: for a PDF, section headers + first/last pages + a few sampled sections; for a long transcript, sampled spans plus topic shifts; for a codebase, entry points and the relevant module shape. Skim to locate what matters and how the pieces relate, then stop.
-- **Ground in specifics:** name the concrete bridges the approach will make ("the transcript spends ~40 minutes on pricing, which maps to the book's chapter-3 framework — I'll connect them there"), not a generic recipe.
-- **Degrade gracefully.** If the inputs are absent or arrive later, fall back to proposing from the request alone and flag the approach-plan as provisional/ungrounded — never block waiting for inputs, never emit generic methodology dressed as a plan.
-- **No process exhaust.** The approach-plan reads as value to the user, not as an audit log of recon steps ("I skimmed the PDF, then sampled the transcript, then…"). Say what you concluded, not the plumbing. (See the Veil of value in `references/universal-planning.md`.)
+- **根据输入类型绑定侦察**，因此检查点保持便宜。方向性指导，而不是规则：对于 PDF，章节标题 + first/last 页 + 一些样本章节；对于长文本，采样跨度加上主题转换；代码库、入口点和相关模块形状。快速浏览找出重要的内容以及各部分之间的关系，然后停止。
+- **具体细节：** 说出该方法将建立的具体桥梁（“记录在定价上花费了约 40 分钟，这映射到本书的第 3 章框架 - 我将在那里将它们连接起来”），而不是通用配方。
+- **优雅地降级。**如果输入不存在或稍后到达，则退回到仅根据请求提出建议，并将方法计划标记为provisional/ungrounded——永远不要阻塞等待输入，永远不要发出伪装成计划的通用方法。
+- **没有流程耗尽。** 进场计划对用户来说是一种价值，而不是侦察步骤的审核日志（“我浏览了 PDF，然后对笔录进行了采样，然后……”）。说出你的结论，而不是管道。 （参见`references/universal-planning.md`中的价值面纱。）
 
-## Stage 2: Compose the approach-plan (chat-first)
+## 第 2 阶段：制定方法计划（聊天优先）
 
-Deliver the approach-plan in chat. It is **file-optional** — the user decides whether to persist it. Keep it scannable. Cover, right-sized to the request:
+在聊天中交付进场计划。它是**文件可选** — 用户决定是否保留它。保持可扫描。封面，尺寸适合要求：
 
-- **How each input will be handled** — what you'll mine from each, grounded in the recon.
-- **How they combine** — the synthesis strategy / sequencing; this is usually the risky part and the most valuable thing to confirm.
-- **The shape of the deliverable** — structure/outline of what executing this will produce.
-- **The forks worth confirming** — the few decisions where the user's steer materially changes the result (e.g., weighting one source over another, depth vs. breadth, audience).
-- **Open questions** — anything genuinely unresolved that the user should answer before execution.
+- **如何处理每个输入** - 您将从每个输入中挖掘什么，以侦察为基础。
+- **它们如何结合**——合成策略/测序；这通常是有风险的部分，也是最值得确认的事情。
+- **可交付成果的形状** — structure/outline 执行此操作将产生什么。
+- **值得确认的分叉**——用户的引导会实质上改变结果的少数决定（例如，将一个来源相对于另一个来源进行加权、深度与广度、受众）。
+- **开放式问题** — 用户在执行前应回答的任何真正未解决的问题。
 
-This is not a software plan template (no implementation units / test scenarios) unless the deliverable itself is a software implementation plan — in which case "execute now / code" routes into the normal `ce-plan` flow (below) rather than composing the deliverable here.
+这不是软件计划模板（没有实施单元/测试场景），除非可交付成果本身是软件实施计划 - 在这种情况下，“立即执行/代码”路由到正常的 `ce-plan` 流程（如下），而不是在此处编写可交付成果。
 
-## Stage 3: Checkpoint
+## 第三阶段：检查点
 
-Hold at the approach. Use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to numbered options on the host's user-visible chat surface only when no such tool is in the list or a real question call errors — never silently skip.
+保持接近。使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号选项 - 切勿默默跳过。
 
-**Sequence orthogonal axes** rather than cramming them into one menu (per the "split orthogonal decisions" rule and the 4-option cap):
+**对正交轴进行排序**，而不是将它们塞进一个菜单中（根据“分割正交决策”规则和 4 选项上限）：
 
-1. **First:** "Execute now, or save for later?"
-2. **Then, only if executing now and the domain isn't already obvious:** confirm code vs. knowledge-work deliverable. Offer to deepen the approach-plan as part of "save for later".
+1. **第一：**“现在执行，还是保存到以后？”
+2. **然后，只有在现在执行并且领域还不明显的情况下：**确认代码与知识工作可交付成果。作为“留待以后”的一部分，提出深化方法计划。
 
-## Stage 4: Route
+## 第四阶段：路线
 
-**Save for later.** Persist the approach-plan to `<root>/plans/` so it survives. If the deliverable is non-code, write the marker (`execution: knowledge-work`, see `references/plan-sections.md`) at persist time — so a later `ce-work` invocation on the saved plan routes to the carve-out, not the code path. Do not label an approach-plan as `artifact_contract: ce-unified-plan/v1` unless it also contains Product Contract, Planning Contract, Implementation Units, Verification Contract, and Definition of Done for a software implementation. A plan-for-a-plan is not an implementation plan; its job is to guide a later planning or knowledge-work pass, not to execute code. Offer to deepen it. Keep the plan **agent-agnostic** (no `ce-work`-specific choreography in the body) so any agent can execute it later.
+**留到以后使用。** 坚持到 `<root>/plans/` 的进近计划，这样它就可以生存。如果可交付成果是非代码，请在持久时间写入标记（`execution: knowledge-work`，请参阅`references/plan-sections.md`），以便稍后对已保存计划的`ce-work`调用路由到剥离，而不是代码路径。不要将方法计划标记为`artifact_contract: ce-unified-plan/v1`，除非它还包含产品合同、规划合同、实施单元、验证合同和软件实施的完成定义。计划中的计划不是实施计划；而是计划。它的工作是指导以后的计划或知识工作，而不是执行代码。提出加深它。保持计划**与代理无关**（体内没有`ce-work`特定的编排），以便任何代理都可以稍后执行它。
 
-**Execute now -- code deliverable.** The approach-plan's job is done; continue into the normal `ce-plan` flow (Phase 0.1b onward) to produce the implementation plan, then hand off to `ce-work` for the code. `ce-plan` never writes the code itself.
+**立即执行——代码可交付。** 方法计划的工作已经完成；继续进入正常的`ce-plan`流程（阶段0.1b之后）以生成实施计划，然后将代码移交给`ce-work`。 `ce-plan`从不自己编写代码。
 
-**Execute now -- non-code deliverable.** This is the knowledge-work path with no `ce-work` equivalent, so it goes to the knowledge-work carve-out inside `ce-work`:
+**立即执行——非代码交付。** 这是没有 `ce-work` 等价物的知识工作路径，因此它进入 `ce-work` 内的知识工作划分：
 
-1. Write the marker `execution: knowledge-work` into the plan frontmatter.
-2. **Persist** the marked plan to `<root>/plans/` (the marker needs a file to live in so it can travel — R7's file-optional rule covers the user keeping a chat-only copy, but non-code *execution* requires a saved file).
-3. Invoke the `ce-work` skill with the plan path using the host's normal skill-invocation mechanism. Do not substitute a generic Task, Agent, or subagent. If `ce-work` cannot be invoked, say execution did not start and print a copyable handoff prompt instructing the next agent to invoke `ce-work` with the plan path.
+1. 将标记`execution: knowledge-work`写入计划的frontmatter中。
+2. **将标记的计划保留到`<root>/plans/`（标记需要一个文件来保存，以便它可以移动 - R7 的文件可选规则涵盖用户保留仅用于聊天的副本，但非代码*执行*需要保存的文件）。
+3. 使用主机的正常技能调用机制通过计划路径调用`ce-work`技能。不要替换通用任务、代理或子代理。如果无法调用`ce-work`，则表示执行未开始，并打印可复制的切换提示，指示下一个代理使用计划路径调用`ce-work`。
 
-`ce-plan` itself does not execute the deliverable in any path — it produces the approach-plan and hands off. The portable plan is also runnable by any other agent without `ce-work`.
+`ce-plan` 本身并不以任何路径执行可交付成果——它生成方法计划并进行交接。便携式计划也可由任何其他没有 `ce-work` 的代理运行。
 
-## Boundaries: not the other approach surfaces
+## 边界：不是其他进近面
 
-Three in-chat "approach" mechanics already exist. Approach altitude is separate but coordinated — keep it separate by its distinguishing properties, not by vocabulary:
+三种聊天内“接近”机制已经存在。进场高度是分开的，但又是协调的——通过其独特的属性，而不是词汇来保持它的分开：
 
-- **Answer-seeking's plan-of-attack** (`references/universal-planning.md`): non-blocking (states the approach and proceeds immediately), discards its scaffold, produces a chat answer, and lives only in the non-software answer-seeking branch. Approach altitude is domain-general, **holds at a checkpoint** for a user decision, and produces a **persistable, deepenable** approach-plan. An investigative request with no approach-language is answer-seeking's, not this.
-- **Scoping synthesis** (Phase 0.7 / 5.1.5): a *scope* checkpoint for a deliverable already committed to — it confirms what the implementation plan will target. Approach altitude is an *altitude* checkpoint that decides whether to commit to the deliverable at all; it sits above the implementation plan, not inside producing one.
-- **Deepening** (Phase 5.3): operates on a plan that already exists, strengthening it via confidence sub-agents. Approach altitude operates *before any artifact exists*. The "deepen" affordance offered at the approach-altitude checkpoint is the user optionally enriching the approach-plan — not the Phase 5.3 confidence pass.
+- **寻求答案的攻击计划**（`references/universal-planning.md`）：非阻塞（说明方法并立即继续），丢弃其脚手架，生成聊天答案，并且仅存在于非软件寻求答案分支中。进近高度是领域通用的，**保持在检查点**以供用户决定，并生成**可持久的、可深化的**进近计划。没有接近语言的调查请求是寻求答案的请求，而不是这个。
+- **范围综合**（阶段 0.7 / 5.1.5）：已提交的可交付成果的“范围”检查点 - 它确认实施计划的目标。进近高度是一个“高度”检查点，决定是否完全承诺交付成果；它位于实施计划之上，而不是制定计划之内。
+- **深化**（阶段 5.3）：按照已有的计划进行操作，通过信心子代理加强它。进近高度*在任何伪影存在之前*运行。进场高度检查点提供的“加深”功能是用户选择性地丰富进场计划，而不是第 5.3 阶段的置信度。

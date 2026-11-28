@@ -1,10 +1,10 @@
-# Talking to the user
+# 与用户交谈
 
-Ask each question using the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to a numbered list on the host's user-visible chat surface only when no such tool is in the list or a real question call errors.
+使用当前工具列表中已有的主机阻止问题工具提出每个问题（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能 - 不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人的用户可见聊天界面上的编号列表。
 
-The user decides each offer from what your reply shows. Tool output may be collapsed or hidden, so anything the user needs in order to decide belongs in your reply itself.
+用户根据您的回复显示的内容来决定每个报价。工具输出可能会折叠或隐藏，因此用户需要做出决定的任何内容都属于您的回复本身。
 
-- Before asking, give a short account of each change that the user can read once: what it is and what it gets them in this repository. Show full file text, directive text, or diffs only when the user asks. Nothing is committed, so the user can read the written files afterwards.
-- A question dialog can cover the chat. Each question also names its change and what it gets the user, so it makes sense on its own.
-- Use plain words. Never use this skill's step or phase names, and never use a bare skill or tool name as the explanation. Name a file, setting, or package only alongside what it does for the user.
-- Each option says what happens if it is picked, and the offer names every change it covers.
+- 在询问之前，请简要说明用户可以阅读一次的每个更改：它是什么以及它在此存储库中带来了什么。仅当用户询问时才显示完整文件文本、指令文本或差异。没有提交任何内容，因此用户可以随后读取写入的文件。
+- 问题对话框可以覆盖聊天。每个问题还命名了它的更改以及它为用户带来的内容，因此它本身就有意义。
+- 使用简单的词语。切勿使用该技能的步骤或阶段名称，也切勿使用纯粹的技能或工具名称作为解释。仅根据文件、设置或包对用户的作用来命名。
+- 每个选项都说明了如果选择它会发生什么，并且报价列出了它涵盖的每个更改。

@@ -1,102 +1,102 @@
-# Divergent Ideation (Phase 2)
+# 发散思维（第二阶段）
 
-Read this file at the start of Phase 2 — after Phase 1 grounding and Phase 1.5 decomposition complete, and before building any ideation dispatch prompt. It defines the ideation fleet, the dispatch payload, the frames, the per-idea output contract, and the post-merge synthesis steps. Model tier names (extraction / generation / ceiling) are defined in the model tiers in `references/grounding.md`.
+在第 2 阶段开始时阅读此文件 - 在第 1 阶段基础和第 1.5 阶段分解完成之后，以及在构建任何构思调度提示之前。它定义了构思队列、调度有效负载、框架、每个创意的输出合同以及合并后的合成步骤。模型层名称（提取/生成/上限）在`references/grounding.md`的模型层中定义。
 
-## Fleet
+## 舰队
 
-Dispatch parallel ideation sub-agents per the model-tier fleet in `references/grounding.md`. Omit the `mode` parameter so the user's configured permission settings apply. The default fleet is **5 agents covering all six frames**:
+在 `references/grounding.md` 中为每个模型层队列调度并行构思子代理。省略 `mode` 参数，以便应用用户配置的权限设置。默认车队是 **5 个代理，覆盖所有六个框架**：
 
-- **3 generation-tier agents**, one per evidence-driven frame (Pain and friction; Inversion, removal, or automation; Leverage and compounding). These frames live on evidence the agents read for themselves, so the mid-tier model performs well here.
-- **2 ceiling-tier agents** for the ceiling frames, where the strong model's reasoning is the product and must not be tiered down: one takes Cross-domain analogy; the other takes Assumption-breaking and reframing **plus** Constraint-flipping (cousins — both invert givens; one agent holds both as starting biases).
+- **3 代代理**，每个证据驱动框架一个（疼痛和摩擦；反转、移除或自动化；杠杆和复合）。这些框架依赖于代理自己阅读的证据，因此中间层模型在这里表现良好。
+- **2个天花板层代理**用于天花板框架，其中强模型的推理是产品，不能分层：一个采取跨域类比；另一种则采取打破假设和重构**加上**约束翻转（表兄弟——两者都颠倒给定；一个代理将两者都视为起始偏差）。
 
-**How the run scales.** Phase 0.2 decides whether the run is in surprise-me mode or has issue-tracker intent. Phase 0.5 decides which depth overrides are active, and `go deep` cancels tactical. The fleet follows from those resolved variants under these conditions:
+**运行如何扩展。** 阶段 0.2 决定运行是处于惊喜模式还是具有问题跟踪器意图。阶段 0.5 决定哪些深度覆盖处于活动状态，`go deep` 取消战术。在这些条件下，机队遵循这些已解决的变体：
 
-- **Scaling never drops a frame and never skips basis verification.** It changes only per-frame volume, per-agent verification reads, model tier, and the agent count as stated below. Every frame in the frame set runs, and every submitted idea keeps its basis check. Never pack extra frames into fewer agents to save cost: the read budget is per agent, so an agent holding three frames verifies about a third as much per idea.
-- **The frame set is the six frames below**, except when issue-tracker intent was detected and the issue intelligence agent returned usable themes. Then the themes become the frames (see the issue-tracker override below).
-- **The agent count follows the frame set.** Theme frames run on 4 agents, whatever else is active. The six default frames run on the 5-agent default above, or on 6 agents (one frame each) when `go deep` or surprise-me is active. Tactical scope never changes the agent count; it contributes only tactical's dials (`references/scope-gates.md` Phase 0.5).
-- **Tier.** Under `go deep` or surprise-me every ideation agent runs on the ceiling tier, theme frames included. Otherwise each frame keeps its own tier.
-- **A fallback recomputes only what the abandoned frame set determined.** When the issue lens ends without usable themes, the run uses the six default frames. Recompute the agent count for that frame set, and recompute how any requested total splits across the frames. Carry forward everything else Phase 0.5 resolved — which overrides are active and any requested total or survivor count — rather than re-reading the prompt's raw signals.
+- **缩放永远不会丢帧，也永远不会跳过基础验证。** 它仅更改每帧卷、每个代理验证读取、模型层和代理计数，如下所述。框架集中的每个框架都会运行，每个提交的想法都会保留其基础检查。切勿将额外的帧打包到更少的代理中以节省成本：读取预算是每个代理的，因此持有三个帧的代理验证每个想法的大约三分之一。
+- **框架集是下面的六个框架**，除非检测到问题跟踪器意图并且问题智能代理返回可用主题。然后主题成为框架（请参阅下面的问题跟踪器覆盖）。
+- **代理计数遵循框架集。** 主题框架在 4 个代理上运行，无论其他代理是否处于活动状态。当`go deep`或surprise-me处于活动状态时，六个默认框架在上面的5个代理默认情况下运行，或者在6个代理（每个代理一帧）上运行。战术范围永远不会改变特工数量；它仅提供战术表盘（`references/scope-gates.md`阶段0.5）。
+- **层。** 在 `go deep` 或令我惊讶的情况下，每个构思代理都在天花板层上运行，包括主题框架。否则，每个框架都会保留自己的层。
+- **后备仅重新计算废弃帧集确定的内容。** 当问题镜头在没有可用主题的情况下结束时，运行将使用六个默认帧。重新计算该帧集的代理计数，并重新计算任何请求的总数如何在帧之间划分。继续推进阶段 0.5 解决的所有其他问题（哪些覆盖处于活动状态以及任何请求的总数或幸存者计数），而不是重新读取提示的原始信号。
 
-Each frame targets ~6-8 ideas — **3-4 under tactical scope** — and a two-frame agent targets that per frame, yielding ~36-48 raw ideas in the default path (~18-24 tactical) or ~24-32 across 4 frames in issue-tracker mode; roughly 25-30 survive dedupe in the default path and fewer in the 4-frame path. **A raw-number volume request is a total, not a per-frame multiplier.** Divide it across the frames in play — `100 ideas` over six frames is ~16-17 each, not 100 each — and adjust the per-frame target to hit that total. Requests shaped like `top 3` constrain the *survivor* count instead and leave generation alone.
+每帧针对约 6-8 个想法 - **战术范围下的 3-4 个想法** - 两帧代理以每帧为目标，在默认路径中产生约 36-48 个原始想法（约 18-24 战术）或在问题跟踪器模式下跨 4 帧产生约 24-32 个想法；在默认路径中大约有 25-30 个在重复数据消除后幸存下来，而在 4 帧路径中则更少。 **原始数字量请求是总数，而不是每帧乘数。** 将其除以正在播放的帧 - 六帧上的 `100 ideas` 约为每帧 16-17，而不是每帧 100 - 并调整每帧目标以达到该总数。形状像 `top 3` 的请求会限制 *survivor* 计数，而不会影响生成。
 
-**A total too small to spread across the frames is a survivor limit, not a generation target.** `3 ideas about auth` cannot mean three raw candidates divided six ways — that would either overshoot the ask or leave frames unrun, and the six-frame floor is not negotiable. Read any total at or below roughly one per frame the way `top 3` reads: generate normally, then cut to that many survivors.
+**总数太小而无法分布在帧中是幸存者限制，而不是生成目标。** `3 ideas about auth` 不能意味着三个原始候选者按六种方式划分 - 这要么超出要求，要么使帧无法运行，并且六帧底线是不可协商的。按照`top 3`的方式读取每帧大约一个或以下的任何总数：正常生成，然后剪切到那么多幸存者。
 
-## Dispatch Payload (cache-friendly, long-context ordered)
+## 调度有效负载（缓存友好，长上下文有序）
 
-Build one shared grounding block and keep it byte-identical across every ideation dispatch this run — identical prefixes let platforms with prompt caching reuse the expensive part. Longform shared material goes first; the agent-specific task goes last:
+构建一个共享的基础块，并在这次运行的每个构思调度中保持字节相同——相同的前缀让具有即时缓存的平台可以重用昂贵的部分。长篇共享材料优先；特定于代理的任务最后执行：
 
-- `<grounding>` — the consolidated grounding summary (identical bytes across agents), including the absolute paths of any user-supplied research dossiers under `<scratch-dir>`. Instruct each agent to read those dossier files, when present, before generating; their gists are orientation, not evidence. In repo mode the evidence an agent cites is the repo lines it reads itself (see Verification reads); in elsewhere modes without dossiers, the grounding summary itself is the evidence layer.
-- `<constraints>` — the user's prompt, the focus hint, and any *User-named references*: ideas that violate these are out regardless of basis
-- `<background>` — everything else in the grounding (codebase context, additional context, learnings, external context, user-supplied research): informative, not directive — it can supply an idea's basis, but it must not pull ideation toward whatever was loudest in the corpus when the user named a different focus
-- `<axes>` — the Phase 1.5 axis list, when present
-- `<task>` — the frame assignment, per-frame volume target, ambition charter, verification-read budget, and the per-idea output contract; generate raw candidates only (critique comes later)
+- `<grounding>` — 综合基础摘要（跨代理的相同字节），包括`<scratch-dir>`下任何用户提供的研究档案的绝对路径。指示每个代理在生成之前读取这些档案文件（如果存在）；他们的要点是方向，而不是证据。在回购模式下，代理引用的证据是它自己读取的回购行（请参阅验证读取）；在没有档案的其他模式中，基础摘要本身就是证据层。
+- `<constraints>` — 用户的提示、焦点提示和任何*用户命名的引用*：违反这些的想法将被排除，无论其基础如何
+- `<background>` - 基础中的其他所有内容（代码库上下文、附加上下文、学习、外部上下文、用户提供的研究）：提供信息，而不是指导性 - 它可以提供想法的基础，但当用户命名不同的焦点时，它不能将想法拉向语料库中最响亮的内容
+- `<axes>` — 阶段 1.5 轴列表（如果存在）
+- `<task>` — 框架分配、每帧体积目标、野心章程、验证读取预算和每个想法输出合同；仅生成原始候选人（稍后进行批评）
 
-Only the shared blocks are byte-identical. Each agent's `<task>` names that agent's own frame or frames, written out from the frame list below, before the dispatch is sent. A prompt that still holds an unfilled slot for the frame sends an agent with no lens, and that frame silently goes missing from the run.
+只有共享块是字节相同的。每个代理的 `<task>` 命名该代理自己的一个或多个帧，在发送调度之前从下面的帧列表中写出。仍然保留未填充的帧槽的提示会发送给没有镜头的代理，并且该帧会在运行中悄然丢失。
 
-The `<constraints>`/`<background>` split is the primary defense against grounding noise (an unrelated `FEEDBACK.md` the user did not name, a tangentially-cited prior-art result) shaping survivors against user intent — keep it mechanical via the tags, not prose hedging. User-supplied *research* artifacts are background even though user-named — supplying evidence is not issuing a directive; only directive files (per the Phase 1 routing test) ride in `<constraints>`.
+`<constraints>`/`<background>`分裂是针对接地噪声（用户未命名的不相关的`FEEDBACK.md`，一个切线引用的现有技术结果）的主要防御，它塑造了幸存者反对用户意图的方式——通过标签保持机械性，而不是散文对冲。用户提供的“研究”产物是背景，即使是用户命名的——提供证据并不发出指令；只有指令文件（根据第一阶段路由测试）位于 `<constraints>` 中。
 
-**Ambition charter (include verbatim in every ideation dispatch):**
+**雄心勃勃的章程（在每个创意调度中逐字包含）：**
 
-> This ideation exists so the user can choose a direction worth building — the output's value is decided by whether one idea changes what they do next. Generate the smartest, most inventive ideas your frame can reach: ideas a strong team would say "we have to do this" about. Your first few ideas will be the obvious ones — treat them as warm-up, and keep only the ones that still earn their place after the non-obvious ideas exist. If an idea would appear in a generic listicle about this topic, sharpen it with grounding evidence or drop it. Anchor every idea in specific entries from the grounding.
+> 这种想法的存在是为了让用户可以选择一个值得构建的方向——输出的价值取决于一个想法是否会改变他们下一步要做的事情。产生您的框架所能达到的最聪明、最具创造性的想法：一个强大的团队会说“我们必须这样做”的想法。你最初的几个想法将是显而易见的——将它们视为热身，并只保留那些在非显而易见的想法存在后仍然占据一席之地的想法。如果某个想法出现在有关该主题的通用列表中，请用基础证据来强化它或放弃它。将每个想法锚定在具体的基础条目中。
 
-**Verification reads (repo mode).** After an agent makes its internal cut, it may spend up to **5 targeted reads** — 10 under `go deep`, 2-3 under tactical scope — following the files and `file:line` pointers the grounding names to verify or deepen the bases of ideas it will submit. A `direct:` basis must quote a line the agent read itself in this run and cite it as `path:line`, never a guessed citation. The grounding summary orients the agent but is not a citable source: when an idea's evidence comes only from the summary, spend a verification read on the line before citing it. Elsewhere modes verify against the user-supplied context — including reading user-research dossiers when present — instead of reading repo files.
+**验证读取（回购模式）。** 在代理进行内部切割后，它可能会花费最多 **5 次目标读取** — `go deep` 下 10 次，战术范围下 2-3 次 — 遵循文件和 `file:line` 指针的基础名称来验证或深化其将提交的想法的基础。 `direct:`基础必须引用代理在本次运行中读取的一行并将其引用为`path:line`，而不是猜测的引用。基础摘要为代理提供了方向，但不是可引用的来源：当一个想法的证据仅来自摘要时，在引用它之前先进行验证阅读。其他模式根据用户提供的上下文进行验证 - 包括读取用户研究档案（如果存在） - 而不是读取存储库文件。
 
-**The tactical read budget goes with the tactical volume.** When an active tactical run carries an explicit volume request that raises generation above 3-4 ideas per frame, it verifies at the ordinary 5 reads.
+**战术读取预算与战术数量相关。** 当主动战术运行携带明确的数量请求，将每帧生成 3-4 个想法以上时，它会在普通 5 次读取时进行验证。
 
-**Budgets are ceilings, not guarantees of uniform scrutiny.** A two-frame agent, and any run at a raised volume target, submits more ideas against the same ceiling, so per-idea depth is lower there. That is an accepted trade, not a defect — but the artifact says so rather than implying every basis got equal verification. An unverified basis presented as verified is the failure this whole mechanism exists to prevent.
-## Frames
+**预算是上限，而不是统一审查的保证。** 两架代理以及任何提高数量目标的运行都会针对相同的上限提交更多的想法，因此每个想法的深度较低。这是一种可接受的交易，而不是缺陷——但该产物是这么说的，而不是暗示每个基础都得到了同等的验证。呈现为已验证的未经验证的基础是整个机制存在的目的是防止失败。
+## 镜框
 
-Assign each sub-agent its frame (or frame pair) as a **starting bias, not a constraint**. Prompt each to begin from its assigned perspective but follow any promising thread -- cross-cutting ideas that span multiple frames are valuable.
+将每个子代理的框架（或框架对）分配为**起始偏差，而不是约束**。提示每个人从指定的角度开始，但遵循任何有前途的线索——跨越多个框架的横切想法是有价值的。
 
-**Frame selection (mode-symmetric — same six frames in repo and elsewhere modes):**
+**帧选择（模式对称 - 回购和其他模式中相同的六个帧）：**
 
-1. **Pain and friction** — user, operator, or topic-level pain points; what is consistently slow, broken, or annoying.
-2. **Inversion, removal, or automation** — invert a painful step, remove it entirely, or automate it away.
-3. **Assumption-breaking and reframing** — what is being treated as fixed that is actually a choice; reframe one level up or sideways.
-4. **Leverage and compounding** — choices that, once made, make many future moves cheaper or stronger; second-order effects.
-5. **Cross-domain analogy** — generate ideas by asking how completely different fields solve a structurally analogous problem. The grounding domain is the user's topic; the analogy domain is anywhere else (other industries, biology, games, infrastructure, history). Push past the obvious analogy to non-obvious ones.
-6. **Constraint-flipping** — invert the obvious constraint to its opposite or extreme. What if the budget were 10x or 0? What if the team were 100 people or 1? What if there were no users, or 1M? Use the resulting design as a candidate even if the constraint flip itself is not realistic.
+1. **痛点和摩擦**——用户、操作员或主题级别的痛点；始终缓慢、损坏或烦人的事情。
+2. **反转、删除或自动化**——反转一个痛苦的步骤，完全删除它，或者自动化它。
+3. **打破假设和重构**——被视为固定的东西实际上是一种选择；向上或横向重新构建一层。
+4. **杠杆和复利**——一旦做出选择，就会使许多未来的行动变得更便宜或更强大；二阶效应。
+5. **跨领域类比**——通过询问完全不同的领域如何解决结构相似的问题来产生想法。接地域是用户的主题；类比领域可以是其他任何地方（其他行业、生物学、游戏、基础设施、历史）。把显而易见的类比推向不明显的类比。
+6. **约束翻转** — 将明显的约束反转到其相反或极端。如果预算是 10 倍或 0 该怎么办？如果团队是 100 人还是 1 人呢？如果没有用户，或者1M怎么办？即使约束翻转本身不现实，也可以使用生成的设计作为候选。
 
-**Issue-tracker mode override (repo mode only).** When issue-tracker intent is active and themes were returned by the issue intelligence agent: the **highest-leverage themes become frames** — leverage is the analyst's ranking (prevalence + severity + recurrence + breadth), so do not drop a top-leverage theme merely because its confidence is low; use confidence only to break ties among comparable-leverage themes. Pad with frames from the 6-frame default pool (in the order listed above) if fewer than 3 cluster-derived frames. Cap at 4 total — issue-tracker mode keeps its tighter dispatch by design. Theme frames dispatch on the generation tier (themes are evidence-driven); padded frames keep their native tier.
+**问题跟踪器模式覆盖（仅限回购模式）。**当问题跟踪器意图处于活动状态并且问题智能代理返回主题时：**最高杠杆主题成为框架** - 杠杆是分析师的排名（流行度 + 严重性 + 复发 + 广度），因此不要仅仅因为其置信度较低而放弃最高杠杆主题；仅利用信心来打破可比杠杆主题之间的联系。如果簇派生帧少于 3 个，则使用 6 帧默认池中的帧（按上面列出的顺序）进行填充。总数上限为 4 — 问题跟踪器模式在设计上保持了更严格的调度。主题框架在生成层调度（主题是证据驱动的）；带衬垫的框架保持其原始层。
 
-**Axis spread instruction.** When an axis list is present, instruct each sub-agent to distribute its ideas across multiple axes — the frame's lens applies to every axis, but ideas should not all cluster on one. Each idea must be tagged with the axis it targets. The frame is a lens; the axis list names the parts of the subject to examine. A frame that plausibly reaches an axis should produce at least one idea there before doubling up on a different axis. When decomposition was skipped (atomic subject or surprise-me), omit the axis instruction entirely — do not invent axes at dispatch time.
+**轴传播指令。** 当存在轴列表时，指示每个子代理将其想法分布在多个轴上 - 框架的镜头适用于每个轴，但想法不应全部聚集在一个轴上。每个想法都必须标有其目标轴。镜框是镜片；轴列表列出了要检查的主题的各个部分。一个看似合理地到达某个轴的框架应该在该轴上至少产生一个想法，然后再在另一个轴上加倍。当分解被跳过时（原子主题或令我惊讶），完全省略轴指令 - 不要在调度时发明轴。
 
-**Surprise-me mode addendum.** When Phase 0.2 routed to surprise-me, include this additional instruction in each sub-agent's dispatch prompt:
+**Surprise-me 模式附录。** 当第 0.2 阶段路由到 Surprise-me 时，请在每个子代理的调度提示中包含此附加指令：
 
-> No user-specified subject. Through your frame's lens, explore the Phase 1 material and identify the subject(s) you find most interesting for this frame. Different frames finding different subjects is the feature — cross-subject divergence is what makes surprise-me valuable. Each idea still carries a basis; the basis may include identification of the subject itself (why *this* subject is worth ideating on through your lens, citing what in the Phase 1 material signals it).
+> 没有用户指定的主题。通过相框的镜头，探索第一阶段的材料并确定您认为此相框最感兴趣的主题。不同的框架找到不同的主题是其特点——跨主题的分歧使得惊喜变得有价值。每个想法都有其基础；基础可能包括对主题本身的识别（为什么*这个*主题值得通过你的镜头进行构思，引用第一阶段材料中的信号）。
 
-## Per-Idea Output Contract (uniform across all frames, all modes)
+## 每个想法的输出契约（在所有框架、所有模式中统一）
 
-Each sub-agent returns this structure per idea:
+每个子代理返回每个想法的结构：
 
-- **title**
-- **summary** (2-4 sentences)
-- **axis** — required when Phase 1.5 produced an axis list. Pick the one axis this idea most centrally targets; do not span. Omit entirely when decomposition was skipped.
-- **basis** (required, tagged) — one of:
-  - `direct:` quoted line / specific file / named issue / explicit user-supplied context
-  - `external:` named prior art, domain research, adjacent pattern, with source
-  - `reasoned:` explicit first-principles argument for why this move likely applies — not a gesture; the argument is written out
-- **why_it_matters** — connects the basis to the move's significance
-- **meeting_test** — one line confirming this would warrant team discussion (waived when tactical scope is active — Phase 0.5)
+- **标题**
+- **摘要**（2-4句话）
+- **axis** — 当阶段 1.5 生成轴列表时需要。选择这一想法最集中的目标轴；不要跨越。当跳过分解时完全省略。
+- **基础**（必填，已标记）- 以下之一：
+  - `direct:` 引用行/特定文件/命名问题/显式用户提供的上下文
+  - `external:` 命名为现有技术、领域研究、相邻模式、带有来源
+  - `reasoned:` 明确的第一原则论证为什么这一举措可能适用——而不是一个手势；论证被写出来
+- **why_it_matters** — 将基础与此举的意义联系起来
+- **meeting_test** - 一行确认这一点将保证团队讨论（当战术范围处于活动状态时放弃 - 阶段 0.5）
 
-Basis is required, not optional. If a sub-agent cannot articulate a basis of at least one type, the idea is dropped. The failure mode to prevent is generic "AI-slop" ideas that sound plausible but lack a basis the user can verify.
+基础是必需的，不是可选的。如果子代理无法阐明至少一种类型的基础，则该想法将被放弃。预防故障的模式是通用的“AI-slop”想法，听起来似乎有道理，但缺乏用户可以验证的基础。
 
-**Generation rules (uniform across frames, all modes):**
+**生成规则（跨帧、所有模式统一）：**
 
-- Every idea carries an articulated basis. Unjustified speculation is dropped, regardless of how plausible it sounds.
-- Bias toward the basis type your frame naturally produces — pain/inversion/leverage tend toward `direct:`; analogy and constraint-flipping tend toward `reasoned:`; assumption-breaking is mixed — but don't exclude other basis types.
-- Apply the meeting-test as a default floor: would this idea warrant team discussion? If not, it's below the floor and is dropped. The floor is relaxed only when tactical scope is active (Phase 0.5) — a `go deep` run that also carried a tactical word is not tactical.
-- Stay within the subject's identity. Product expansions, new surfaces, new markets, retirements, and architectural pivots are fair game when the basis supports them. Subject-replacement moves (abandoning the project, pivoting to unrelated domains, becoming a different organization) are out regardless of basis.
-- **Honor the asked scope.** When the focus hint names a part of the subject (a flow, a stage, a section, a feature within a larger product — e.g., "account settings", "onboarding flow", "pricing page copy", "gameplay rules"), ideate at full ambition *within that scope*. Widening the scope to the whole subject — proposing fundamental changes to the broader product when the user named one slice — is a scope mismatch even when no subject-replacement occurred. Big-picture thinking still applies; it just operates inside the slice the user named, not by widening it.
+- 每个想法都有一个明确的基础。无论听起来多么合理，不合理的猜测都会被放弃。
+- 偏向您的框架自然产生的基本类型 - pain/inversion/leverage 倾向于 `direct:`；类比和约束翻转趋于`reasoned:`；打破假设的情况有好有坏——但不排除其他基础类型。
+- 将会议测试作为默认底线：这个想法值得团队讨论吗？如果没有，它就会在地板下方并掉落。仅当战术范围处于活动状态（阶段 0.5）时，地板才会放松 - 还带有战术词的`go deep`跑不是战术的。
+- 保持在主体的身份范围内。当基础支持时，产品扩展、新表面、新市场、退休和架构枢轴都是公平的游戏。无论基础如何，主题替换举措（放弃项目、转向不相关领域、成为不同的组织）都将被淘汰。
+- **尊重所要求的范围。**当焦点提示命名主题的一部分（流程、阶段、部分、较大产品中的功能 - 例如“帐户设置”、“入门流程”、“定价页面副本”、“游戏规则”）时，*在该范围内*充分发挥创意。将范围扩大到整个主题（当用户指定一个切片时，建议对更广泛的产品进行根本性更改）即使没有发生主题替换，也是一种范围不匹配。大局思维仍然适用；它只是在用户指定的切片内操作，而不是通过扩大它。
 
-## After All Sub-Agents Return
+## 所有子代理返回后
 
-1. Merge and dedupe into one master candidate list.
-2. Synthesize cross-cutting combinations -- scan for ideas from different frames that combine into something stronger. In specified mode, expect 3-5 additions at most. **In surprise-me mode, cross-cutting is the magic layer** — frames often converge on overlapping subjects or find complementary angles; expect 5-8 additions and give this step more attention. Present combinations that span multiple frame-chosen subjects as a distinctive surprise-me output pattern.
-3. **Axis-coverage check (when Phase 1.5 produced an axis list; skipped otherwise).** Count ideas per axis after dedupe. For any axis with zero ideas, dispatch one recovery sub-agent (any unused frame, or the frame whose lens fits the missing axis best — e.g., Pain & friction for usability axes, Cross-domain analogy for distribution or compounding axes; dispatched on that frame's native tier) targeting that axis specifically. The recovery dispatch carries the same per-idea output contract and ~3-5 ideas as its target. **Cap recovery at 2 axes total** — if more than 2 axes are empty after the first round, accept thin coverage rather than fanning out further. After recovery returns, merge into the master list and dedupe again. Note empty axes that were not recovered in the rejection summary as "axis: <name> — recovery skipped (cap reached)" so the gap is visible to the user.
-4. If a focus was provided, weight the merged list toward it without excluding stronger adjacent ideas.
-5. Spread ideas across multiple dimensions when justified: workflow/DX, reliability, extensibility, missing capabilities, docs/knowledge compounding, quality/maintenance, leverage on future work.
+1. 合并并删除重复数据到一个主候选列表中。
+2. 综合横切组合——从不同框架中寻找想法，并将其组合成更强大的东西。在指定模式下，预计最多可添加 3-5 个。 **在“惊喜”模式中，横切是神奇的层**——画面常常会聚在重叠的主题上或找到互补的角度；预计会有 5-8 个添加，并更加注意这一步。将跨越多个框架选择的主题的组合呈现为独特的惊喜输出模式。
+3. **轴覆盖检查（当阶段 1.5 生成轴列表时；否则跳过）。** 在重复数据删除后对每个轴的想法进行计数。对于任何想法为零的轴，专门针对该轴调度一个恢复子代理（任何未使用的框架，或者其镜头最适合缺失轴的框架 - 例如，可用性轴的疼痛和摩擦，分布或复合轴的跨域类比；在该框架的本机层上调度）。恢复调度具有相同的每个想法输出合同和约 3-5 个想法作为其目标。 **总共 2 个轴的上限恢复** — 如果第一轮后超过 2 个轴是空的，则接受薄覆盖而不是进一步扇形展开。恢复恢复后，合并到主列表中并再次进行重复数据删除。请注意拒绝摘要中未恢复的空轴为“轴：<name> — 已跳过恢复（达到上限）”，以便用户可以看到间隙。
+4. 如果提供了焦点，则将合并列表的权重集中在该焦点上，而不排除更强的相邻想法。
+5. 当合理时，将想法传播到多个维度：workflow/DX，可靠性，可扩展性，缺失的功能，docs/knowledge复合，quality/maintenance，对未来工作的影响。
 
-**Raw-candidates checkpoint.** Immediately after the cross-cutting synthesis step completes and the raw candidate list is consolidated, write `<scratch-dir>/raw-candidates.md` (using the absolute path captured in Phase 1) containing the full candidate list with sub-agent attribution. This protects the most expensive output (the parallel ideation dispatches + dedupe) before Phase 3 critique potentially compacts context. Best-effort: if the write fails (disk full, permissions), log a warning and proceed; the run does not depend on the checkpoint. Not cleaned up at the end of the run (the run directory is preserved so the web-research cache remains reusable across run-ids in the same session — see Phase 5).
+**原始候选检查点。** 在横切合成步骤完成并且原始候选列表被合并后，立即写入 `<scratch-dir>/raw-candidates.md` （使用在第 1 阶段捕获的绝对路径），其中包含具有子代理属性的完整候选列表。这可以在第 3 阶段批判可能压缩上下文之前保护最昂贵的输出（并行构思调度 + 重复数据删除）。尽力而为：如果写入失败（磁盘已满、权限），则记录警告并继续；运行不依赖于检查点。运行结束时未清理（保留运行目录，以便网络研究缓存在同一会话中的运行 ID 之间保持可重用 — 请参阅第 5 阶段）。
 
-When the merge, synthesis, and axis-coverage steps are complete, load `references/post-ideation-workflow.md` before any critique begins. That read is required: the filtering rubric, the Phase 4 auto-write, and the Phase 5 menu live only there.
+当合并、综合和轴覆盖步骤完成时，在任何批评开始之前加载`references/post-ideation-workflow.md`。该读取是必需的：过滤标题、第 4 阶段自动写入和第 5 阶段菜单仅存在于此。

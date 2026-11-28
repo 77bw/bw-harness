@@ -1,55 +1,55 @@
-# Phases 2-3: hypotheses and the optimization loop
+# 第 2-3 阶段：假设和优化循环
 
-Read this before generating hypotheses and follow it for the whole loop. The SKILL.md body states the dependency pre-approval gate (the check that stops the run until the user has approved new dependencies) and the stopping criteria. This file carries hypothesis generation, batch selection, experiment dispatch, result collection and persistence, batch evaluation, the state update, the tick boundary, and the cross-cutting concerns. `<state-root>` is the run's ledger directory resolved in Phase 0 (`references/persistence.md`).
+在生成假设之前阅读本文，并在整个循环中遵循它。 SKILL.md 主体说明了依赖项预批准门（在用户批准新依赖项之前停止运行的检查）和停止条件。该文件包含假设生成、批次选择、实验调度、结果收集和持久化、批次评估、状态更新、刻度边界和横切关注点。 `<state-root>` 是在阶段 0 (`references/persistence.md`) 中解析的运行的账本目录。
 
-## Phase 2: Hypothesis Generation
+## 第二阶段：假设生成
 
-### 2.1 Analyze Current Approach
+### 2.1 分析当前方法
 
-Read the code within `scope.mutable` to understand:
-- The current implementation approach
-- Obvious improvement opportunities
-- Constraints and dependencies between components
+阅读`scope.mutable`内的代码即可理解：
+- 目前的实施方式
+- 明显的改进机会
+- 组件之间的约束和依赖关系
 
-When the baseline recorded `worst_cases`, read them. They show where the current approach fails and are one source of hypotheses, beside the code, attribution, and prior learnings. They do not limit the search: a hypothesis may replace the approach instead of fixing those cases.
+当基线记录`worst_cases`时，读取它们。它们显示了当前方法的失败之处，并且是除了代码、归因和先前学习之外的假设来源之一。它们不限制搜索：假设可能会取代方法而不是修复这些情况。
 
-Write `source-digest.md` in the run's scratch directory once, now. It holds what an experiment worker needs to know about the material the target works on (evaluation data, corpora, large inputs, and how the harness uses them) and about the current approach, short enough to include in every worker prompt. Each worker starts with an empty context, so without the digest every experiment pays to read that material again. Rewrite the digest only when a keep changes something it describes.
+现在，在运行的临时目录中写入一次`source-digest.md`。它包含实验工作人员需要了解的目标工作材料（评估数据、语料库、大量输入以及工具如何使用它们）以及当前方法的信息，足够短以包含在每个工作人员提示中。每个工作人员都从一个空的上下文开始，因此如果没有摘要，每个实验都需要再次阅读该材料。仅当保留更改其描述的内容时才重写摘要。
 
-The next action is the cheapest executable step that would change what gets implemented. A locating measurement is one that finds where the cost actually sits (a profile, per-stage timing, a query count) rather than testing a change. It belongs in this phase when it is cheaper than an implementation experiment, would change whether a hypothesis is worth keeping or skipping, and can be taken. For a named workload's cost, the locating measurement is attribution: shares by stage, query, or call. Take it before an implementation experiment when the Phase 1 baseline total cannot say which hypothesis is worth keeping and those same conditions hold. The baseline total stays the scoring reference; the shares only decide what to try. A scored variant space does not require a performance profile: rubric evidence decides what to try, and numerical benefit may stay unknown.
+下一个行动是最便宜的可执行步骤，它将改变所实施的内容。定位测量是一种查找成本实际所在的测量（配置文件、每阶段计时、查询计数），而不是测试更改。它属于这个阶段，因为它比实施实验更便宜，会改变假设是否值得保留或跳过，并且可以被采用。对于指定工作负载的成本，定位度量是归因：按阶段、查询或调用划分的份额。当第一阶段基线总数无法表明哪个假设值得保留并且那些相同的条件成立时，在实施实验之前采取它。基线总分仍作为评分参考；股票只决定尝试什么。评分变体空间不需要性能概况：标题证据决定尝试什么，而数值效益可能仍然未知。
 
-Do not treat the implementation backlog as empty, and do not proceed to wrap-up, while a cheaper locating measurement can still be taken and would change whether a hypothesis is kept or skipped. If such a measurement would change that decision but cannot be obtained, wrap up and say what blocked it. Do not implement without that measurement.
+不要将实施积压视为空，也不要继续进行总结，同时仍然可以采取更便宜的定位测量，并且会改变保留还是跳过假设。如果这样的测量会改变该决定但无法获得，请总结并说明是什么阻碍了它。如果没有该测量，请勿实施。
 
-Optionally read `references/agents/repo-research-analyst.md` and dispatch a generic subagent seeded with that local prompt for deeper codebase analysis if the scope is large or unfamiliar. Do not dispatch a standalone agent by type/name. Pass the active project and optimization context, request only question-specific scopes such as `patterns`, and go directly to current owning code. If the optimization cannot be scoped, allow one targeted root or workspace probe.
+如果范围很大或不熟悉，可以选择读取 `references/agents/repo-research-analyst.md` 并分派一个通用子代理，该子代理以该本地提示为种子进行更深入的代码库分析。不要在 type/name 之前派遣独立代理。传递活动项目和优化上下文，仅请求特定于问题的范围（例如 `patterns`），并直接转到当前所属代码。如果无法确定优化范围，请允许一个目标根或工作区探测。
 
-A generic subagent is one whose whole brief is the prompt you send it. When the host's subagent tool makes you name an agent, use only a name you have seen the host list, and list its agents before the first dispatch if you have not. Pick the plain one that adds no role of its own, which still counts as a generic subagent. Never pick a specialist, such as a reviewer or worker agent, whose own role prompt, output format, or tool limits would replace or narrow your prompt.
+通用子代理的整个简介就是您发送的提示。当主机的子代理工具要求您命名代理时，请仅使用您在主机列表中看到的名称，如果没有，请在第一次调度之前列出其代理。选择不添加自己的角色的普通子代理，它仍然算作通用子代理。切勿选择专家，例如审查者或工作代理，他们自己的角色提示、输出格式或工具限制会取代或缩小您的提示。
 
-### 2.2 Generate Hypothesis List
+### 2.2 生成假设列表
 
-Generate an initial set of hypotheses. Each hypothesis should have:
-- **Description**: what to try
-- **Category**: one of the standard categories (signal-extraction, graph-signals, embedding, algorithm, preprocessing, parameter-tuning, architecture, data-handling) or a domain-specific category
-- **Priority**: high, medium, or low as a summary label
-- **Required dependencies**: any new packages or tools needed
-- **Opportunity**: the log schema's `opportunity` record (estimate or explicit unknown)
+生成一组初始假设。每个假设应该有：
+- **描述**：尝试什么
+- **类别**：标准类别之一（信号提取、图形信号、嵌入、算法、预处理、参数调整、架构、数据处理）或特定于领域的类别
+- **优先级**：高、中或低作为摘要标签
+- **所需的依赖项**：所需的任何新包或工具
+- **机会**：日志模式的`opportunity`记录（估计或显式未知）
 
-Include user-provided hypotheses if any were given as input.
+包括用户提供的假设（如果有）作为输入。
 
-Record an `opportunity` on every hypothesis using the log schema before implementation. Connect whatever observed cost or rubric evidence exists to the expected change in the target metric, with units, a comparison baseline, and the assumptions behind the estimate. Prefer a supported range or upper bound over a point estimate. If the benefit or the cost share cannot be estimated, record it as unknown and name the cheapest measurement that would resolve the uncertainty. A subjective priority score is not a measured benefit. The `priority` field does not rank the backlog.
+在实施之前使用日志模式记录每个假设的 `opportunity`。将任何观察到的成本或存在的标题证据与目标指标的预期变化、单位、比较基线以及估计背后的假设联系起来。与点估计相比，更喜欢支持的范围或上限。如果无法估计收益或成本份额，请将其记录为未知，并指定可解决不确定性的最便宜的衡量方法。主观优先级分数不是衡量的收益。 `priority` 字段不对待办事项进行排名。
 
-An unknown opportunity may sit on the backlog. It is not a runnable implementation experiment while a cheaper locating measurement would change whether it is kept or skipped.
+未知的机会可能会被积压。它不是一个可运行的实现实验，而更便宜的定位测量会改变它是保留还是跳过。
 
-The backlog contains the credible opportunities supported by current evidence, not a required number of ideas. Rank by expected target benefit, confidence, implementation and measurement cost, and behavioral risk. Persist and verify the ranked opportunities and estimates at CP-2. Follow the SKILL.md body's reporting rule when you tell the user the findings that explain the chosen direction. The full backlog remains available on disk.
+积压工作包含由当前证据支持的可信机会，而不是所需数量的想法。按预期目标收益、信心、实施和衡量成本以及行为风险进行排名。坚持并验证 CP-2 上的排名机会和估计。当您告诉用户解释所选方向的发现时，请遵循 SKILL.md 机构的报告规则。磁盘上仍保留完整的积压工作。
 
-### 2.3 Dependency Pre-Approval
+### 2.3 依赖性预批准
 
-The SKILL.md body states this gate. A dependency the user does not approve stays in the backlog, is skipped in batch selection, and comes back at wrap-up. Record its outcome on each hypothesis as `dep_status: approved` or `needs_approval`, which is what batch selection reads.
+SKILL.md主体说明了这个门。用户不批准的依赖项会保留在待办事项中，在批量选择中被跳过，并在总结时返回。将每个假设的结果记录为 `dep_status: approved` 或 `needs_approval`，这是批量选择读取的内容。
 
-### 2.4 Record Hypothesis Backlog (CP-2)
+### 2.4 记录假设积压（CP-2）
 
-**MANDATORY CHECKPOINT.** Write the initial backlog to the experiment log file and verify. CP-2 is incomplete until each hypothesis in that write carries its opportunity record.
+**强制检查点。** 将初始积压写入实验日志文件并验证。直到该写入中的每个假设都携带其机会记录之前，CP-2 才是完整的。
 ```yaml
 hypothesis_backlog:
-  - description: "Remove template boilerplate before embedding"
+  - description: "嵌入前删除模板样板"
     category: "signal-extraction"
     priority: high
     dep_status: approved
@@ -61,7 +61,7 @@ hypothesis_backlog:
       expected_benefit: "unknown; cheapest resolve: one judged stripped-vs-current sample"
       confidence: "low: unmeasured"
       cost_and_risk: "small edit; judge sample; no new deps"
-  - description: "Try HDBSCAN clustering algorithm"
+  - description: "尝试HDBSCAN聚类算法"
     category: "algorithm"
     priority: medium
     dep_status: needs_approval
@@ -77,212 +77,212 @@ hypothesis_backlog:
 
 ---
 
-## Phase 3: Optimization Loop
+## 第三阶段：优化循环
 
-This phase runs in ticks until a stopping criterion is met. One tick is one batch: select (3.1), dispatch (3.2), collect and persist each result as it lands (3.3), evaluate (3.4), update state (3.5), check the stopping criteria (3.6). The tick boundary is the only place a turn may end with work outstanding; what that requires is stated there. A tick reaches the tick boundary after 3.6, or earlier at any step that cannot go further until results arrive for receipts recorded in `run_state.pending_waits` and has nothing else it can do first. An early crossing leaves the rest of the tick undone. It writes `run_state` with the in-tick time not yet counted added to `active_seconds`, and it leaves `tick` unchanged. When the awaited results land, the resumed turn continues the same batch at the step that was waiting. It does not select a new batch at 3.1. In a session with no wake capability, ticks follow one another in this session exactly as batches did before, and nothing in this file asks you to do anything else.
+此阶段以滴答为单位运行，直到满足停止标准。一个刻度是一批：选择（3.1）、分派（3.2）、收集并保存每个结果（3.3）、评估（3.4）、更新状态（3.5）、检查停止标准（3.6）。刻度边界是转弯可能以未完成工作结束的唯一地方；那里说明了需要什么。蜱虫在 3.6 之后或更早的任何步骤到达蜱虫边界，在 `run_state.pending_waits` 中记录的收据结果到达之前无法继续前进，并且它首先无能为力。过早的穿越会使蜱虫的其余部分未完成。它写入 `run_state`，并将尚未计算的 in-tick 时间添加到 `active_seconds`，并保持 `tick` 不变。当等待的结果落地时，恢复的轮次会在等待的步骤中继续执行相同的批次。它不会在 3.1 中选择新批次。在没有唤醒功能的会话中，蜱虫在该会话中彼此跟随，就像以前的批次一样，并且该文件中没有任何内容要求您执行任何其他操作。
 
-### 3.1 Batch Selection
+### 3.1 批量选择
 
-Select hypotheses for this batch:
-- Build a runnable backlog by excluding hypotheses with `dep_status: needs_approval`
-- A hypothesis is not runnable while a cheaper locating measurement would still change whether it is kept or skipped
-- If `execution.mode` is `serial`, or the current decision needs to attribute a cost change to one lever, force `batch_size = 1`
-- Otherwise, `batch_size = min(runnable_backlog_size, execution.max_concurrent)`, further capped by `execution.max_experiments_per_tick` when the spec sets it
-- Shrink the batch until its estimated worker and judge cost fits every configured spend cap (3.6). If not even one experiment fits, stop with that criterion
-- Select by the ranked expected benefit, confidence, cost, and risk above; the priority label does not decide order. Category diversity breaks remaining ties.
+为此批次选择假设：
+- 通过排除 `dep_status: needs_approval` 的假设来构建可运行的积压工作
+- 假设是不可运行的，而更便宜的定位测量仍然会改变，无论是保留还是跳过
+- 如果`execution.mode`是`serial`，或者当前决策需要将成本变化归因于一个杠杆，则强制`batch_size = 1`
+- 否则，`batch_size = min(runnable_backlog_size, execution.max_concurrent)`，当规范设置时进一步限制为`execution.max_experiments_per_tick`
+- 缩小批次，直到其估计的工作人员和判断成本适合每个配置的支出上限 (3.6)。如果连一个实验都不适合，就停止该标准
+- 按上述预期收益、置信度、成本和风险的排名进行选择；优先级标签不决定顺序。类别多样性打破了剩余的联系。
 
-When a cheaper locating measurement can be taken and would still change whether a hypothesis is kept or skipped, take that measurement and update the backlog before selecting a batch. Do not treat that state as an empty backlog.
+当可以采取更便宜的定位测量并且仍然会改变是否保留或跳过假设时，请在选择批次之前进行该测量并更新积压工作。不要将该状态视为空积压。
 
-When no executable next action remains, proceed to Phase 4 (wrap-up). An action is executable only if it can be taken now. A locating measurement that would change a keep-or-skip decision but cannot be obtained is a blocker, not a reason to keep the loop open. Wrap up and say what blocked it. Deferred dependencies are presented at wrap-up instead of the loop spinning forever.
+当没有可执行的下一个操作剩余时，继续到阶段 4（总结）。只有现在可以采取的操作才是可执行的。会改变保留或跳过决策但无法获得的定位测量是阻碍因素，而不是保持环路开放的原因。总结一下并说出是什么阻碍了它。延迟依赖性在总结时呈现，而不是永远旋转的循环。
 
-### 3.2 Dispatch Experiments
+### 3.2 调度实验
 
-The experiment's forecast is the backlog `opportunity` as of dispatch. Do not reconstruct it from later results. Copy that backlog value into the experiment entry at its first CP-3 write, including when that write recovers a `result.yaml` marker that has no forecast. Revised estimates for later experiments must not overwrite an earlier experiment's forecast. Missing forecasts in resumed legacy runs stay unrecorded.
+实验的预测是截至调度时的积压`opportunity`。不要根据后来的结果重建它。在第一次 CP-3 写入时将该积压值复制到实验条目中，包括当该写入恢复没有预测的 `result.yaml` 标记时。对后续实验的修订估计不得覆盖早期实验的预测。恢复的遗留运行中丢失的预测不会被记录。
 
-For each hypothesis in the batch, dispatch according to `execution.mode`. In `serial` mode, run exactly one experiment to completion before selecting the next hypothesis. In `parallel` mode, dispatch the batch concurrently.
+对于批次中的每个假设，根据`execution.mode`进行调度。在 `serial` 模式下，在选择下一个假设之前运行一个实验直至完成。在`parallel`模式下，并发调度批次。
 
-**Bounded dispatch.** Do not assume the host will accept all concurrent subagents at once; the active-subagent cap varies by host and profile and is independent of `execution.max_concurrent` (which caps worktrees, a separate budget). Queue the selected experiments, dispatch only as many as the host accepts, and when a capacity or active-agent-limit error appears, treat it as backpressure: retry the queued experiment after a slot frees rather than marking it failed. Mark an experiment failed only when dispatch fails for a non-capacity reason that survives correcting the invocation, or a successfully dispatched experiment errors/times out.
+**有界调度。** 不要假设主机会立即接受所有并发子代理；活动子代理上限因主机和配置文件而异，并且独立于`execution.max_concurrent`（它限制工作树，一个单独的预算）。将选定的实验排队，仅调度主机接受的数量，并且当出现容量或活动代理限制错误时，将其视为背压：在插槽释放后重试排队的实验，而不是将其标记为失败。仅当调度由于非容量原因而在更正调用后仍然存在时失败，或者成功调度实验 errors/times 时，才将实验标记为失败。
 
-The Phase 3 blocks below each set `SKILL_DIR` inline as well (the loaded `ce-optimize` skill directory; see the Bundled scripts note in Phase 1). Shell state does not persist from Phase 1, so each block carries its own assignment.
+每组 `SKILL_DIR` 下方的第 3 阶段块也是内联的（加载的 `ce-optimize` 技能目录；请参阅第 1 阶段中的捆绑脚本注释）。 Shell 状态不会从第 1 阶段开始持续存在，因此每个块都有自己的分配。
 
-**One dispatch recipe, per experiment.** The backend changes where the experiment runs and how its result comes back, not what the worker is told.
+**每个实验一个调度配方。** 后端更改实验运行的位置及其结果返回的方式，而不是告诉工作人员的内容。
 
-1. **Isolate.** For `worktree` and `codex`, create the experiment worktree on the optimization branch:
+1. **隔离。** 对于 `worktree` 和 `codex`，在优化分支上创建实验工作树：
    ```bash
    SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
    WORKTREE_PATH=$(bash "$SKILL_DIR/scripts/experiment-worktree.sh" create "<spec_name>" <exp_index> "optimize/<spec_name>" <shared_files...>)  # creates optimize-exp/<spec_name>/exp-<NNN>
    ```
-   Apply port parameterization if configured (set env vars for the measurement script). For `remote`, isolation is the worker's own checkout: record `base_sha` (`git rev-parse optimize/<spec_name>`) and make sure that commit is pushed to the remote the worker will fetch from.
-2. **Brief.** Fill the experiment prompt template (`references/experiment-prompt-template.md`): iteration number and spec name; hypothesis description and category; current best and baseline metrics; mutable and immutable scope; constraints and approved dependencies; the rolling window of the last 10 experiments as concise summaries; the source digest; and the current best's relevant `worst_cases`, from its kept entry or the baseline before any keep. For `remote`, append the template's measure-and-report delta with `base_sha`, the result ref `optimize-exp/<spec_name>/exp-<NNN>`, the measurement command, and the paired sample count the current ladder step needs.
-3. **Dispatch** by `execution.backend`, then record the return shape.
+   如果已配置，则应用端口参数化（为测量脚本设置环境变量）。对于`remote`，隔离是工作人员自己的签出：记录`base_sha`（`git rev-parse optimize/<spec_name>`）并确保提交被推送到工作人员将从中获取的远程。
+2. **简述** 填写实验提示模板（`references/experiment-prompt-template.md`）：迭代次数和spec名称；假设描述和类别；当前最佳和基线指标；可变和不可变范围；约束和批准的依赖关系；最后 10 个实验的滚动窗口作为简明摘要；源摘要；当前最好的相关`worst_cases`，来自其保留条目或任何保留之前的基线。对于`remote`，将模板的测量和报告增量附加到`base_sha`、结果参考`optimize-exp/<spec_name>/exp-<NNN>`、测量命令以及当前梯形步骤所需的配对样本计数。
+3. **按`execution.backend`调度**，然后记录回程形状。
 
-| Backend | Dispatch | What returns |
+| 后端 | 派遣 | 返回什么 |
 |---|---|---|
-| `worktree` | A subagent with the filled prompt, working in the experiment worktree | The subagent's completion, with its edits in the worktree |
-| `codex` | Write the filled prompt to a temp file and run `cat /tmp/optimize-exp-XXXXX.txt \| codex exec --skip-git-repo-check - 2>&1`, with the security posture from `execution.codex_security` (ask once per session when unset) | The process exit, with its edits in the worktree |
-| `remote` | The detached-worker dispatch the body's Execution Surface names, with the filled prompt; when no such capability is in the tool list, use the `worktree` row for the whole run and log the fallback | A receipt naming the launch. The result is the pushed result ref (`result.yaml` at its root) or, when the host delivers results as a store file or terminal message, that file or message |
+| `worktree` | 具有填充提示的子代理，在实验工作树中工作 | 子代理的完成及其在工作树中的编辑 |
+| `codex` | 将填充的提示写入临时文件并运行`cat /tmp/optimize-exp-XXXXX.txt \| codex exec --skip-git-repo-check - 2>&1`，安全状态来自`execution.codex_security`（未设置时每个会话询问一次） | 流程退出，及其在工作树中的编辑 |
+| `remote` | 独立工作人员发送主体的执行表面名称，并带有填充的提示；当工具列表中没有此类功能时，请在整个运行中使用 `worktree` 行并记录回退 | 一张注明此次发射的收据。结果是推送的结果引用（`result.yaml`位于其根），或者当主机将结果作为存储文件或终端消息传递时，该文件或消息 |
 
-**Codex delegation condition.** Delegate to `codex exec` only when this session is not itself running inside a Codex sandbox and `.git` is writable; otherwise use the `worktree` row for that experiment and log the fallback. A set sandbox marker in your environment is proof you are inside one; an unset marker proves nothing on its own, which is why the writable-`.git` check stays in the test:
+**Codex委托条件。** 仅当该会话本身不在Codex沙箱内运行并且`.git`可写时，才委托给`codex exec`；否则，请使用 `worktree` 行进行该实验并记录回退。您环境中设置的沙箱标记可以证明您位于其中；未设置的标记本身无法证明任何内容，这就是可写-`.git`检查保留在测试中的原因：
 ```bash
 # any true branch means: do not delegate this experiment to codex
 test -n "${CODEX_SANDBOX:-}" || test -n "${CODEX_SESSION_ID:-}" || test ! -w .git
 ```
 
-**Return shape.** A dispatch returns either a **result** (the work is done and its edits are where the table says) or a **receipt** (a handle for work that will finish after this call returns). A result goes straight to 3.3. A receipt is a pending wait: record it in `run_state.pending_waits` as `references/persistence.md` specifies, including the observable that will carry the result and the action to take (collect it through 3.3), and verify the write before dispatching the next experiment. Collect a receipt's result when that observable arrives, never by polling in a foreground loop.
+**返回形状。** 调度返回 **结果**（工作已完成，其编辑位于表所示位置）或 **收据**（此调用返回后将完成的工作的句柄）。结果直接达到3.3。收据是一个挂起的等待：按照`references/persistence.md`的规定将其记录在`run_state.pending_waits`中，包括将携带结果的可观察量和要采取的操作（通过3.3收集），并在分派下一个实验之前验证写入。当可观察的到达时收集收据的结果，而不是通过在前台循环中轮询。
 
-### 3.3 Collect and Persist Results
+### 3.3 收集并保存结果
 
-Persist a `comparisons` record for each distinct reference, candidate, and workload pairing used in a decision. Each side's identity must uniquely identify the bytes that were measured; a shared HEAD is not enough when the candidate is uncommitted. Record the workload, both snapshots, and the decision's uncertainty and correctness evidence. Standalone and integrated pairings stay distinct in this array; a later in-place update must not replace a previously persisted distinct pairing. A runner-up's contribution is its confirmed change against the branch it was added to, not its standalone gain. These records explain results. `decide.mjs` still makes the accept or revert decision, using the existing snapshot fields.
+为决策中使用的每个不同的参考、候选者和工作负载配对保留一个 `comparisons` 记录。每一方的身份必须唯一地标识所测量的字节；当候选人未做出承诺时，共享的HEAD是不够的。记录工作负载、快照以及决策的不确定性和正确性证据。独立和集成配对在此阵列中保持不同；稍后的就地更新不得替换先前保留的不同配对。亚军的贡献是其相对于其添加到的分支的确认变化，而不是其独立收益。这些记录解释了结果。 `decide.mjs` 仍然使用现有快照字段做出接受或恢复决定。
 
-A measurement used to keep, skip, or claim a result names what bounds it. For a comparison, the bound is the threshold `decide.mjs` applied and the sample count behind the decision. For a locating measurement, the bound is the most gain the measured cost share leaves possible. With no bound, the claim is inconclusive and does not justify the keep or the skip.
+用于保留、跳过或声明结果的测量指定了结果的范围。为了进行比较，界限是应用的阈值 `decide.mjs` 和决策背后的样本数。对于定位测量，界限是测量的成本份额可能留下的最大收益。没有限制，该主张是不确定的，并且不能证明保留或跳过是合理的。
 
-Process experiments as they complete: do NOT wait for the entire batch to finish before writing results. An experiment dispatched as a receipt completes when its recorded observable arrives; collect it through the same steps, then clear its `pending_waits` entry in the CP-3 write.
+实验完成后进行处理：不要等待整个批次完成后再写入结果。当其记录的可观察值到达时，作为收据发送的实验完成；通过相同的步骤收集它，然后清除 CP-3 写入中的 `pending_waits` 条目。
 
-**Collecting a `remote` result.** Fetch the result ref and read `result.yaml` from it. Accept it only when `base_sha` equals the `base_sha` you dispatched, the result ref's tip adds only `result.yaml` and its parent is `head_sha`, the commit range `base_sha..head_sha` touches only `scope.mutable`, and both `baseline` and `candidate` snapshots are present with the required objectives. A result failing any of these is `error` with the reason, logged and closed like a failed measurement; never repair a worker's numbers. An accepted result replaces steps 1 and 2 below: the worker's paired snapshots are the measurement and its `result.yaml` is the marker (copy it into `<state-root>/exp-<NNN>-result.yaml` so recovery does not depend on the remote ref). Continue from step 3 with the worker's `baseline` as the reference snapshot for `decide.mjs`, and record `machine` and `measured_by: worker` on the `comparisons` entry. A worker's `result.yaml` carries only the selection pairing, so a configured holdout answers a would-be keep with `next_measurement: holdout` exactly as for any other backend; that holdout is collected by the independent confirmation in 3.4, on the confirming machine, never by the worker that wrote the candidate. When `decide.mjs` asks for more selection samples (`add_sample`, `confirm`), re-dispatch the same worker (or a new one from the same `head_sha`) for that count; the entry stays one experiment.
+**收集`remote`结果。**获取结果引用并从中读取`result.yaml`。仅当 `base_sha` 等于您分派的 `base_sha` 时才接受它，结果引用的提示仅添加 `result.yaml` 并且其父级为 `head_sha`，提交范围 `base_sha..head_sha` 仅涉及 `scope.mutable`，并且 `baseline` 和 `candidate` 快照都存在所需的目标。未通过其中任何一项的结果为`error`，并记录原因并像失败的测量一样关闭；切勿修复工人的号码。接受的结果替换下面的步骤 1 和 2：工作人员的配对快照是测量值，其 `result.yaml` 是标记（将其复制到`<state-root>/exp-<NNN>-result.yaml`，以便恢复不依赖于远程引用）。从步骤3继续，以worker的`baseline`作为`decide.mjs`的参考快照，并在`comparisons`条目上记录`machine`和`measured_by: worker`。工作人员的 `result.yaml` 仅携带选择配对，因此配置的保留会像任何其他后端一样回答可能保留的 `next_measurement: holdout` ；该抵制是通过 3.4 中的独立确认在确认机器上收集的，而不是由编写候选人的工人收集的。当`decide.mjs`要求更多的选择样本（`add_sample`，`confirm`）时，重新调度该数量的同一工人（或来自同一`head_sha`的新工人）；该条目仍然是一项实验。
 
-For each completed experiment, **immediately**:
+对于每个已完成的实验，**立即**：
 
-1. **Run measurement** in the experiment's worktree. Spend only the measurement the current decision needs (see Phase 1). When `stability.mode` is `ladder` and a smoke command is set, run that smoke check first. A smoke failure is terminally `degenerate`, and success proceeds to the first exploratory sample of `measurement.command` before comparison. Otherwise start with one exploratory sample. Pass `CE_OPTIMIZE_CENSOR_AFTER` to `measure.sh` only when elapsed wall time itself proves the candidate cannot become eligible, meaning every required objective is already hopeless, not merely the primary. Otherwise let measurement finish so other required objectives can still win, and let `decide.mjs` assess futility after the payload is complete.
+1. **在实验的工作树中运行测量**。仅花费当前决策所需的测量（参见第 1 阶段）。当`stability.mode`为`ladder`并且设置了烟雾命令时，首先运行该烟雾检查。烟雾失败最终为`degenerate`，成功进行到比较之前的第一个探索性样本`measurement.command`。否则从一个探索性样本开始。仅当经过的墙时间本身证明候选人无法符合资格时，才将`CE_OPTIMIZE_CENSOR_AFTER`传递到`measure.sh`，这意味着每个必需的目标都已经是无望的，而不仅仅是主要目标。否则让测量完成，以便其他所需目标仍然可以获胜，并让`decide.mjs`在有效负载完成后评估无用性。
    ```bash
    SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
    bash "$SKILL_DIR/scripts/measure.sh" "<measurement.command>" <timeout_seconds> "<worktree_path>/<measurement.working_directory or .>" <env_vars...>
    ```
-   When mode is `repeat`, keep running `repeat_count` times and aggregating as in Phase 1. When mode is `stable`, run once.
+   当mode为`repeat`时，继续运行`repeat_count`次并聚合，如阶段1。当mode为`stable`时，运行一次。
 
-2. **Write crash-recovery marker.** Immediately after measurement, write `result.yaml` in the experiment worktree containing the raw metrics. This keeps the measurement recoverable even if the agent crashes before updating the main log.
+2. **写入崩溃恢复标记。** 测量后立即在包含原始指标的实验工作树中写入 `result.yaml`。即使代理在更新主日志之前崩溃，这也可以使测量保持可恢复。
 
-3. **Read raw JSON output** from the measurement script. When it reports per-case results, keep the worst few, with what went wrong, as `worst_cases` for step 7.
+3. **从测量脚本中读取原始 JSON 输出**。当它报告每个案例的结果时，保留最差的几个，以及出现的问题，作为步骤 7 的`worst_cases`。
 
-4. **Evaluate degenerate gates** (the cheap hard checks in `metric.degenerate_gates` that reject obviously broken output):
-   - For each gate in `metric.degenerate_gates`, parse the operator and threshold
-   - Compare the metric value against the threshold
-   - If ANY gate fails, mark the outcome `degenerate` and skip judge evaluation. This saves money.
+4. **评估退化门**（`metric.degenerate_gates`中廉价的硬检查拒绝明显损坏的输出）：
+   - 对于`metric.degenerate_gates`中的每个门，解析算子和阈值
+   - 将指标值与阈值进行比较
+   - 如果任何门失败，则将结果标记为`degenerate`并跳过判断评估。这样可以省钱。
 
-5. **If the degenerate gates pass AND primary type is `judge`**:
-   - **Check judge independence before dispatching.** A judge must not have authored the hypothesis or run the experiment it is scoring, and must not see other judges' results. That independence is what makes these scores usable for the accept or revert decision. If the host exposes no way to dispatch judges as separate agents, do **not** score inline. Mark the experiment's outcome `error` with the reason (judges undispatchable), skip judge evaluation exactly as a failed degenerate gate does, and continue to the log-and-append step so the entry is still written to disk. An experiment stopped here never carries judge metrics, so it is not eligible to become `best` and does not enter the accept/revert comparison. It is unmeasured, not poor-scoring. Report the blocker and its effect on the run to the user.
-   - Read the experiment's output (cluster assignments, search results, etc.)
-   - Apply stratified sampling per `metric.judge.stratification` config (using `sample_seed`)
-   - Group samples into batches of `metric.judge.batch_size`
-   - **Judge cache.** Before filling a batch, hash each sampled item's bytes and look the hash up in `judge-cache.yaml` beside the experiment log. An item already scored in this run under this rubric reuses its cached result (scores, `reason`, `feedback`, `ambiguous`); only uncached items are dispatched, and their results are written to the cache as they land. Identical output is scored once per run.
-   - Fill the judge prompt template (`references/judge-prompt-template.md`) for each batch
-   - Dispatch the `ceil(sample_size / batch_size)` judge sub-agents using the same bounded dispatch as Phase 3.2: queue them, dispatch to whatever concurrency the host accepts, and treat a capacity error as backpressure (retry the queued batch after a slot frees) rather than a scoring failure. These judge sub-agents are a separate budget from the experiment worktrees.
-   - Each sub-agent returns structured JSON scores with a `feedback` string per item. A batch that comes back without `feedback` is re-dispatched once; persist what the second call returns. Store every item under the entry's `judge.items[]` with its `content_hash`; the digest reads that feedback in step 3.5.
-   - Aggregate scores: compute the configured primary judge field from `metric.judge.scoring.primary` (which should match `metric.primary.name`) plus any `scoring.secondary` values
-   - Keep the items that scored worst by `metric.primary.direction`, about five, with their `reason` as `worst_cases` for step 7
-   - If `singleton_sample > 0`: also dispatch singleton evaluation sub-agents
+5. **如果简并门通过且主要类型为 `judge`**：
+   - **在派遣之前检查法官的独立性。** 法官不得撰写假设或运行其评分的实验，并且不得看到其他法官的结果。这种独立性使得这些分数可用于接受或恢复决策。如果主持人没有透露如何将评委作为单独的代理人派遣，请不要**内嵌评分。用原因标记实验结果`error`（判断为不可分派），像失败的退化门一样跳过判断评估，并继续执行日志和附加步骤，以便条目仍写入磁盘。在此停止的实验永远不会带有判断指标，因此它没有资格成为`best`，也不会进入accept/revert比较。这是无法衡量的，而不是低分。向用户报告拦截器及其对运行的影响。
+   - 读取实验的输出（聚类分配、搜索结果等）
+   - 对每个`metric.judge.stratification`配置应用分层采样（使用`sample_seed`）
+   - 将样本分为`metric.judge.batch_size`个批次
+   - **判断缓存。** 在填充批次之前，对每个采样项的字节进行哈希处理，并在实验日志旁边的 `judge-cache.yaml` 中查找哈希值。在此运行中已在此评分标准下得分的项目重用其缓存结果（分数、`reason`、`feedback`、`ambiguous`）；仅调度未缓存的项目，并且它们的结果在落地时写入缓存。每次运行都会对相同的输出进行评分。
+   - 每批次填写判断提示模板（`references/judge-prompt-template.md`）
+   - 使用与阶段 3.2 相同的有界调度来调度 `ceil(sample_size / batch_size)` 判断子代理：将它们排队，调度到主机接受的任何并发，并将容量错误视为背压（在插槽释放后重试排队批次）而不是评分失败。这些判断子代理是与实验工作树分开的预算。
+   - 每个子代理返回结构化的 JSON 分数，每个项目有一个 `feedback` 字符串。没有`feedback`返回的批次会重新派发一次；保留第二个调用返回的内容。将条目的 `judge.items[]` 及其 `content_hash` 下的每个项目存储起来；摘要在步骤 3.5 中读取该反馈。
+   - 聚合分数：根据 `metric.judge.scoring.primary`（应匹配 `metric.primary.name`）加上任何 `scoring.secondary` 值计算配置的主要判断字段
+   - 将得分最差的项目保留为 `metric.primary.direction`，大约为 5 个，将其 `reason` 设为`worst_cases`，用于第 7 步
+   - 如果`singleton_sample > 0`：也调度单例评估子代理
 
-6. **Compare with `decide.mjs`.** Invoke it only after the degenerate gates pass and the payload holds every required objective value, meaning the hard metrics from measurement and the judge scores when those were collected. The payload is the spec as loaded plus the baseline and candidate snapshots. The script reads the nested spec (`metric`, `measurement.stability`) and decides eligibility, noise, and the ladder next step. Do not reconstruct a flattened payload, and do not re-derive the threshold in prose.
+6. **与`decide.mjs`比较。** 仅在简并门通过并且有效负载包含每个所需的目标值后调用它，这意味着来自测量的硬指标和收集这些指标时的判断分数。有效负载是加载的规范加上基线和候选快照。该脚本读取嵌套规范（`metric`、`measurement.stability`）并决定下一步的资格、噪音和阶梯。不要重构扁平化的有效负载，也不要在散文中重新推导阈值。
    ```bash
    SKILL_DIR="<absolute path of the directory containing this SKILL.md>";
    NODE="$(for c in node nodejs; do command -v "$c" >/dev/null 2>&1 && "$c" -e '' >/dev/null 2>&1 && { echo "$c"; break; }; done)";
    [ -n "$NODE" ] || { echo "no working Node runtime on PATH (tried node, nodejs)" >&2; exit 1; };
    "$NODE" "$SKILL_DIR/scripts/decide.mjs" "<payload.json>"
    ```
-   If that probe finds no runtime, do not invoke an empty command. Mark the experiment `error` with that reason and continue the batch. Use `decision` and `next_measurement`. Collect the requested measurement and repeat this sequence whenever `next_measurement` is not `none`. Do not keep a candidate until `next_measurement` is `none`. Record `inconclusive` and `censored` as those outcomes, not as `reverted`. Each extra sample belongs to this same experiment: write it onto the existing entry at CP-3, then decide again.
+   如果该探测器未找到运行时，请不要调用空命令。用这个原因标记实验`error`并继续批次。使用`decision`和`next_measurement`。收集所请求的测量值，并在 `next_measurement` 不是 `none` 时重复此序列。在 `next_measurement` 为 `none` 之前不要保留候选者。将 `inconclusive` 和 `censored` 记录为这些结果，而不是 `reverted`。每个额外的样本都属于同一个实验：将其写入 CP-3 的现有条目中，然后再次决定。
 
-   **Held-out confirmation.** When the spec configures a holdout, `decide.mjs` answers a would-be keep with `next_measurement: holdout` until the payload carries a `holdout` snapshot pair. Collect it then and not before: the holdout depends on the selection decision, so it is never dispatched alongside the selection measurement, however independent the two calls look. Scoring it early spends on candidates that would have been rejected anyway and puts held-out feedback in front of you before the next hypothesis. Run `measurement.holdout.command` (or, for a judge primary, the judge sample under `metric.judge.confirmation_seed`, drawn only from items of each output that the selection sample did not draw) on the reference and on the candidate, persist the pairing as `kind: holdout` in `comparisons`, and decide again. The holdout result decides keep or not; it does not enter the digest, the rolling window summaries, or hypothesis generation. A holdout that does not confirm the gain withholds the keep; record the outcome the script returned.
+   **保留确认。** 当规范配置保留时，`decide.mjs` 会回答可能保留的`next_measurement: holdout`，直到有效负载携带`holdout` 快照对。然后而不是之前收集它：保留取决于选择决策，因此它永远不会与选择测量一起发送，无论这两个调用看起来如何独立。尽早评分可以花在无论如何都会被拒绝的候选人身上，并在下一个假设之前将保留的反馈摆在你面前。在参考和候选上运行`measurement.holdout.command`（或者，对于初级法官，`metric.judge.confirmation_seed`下的法官样本，仅从选择样本未抽取的每个输出的项目中抽取），将配对保留为`comparisons`中的`kind: holdout`，然后再次决定。坚持的结果决定保留与否；它不进入摘要、滚动窗口摘要或假设生成。不确认收益的坚持者将扣留保留；记录脚本返回的结果。
 
-   **Per-experiment diagnostics.** When the harness or the judge dispatch reports cost, tokens, or latency, record them under the entry's `cost`. When `measurement.per_case` is true, record the script's `regressions` on the entry. Neither changes the decision.
+   **每次实验诊断。** 当工具或判断调度报告成本、令牌或延迟时，将它们记录在条目的 `cost` 下。当`measurement.per_case`为真时，在条目上记录脚本的`regressions`。两者都没有改变决定。
 
-7. **IMMEDIATELY persist this experiment on disk (CP-3).** Do not defer this to batch evaluation. The durable unit is one log entry per experiment at `<state-root>/experiment-log.yaml`. After the first measurement, append that entry, including any `worst_cases`. After every later ladder sample for the same experiment, write the accumulated metrics and current outcome onto that same entry. Do not append a second entry for the same hypothesis, and do not rewrite a different experiment's samples. Write a decide terminal only when `next_measurement` is `none`. Until then the entry stays nonterminal, `promising` while the keep path still needs samples and `measured` otherwise (including an inconclusive result that still wants samples). When `next_measurement` is `none`, an eligible result stays `measured` until its diff is on the optimization branch; a non-eligible result gets the decide terminal (`reverted`, `inconclusive`, `censored`, `degenerate`). `kept` and `runner_up_kept` wait until that integration. The raw metrics are on disk and safe from context compaction.
+7. **立即将此实验保留在磁盘上 (CP-3)。** 不要将此推迟到批量评估。持久单元是每个实验在 `<state-root>/experiment-log.yaml` 的一个日志条目。第一次测量后，附加该条目，包括任何 `worst_cases`。在同一实验的每个后续阶梯样本之后，将累积的指标和当前结果写入同一条目。不要为同一假设添加第二个条目，也不要重写不同实验的样本。仅当`next_measurement`为`none`时才编写判定终端。在那之前，条目保持非终结符，`promising`，而保持路径仍然需要样本，而`measured`否则（包括仍需要样本的不确定结果）。当`next_measurement`为`none`时，符合条件的结果将保持`measured`，直到其diff进入优化分支；不合格的结果将进入决策终端（`reverted`、`inconclusive`、`censored`、`degenerate`）。 `kept`和`runner_up_kept`等待整合。原始指标位于磁盘上，并且不受上下文压缩的影响。
 
-8. **VERIFY the write (CP-3 verification).** Read the experiment log back from disk and confirm the entry just written is present. If verification fails, retry the write. Do NOT proceed to the next experiment until this entry is confirmed on disk.
+8. **验证写入（CP-3 验证）。** 从磁盘读回实验日志并确认刚刚写入的条目是否存在。如果验证失败，请重试写入。在磁盘上确认此条目之前，请勿继续进行下一个实验。
 
-**Why immediately + verify?** The agent's context window is NOT a durable store. Context compaction, session crashes, and restarts are expected during long runs, so results that exist only in the agent's memory are lost. The verification step catches silent write failures that would otherwise lose data.
+**为什么立即+验证？** 代理的上下文窗口不是持久存储。在长时间运行期间，预计会出现上下文压缩、会话崩溃和重新启动，因此仅存在于代理内存中的结果将会丢失。验证步骤捕获静默写入失败，否则会丢失数据。
 
-### 3.4 Evaluate Batch
+### 3.4 评估批次
 
-Every retained change must have earned its gain by doing the work the metric stands for. Before retaining any integration, including a runner-up, read the combined diff against the spec's `description` and `constraints`; a gain beyond the hypothesis's recorded opportunity upper bound calls for a slower read. A gain that comes from what the harness does not observe, or from breaking a `constraints` entry the harness does not check, is not a keep even though the gates, the ladder, and the holdout passed: revert it, record in the entry's `learnings` which observation or constraint the harness lacks, and carry that gap into the report. Closing the gap is a harness or spec change for a new run, not something this run patches.
+每个保留的变更都必须通过完成指标所代表的工作来获得收益。在保留任何集成（包括亚军）之前，请阅读与规范的 `description` 和 `constraints` 的组合差异；超出假设记录机会上限的增益需要较慢的读取速度。来自宿主未观察到的内容或打破宿主未检查的`constraints`条目的增益，即使通过了大门、梯子和抵抗者，也不是保留：恢复它，在条目的`learnings`中记录宿主缺少哪些观察或约束，并将该差距带入报告中。缩小差距是新运行的宿主或规格更改，而不是本次运行的修补程序。
 
-After all experiments in the batch have been measured:
+测量该批次中的所有实验后：
 
-1. **Decide eligibility from `decide.mjs`, not from the primary metric alone.** An experiment is eligible when it improves at least one required objective beyond the configured comparison threshold and does not violate any other required objective. When `metric.objectives` is absent, the primary is the only required objective. `inconclusive` is not a keep.
+1. **从 `decide.mjs` 决定资格，而不是仅根据主要指标。** 当实验将至少一个所需目标改进到超出配置的比较阈值并且不违反任何其他所需目标时，该实验就是合格的。当 `metric.objectives` 不存在时，主要目标是唯一需要的目标。 `inconclusive` 不是一个保留。
 
-2. **Rank** the eligible experiments in the batch by the script's `rank_score` (primary relative gain when the primary moved; otherwise the strongest required-objective relative gain). Identify that winner as the experiment to keep. An eligible experiment may be kept even if the ranking primary did not move.
+2. **根据脚本的 `rank_score` 对批次中符合条件的实验进行排名**（主要移动时的主要相对增益；否则最强的所需目标相对增益）。确定获胜者作为要保留的实验。即使初选排名未发生变化，也可以保留符合条件的实验。
 
-3. **Confirm a `remote` winner independently before the keep test.** A `remote` winner enters this step when the decision on the worker's pair is eligible and asks for nothing more than the holdout: `keep` with `next_measurement: none`, or `promising` with `next_measurement: holdout`. For that winner, one independent measurement owns both the confirmation and the holdout: obtain a pairing the candidate's author did not produce by fetching `head_sha`, inspecting the diff against `base_sha`, and measuring it paired on this checkout or through a fresh confirmation worker that did not implement it, at the full configured protocol. When the worker's decision asked for `holdout`, that same measurement also runs the holdout on the reference and the candidate. Persist each pairing in `comparisons` (`kind: standalone` for the confirmation pair, `kind: holdout` for the holdout pair), every one with the `machine` and `measured_by` that produced it. Run `decide.mjs` on the payload built from those independent snapshots, never from the worker's. When that decision is not `keep` with `next_measurement: none`, the experiment takes that decide terminal and the worker's own claim is recorded as unconfirmed. The same independence that makes judge scores usable makes a self-measured keep usable.
+3. **在保留试验前独立核验远端候选。** 适用于当前配对结果已达标的 `remote` 候选：`keep` 与 `next_measurement: none`，或 `promising` 与 `next_measurement: holdout`。确认和保留集测量均不可由候选作者产生。取 `head_sha`，对 `base_sha` 审查差异，用当前工作区或未参与实现的新执行者按完整协议测量。若要求 `holdout`，同一次独立测量须对基准和候选使用保留集。将每对结果写到 `comparisons`：确认用 `kind: standalone`，保留集用 `kind: holdout`，保留 `machine` 和 `measured_by`。用这些独立快照调用 `decide.mjs`，不用作者自报结果。若不是 `keep` 与 `next_measurement: none`，按实际终态记录，该候选仍未确认。
 
-4. **If the winner's deciding result is `keep` with `next_measurement: none`: KEEP**
-   - For a `remote` winner, the deciding result is the independent decision from step 3. For any other winner, it is the last `decide.mjs` result from 3.3.
-   - A `keep` has already passed held-out confirmation when the spec configures one; an entry whose last decision is `promising` with `next_measurement: holdout` is not a keep until the holdout pair is collected and the script decides again
-   - Commit the experiment branch first so the winning diff exists as a real commit before any merge or cherry-pick (a `remote` winner is already a commit at `head_sha`; merge `head_sha`, not the result ref's tip, which only adds `result.yaml`)
-   - Include only mutable-scope changes in that commit; if no eligible diff remains, treat the experiment as non-improving and revert it
-   - Merge the committed experiment branch into the optimization branch
-   - Use the message `optimize(<spec-name>): <hypothesis description>` for the experiment commit
-   - After the merge succeeds, clean up the winner's experiment worktree and branch; the integrated commit on the optimization branch is the durable artifact
-   - This is now the new baseline for subsequent batches
+4. **如果获胜者的决定结果是`keep`且`next_measurement: none`：保留**
+   - 对于`remote`获胜者，决定结果是步骤3中的独立决定。对于任何其他获胜者，其是3.3中的最后`decide.mjs`结果。
+   - 当规范配置一个`keep`时，它已经通过了保留确认；最后决定为 `promising` 和 `next_measurement: holdout` 的条目在收集保留对并且脚本再次决定之前不会保留
+   - 首先提交实验分支，以便在任何合并或樱桃选择之前获胜的差异作为真正的提交存在（`remote`获胜者已经是`head_sha`处的提交；合并`head_sha`，而不是结果引用的提示，它只添加`result.yaml`）
+   - 在该提交中仅包含可变范围的更改；如果没有剩余合格的差异，则将实验视为非改进并恢复它
+   - 将已提交的实验分支合并到优化分支中
+   - 使用消息 `optimize(<spec-name>): <hypothesis description>` 进行实验提交
+   - 合并成功后，清理获胜者的实验工作树和分支；优化分支上的集成提交是持久的产物
+   - 现在这是后续批次的新基线
 
-5. **Check file-disjoint runners-up** (up to `max_runner_up_merges_per_batch`):
-   - For each runner-up that also improved, check file-level disjointness with the kept experiment
-   - **File-level disjointness**: two experiments are disjoint if they modified completely different files. Same file = overlapping, even if different lines.
-   - If disjoint, cherry-pick the runner-up onto the new baseline and run the same decide loop as step 3.3 against a fresh sample set for that combined snapshot. Do not reuse the standalone experiment's accumulated samples; they were measured against the previous baseline. Collect further measurement whenever `next_measurement` is not `none`. Persist the combined pairing as `kind: integrated` on that same log entry without replacing the standalone comparison. Keep the original standalone log entry for audit.
-   - Keep the cherry-pick only when that result is eligible and `next_measurement` is `none` (outcome: `runner_up_kept`); then clean up that runner-up's experiment worktree and branch
-   - Otherwise revert the cherry-pick, log it as "promising alone but neutral/harmful in combination" (outcome: `runner_up_reverted`), then clean up the runner-up's experiment worktree and branch
-   - Stop after first failed combination
+5. **检查文件不相交的亚军**（最多 `max_runner_up_merges_per_batch`）：
+   - 对于每个也有所改进的亚军，请检查文件级与保留的实验的不相交性
+   - **文件级不相交**：如果两个实验修改了完全不同的文件，则它们是不相交的。相同的文件=重叠，即使是不同的行。
+   - 如果不相交，则将亚军挑选到新基线上，并针对该组合快照的新样本集运行与步骤 3.3 相同的决策循环。请勿重复使用独立实验积累的样本；它们是根据之前的基线进行测量的。当 `next_measurement` 不是 `none` 时，收集进一步的测量结果。在同一日志条目上将组合配对保留为 `kind: integrated`，而不替换独立比较。保留原始独立日志条目以供审核。
+   - 仅当结果符合条件且 `next_measurement` 为 `none`（结果：`runner_up_kept`）时才保留择优挑选；然后清理亚军的实验工作树和分支
+   - 否则恢复樱桃选择，将其记录为“单独有前途但组合neutral/harmful”（结果：`runner_up_reverted`），然后清理亚军的实验工作树和分支
+   - 第一次组合失败后停止
 
-6. **Handle deferred dependencies.** Experiments that need unapproved dependencies get outcome `deferred_needs_approval`
+6. **处理延迟的依赖关系。** 需要未经批准的依赖关系的实验会得到结果 `deferred_needs_approval`
 
-7. **Close the rest.** Cleanup worktrees; a `remote` result ref may be deleted once its entry is verified in the log and its `result.yaml` copy is in `<state-root>`. `kept` and `runner_up_kept` are only for diffs on the optimization branch. Eligible candidates that were not integrated become `not_selected`. Leave `inconclusive`, `censored`, and `degenerate` as `decide.mjs` returned them.
+7. **清理其他试验。** 仅在日志已核验条目且 `<state-root>` 有 `result.yaml` 副本时可删除 `remote` 结果引用。`kept`、`runner_up_kept` 仅用于优化分支已经纳入的差异；已达标但未纳入的为 `not_selected`。`inconclusive`、`censored`、`degenerate` 保持 `decide.mjs` 的原判。
 
-### 3.5 Update State (CP-4)
+### 3.5 更新状态（CP-4）
 
-**MANDATORY CHECKPOINT.** By this point, individual experiment results are already on disk (written in step 3.3). This step updates aggregate state and verifies.
+**强制检查点。** 此时，各个实验结果已存储在磁盘上（在步骤 3.3 中写入）。此步骤更新聚合状态并进行验证。
 
-1. **Re-read the experiment log from disk.** Do not trust in-memory state. The log is the source of truth.
+1. **从磁盘重新读取实验日志。** 不要相信内存状态。日志是事实的来源。
 
-2. **Finalize outcomes.** Update experiment entries from the step 3.4 evaluation (mark `kept`, `reverted`, `runner_up_kept`, etc.). Write these outcome updates to disk immediately.
+2. **最终确定结果。** 更新步骤 3.4 评估中的实验条目（标记 `kept`、`reverted`、`runner_up_kept` 等）。立即将这些结果更新写入磁盘。
 
-3. **Update the `best` section** in the experiment log if a new best was found. Update the running spend totals there too: judge spend, and the estimated spend of the whole run, which counts experiment workers, judges, and research subagents. Use the usage the host reports where it reports any, estimate the rest from the work dispatched, and record which parts are estimates. Write to disk.
+3. **如果找到新的最佳值，请更新实验日志中的`best`部分**。也更新运行支出总额：法官支出和整个运行的估计支出，其中包括实验工作人员、法官和研究子代理。使用主机报告的使用情况，根据已分派的工作估计其余部分，并记录哪些部分是估计值。写入磁盘。
 
-4. **Write strategy digest** to `<state-root>/strategy-digest.md`:
-   - Categories tried so far (with success/failure counts)
-   - Key learnings from this batch and overall
-   - Failure patterns that recur across `worst_cases`, and which ones the current best still shows
-   - Remaining opportunities, their supporting evidence, and whether current measurements still support their estimates; mark stale estimates for reassessment before selecting them
-   - Current best metrics and improvement from baseline
-   - **Failure themes:** the recurring `feedback` strings from the current best's `judge.items[]` (or its failing `cases` when `measurement.per_case` is set), grouped by what is wrong, each with a count and one representative item. Selection-sample items only; holdout items never enter the digest
+4. **将策略摘要**写入`<state-root>/strategy-digest.md`：
+   - 到目前为止尝试过的类别（success/failure计数）
+   - 本批次和整体的主要经验教训
+   - 在 `worst_cases` 中重复出现的故障模式，以及当前最好的仍然显示的故障模式
+   - 剩余的机会、它们的支持证据，以及当前的测量是否仍然支持它们的估计；在选择之前标记过时的估计以进行重新评估
+   - 当前最佳指标以及相对于基线的改进
+   - **失败主题：**当前最佳 `judge.items[]`（或设置 `measurement.per_case` 时失败的 `cases`）中重复出现的 `feedback` 字符串，按错误分组，每个字符串都有一个计数和一个代表性项目。仅选择样品；保留项目永远不会进入摘要
 
-5. **Generate new hypotheses** based on learnings:
-   - Re-read the strategy digest from disk (not from memory)
-   - Read the rolling window (last 10 experiments from the log on disk)
-   - Do NOT read the full experiment log -- use the digest for broad context
-   - Start from the failure themes: a theme with a count worth acting on becomes at most one hypothesis that addresses the theme, with the representative item as its evidence. A rule per failing item is not a hypothesis; it is the pattern that overfits the selection sample
-   - After a keep on a cost target, re-measure how the cost divides among the parts before adding implementation hypotheses only when the keep leaves the current shares unable to say whether the next hypothesis is worth keeping
-   - Add new hypotheses to the backlog and write the updated backlog to disk
+5. **根据学习产生新的假设**：
+   - 从磁盘（而不是从内存）重新读取策略摘要
+   - 读取滚动窗口（磁盘上日志中的最后 10 个实验）
+   - 不要阅读完整的实验日志——使用摘要来了解广泛的背景
+   - 从失败主题开始：一个值得采取行动的主题最多成为解决该主题的一个假设，并以代表性项目作为其证据。每个失败项目的规则不是假设；而是假设。这是过度拟合选择样本的模式
+   - 保持成本目标后，仅当保持使当前份额无法判断下一个假设是否值得保留时，才在添加实施假设之前重新衡量成本如何在各个部分之间分配
+   - 将新假设添加到待办事项中并将更新的待办事项写入磁盘
 
-6. **Write the updated hypothesis backlog to disk.** The backlog section of the experiment log must reflect newly added hypotheses and removed (tested) ones.
+6. **将更新的假设积压写入磁盘。** 实验日志的积压部分必须反映新添加的假设和删除（测试）的假设。
 
-7. **Write `run_state`.** Add the in-tick time not yet counted to `active_seconds`, increment `tick`, set `status`, and preserve all outstanding waits in `pending_waits`, including the deadline timer (`references/persistence.md`).
+7. **写入 `run_state`。** 将尚未计数的 in-tick 时间添加到 `active_seconds`，递增 `tick`，设置 `status`，并在 `pending_waits` 中保留所有未完成的等待，包括截止时间计时器 (`references/persistence.md`)。
 
-**CP-4 Verification:** Read the experiment log back from disk. Confirm: (a) all experiment outcomes from this batch are finalized, (b) the `best` section reflects the current best, (c) the hypothesis backlog is updated, (d) `run_state` reflects this tick. Read `strategy-digest.md` back and confirm it exists. Only THEN proceed to the stopping criteria check.
+**CP-4 验证：** 从磁盘读回实验日志。确认：(a) 该批次的所有实验结果均已最终确定，(b) `best` 部分反映当前最佳结果，(c) 假设积压已更新，(d) `run_state` 反映此勾选。读回 `strategy-digest.md` 并确认它存在。只有然后才继续进行停止标准检查。
 
-**Checkpoint: at this point, all state for this tick is on disk. If the agent crashes and restarts, it can resume from the experiment log without loss.**
+**检查点：此时，该刻度的所有状态都在磁盘上。如果代理崩溃并重新启动，它可以从实验日志中恢复而不会丢失。**
 
-### 3.6 Check Stopping Criteria
+### 3.6 检查停止标准
 
-Stop the loop as soon as any one of these holds. Two clocks are involved: `run_state.active_seconds` counts time spent inside ticks since Phase 3 started, summed across ticks and excluding time spent waiting; `run_state.phase3_started_at` anchors calendar time. In a single uninterrupted session the two clocks read the same.
+一旦其中任何一个成立，就停止循环。涉及两个时钟：`run_state.active_seconds`计算自第3阶段开始以来在tick内花费的时间，对各个tick进行求和并排除等待所花费的时间； `run_state.phase3_started_at` 锚定日历时间。在一次不间断的会话中，两个时钟的读数相同。
 
-- **Target reached**: `stopping.target_reached` is true and the current best meets every declared required target (`decide.mjs` `target_reached` on the current-best snapshot). When `metric.objectives` is absent, that is the single `metric.primary.target` if set. Do not stop for a primary-only hit while another required target is still unmet.
-- **Max iterations**: total experiments run >= `stopping.max_iterations`
-- **Max active hours**: `run_state.active_seconds` (not time since the invocation, not time spent waiting) >= `stopping.max_hours`
-- **Wall-clock backstop**: calendar time since `run_state.phase3_started_at` >= `stopping.max_wall_hours`. No wake extends it. A wake that fires after it has passed collects any arrived results, then goes to Phase 4.
-- **Spend cap reached**: the spend already recorded plus the estimated cost of the next dispatch would pass a configured cap: `metric.judge.max_total_cost_usd` for judge spend, `stopping.max_total_cost_usd` for whole-run spend. A cap limits spend; it does not trigger after spend passes it. Check it before every dispatch that costs money, including Phase 2 research and each batch with its judge passes, not only at this step
-- **Plateau**: no improvement for `stopping.plateau_iterations` **consecutive** experiments
-- **Manual stop**: the user interrupts. Save state, then go to Phase 4.
-- **No runnable hypothesis left**: no executable next action remains
+- **达到目标**：`stopping.target_reached`为真，并且当前最佳满足每个声明的所需目标（当前最佳快照上的`decide.mjs``target_reached`）。当 `metric.objectives` 不存在时，如果设置则为单个 `metric.primary.target`。当另一个所需的目标仍未实现时，不要停下来只进行主要的点击。
+- **最大迭代次数**：运行的总实验 >= `stopping.max_iterations`
+- **最大活动时间**：`run_state.active_seconds`（不是自调用以来的时间，不是等待所花费的时间）>= `stopping.max_hours`
+- **挂钟逆止器**：自 `run_state.phase3_started_at` >= `stopping.max_wall_hours` 开始的日历时间。没有尾流延长它。在它过去后触发的唤醒会收集所有到达的结果，然后进入阶段 4。
+- **达到支出上限**：已记录的支出加上下一次调度的估计成本将超过配置的上限：`metric.judge.max_total_cost_usd`用于判断支出，`stopping.max_total_cost_usd`用于整个运行支出。支出上限；支出通过后不会触发。在每次需要花钱的调度之前检查它，包括第二阶段研究和每个批次及其法官通过的情况，而不仅仅是在这一步
+- **稳定期**：`stopping.plateau_iterations` **连续**实验没有改善
+- **手动停止**：用户中断。保存状态，然后进入阶段 4。
+- **没有留下可运行的假设**：没有留下可执行的下一个动作
 
-If none is met, cross the tick boundary.
+如果没有满足，则越过刻度线边界。
 
-**Tick boundary.** Check the wall deadline before crossing, including an early crossing while results are missing. At or after the deadline, persist already-arrived results and go to Phase 4 without waiting or integrating candidates. Otherwise, with experiment receipts pending, apply `references/persistence.md` (The Wait Record and Ticks) to continue an attached wait, park with bounded automatic resumption, or hand back a manual-resume checkpoint. Resume the same batch at its waiting step. With no experiment receipts pending, start the next tick at 3.1; a deadline timer alone is not an experiment to wait for.
+**勾选边界。** 在穿越之前检查墙的截止日期，包括在结果丢失时提前穿越。在截止日期或之后，保留已到达的结果并进入第 4 阶段，无需等待或整合候选人。否则，在实验收据待定的情况下，应用`references/persistence.md`（等待记录和刻度）继续附加等待，停放有界自动恢复，或交还手动恢复检查点。在等待步骤中恢复同一批次。如果没有待处理的实验收据，则从 3.1 开始下一个价格变动；单独的截止计时器并不是一个值得等待的实验。
 
-### 3.7 Cross-Cutting Concerns
+### 3.7 跨领域关注点
 
-**Codex failure cascade**: Track consecutive Codex delegation failures. After 3 consecutive failures, auto-disable Codex for remaining experiments and fall back to subagent dispatch. Log the switch.
+**Codex失败级联**：跟踪连续的Codex委托失败。连续 3 次失败后，自动禁用剩余实验的 Codex 并回退到子代理调度。记录交换机。
 
-**Error handling**: Classify a failed measurement from what `measure.sh` actually signaled. The censored stderr marker (with exit 125) is `censored`. Exit 124 is `timeout`. Any other non-zero exit (including 125 without that marker) is `error`. Log that outcome with the error message, revert the experiment, and continue the batch.
+**错误处理**：根据 `measure.sh` 实际发出的信号对失败的测量进行分类。经过审查的 stderr 标记（出口为 125）是 `censored`。 124号出口是`timeout`。任何其他非零退出（包括没有该标记的 125）都是 `error`。使用错误消息记录该结果，恢复实验，然后继续批处理。
 
-**Progress reporting:** follow the SKILL.md body's reporting rule. Base any reported improvement on persisted, verified measurements, distinguish preliminary from confirmed results, and state what was measured and any limits on the claim. Batch counts and cumulative scoring cost remain in the log for wrap-up. Report them to the user during the run when they affect a decision.
+**进度报告：**遵循SKILL.md机构的报告规则。任何报告的改进都基于持续的、经过验证的测量，区分初步结果和已确认的结果，并说明测量的内容和声明的任何限制。批次计数和累积评分成本保留在日志中以供总结。当它们影响决策时，请在运行期间向用户报告。
 
-**Crash recovery**: See the Persistence Discipline section. Per-experiment `result.yaml` markers are written in step 3.3. Individual experiment results are appended to the log immediately in step 3.3. Tick-level state (outcomes, best, digest, `run_state`) is written in step 3.5. On resume (Phase 0.4), the log at `<state-root>` is the ground truth. Scan for any `result.yaml` markers not yet reflected in the log, then collect any pending wait whose result has arrived.
+**崩溃恢复**：请参阅持久性规则部分。每个实验 `result.yaml` 标记在步骤 3.3 中写入。各个实验结果立即附加到步骤 3.3 中的日志中。刻度级别状态（结果、最佳、摘要、`run_state`）在步骤 3.5 中写入。在恢复中（阶段 0.4），`<state-root>` 处的日志是基本事实。扫描日志中尚未反映的任何 `result.yaml` 标记，然后收集结果已到达的任何待处理等待。
 
 ---

@@ -1,42 +1,42 @@
-# Product Pressure Test — rigor-gap lenses
+# 产品压力测试 - 严格间隙镜片
 
-Read this at Phase 1.2, before generating approaches. This is agent-internal analysis, not a user-facing checklist. Read the opening, note which gaps actually exist, and raise only those as questions during Phase 1.3 (Collaborative Dialogue) — folded into the normal flow of dialogue, not asked as a pre-flight gauntlet. A fuzzy opening may earn three or four probes; a concrete, well-framed one may earn zero because no scope-appropriate gaps were found.
+在生成方法之前，请阅读第 1.2 阶段的内容。这是代理内部分析，而不是面向用户的清单。阅读开场白，注意哪些差距实际上存在，并在第 1.3 阶段（协作对话）期间仅提出这些问题——纳入正常的对话流程，而不是作为飞行前的挑战提出。一个模糊的开口可能会赢得三到四个探针；一个具体的、框架良好的项目可能会赚到零，因为没有发现适合范围的差距。
 
-Match depth to the Phase 0.3 scope.
+将深度与 Phase 0.3 范围相匹配。
 
-## Lightweight
+## 轻的
 
-- Is this solving the real user problem?
-- Are we duplicating something that already covers this?
-- Is there a clearly better framing with near-zero extra cost?
+- 这能解决真正的用户问题吗？
+- 我们是否在重复已经涵盖这一点的内容？
+- 是否有明显更好的框架且额外成本接近于零？
 
-## Standard — scan for these gaps
+## 标准 — 扫描这些间隙
 
-- **Evidence gap.** The opening asserts want or need, but doesn't point to anything the would-be user has already done — time spent, money paid, workarounds built — that would make the want observable. When present, ask for the most concrete thing someone has already done about this.
+- **证据差距。** 开头断言了想要或需要，但没有指出潜在用户已经做过的任何事情——花费的时间、支付的金钱、建立的解决方法——这些都会使需求变得可见。在场时，询问某人已经为此做过的最具体的事情。
 
-- **Specificity gap.** The opening describes the beneficiary at a level of abstraction where the agent couldn't design without silently inventing who they are and what changes for them. When present, ask the user to name a specific person or narrow segment, and what changes for that person when this ships.
+- **具体差距。** 开头在抽象层面描述了受益人，在这种抽象层面上，代理人无法在不默默发明他们是谁以及对他们进行什么改变的情况下进行设计。当出现时，要求用户说出特定的人或一小部分人的名字，以及发布后该人会发生什么变化。
 
-- **Counterfactual gap.** The opening doesn't make visible what users do today when this problem arises, nor what changes if nothing ships. When present, ask what the current workaround is, even if it's messy — and what it costs them.
+- **反事实差距。** 该开口并没有显示出用户今天出现此问题时所做的操作，也没有显示出如果没有发布任何内容会发生什么变化。当在场时，询问当前的解决方法是什么，即使它很混乱 - 以及它的成本是什么。
 
-- **Attachment gap.** The opening treats a particular solution shape as the thing being built, rather than the value that shape is supposed to deliver, and hasn't been examined against smaller forms that might deliver the same value. When present, ask what the smallest version that still delivers real value would look like.
+- **附件间隙。** 该开口将特定的解决方案形状视为正在构建的事物，而不是该形状应该提供的价值，并且尚未针对可能提供相同价值的较小形式进行检查。当存在时，询问仍然提供真正价值的最小版本是什么样子。
 
-Plus these synthesis questions — not gap lenses, product-judgment the agent weighs in its own reasoning:
-- Is there a nearby framing that creates more user value without more carrying cost? If so, what complexity does it add?
-- Given the current project state, user goal, and constraints, what is the single highest-leverage move right now: the request as framed, a reframing, one adjacent addition, a simplification, or doing nothing?
+再加上这些综合问题——不是间隙透镜，而是代理在自己的推理中权衡的产品判断：
+- 是否有一种附近的框架可以在不增加携带成本的情况下创造更多的用户价值？如果是这样，它会增加什么复杂性？
+- 考虑到当前的项目状态、用户目标和限制，目前影响力最高的单一举措是什么：框架请求、重新框架、相邻添加、简化还是什么也不做？
 
-Favor moves that compound value, reduce future carrying cost, or make the product meaningfully more useful or compelling. Use the result to sharpen the conversation, not to bulldoze the user's intent.
+青睐能够复合价值、降低未来持有成本或使产品更有用或更有吸引力的举措。使用结果来加强对话，而不是压制用户的意图。
 
-## Deep — Standard lenses and synthesis questions plus
+## 深度 - 标准镜头和综合问题加上
 
-- Is this a local patch, or does it move the broader system toward where it wants to be?
+- 这是一个本地补丁，还是会让更广泛的系统朝着它想要的方向发展？
 
-## Deep — product — Deep plus
+## Deep — 产品 — Deep plus
 
-- **Durability gap.** The opening's value proposition rests on a current state of the world that may shift in predictable ways within the horizon the user cares about. When present, ask how the idea fares under the most plausible near-term shifts — and push past rising-tide answers every competitor could make.
+- **耐用性差距。** 开口的价值主张取决于世界的当前状态，该状态可能会在用户关心的范围内以可预测的方式发生变化。当在场时，询问这个想法在最合理的近期变化下的表现如何，并超越每个竞争对手可能做出的高潮答案。
 
-- What adjacent product could we accidentally build instead, and why is that the wrong one?
-- What would have to be true in the world for this to fail?
+- 我们可能会意外地构建哪些相邻产品，为什么这是错误的？
+- 世界上必须有什么事情是真的才会让这个失败呢？
 
-These questions force an explicit product thesis and feed the Scope Boundaries subsections ("Deferred for later" and "Outside this product's identity") and Dependencies / Assumptions in the Product Contract.
+这些问题迫使提出明确的产品论点，并提供范围边界小节（“推迟到以后”和“在该产品的身份之外”）和产品合同中的依赖项/假设。
 
-Phase 1.3 decides how these gaps are asked as probes: each scope-appropriate gap found here becomes a separate open-ended probe (the "when present, ask..." line is the probe), asked progressively but all probed before Phase 2 (Explore Approaches).
+阶段 1.3 决定如何将这些差距作为探针进行询问：此处找到的每个范围适当的差距都成为一个单独的开放式探针（“当存在时，询问...”行是探针），逐步询问，但在阶段 2（探索方法）之前进行所有探测。

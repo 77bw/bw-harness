@@ -1,27 +1,27 @@
-# Choosing the form
+# 选择形式
 
-The counterfactual has passed. Choose the cheapest form that would stop the repeat. Try the forms in this order and take the first that holds. Write it unless the form below says to report it. Do not ask first: every mode behaves the same way here, because the commit or pull request that carries the write is its review.
+反事实已经过去了。选择最便宜的形式来阻止重复。按此顺序尝试表格并选择第一个有效的表格。除非下面的表格要求报告，否则请写下来。不要先问：每种模式在这里的行为方式都相同，因为携带写入的提交或拉取请求是其审查。
 
-In a Full run, read `pack_overlap` in `related.json` before writing anything. When a pack rule already covers the lesson, write no check or standard here: assembly's Pack-covered row decides what happens.
+在完整运行中，在写入任何内容之前先读取 `related.json` 中的 `pack_overlap`。当 Pack 规则已涵盖课程时，请不要在此处编写检查或标准：程序集的 Pack 覆盖行决定会发生什么。
 
-Weigh any prevention idea already in the session, under any label, including a debug summary's Prevention line or a `prevention_signal` field. Read the repo's lint, type, and CI configuration, and the `CODING_STANDARDS.md` files that govern the affected code.
+权衡会话中已有的任何标签下的任何预防想法，包括调试摘要的预防行或 `prevention_signal` 字段。阅读存储库的 lint、类型和 CI 配置，以及管理受影响代码的 `CODING_STANDARDS.md` 文件。
 
-1. **One owner and one way.** This holds when the mistake was possible because two ways to do the same thing exist. Consolidating them changes product code, so this skill never does it. Report it as work for whoever owns that code.
-2. **A check.** This holds when a type, lint rule, or test can detect the defect, it runs where the repo already runs its checks, and its failure tells the reader what to fix. Write only an added test, or a lint rule added or tightened through lint tooling the repo already runs. Tightening means enabling a rule, widening its scope, or raising its severity. A new custom rule counts when the repo already has a setup for writing them. When a rule flags existing code and the repo already keeps a baseline or suppression file, add entries there that cover only those violations, so the rule still fails on new code. Report the check instead of writing it when it needs product code changed, including most type changes and any log field or metric, or when it needs a new tool, plugin, dependency, or rule-writing or baseline setup. Keep a check only after you have seen it pass on the current tree, run the way the repo runs it, and fail on the defect's shape in a throwaway copy of the tree. When the property the check protects rests on more than one guard in the code, break each guard alone in that copy and see the check fail each time. The working tree never holds the defect, not even briefly. If you cannot show every one of these results, undo the check, report it as the recommended form, and try the next form.
-3. **A standard.** This holds when the defect is one an author must avoid while writing and a reviewer can see in a diff, it meets the bar below, and no check can hold it. Add one condition to the `CODING_STANDARDS.md` nearest the affected code, in that file's style, and link the learning if this run also writes one. The problem this run solved counts as the bar's evidence even before its fix is committed. If this form holds but no such file exists, do not create one: a repo without coding standards has made a valid choice, and a usable file also needs its review doc and pointer lines. The learning holds the whole lesson and states the rule as guidance. Nothing is lost, because `ce-setup` drafts rules from solution records whenever someone runs it. The only trace of this case is the attended report's line that `references/report.md` defines.
+1. **一个所有者和一种方法。** 当可能发生错误时，这是成立的，因为存在两种方法可以做同一件事。合并它们会改变产品代码，所以这个技能永远不会做到这一点。将其报告为拥有该代码的人的工作。
+2. **检查。** 当类型、lint 规则或测试可以检测到缺陷时，它会在存储库已经运行其检查的地方运行，并且它的失败会告诉读者要修复什么。仅编写添加的测试，或者通过存储库已运行的 lint 工具添加或收紧的 lint 规则。收紧意味着启用规则、扩大其范围或提高其严重性。当存储库已经具有用于编写它们的设置时，新的自定义规则才有效。当规则标记现有代码并且存储库已保留基线或抑制文件时，请在其中添加仅涵盖这些违规行为的条目，以便规则在新代码上仍然失败。当需要更改产品代码（包括大多数类型更改和任何日志字段或指标）时，或者当需要新工具、插件、依赖项或规则编写或基线设置时，报告检查而不是编写检查。仅当您看到它在当前树上传递后才进行检查，按照存储库运行它的方式运行，并在树的一次性副本中对缺陷的形状进行失败。当检查保护的属性依赖于代码中的多个守卫时，单独破坏该副本中的每个守卫，然后每次都会看到检查失败。工作树永远不会保留该缺陷，即使是短暂的。如果您无法显示所有结果，请撤消检查，将其报告为推荐表单，然后尝试下一个表单。
+3. **一个标准。** 当缺陷是作者在写作时必须避免的缺陷并且审查者可以在差异中看到它满足下面的标准并且没有任何检查可以控制它时，这一点就成立。以该文件的样式向最接近受影响代码的 `CODING_STANDARDS.md` 添加一个条件，如果此运行也写入一个条件，则链接学习。即使在提交修复之前，此运行解决的问题也将被视为酒吧的证据。如果此形式成立但不存在这样的文件，则不要创建一个：没有编码标准的存储库已做出有效选择，并且可用文件还需要其审查文档和指针行。学习贯穿整个课程并陈述规则作为指导。不会丢失任何内容，因为每当有人运行时，`ce-setup`都会从解决方案记录中起草规则。此案例的唯一痕迹是`references/report.md` 定义的出席报告行。
 
    <!-- ce-standards-bar:start -->
-   A defect class enters `CODING_STANDARDS.md` only when it appeared in a review finding the author fixed, a fix commit, a cleanup that removed it across the codebase, or a solution record, and no check covers it. State the class as a condition in a few sentences that stay true without naming volatile numbers or symbols, and group rules by area.
+   仅当缺陷类出现在发现作者修复的评论、修复提交、在代码库中删除它的清理或解决方案记录中，并且没有检查覆盖它时，才会进入`CODING_STANDARDS.md`。用几句话将类别陈述为条件，无需命名易变的数字或符号，并按区域对规则进行分组。
    <!-- ce-standards-bar:end -->
 
-4. **A learning.** This holds for reasoning that code, tests, types, and the standards file cannot carry. Correcting an existing learning that became wrong stays in this form.
+4. **学习。** 这适用于代码、测试、类型和标准文件无法携带的推理。纠正错误的现有学习仍以这种形式进行。
 
-If a check or standard already states the lesson, do not restate it: the counterfactual has failed after all, so write nothing and report which file holds it.
+如果检查或标准已经说明了教训，请不要重述：反事实毕竟失败了，所以什么也不写并报告哪个文件保存它。
 
-After writing a check or a standard, apply the counterfactual again to the updated tree. Write a learning only for what would still be lost, such as measured facts or rejected alternatives, and have it cite the check or standard. When a check or owner consolidation was reported rather than written, the learning holds the whole lesson and names that form under Prevention or Guidance, so the lesson survives if the report is lost. A learning never mentions `ce-setup` or a missing standards file, because it outlives the run and would keep asking.
+编写检查或标准后，再次将反事实应用于更新的树。仅针对仍会丢失的内容（例如衡量的事实或被拒绝的替代方案）编写学习，并让它引用检查或标准。当支票或所有者合并是报告而不是书面时，学习会保留在预防或指导下形成的整个课程和名称，因此如果报告丢失，课程会保留下来。学习永远不会提及 `ce-setup` 或缺失的标准文件，因为它会在运行后持续存在并会不断询问。
 
-A run handles one lesson, and it may produce one stronger form plus at most one learning. Do not commit: the caller or the user commits a check or standard the same way it commits a learning.
+一次跑步可以处理一堂课，它可能会产生一种更强的形式，最多再加上一种学习。不提交：调用者或用户以提交学习的方式提交检查或标准。
 
-When no learning remains to write, skip every later step that works on a written doc: assembly's write and validation steps, grounding validation, and enhancement. Vocabulary capture, the refresh and discoverability step, and the report still run.
+当没有剩余的学习内容需要编写时，请跳过适用于书面文档的每个后续步骤：程序集的编写和验证步骤、基础验证和增强。词汇捕获、刷新和可发现性步骤以及报告仍在运行。
 
-A log field, metric, or assertion in product code stays a proposal in the report. An assertion that fits in a test is a check.
+产品代码中的日志字段、指标或断言仍然是报告中的建议。适合测试的断言就是检查。

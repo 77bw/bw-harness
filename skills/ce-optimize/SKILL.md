@@ -1,64 +1,66 @@
 ---
 name: ce-optimize
-description: "Optimize a named target with a measured loop: attribute a workload's cost, or score variants and keep winners. Use when a working system's metric should move and the winning change is not already known. Use ce-debug when the job is diagnosis; use ce-work when the change is already known."
-argument-hint: "[path to optimization spec YAML, or describe the optimization goal]"
+description: "通过测量的循环优化指定目标：归因工作负载的成本，或对变量进行评分并保留获胜者。当工作系统的指标应该发生变化并且获胜的变化尚不清楚时使用。当作业是诊断时使用ce-debug；当变化已知时使用ce-work。"
+argument-hint: "[优化规范YAML的路径，或描述优化目标]"
 ---
 
-# Optimize a measurable target
+> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
 
-**Outcome:** confirmed improvements to the named target live on an `optimize/<spec-name>` branch, with a disk log. The user takes over at wrap-up.
+# 优化可衡量的目标
 
-**Intent:** the next action is the cheapest step that would change what gets implemented. Attribute the cost of a named workload before searching implementations. Search and keep a scored variant space without requiring a profile.
+**结果：** 确认对 `optimize/<spec-name>` 分支上的指定目标进行了改进，并带有磁盘日志。用户在总结时接管。
 
-**Done when:** a stopping criterion was met, every declared required target is met or another stop was met first, the final state is written and verified on disk, and the user has been given the post-completion options. If the run instead stopped at a check it could not pass, say what blocked it.
+**意图：** 下一步行动是改变所实施内容的最便宜的步骤。在搜索实现之前确定指定工作负载的成本。搜索并保留评分的变体空间，无需配置文件。
 
-Invoking this skill authorizes reading the repo, building the harness, and (after the Phase 1 approval gate) isolated experiments and keep/revert commits on `optimize/<spec-name>`. Ask when spend is uncapped, when a new dependency appears, when wrap-up would push or open a PR, or when only the user can choose among the post-completion options. Do not ask again to run the next experiment inside those limits.
+**完成时间：** 满足停止标准，满足每个声明的所需目标或首先满足另一个停止，最终状态在磁盘上写入和验证，并且用户已获得完成后选项。如果运行在无法通过的检查处停止，请说明是什么阻止了它。
 
-Independent calls and dispatches go in one response; serialize only real dependencies.
+调用此技能可授权读取存储库、构建工具以及（在第一阶段批准门之后）隔离实验并在 `optimize/<spec-name>` 上提交keep/revert。询问何时取消支出上限、何时出现新的依赖项、何时总结将推送或打开 PR，或者何时只有用户可以在完成后选项中进行选择。不要再次要求在这些限制内运行下一个实验。
 
-Report findings, user decisions, blockers, and results. During longer work, give occasional updates on what was learned and what remains. Routine preparation and phase or batch transitions need no announcement. Keep accounting in the log and final recap unless it affects a current decision.
+独立的呼叫和调度一次响应；仅序列化真正的依赖项。
 
-Explain the target, evidence, and decision in ordinary task language. Workflow labels (such as 'harness') belong in artifacts unless the user asks about those mechanics. State unknown duration or cost as unknown; caps are limits, not forecasts.
+报告发现、用户决策、阻碍因素和结果。在较长的工作期间，偶尔更新所学到的知识和剩下的知识。例行准备和阶段或批次转换无需公告。除非影响当前的决定，否则将会计记录在日志中并进行最终回顾。
 
-A step is done only after it ran. Describing a measurement, dispatch, or checkpoint is not doing it. Do not end a turn while in-scope work remains merely described. Outstanding work may outlive the turn only with a verified checkpoint and either bounded automatic resumption or an explicit manual-resume handback, as `references/persistence.md` defines.
+用普通任务语言解释目标、证据和决策。工作流标签（例如“harness”）属于产物，除非用户询问这些机制。将未知的持续时间或成本列为未知；上限是限制，而不是预测。
 
-## Interaction Method
+一个步骤只有在运行后才完成。描述测量、调度或检查点并不是在做。当范围内的工作仅被描述时，请勿结束转弯。只有在经过验证的检查点和有界自动恢复或明确的手动恢复交还（如 `references/persistence.md` 所定义）的情况下，未完成的工作才可能比轮次更长久。
 
-Use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability: do not search for another host's tool name. Fall back to numbered options on the host's chat surface only when no such tool is in the list or a real question call errors. Never skip the question silently.
+## 互动方式
 
-## Execution Surface
+使用当前工具列表中已有的主机阻止问题工具（按功能匹配，而不是按主机特定名称匹配）。当前工具列表中的存在证明该工具存在；永远不要调用面向用户的提问工具来发现它是否存在。如果列出了匹配的工具但已卸载，请使用主机的工具发现原语来加载该功能：不要搜索另一个主机的工具名称。仅当列表中没有此类工具或真正的问题调用错误时，才回退到主持人聊天界面上的编号选项。永远不要默默地跳过这个问题。
 
-Three capabilities decide where run state lives, how the loop waits, and where experiments run. A **durable state root** is a writable location the harness names that persists across turns and context resets, outside the repo checkout; without one, state lives under `.context/compound-engineering/ce-optimize/<spec-name>/`. A **wake after turn end** is a way to be re-invoked by an external event or timer without holding a tool call open; without one, the loop runs inside this session, and a wait it cannot hold ends the turn as a checkpoint with a resume invocation. A **detached worker** is a dispatch whose result arrives as a pushed ref, a store file, or a host-delivered message, not as edits in the local tree; `execution.backend: remote` needs one; without one that spec runs on `worktree`. Presence in the current tool list, or in context the harness gave you, is proof; a missing binary or environment variable proves nothing. Take a fallback without asking.
+## 执行面
 
-## Artifact Root
+三种功能决定运行状态的存在位置、循环如何等待以及实验运行的位置。 **持久状态根**是一个可写位置，在存储库签出之外，在轮次和上下文重置期间持续存在宿主名称；如果没有一个，状态就会低于 `.context/compound-engineering/ce-optimize/<spec-name>/`。 **回合结束后唤醒**是一种由外部事件或计时器重新调用而无需保持工具调用打开的方法；如果没有，循环将在该会话内运行，并且它无法保持的等待将作为带有恢复调用的检查点结束回合。 **分离的工作人员**是一个调度，其结果作为推送的引用、存储文件或主机传递的消息到达，而不是作为本地树中的编辑； `execution.backend: remote`需要一个；没有在 `worktree` 上运行的规范。当前工具列表中的存在或宿主为您提供的上下文中的存在就是证明；缺少的二进制文件或环境变量不能证明任何事情。不问就退却。
+
+## 神器根
 
 <!-- ce-docs-root:start -->
-**Resolve the CE artifact root `<root>` before composing any artifact path.**
+**在组成任何产物路径之前解析 CE 产物根 `<root>`。**
 
-- **Read** `docs_root` from `<repo-root>/.compound-engineering/config.yaml` only (`<repo-root>` = `git rev-parse --show-toplevel`). Do not read it from `config.local.yaml`. Unset -> `<root>` is `docs`, exactly as before.
-- **Validate** a set value: a repo-relative directory whose real, symlink-resolved path stays inside the repo and is neither the repo root nor under `.git/`. Otherwise stop with an error naming `docs_root` and the value -- never fall back to `docs`.
-- **Use** `<root>` as the sole artifact location: create it if absent, compose each path as `<root>/<subdir>` with this skill's own subdirectory, and never also read `docs`.
+- **仅从 `<repo-root>/.compound-engineering/config.yaml` 读取** `docs_root` (`<repo-root>` = `git rev-parse --show-toplevel`)。不要从`config.local.yaml`开始阅读。取消设置 -> `<root>` 为 `docs`，与之前完全相同。
+- **验证**设置值：一个存储库相对目录，其真实的符号链接解析路径保留在存储库内，既不是存储库根目录，也不是位于 `.git/` 下。否则，会因命名 `docs_root` 和值时出错而停止 - 永远不会回退到 `docs`。
+- **使用** `<root>` 作为唯一的产物位置：如果不存在则创建它，将每个路径与该技能自己的子目录组成 `<root>/<subdir>`，并且永远不要读取 `docs`。
 <!-- ce-docs-root:end -->
 
-## Persistence Discipline
+## 坚持纪律
 
-The experiment log on disk is the source of truth. Write order is measure, write, verify, then show the user. **Read `references/persistence.md` now** for checkpoints CP-0 through CP-5, the state root layout, and resume.
+磁盘上的实验日志是事实的来源。写入顺序是测量、写入、验证，然后显示给用户。 **立即阅读 `references/persistence.md`** 以了解检查点 CP-0 到 CP-5、状态根布局并恢复。
 
-## The phases
+## 阶段
 
-Four phases run in order; each names the reference it cannot start without. A fresh run skips none: a harder optimization spends longer in a phase, not fewer phases.
+四个阶段依次进行；每个都指定了它无法启动的参考。新的运行不会跳过任何一个：更困难的优化会在一个阶段花费更长的时间，而不是更少的阶段。
 
-**A resume is not a fresh run.** On a resume, re-enter Phase 0 only far enough to detect the run and to recover any `result.yaml` markers the log is missing. Then continue from the phase the log records and skip the work it proves finished. A checkpoint proves the work that produced it; a user decision counts only while the log records it. The Phase 1 approval record is bound to the spec digest and the caps it approved; present that gate again when it is absent or no longer matches.
+**恢复不是全新的运行。** 在恢复中，重新进入阶段 0 的距离足以检测运行并恢复日志丢失的任何 `result.yaml` 标记。然后从日志记录的阶段继续，并跳过证明已完成的工作。检查点证明产生它的工作；用户的决定仅在日志记录时才有效。第一阶段批准记录与规范摘要及其批准的上限绑定；当该门不存在或不再匹配时，再次显示该门。
 
-**Phase 0: Setup.** The input is a goal or a spec YAML path, from the user or a calling skill. **Read `references/spec.md`**: it asks for the input when neither supplied one, then loads or builds the spec to save (CP-0). **Read `references/measurement.md`** for the rest of Phase 0 and Phase 1.
+**阶段 0：设置。** 输入是来自用户或调用技能的目标或规范 YAML 路径。 **读取`references/spec.md`**：当未提供输入时，它会要求输入，然后加载或构建要保存的规范（CP-0）。 **阅读`references/measurement.md`**了解第 0 阶段和第 1 阶段的其余部分。
 
-**Phase 1: Measurement scaffolding.** Build or validate the harness, write the baseline (CP-1), probe parallelism, check the worktree budget. Two gates stop the run:
+**阶段 1：测量脚手架。** 构建或验证工具，编写基线 (CP-1)，探测并行性，检查工作树预算。两个门阻止了奔跑：
 
-- **Clean-tree gate.** Do not continue while any file in `scope.mutable` or `scope.immutable` has uncommitted changes. The reference defines the check and what to ask for.
-- **User approval gate.** Present what Phase 1 assembled and offer proceed, fix issues, and adjust spec; the reference lists what to include. Disclose which spend is capped and which is uncapped. **Do not enter Phase 2 until the user explicitly approves.** Then record the approval and re-read the spec and baseline from disk.
+- **清理树门。** 当 `scope.mutable` 或 `scope.immutable` 中的任何文件有未提交的更改时，不要继续。该参考定义了检查和要求的内容。
+- **用户批准门。** 展示第一阶段组装的内容并提供继续、解决问题和调整规格；引用文档列出了要包含的内容。披露哪些支出有上限，哪些支出没有上限。 **在用户明确批准之前不要进入阶段 2。**然后记录批准并从磁盘重新读取规范和基线。
 
-**Phase 2: Hypothesis generation.** Analyze the current approach, rank the hypotheses, record the backlog (CP-2). Do not dispatch an implementation experiment while a cheaper locating measurement would change keep or skip. **Read `references/loop.md`** for this phase and Phase 3. One gate: **dependency pre-approval** of every new dependency across all hypotheses, as one bulk list.
+**阶段 2：假设生成。** 分析当前方法，对假设进行排序，记录积压工作 (CP-2)。当更便宜的定位测量会改变保留或跳过时，不要发送实施实验。 **阅读此阶段和第 3 阶段的`references/loop.md`**。一扇门：所有假设中每个新依赖项的**依赖项预批准**，作为一个批量列表。
 
-**Phase 3: Optimization loop.** Follow the tick protocol in `references/loop.md`, including per-result persistence and batch checkpoints. Stop as soon as any one of eight criteria holds: every declared required target is met, max iterations, max active hours, the wall-clock backstop, a spend cap reached, plateau, a user interrupt, or no runnable hypothesis left. `references/loop.md` states each one exactly. Otherwise start the next tick.
+**阶段3：优化循环。**遵循`references/loop.md`中的tick协议，包括每个结果的持久性和批次检查点。一旦满足八个标准中的任何一个，就停止：满足每个声明的所需目标、最大迭代、最大活动时间、挂钟逆止器、达到支出上限、停滞状态、用户中断或没有留下可运行的假设。 `references/loop.md` 准确地陈述了每一项。否则开始下一个刻度。
 
-**Phase 4: Wrap-up.** **Read `references/wrap-up.md`** for the summary and the post-completion options to present. CP-5 marks the log final. **Write it only after the user picks an option that does not return to Phase 3.** Two options do return: Continue, and approving a deferred dependency.
+**阶段 4：总结。** **阅读 `references/wrap-up.md`** 了解摘要和完成后的选项。 CP-5 标志着日志最终。 **仅在用户选择不返回到阶段 3 的选项后才写入。** 返回两个选项：继续和批准延迟依赖项。

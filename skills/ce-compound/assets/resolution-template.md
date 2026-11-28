@@ -1,96 +1,96 @@
-# Resolution Templates
+# 分辨率模板
 
-Choose the template matching the problem_type track (see `references/schema.yaml`).
+选择与problem_type轨道匹配的模板（参见`references/schema.yaml`）。
 
 ---
 
-## Bug Track Template
+## 错误跟踪模板
 
-Use for: `build_error`, `test_failure`, `runtime_error`, `performance_issue`, `database_issue`, `security_issue`, `ui_bug`, `integration_issue`, `logic_error`
+用于：`build_error`、`test_failure`、`runtime_error`、`performance_issue`、`database_issue`、`security_issue`、`ui_bug`、`integration_issue`、`logic_error`
 
 <!-- YAML safety: array items (symptoms, applies_when, tags, related_components) starting with ` [ * & ! | > % @ ? or containing ": " must be wrapped in double quotes. See references/yaml-schema.md > "YAML Safety Rules". -->
 
 ```markdown
 ---
-title: [Clear problem title]
-date: [YYYY-MM-DD]
-category: [solutions subdirectory]
-module: [Module or area]
-problem_type: [schema enum]
-component: [corpus value, else schema suggested default]
-symptoms:
-  - [Observable symptom 1]
-root_cause: [corpus value, else schema suggested default]
-resolution_type: [schema enum]
-severity: [schema enum]
-retire_when: [optional; the outside change that would retire this doc and how to check for it, else omit this line]
-tags: [keyword-one, keyword-two]
+title: [清除问题标题]
+日期：[年-月-日]
+类别：[解决方案子目录]
+模块：[模块或区域]
+problem_type：[架构枚举]
+组件：[语料库值，否则架构建议默认]
+症状：
+  - [观察到的症状1]
+root_cause：[语料库值，其他模式建议默认]
+resolution_type：[架构枚举]
+严重性：[架构枚举]
+retire_when：[可选；将使该文档失效的外部更改以及如何检查它，否则忽略此行]
+标签：[关键字一，关键字二]
 ---
 
-# [Clear problem title]
+# 【明确问题标题】
 
-## Problem
-[1-2 sentence description of the issue and user-visible impact]
+## 问题
+[1-2 句话描述问题和用户可见的影响]
 
-## Symptoms
-- [Observable symptom or error]
+## 症状
+- [观察到的症状或错误]
 
-## What Didn't Work
-- [Attempted fix and why it failed]
+## 什么不起作用
+- [尝试修复以及失败原因]
 
-## Solution
-[The fix that worked, including code snippets when useful]
+## 解决方案
+[有效的修复，包括有用的代码片段]
 
-## Why This Works
-[Root cause explanation and why the fix addresses it]
+## 为什么这有效
+[根本原因解释以及修复解决该问题的原因]
 
-## Prevention
-- [Concrete practice, test, or guardrail]
+## 预防
+- 【具体实践，测试，还是护栏】
 
-## Related Issues
-- [Related docs or issues, if any]
+## 相关问题
+- [相关文档或问题，如果有的话]
 ```
 
 ---
 
-## Knowledge Track Template
+## 知识轨道模板
 
-Use for: `best_practice`, `documentation_gap`, `workflow_issue`, `developer_experience`, `architecture_pattern`, `design_pattern`, `tooling_decision`, `convention`
+用于：`best_practice`、`documentation_gap`、`workflow_issue`、`developer_experience`、`architecture_pattern`、`design_pattern`、`tooling_decision`、`convention`
 
 <!-- YAML safety: array items (symptoms, applies_when, tags, related_components) starting with ` [ * & ! | > % @ ? or containing ": " must be wrapped in double quotes. See references/yaml-schema.md > "YAML Safety Rules". -->
 
 ```markdown
 ---
-title: [Clear, descriptive title]
-date: [YYYY-MM-DD]
-category: [solutions subdirectory]
-module: [Module or area]
-problem_type: [schema enum]
-component: [corpus value, else schema suggested default]
-severity: [schema enum]
+标题：[清晰的描述性标题]
+日期：[年-月-日]
+类别：[解决方案子目录]
+模块：[模块或区域]
+problem_type：[架构枚举]
+组件：[语料库值，否则架构建议默认]
+严重性：[架构枚举]
 applies_when:
-  - [Condition where this applies]
-retire_when: [optional; the outside change that would retire this doc and how to check for it, else omit this line]
-tags: [keyword-one, keyword-two]
+  - [适用条件]
+retire_when：[可选；将使该文档失效的外部更改以及如何检查它，否则忽略此行]
+标签：[关键字一，关键字二]
 ---
 
-# [Clear, descriptive title]
+# [清晰、描述性的标题]
 
-## Context
-[What situation, gap, or friction prompted this guidance]
+## 语境
+[什么情况、差距或摩擦促使了本指导]
 
-## Guidance
-[The practice, pattern, or recommendation with code examples when useful]
+## 指导
+[有用的实践、模式或建议以及代码示例]
 
-## Why This Matters
-[Rationale and impact of following or not following this guidance]
+## 为什么这很重要
+[遵循或不遵循本指南的理由和影响]
 
-## When to Apply
-- [Conditions or situations where this applies]
+## 何时申请
+- [适用的条件或情况]
 
-## Examples
-[Concrete before/after or usage examples showing the practice in action]
+## 示例
+[具体before/after或展示实际实践的使用示例]
 
 ## Related
-- [Related docs or issues, if any]
+- [相关文档或问题，如果有的话]
 ```

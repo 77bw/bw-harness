@@ -1,114 +1,114 @@
-# Arguments, modes, and the deliverable
+# 参数、模式和可交付成果
 
-Read this at Stage 0, before scope is resolved. It defines how to parse the arguments, which argument combinations stop the review, the quick-review short-circuit, and what each mode returns.
+在解决范围之前，请在第 0 阶段阅读此内容。它定义了如何解析参数、哪些参数组合会停止审阅、快速审阅短路以及每种模式返回的内容。
 
-Give each file you read its own tool call, so its output comes back on its own, never several files in one command or one script. A read counts only when the whole file came back. Some hosts cut the middle out of a long tool output and leave a truncation marker in its place, so when a read comes back shortened, read the missing lines in smaller ranges before you act on that file. That applies to every file you read during this review, not only to references.
+为您读取的每个文件提供自己的工具调用，以便其输出自行返回，而不是在一个命令或一个脚本中返回多个文件。仅当整个文件返回时，读取才算数。某些主机会从长工具输出中切掉中间部分，并在其位置留下截断标记，因此当读取返回时缩短，请在对该文件进行操作之前读取较小范围内的缺失行。这适用于您在审阅期间阅读的每个文件，而不仅仅是引用文档。
 
-## Argument Parsing
+## 参数解析
 
-Parse the arguments you were invoked with for optional tokens. Strip each recognized token before interpreting the remainder as a PR number, GitHub URL, or branch name.
+解析您调用的参数以获取可选标记。在将剩余部分解释为 PR 数字、GitHub URL 或分支名称之前，先剥离每个已识别的标记。
 
-| Token | Example | Effect |
+| 代币 | 例子 | 影响 |
 |-------|---------|--------|
-| `mode:agent` | `mode:agent` | **Report-only**: return **JSON** instead of markdown tables and skip the Stage 5c apply (the caller applies). Does not change reviewer selection, merge logic, or scope rules (see Output format) |
-| `mode:headless` | `mode:headless` | **Deprecated alias** for `mode:agent` |
-| `mode:report-only` | `mode:report-only` | **Deprecated — ignored.** Former no-artifacts mode; default behavior is review-only without checkout |
-| `apply:local` | `apply:local` | Explicitly authorize Stage 5c to apply verified findings to the reviewed local checkout. This is authority, not an output mode; bare review remains report-only. |
-| `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Diff base on the **current checkout** (explicit; skips auto base detection) |
-| `plan:<path>` | `plan:<root>/plans/2026-03-25-001-feat-foo-plan.md` | Plan file for requirements verification (explicit). Supports markdown and HTML unified plans. |
-| `plan_group:<label>` | `plan_group:PR2` | With `plan:`, the PR group of a multi-PR plan this diff builds, named by the label that starts its heading (`PR2` in `PR2: Report headline and summary`). Scopes plan completeness to that group (see `references/intent-and-plan.md`). |
-| `depth:full` | `depth:full` | **Force the full spine** — skip the Review depth gate's lite and focused paths. Use when a deep/thorough review is explicitly requested (the one override the gate cannot infer). Does not change conditional selection, merge, or scope on the full path. |
-| `depth:auto` | `depth:auto` | **Default** — this skill self-sizes via the Review depth gate after Stage 1. Callers do not classify. |
-| `grouping:auto` | `grouping:auto` | **Default** — build thematic triage groups when findings span distinct concerns (Stage 5 step 9b) |
-| `grouping:off` | `grouping:off` | Suppress triage groups: no Triage Groups section, empty `triage_groups` in JSON |
-| `grouping:always` | `grouping:always` | Always build triage groups, even for small reviews |
+| `mode:agent` | `mode:agent` | **仅报告**：返回 **JSON** 而不是 Markdown 表并跳过阶段 5c 应用（调用者应用）。不更改审查者选择、合并逻辑或范围规则（请参阅输出格式） |
+| `mode:headless` | `mode:headless` | **已弃用 `mode:agent` 的别名** |
+| `mode:report-only` | `mode:report-only` | **已弃用 — 已忽略。** 以前的无产物模式；默认行为是仅审核而不结帐 |
+| `apply:local` | `apply:local` | 明确授权 Stage 5c 将经过验证的结果应用于经过审查的本地结账。这是权威，不是输出方式；纯粹的审查仍然只是报告。 |
+| `base:<sha-or-ref>` | `base:abc1234` 或 `base:origin/main` | 基于 **当前结账** 进行差异基础（显式；跳过自动基础检测） |
+| `plan:<path>` | `plan:<root>/plans/2026-03-25-001-feat-foo-plan.md` | 需求验证的计划文件（显式）。支持markdown和HTML统一方案。 |
+| `plan_group:<label>` | `plan_group:PR2` | 对于`plan:`，此差异构建的多PR计划的PR组，由开始其标题的标签命名（`PR2: Report headline and summary`中的`PR2`）。范围计划对该组的完整性（参见`references/intent-and-plan.md`）。 |
+| `depth:full` | `depth:full` | **强制整个脊柱** — 跳过查看深度门的精简路径和集中路径。当明确请求 deep/thorough 审查时使用（覆盖门的审查无法推断）。不更改完整路径上的条件选择、合并或范围。 |
+| `depth:auto` | `depth:auto` | **默认** — 此技能在第 1 阶段之后通过复习深度门自行调整大小。调用者不会进行分类。 |
+| `grouping:auto` | `grouping:auto` | **默认** — 当调查结果涵盖不同的问题时建立主题分类组（第 5 阶段步骤 9b） |
+| `grouping:off` | `grouping:off` | 抑制分类组：无分类组部分，JSON 中为空 `triage_groups` |
+| `grouping:always` | `grouping:always` | 始终建立分类小组，即使是小评论 |
 
-**Grouping is presentation, not a mode.** The `grouping:` tokens change how the finding set is organized for triage — never reviewer selection, merge logic, scope rules, or the Stage 5c apply decision.
+**分组是表示形式，而不是模式。** `grouping:` 标记会改变结果集的分类组织方式 — 绝不是审查者选择、合并逻辑、范围规则或第 5c 阶段应用决策。
 
-**Mode alias:** `mode:headless` normalizes to `mode:agent`. `mode:agent` + `mode:headless` is not a conflict. `mode:non-interactive` is **not** an alias for `mode:agent` — that token means “suppress prompts” in other CE skills; if it appears here, treat it as an unrecognized, conflicting `mode:` token and stop rather than guessing what was meant.
+**模式别名：** `mode:headless` 标准化为 `mode:agent`。 `mode:agent` + `mode:headless` 不冲突。 `mode:non-interactive` **不是** `mode:agent` 的别名 — 该标记在其他 CE 技能中表示“抑制提示”；如果它出现在这里，请将其视为无法识别的、冲突的 `mode:` 标记并停止，而不是猜测其含义。
 
-**Conflicting arguments:** Stop without dispatching reviewers when:
-- Multiple incompatible scope selectors appear together (e.g. `base:` **and** a PR number/branch target — `base:` means "review the current checkout against this base")
-- Multiple distinct `mode:` tokens other than the `mode:agent`/`mode:headless` alias pair
-- `mode:non-interactive` (alone or with other modes) — not valid for this skill; use `mode:agent` for JSON
-- `apply:local` together with `mode:agent` — pipeline handoffs are always report-only
-- Multiple distinct `grouping:` tokens (e.g. `grouping:off` **and** `grouping:always`)
+**冲突的论点：** 在以下情况下停止而不派遣审稿人：
+- 多个不兼容的范围选择器一起出现（例如 `base:` **和** PR number/branch 目标 — `base:` 表示“根据此基础查看当前结账”）
+- 除 `mode:agent`/`mode:headless` 别名对之外的多个不同的 `mode:` 标记
+- `mode:non-interactive`（单独或与其他模式一起）—对该技能无效；使用`mode:agent`代替JSON
+- `apply:local` 与 `mode:agent` 一起 — 管道切换始终仅报告
+- 多个不同的 `grouping:` 标记（例如 `grouping:off` ** 和 ** `grouping:always`）
 
-Deprecated `mode:autofix` is **not** a conflict — ignore the token and proceed with the normal flow (see below).
+已弃用的 `mode:autofix` **不是** 冲突 - 忽略该令牌并继续正常流程（见下文）。
 
-Emit a one-line failure reason. In `mode:agent`, return JSON: `{"status":"failed","reason":"..."}`.
+发出一行失败原因。在`mode:agent`中，返回JSON：`{"status":"failed","reason":"..."}`。
 
-## Output format
+## 输出格式
 
-| Invocation | Deliverable |
+| 祈求 | 可交付成果 |
 |------------|-------------|
-| **Default** | Report-only markdown (pipe-delimited finding tables) + Actionable Findings summary |
-| **Explicit local apply** | The same markdown report plus verified local fixes and an Applied section |
-| **`mode:agent`** | One JSON object (see ## JSON output format below) + the same `/tmp/.../ce-code-review/<run-id>/` artifacts |
+| **默认** | 仅报告Markdown（以竖线分隔的结果表）+ 可操作的结果摘要 |
+| **显式本地应用** | 相同的Markdown报告加上经过验证的本地修复和应用部分 |
+| **`mode:agent`** | 一个 JSON 对象（请参阅下面的 ## JSON 输出格式）+ 相同的 `/tmp/.../ce-code-review/<run-id>/` 产物 |
 
-Default and `mode:agent` are **report-only**. `mode:agent` changes only the serialization from markdown to JSON for programmatic callers; it does not change reviewer selection, merge logic, or scope rules. `apply:local` is separate mutation authority, not an output mode. The default markdown is the human view; keep it ASCII-safe (pipe tables, `->` not middot `·`, no box-drawing) so it degrades gracefully across terminals.
+默认值和`mode:agent`是**仅报告**。对于编程调用者，`mode:agent` 仅将序列化从 markdown 更改为 JSON；它不会更改审查者选择、合并逻辑或范围规则。 `apply:local`是单独的变异权限，不是输出模式。默认的 Markdown 是人类视图；保持它的 ASCII 安全（管道表，`->`不是中点`·`，没有方框图），这样它就可以在终端之间优雅地降级。
 
-Whatever this skill returns, including a failed, degraded, or skipped result, is the last thing it writes. It ends this skill, not the turn. When a caller invoked this skill, control returns to the caller in this same session, and the caller's own handling of the result decides whether its run continues or stops; otherwise end the turn.
+无论该技能返回什么，包括失败、降级或跳过的结果，都是它写入的最后内容。它结束了该技能，而不是回合。当调用者调用此技能时，控制权将在同一会话中返回给调用者，并且调用者自己对结果的处理决定其运行是继续还是停止；否则结束回合。
 
-## Quick Review Short-Circuit
+## 快速回顾短路
 
-If the invocation arguments indicate the user wants a quick, fast, or light code review — and **`mode:agent` is not active** — do not dispatch the multi-agent flow.
+如果调用参数表明用户想要快速、快速或轻松的代码审查 — 并且 **`mode:agent` 未激活** — 不要分派多代理流。
 
-**Announce the chosen path** before any other work (Quick review vs Multi-agent review). Skip this announcement when `mode:agent` is active.
+**在任何其他工作之前宣布所选路径**（快速审查与多代理审查）。当`mode:agent`激活时跳过此公告。
 
-Sequence:
+顺序：
 
-1. **Run the harness's built-in code review.** Forward any review target after stripping tokens. Then stop — do not dispatch the multi-agent pipeline.
-2. **Exemption:** If no built-in review exists, continue into the full multi-agent review.
-3. **`mode:agent` bypasses this short-circuit only.** It still self-sizes through the Review depth gate and returns JSON from whichever path that gate selects.
+1. **运行工具的内置代码审查。** 剥离令牌后转发任何审查目标。然后停止——不调度多代理管道。
+2. **豁免：** 如果不存在内置审核，则继续进行完整的多代理审核。
+3. **`mode:agent` 仅绕过此短路。** 它仍然通过审查深度门自行调整大小，并从该门选择的任何路径返回 JSON。
 
-**Deprecated:** `mode:autofix` is no longer supported. If passed, ignore it and proceed report-only; it does not grant local apply authority.
+**已弃用：** 不再支持 `mode:autofix`。如果通过，则忽略它并仅进行报告；它不授予本地申请权限。
 
-## Review depth
+## 复习深度
 
-Decide after Stage 1 (its 1b facts and 1c mapping), before reading any later reference. This skill owns the decision; a caller may pass `depth:full` but never a depth of its own. Three paths exist: **lite** (this context alone), **focused** (this context plus one independent adversarial read), and **full** (the multi-agent spine from Stage 2).
+在阅读任何后续引用文档之前，请在第 1 阶段（其 1b 事实和 1c 映射）之后做出决定。这个技能拥有决定权；调用者可能会传递 `depth:full` 但永远不会传递其自己的深度。存在三种路径：**lite**（仅此上下文）、**focused**（此上下文加上一个独立的对抗性读取）和 **full**（来自第 2 阶段的多代理主干）。
 
-Floors that run the full spine from Stage 2, whatever the diff looks like: `depth:full`; the helper's `hard_block_full` (the helper reports facts. It never awards lite. `hard_block_full` is a floor, and it covers a named hard-block class, any file the helper could not count, and a `size_band` of `large`, which means the executable non-test changed lines reached the full floor; whole-file deletions are not counted there); a Stage 1c criteria search that failed or whose scope is uncertain; and apply authority (`apply:local` or an explicit apply request), which needs Stage 5c's verified-apply mechanics. Line counts below the floor, prose and test volume, `unclassified_lines`, and `signals` are prompts to consider, not floors.
+从第 2 阶段开始贯穿整个脊柱的楼层，无论差异如何：`depth:full`；助手的`hard_block_full`（助手报告事实。它从不奖励精简版。`hard_block_full`是一个楼层，它涵盖了一个命名的硬块类，助手无法计数的任何文件，以及`large`的`size_band`，这意味着可执行的非测试更改行达到了整个楼层；整个文件删除不计入其中）；失败或范围不确定的 1c 阶段标准检索；并申请权限（`apply:local`或明确的申请请求），这需要阶段5c的验证申请机制。楼层以下的行数、散文和测试卷、`unclassified_lines`和`signals`是需要考虑的提示，而不是楼层。
 
-### Adversarial selection
+### 对抗性选择
 
-Select the adversarial lens when the user explicitly requests it. Otherwise selection requires evidence from the diff and available context of a credible failure scenario with material consequences: unauthorized access or disclosure, financial loss, persistent data corruption or loss, irreversible external effects, or substantial service disruption. State that scenario and consequence as the selection reason. A verification mechanism inherits the consequence of the behavior it protects; false success alone is insufficient.
+当用户明确请求时选择对抗性镜头。否则，选择需要来自可信故障场景的差异和可用上下文的证据，并产生重大后果：未经授权的访问或披露、财务损失、持续的数据损坏或丢失、不可逆转的外部影响或严重的服务中断。说明该场景和后果作为选择原因。验证机制继承了它所保护的行为的后果；仅仅虚假的成功是不够的。
 
-Diff size, file paths, domain keywords, routine persistence or API use, and uncertainty alone do not select adversarial. An unresolved risk still warrants the lens when evidence supports a material consequence even though its reachability needs investigation. Otherwise record the specific uncertainty in Coverage rather than adding a reviewer just in case. This condition governs both focused and full reviews.
+差异大小、文件路径、域关键字、常规持久性或 API 使用以及不确定性本身并不能选择对抗性。当证据支持重大后果时，未解决的风险仍然值得关注，即使其可达性需要调查。否则，请在覆盖范围中记录特定的不确定性，而不是添加审查者以防万一。此条件适用于重点审查和全面审查。
 
-With no full-spine floor set, select lite when the adversarial condition is absent. When it is present, select focused unless the change needs the full spine's specialist coverage for an auth, money, or externally consumed public-contract boundary; then continue from Stage 2. Those specialist boundaries still require full review even when adversarial is not selected. A user request for adversarial review requires at least focused; `depth:full` alone does not select the lens.
+如果没有完整的脊柱地板设置，则在不存在对抗条件时选择精简版。如果存在，请选择“集中”，除非更改需要整个主干的专家覆盖授权、资金或外部使用的公共合同边界；然后从第二阶段继续。即使没有选择对抗性，这些专家边界仍然需要全面审查。用户提出的对抗性审查请求至少需要有针对性； `depth:full`单独不选择镜头。
 
-The helper's `silent_pass_classes`, `deleted_band`, and `unclassified_lines` identify work to inspect, not additional depth floors. Assess what a changed guard protects and whether surviving code still reaches deleted files. A CI path or large deletion alone does not require an independent read. Executable code under an unrecognized extension still receives the same consequence assessment.
+助手的 `silent_pass_classes`、`deleted_band` 和 `unclassified_lines` 识别要检查的工作，而不是额外的深度楼层。评估更改后的防护措施保护的内容以及幸存的代码是否仍能到达已删除的文件。单独的CI路径或大删除不需要独立读取。无法识别的扩展名下的可执行代码仍然会收到相同的结果评估。
 
-A full-spine floor cannot be talked down, and a path may only move toward full as new evidence appears. On full, correctness remains mandatory and specialist selection remains conditional; use the adversarial condition above rather than inferring it from depth.
+完整的脊柱地板不能被谈论下来，只有当新的证据出现时，一条道路才可能走向完整。总的来说，正确性仍然是强制性的，专家的选择仍然是有条件的；使用上面的对抗条件而不是从深度推断它。
 
-When the gate selects lite or focused, read `references/depth-paths.md` at that point and run the selected path from this context; the full spine continues from Stage 2 and never opens that file. Either way, close the scope stage with the decision: the stage-log call from `references/scope.md` with `--end scope --start review` (lite, focused) or `--end scope --start select` (full), carrying `--fact` entries for `exec_nontest_lines`, `changed_lines`, `size_band`, `deleted_band`, `unclassified_lines`, and `depth`.
+当门选择精简或聚焦时，在该点读取`references/depth-paths.md`并从此上下文运行所选路径；完整的书脊从第 2 阶段继续，并且永远不会打开该文件。无论哪种方式，通过以下决定关闭范围阶段：来自`references/scope.md`的阶段日志调用带有`--end scope --start review`（精简版，重点）或`--end scope --start select`（完整），携带`exec_nontest_lines`，`changed_lines`，`size_band`，`deleted_band`，`unclassified_lines`的`--fact`条目，以及`depth`。
 
-## Run artifacts
+## 运行产物
 
-Every run, lite, focused, or full, leaves its receipt (`review.json` in `mode:agent`, `report.md` in default mode), `stages.jsonl` (the stage log `references/scope.md` opens), and `metadata.json` in the run directory. `metadata.json` minimum fields:
+每次运行，无论是精简版、集中版还是完整版，都会在运行目录中留下其收据（`mode:agent`中的`review.json`，默认模式中的`report.md`）、`stages.jsonl`（阶段日志`references/scope.md`打开）和`metadata.json`。 `metadata.json` 最小字段：
 
 ```json
 {
   "run_id": "<run-id>",
-  "branch": "<git branch --show-current at dispatch time>",
-  "head_sha": "<git rev-parse HEAD at dispatch time>",
+  "branch": "<发送时的 git 分支 --show-current>",
+  "head_sha": "<git rev-parse HEAD 在调度时>",
   "verdict": "<Ready to merge | Ready with fixes | Not ready>",
   "completed_at": "<ISO 8601 UTC timestamp>"
 }
 ```
 
-After `metadata.json` is written, the receipt writer runs `run-log.py summarize --run-dir "$RUN_DIR"` (the same `SKILL_DIR` and interpreter recipe as the stage log) as its last action before returning or emitting the receipt; it is the only writer that touches `metadata.json` after the receipt write, and it merges a `cost` object into the existing fields: `status` (`complete` when every started stage ended and the receipt stage is present, else `partial`), `host`, `scope` (the helper facts and chosen depth from the scope stage), `stages` (name, elapsed seconds, reviewers, candidates, tokens when present), `totals` (elapsed, reviewers, candidates produced by the review, peer, and dispatch stages, artifact bytes, tokens when any stage carried them), `peer` (from `adversarial-<provider>-usage.json` when present), and `truncated_events`. A run killed mid-way leaves a parseable partial log, and a maintainer tuning `FULL_EXEC_LINE_MIN` or another threshold reads `cost.status` before trusting a run's numbers.
+写入`metadata.json`后，收据写入器运行`run-log.py summarize --run-dir "$RUN_DIR"`（与阶段日志相同的`SKILL_DIR`和解释器配方）作为返回或发出收据之前的最后一个操作；它是唯一在收据写入后触及`metadata.json`的编写器，并将`cost`对象合并到现有字段中：`status`（当每个启动阶段结束且收据阶段存在时`complete`，否则`partial`），`host`，`scope`（辅助事实和从范围阶段选择的深度）， `stages`（名称、经过的秒数、审查者、候选项、令牌（如果存在））、`totals`（已过的、审查者、审阅、对等和分派阶段生成的候选项、产物字节、任何阶段携带它们时的令牌）、`peer`（来自`adversarial-<provider>-usage.json`（如果存在）和`truncated_events`。中途终止的运行会留下可解析的部分日志，并且维护者在信任运行数字之前调整`FULL_EXEC_LINE_MIN`或另一个阈值读取`cost.status`。
 
-The full path adds the artifacts listed under "Run artifacts" in `references/finish-input.md`.
+完整路径添加 `references/finish-input.md` 中“运行产物”下列出的产物。
 
-## JSON output format (`mode:agent` only)
+## JSON 输出格式（仅限`mode:agent`）
 
-One definition for every depth path. Emit **one raw JSON object** as the primary response: a single bare JSON value, **no markdown code fence**. A leading ```` ```json ```` fence makes the response start with backticks and breaks naive `JSON.parse` consumers, so never wrap it. Also write `review.json` under the resolved `<run-dir>` with the same payload.
+所有深度共用同一输出协议。主响应只返回**一个原始 JSON 对象**，不加文字或代码围栏；否则直接调用 `JSON.parse` 的消费者会解析失败。把完全相同的载荷写到已解析的 `<run-dir>` 下的 `review.json`。
 
-`mode:agent` does not apply fixes (the caller does), so there is no `applied_fixes` field; the handoff is `actionable_findings`. Applied work appears only in explicitly authorized local-apply markdown runs (Stage 5c/6).
+`mode:agent` 不应用修复（调用者应用），因此没有 `applied_fixes` 字段；切换是`actionable_findings`。应用的工作仅出现在明确授权的本地应用Markdown运行中（阶段5c/6）。
 
-Minimum shape:
+最小形状：
 
 ```json
 {
@@ -139,26 +139,26 @@ Minimum shape:
 }
 ```
 
-`peer` tells a caller whether a different-provider peer actually reviewed the change. It is not part of the minimum shape: add it only when this run selected the adversarial lens (the full roster selected it, or the focused path ran), and never on lite. Its shape:
+`peer` 告诉调用者不同提供商的同行是否实际审查了更改。它不是最小形状的一部分：仅当本次运行选择了对抗性镜头（完整名单选择了它，或聚焦路径运行）时才添加它，并且从不在精简版上添加它。其形状：
 
 ```json
-"peer": {"outcome": "folded | in-process-fallback | not-run | no-usable-output | failed", "coverage": "<the Coverage sentence for this outcome>"}
+"peer": {"outcome": "folded | in-process-fallback | not-run | no-usable-output | failed", "coverage": "<该结果的覆盖句子>"}
 ```
 
-On the full path, copy `outcome` and `coverage` verbatim from the `peer` record in `finish-input.json`; the focused path fills them from its own fold-in, using the same outcome names and Coverage sentences. `folded` is the only outcome in which a peer artifact was folded into this review. Every other outcome means no peer artifact was folded, and `coverage` says why and what covered the lens instead. An outcome other than `folded` never changes `status`.
+在完整路径上，从`finish-input.json`中的`peer`记录逐字复制`outcome`和`coverage`；聚焦路径使用相同的结果名称和覆盖句子从自己的折叠中填充它们。 `folded` 是同行产物被纳入本次审查的唯一结果。所有其他结果都意味着没有同行产物被折叠，而`coverage`说明了为什么以及什么覆盖了镜头。 `folded`以外的结果永远不会改变`status`。
 
-When Stage 1d staged a review policy, every path adds `coverage.review_policy`: `sources` (the policy file paths read), `removed` and `regraded` (counts), and `not_applied` (policy files the change edited, whose new version this review did not apply).
+当阶段 1d 上演审核策略时，每个路径都会添加 `coverage.review_policy`：`sources`（读取的策略文件路径）、`removed` 和 `regraded`（计数）以及 `not_applied`（更改编辑的策略文件，本次审核不应用其新版本）。
 
-Lite fills `findings`, `actionable_findings`, `testing_gaps`, `residual_risks`, and `requirements_completeness` (`null` only when no plan was found) from its own review. The arrays owned by reviewers it did not run (`learnings`, `deployment_notes`, `pre_existing_findings`, `triage_groups`) are `[]`, and Coverage names them as not assessed. `reviewers` is `["correctness"]` and `coverage.depth` is `"lite"`. Focused fills the same fields from its merged findings, lists its two reviewers, and sets `coverage.depth` to `"focused"`; the full path's finish leaf fills every field and sets `coverage.depth` to `"full"`.
+Lite 根据自己的评论填充了 `findings`、`actionable_findings`、`testing_gaps`、`residual_risks` 和 `requirements_completeness`（`null` 仅当未找到计划时）。未运行的审查者拥有的数组（`learnings`、`deployment_notes`、`pre_existing_findings`、`triage_groups`）为`[]`，Coverage 将它们命名为未评估。 `reviewers` 是`["correctness"]`，`coverage.depth` 是`"lite"`。 Focused 从合并的结果中填充相同的字段，列出其两位审稿人，并将 `coverage.depth` 设置为 `"focused"`；完整路径的完成叶填充每个字段并将 `coverage.depth` 设置为 `"full"`。
 
-Each object in `findings` uses the merged finding fields: `#`, `title`, `severity`, `file`, `line`, `confidence`, `autofix_class`, `owner`, `requires_verification`, `pre_existing`, `suggested_fix`, `first_evidence`, `why_it_matters`, `evidence`, `reviewers`, `independent_reviewers`. A finding Stage 5b left unresolved, or confirmed with an unmeasured-incidence reason, also carries `validation_status` and `validation_reason`, and carries `protected_subject` when one applies. Each object in `learnings` is a Known Pattern note: `type` (`known_pattern`), `title`, `citation` (a `<root>/solutions/` path or `(pack: <id>, <path within the pack>)`), and `note` (one line on how it bears on the change); contradicted pack rules are findings, never `learnings` entries. When Compound Packs were resolved, on any path, `coverage.compound_packs` carries `roots` as the list of pack ids (strings — never the resolver's absolute `dir` paths) plus the resolver's `warnings` and `errors` arrays verbatim, so a consumer can tell a declared pack that loaded from one that was skipped. The helper derives `independent_reviewers`; synthesis may preserve or union that list but must not infer it from `reviewers`.
+`findings` 中的每个对象都使用合并的查找字段：`#`、`title`、`severity`、`file`、`line`、`confidence`、`autofix_class`、`owner`、`requires_verification`、`pre_existing`、 `suggested_fix`、`first_evidence`、`why_it_matters`、`evidence`、`reviewers`、`independent_reviewers`。未解决的第 5b 阶段的发现，或因未测量的发生原因而得到确认的结果，也带有 `validation_status` 和 `validation_reason`，并且在申请时带有 `protected_subject`。 `learnings` 中的每个对象都是已知模式注释：`type` (`known_pattern`)、`title`、`citation`（`<root>/solutions/` 路径或`(pack: <id>, <包内的路径>)`）和 `note`（一行说明其如何影响更改）；矛盾的包规则是发现，而不是`learnings`条目。当Compound Pack被解析时，在任何路径上，`coverage.compound_packs`都会携带`roots`作为包ID列表（字符串 - 绝不是解析器的绝对`dir`路径）加上解析器的`warnings`和`errors`数组逐字，因此消费者可以告诉已声明的包是从跳过的包加载的。助手导出`independent_reviewers`；综合可以保留或联合该列表，但不得从 `reviewers` 推断它。
 
-An incoming finding may carry an optional `settled_conflict` field naming a `session-settled:` KTD. The marker supplies context for settlement reconciliation; it does not exempt the finding from admission or authorize a change.
+传入的结果可能带有一个可选的 `settled_conflict` 字段，命名为 `session-settled:` KTD。该标记为和解调节提供了背景；它并不免除承认或授权更改调查结果。
 
-`actionable_findings` lists the `gated_auto` / `manual` + `downstream-resolver` subset with the same fields plus stable `#`. A finding with `validation_status: "unresolved"` never appears here; it stays in `findings` as a clearly labeled verification gate.
+`actionable_findings` 列出了 `gated_auto` / `manual` + `downstream-resolver` 子集，具有相同的字段以及稳定的 `#`。 `validation_status: "unresolved"` 的发现从未出现在这里；它留在`findings`作为一个明确标记的验证门。
 
-Each object in `triage_groups` carries `{ "title", "findings": [<stable #s>], "context", "preferred_resolution", "why" }`: the finalized groups from Stage 5 step 6 after Stage 5b step 5 pruning. Every referenced `#` must exist in `findings` (the full set), **not** necessarily in `actionable_findings`. Groups are a triage **lens over all findings, not an apply queue**: a group (and its `preferred_resolution` ordering) can reference advisory or `human`/`release`-owned findings that the caller must not apply. So a caller batching related fixes by theme must first intersect each group's `findings` with `actionable_findings` and act only on that subset; the apply handoff stays `actionable_findings`, never `triage_groups`. Empty array when `grouping:off` is active or no groups were built.
+`triage_groups`中的每个对象都携带`{ "title", "findings": [<stable #s>], "context", "preferred_resolution", "why" }`：在阶段5b步骤5修剪之后阶段5步骤6的最终组。每个引用的`#`必须存在于`findings`（完整集）中，**不一定**一定存在于`actionable_findings`中。组是对所有结果进行分类**的镜头，而不是应用队列**：组（及其 `preferred_resolution` 顺序）可以参考调用者不得应用的建议或 `human`/`release` 拥有的结果。因此，按主题批处理相关修复的调用者必须首先将每个组的 `findings` 与 `actionable_findings` 相交，并仅对该子集执行操作；应用切换保持`actionable_findings`，而不是`triage_groups`。当 `grouping:off` 处于活动状态或未构建组时为空数组。
 
-On failure before review completes, set `"status": "failed"` and `"reason": "<one sentence>"`. When all reviewers fail, use `"status": "degraded"` with a reason. When a PR skip rule applies (closed/merged/trivial), use `"status": "skipped"` with the skip reason. Do not emit markdown tables when `mode:agent` is active.
+如果在审核完成之前失败，请设置 `"status": "failed"` 和 `"reason": "<one sentence>"`。当所有审查者都失败时，使用 `"status": "degraded"` 并给出原因。当 PR 跳过规则适用 (closed/merged/trivial) 时，请使用 `"status": "skipped"` 和跳过原因。当 `mode:agent` 处于活动状态时，不要发出Markdown表。
 
-After Stage 6 on the full path, the review ends with the actionable summary, the run artifacts, and the point where the run stops. `references/finish-report.md` defines that ending for the full spine.
+在完整路径的第 6 阶段之后，审核以可操作的摘要、运行产物和运行停止点结束。 `references/finish-report.md` 定义整个脊柱的结尾。

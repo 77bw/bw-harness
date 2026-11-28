@@ -1,8 +1,8 @@
-# Discoverability check
+# 可发现性检查
 
-After the report, apply the **Discoverability Check** section of `references/refresh-and-discoverability.md`. It defines what a reader must learn, the smallest addition and its tone, the consent step, and the `CONCEPTS.md` variant. Follow its interactive Full path in an interactive refresh, with these differences:
+报告后，应用`references/refresh-and-discoverability.md`的**可发现性检查**部分。它定义了读者必须学习的内容、最小的添加及其语气、同意步骤以及 `GLOSSARY.md` 变体。在交互式刷新中遵循其交互式完整路径，但存在以下差异：
 
-- **Instruction files:** look for the project's root agent-instruction surface, whatever this project uses (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or an equivalent). If there is none, skip the check.
-- **Questions:** ask as `references/refresh/modes.md` describes under Blocking questions.
-- **Non-interactive:** emit a "Discoverability recommendation" line in the report instead of editing instruction files. The scope of a non-interactive refresh is doc maintenance, not project config.
-- **Late edit:** if this check edited an instruction file after Commit already ran, amend the commit (same branch, not yet pushed) or add a small follow-up commit (e.g., `docs: add solutions discoverability to AGENTS.md`), and push it if the branch was already pushed so an open PR includes it. If the user chose "don't commit", leave the edits uncommitted alongside the rest.
+- **指令文件：**查找项目的根代理指令表面，无论该项目使用什么（`AGENTS.md`、`CLAUDE.md`、`GEMINI.md`或等效项）。如果没有，则跳过检查。
+- **问题：** 按照阻止问题中描述的 `references/refresh/modes.md` 进行提问。
+- **非交互式：** 在报告中发出“可发现性建议”行，而不是编辑说明文件。非交互式刷新的范围是文档维护，而不是项目配置。
+- **后期编辑：**如果此检查在提交已经运行后编辑了指令文件，请修改提交（同一分支，尚未推送）或添加一个小的后续提交（例如，`docs: add solutions discoverability to AGENTS.md`），如果分支已经推送，则推送它，以便打开的PR包含它。如果用户选择“不提交”，则将未提交的编辑与其余内容一起保留。

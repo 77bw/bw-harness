@@ -1,93 +1,93 @@
-# Persistence: the rules, the checkpoints, and resume
+# 持久性：规则、检查点和恢复
 
-Read this before Phase 0 and follow it for the whole run. The body states the invariant and names the six checkpoints; this file carries the rules that implement them, the state root, the checkpoint table, the file layout, the wait record, and the resume procedure.
+在阶段 0 之前阅读此内容并在整个运行过程中遵循它。正文陈述了不变量并命名了六个检查点；该文件包含实现它们的规则、状态根、检查点表、文件布局、等待记录和恢复过程。
 
-### Core Rules
+### 核心规则
 
-1. **Write each experiment result to disk IMMEDIATELY after measurement.** Not after the batch, not after evaluation, IMMEDIATELY. Append the experiment entry to the experiment log file the moment its metrics are known, before evaluating the next experiment. This is the #1 crash-safety rule.
+1. **测量后立即将每个实验结果写入磁盘。** 不是在批次之后、评估之后立即写入。在评估下一个实验之前，一旦知道其指标，就将实验条目附加到实验日志文件中。这是第一条碰撞安全规则。
 
-2. **VERIFY every critical write.** After writing the experiment log, read the file back and confirm the entry is present. This catches silent write failures. Do not proceed to the next experiment until verification passes.
+2. **验证每个关键写入。**写入实验日志后，读回文件并确认条目存在。这可以捕获静默写入失败。在验证通过之前不要进行下一个实验。
 
-3. **Re-read from disk at every phase boundary and before every decision.** Never trust in-memory state across phase transitions, batch boundaries, or after any operation that might have taken significant time. Re-read the experiment log and strategy digest from disk.
+3. **在每个阶段边界和每个决策之前从磁盘重新读取。** 切勿相信跨阶段转换、批次边界或任何可能花费大量时间的操作之后的内存中状态。从磁盘重新读取实验日志和策略摘要。
 
-4. **One experiment, one log entry.** Append a new experiment entry on its first measurement. Later ladder samples for that same experiment update that entry's metrics and outcome in place so a crash can resume the ladder without losing samples or duplicating the hypothesis. Distinct `comparisons` pairings accumulate on that same entry; in-place updates must not replace a previously persisted distinct pairing. Never rewrite a different experiment's samples or gate values. Outcome, `best`, and `hypothesis_backlog` are also updated in place at batch evaluation (CP-4). Do not rebuild the file from memory.
+4. **一个实验，一个日志条目。** 在第一次测量时附加新的实验条目。同一实验的后续阶梯样本会更新该条目的指标和结果，以便崩溃可以恢复阶梯，而不会丢失样本或重复假设。不同的 `comparisons` 配对在同一条目上累积；就地更新不得取代先前保留的不同配对。切勿重写不同实验的样本或门值。结果、`best`和`hypothesis_backlog`也在批次评估（CP-4）时进行适当更新。不要从内存中重建文件。
 
-5. **Per-experiment result markers for crash recovery.** Each experiment writes a `result.yaml` marker in its worktree immediately after measurement. On resume, scan for these markers to recover experiments that were measured but not yet logged.
+5. **用于崩溃恢复的每个实验结果标记。** 每个实验在测量后立即在其工作树中写入一个 `result.yaml` 标记。恢复时，扫描这些标记以恢复已测量但尚未记录的实验。
 
-6. **Write the strategy digest after every batch, before generating new hypotheses.** The agent reads the digest (not its memory) when deciding what to try next.
+6. **在每批之后、生成新假设之前写入策略摘要。** 代理在决定下一步尝试什么时读取摘要（而不是其内存）。
 
-7. **Never present results to the user without writing them to disk first.** The order is: measure -> write to disk -> verify -> THEN show the user. Not the reverse.
+7. **在未将结果写入磁盘之前，切勿将结果呈现给用户。**顺序是：测量 -> 写入磁盘 -> 验证 -> 然后向用户显示。不是相反。
 
-### The State Root
+### 状态根
 
-`<state-root>` is the directory that holds the run's ledger. Resolve it once, in Phase 0, by the body's Execution Surface rule: when the harness names a durable state root, `<state-root>` is `<that location>/ce-optimize/<spec-name>/`, placed where that location's own conventions keep working state rather than user-facing documents; otherwise it is `.context/compound-engineering/ce-optimize/<spec-name>/` in the repo checkout, which is gitignored and survives a local resume only on this machine. A run's root is wherever its log already is: never move a ledger mid-run, and a resume that finds the log at one root uses that root even when the other is now available. Give every subagent and worker the resolved path, not the rule.
+`<state-root>` 是保存运行账本的目录。在第 0 阶段，根据主体的执行表面规则解决一次：当宿主命名持久状态根时，`<state-root>` 是 `<that location>/ce-optimize/<spec-name>/`，放置在该位置自己的约定保持工作状态的位置，而不是面向用户的文档；否则，它在 repo checkout 中是 `.context/compound-engineering/ce-optimize/<spec-name>/`，它会被 gitignored 并且仅在本机上的本地恢复中幸存下来。运行的根位于其日志所在的位置：永远不要在运行中移动分类帐，并且在一个根处找到日志的恢复会使用该根，即使另一个根现在可用。为每个子代理和工作人员提供已解析的路径，而不是规则。
 
-Examples of what the three capabilities look like on some harnesses. This table is not a tool list; the body's rule decides.
+某些宿主上这三种功能的示例。此表不是工具列表；身体的规则决定。
 
-| Harness | Durable state root | Wake after turn end | Detached worker |
+| 马具 | 持久状态根 | 回合结束后唤醒 | 独立工人 |
 |---|---|---|---|
-| A coordinator harness with a persistent agent store (for example Cursor Projects' Agent Store) | The store path named in your context | Event subscriptions or a timer subscription that re-invokes the agent | A cloud-agent launch that returns a receipt and lands its work as a pushed branch or a store file |
-| Grok (CLI/TUI) | None named; `.context/` | `scheduler_create --durable` | None; `worktree` |
-| Claude Code, Codex, Cursor CLI sessions | None named; `.context/` | Whatever scheduling or wake tool the session lists; when it lists none, cron running the resume invocation is the user's escalation | None; `worktree` (or `codex` when the spec says so) |
+| 具有持久代理存储的协调器工具（例如 Cursor Projects 的代理存储） | 在您的上下文中命名的存储路径 | 事件订阅或重新调用代理的计时器订阅 | 云代理启动，返回收据并将其工作作为推送分支或存储文件 |
+| 格洛克 (CLI/TUI) | 没有指名； `.context/` | `scheduler_create --durable` | 没有任何; `worktree` |
+| Claude Code、Codex、光标 CLI 会话 | 没有指名； `.context/` | 会话列出的任何调度或唤醒工具；当它没有列出时，运行恢复调用的 cron 是用户的升级 | 没有任何; `worktree`（或`codex`，当规范如此规定时） |
 
-When the harness shows the user a status surface for this run, write a one-line run status there at CP-4 and at each stop, in addition to the log.
+当宿主向用户显示本次运行的状态界面时，除了日志之外，还要在 CP-4 和每个停止处写入一行运行状态。
 
-### Mandatory Disk Checkpoints
+### 强制磁盘检查点
 
-These are non-negotiable write-then-verify steps. At each checkpoint, the agent MUST write the specified file and then read it back to confirm the write succeeded.
+这些是不可协商的“写入然后验证”步骤。在每个检查点，代理必须写入指定的文件，然后读回以确认写入成功。
 
-| Checkpoint | File Written | Phase |
+| 检查站 | 文件已写入 | 阶段 |
 |---|---|---|
-| CP-0: Spec saved | `spec.yaml` | Phase 0, after user approval |
-| CP-1: Baseline recorded | `experiment-log.yaml` (initial with baseline) | Phase 1, after baseline measurement |
-| Approval recorded | `experiment-log.yaml` (`approval` section) | Phase 1.7, the moment the user approves |
-| CP-2: Hypothesis backlog saved | `experiment-log.yaml` (hypothesis_backlog section) | Phase 2, after hypothesis generation |
-| CP-3: Each experiment result | `experiment-log.yaml` (append on first measurement; update that entry on later samples) | Phase 3.3, immediately after each measurement |
-| CP-4: Batch summary | `experiment-log.yaml` (outcomes + best + `run_state`) + `strategy-digest.md` | Phase 3.5, after batch evaluation |
-| CP-5: Final summary | `experiment-log.yaml` (final state) | Phase 4, at wrap-up |
+| CP-0：规格已保存 | `spec.yaml` | 阶段 0，用户批准后 |
+| CP-1：记录基线 | `experiment-log.yaml`（初始有基线） | 第 1 阶段，基线测量后 |
+| 批准记录 | `experiment-log.yaml`（`approval`部分） | 阶段1.7，用户批准的那一刻 |
+| CP-2：假设积压已保存 | `experiment-log.yaml`（hypothesis_backlog部分） | 第 2 阶段，假设生成后 |
+| CP-3：各实验结果 | `experiment-log.yaml`（附加到第一次测量；在以后的示例中更新该条目） | 阶段 3.3，每次测量后立即 |
+| CP-4：批次摘要 | `experiment-log.yaml`（结果+最佳+`run_state`）+`strategy-digest.md` | 阶段3.5，批次评估后 |
+| CP-5：最终总结 | `experiment-log.yaml`（最终状态） | 第 4 阶段，总结时 |
 
-**Format of a verification step:**
-1. Write the file using the native file-write tool
-2. Read the file back using the native file-read tool
-3. Confirm the expected content is present
-4. If verification fails, retry the write. If it fails twice, alert the user.
+**验证步骤的格式：**
+1. 使用本机文件写入工具写入文件
+2. 使用本机文件读取工具读回文件
+3. 确认预期内容存在
+4. 如果验证失败，请重试写入。如果两次失败，则提醒用户。
 
-### File Locations (all under `<state-root>`)
+### 文件位置（全部位于 `<state-root>` 下）
 
-Anything the branch's readers need durably must be exported to a tracked path; the ledger does not travel with the branch from either root.
+分行读者持久需要的任何内容都必须导出到跟踪路径；账本不随任一根的分支一起移动。
 
-| File | Purpose | Written When |
+| 文件 | 目的 | 写于何时 |
 |------|---------|-------------|
-| `spec.yaml` | Optimization spec (fixed once the Phase 1 approval gate is cleared) | Phase 0 (CP-0) |
-| `experiment-log.yaml` | Full history of all experiments, the approval record, and `run_state` | Initialized at CP-1, appended at first CP-3, updated on later samples and at CP-4 |
-| `strategy-digest.md` | Compressed learnings for hypothesis generation | Written at CP-4 after each batch |
-| `source-digest.md` | What experiment workers need to know about the target's material and current approach | Phase 2.1; rewritten only when a keep changes what it describes |
-| `judge-cache.yaml` | Per-run judge results keyed by item content hash, so identical output is scored once (`references/experiment-log-schema.yaml`, JUDGE CACHE) | Phase 3.3, as each judge batch lands |
-| `<worktree>/result.yaml` | Per-experiment crash-recovery marker | Immediately after measurement, before CP-3 |
+| `spec.yaml` | 优化规范（第一阶段审批通过后修复） | 阶段 0 (CP-0) |
+| `experiment-log.yaml` | 所有实验的完整历史记录、批准记录和`run_state` | 在 CP-1 处初始化，在第一个 CP-3 处附加，在后来的样本和 CP-4 处更新 |
+| `strategy-digest.md` | 用于假设生成的压缩学习 | 在每批之后写在 CP-4 上 |
+| `source-digest.md` | 实验工作者需要了解目标材料和当前方法的哪些内容 | 2.1 阶段；仅当 keep 更改其描述的内容时才重写 |
+| `judge-cache.yaml` | 每次运行的判断结果由项目内容哈希键控，因此相同的输出会被评分一次（`references/experiment-log-schema.yaml`，JUDGE CACHE） | 阶段 3.3，每个评判批次落地 |
+| `<worktree>/result.yaml` | 每个实验的崩溃恢复标记 | 测量后立即，CP-3 之前 |
 
-### The Approval Record
+### 审批记录
 
-The Phase 1 approval is a user decision the log records so that a resume, including an unattended wake, does not re-ask it. Write `approval` the moment the user approves, before Phase 2 starts, with the fields the log schema names: the time, the SHA-256 of the saved `spec.yaml` bytes, and the caps in force (`stopping.*`, `metric.judge.max_total_cost_usd`, `execution.max_concurrent`). The record is valid while the spec digest and every recorded cap match the spec on disk. A record that is absent or no longer matches means the Phase 1 gate is presented again; the answer is a new record.
+第一阶段批准是日志记录的用户决定，以便恢复（包括无人值守唤醒）不会重新询问。在第 2 阶段开始之前，在用户批准时写入 `approval`，其中包含日志模式名称的字段：时间、已保存 `spec.yaml` 字节的 SHA-256 以及有效的上限（`stopping.*`、`metric.judge.max_total_cost_usd`、`execution.max_concurrent`）。当规格摘要和每个记录的上限与磁盘上的规格匹配时，记录有效。不存在或不再匹配的记录意味着第一阶段的门再次出现；答案是新纪录。
 
-The baseline and every logged experiment were measured under the spec that was approved, so what changed decides what still stands. When the change leaves how those measurements were produced untouched (a cap, or a holdout or calibration added to a spec that lacked one), the measurements stand and approving the new spec continues the run. When anything that produced them differs (the metric, the measurement command, the scope, the comparison), the measurements no longer describe this spec: while the log holds no hypothesis backlog and no experiments, go back through Phase 1 so the baseline matches the new spec; once it holds either, the spec is fixed for the run, so restore the approved spec or take Fresh start (Phase 0.4). Say which of the two applies when presenting the gate.
+基线和每个记录的实验都是根据批准的规范进行测量的，因此更改的内容决定了仍然存在的内容。当更改使这些测量的产生方式保持不变（在缺少的规格中添加上限、保留或校准）时，测量将继续运行并批准新规格。当产生它们的任何东西不同时（度量、测量命令、范围、比较），测量不再描述此规范：虽然日志没有假设积压，也没有实验，但返回到第一阶段，使基线与新规范相匹配；一旦满足其中任一条件，运行规范就固定下来，因此恢复批准的规范或采取“全新开始”（阶段 0.4）。说出在展示门时适用两者中的哪一个。
 
-### The Wait Record and Ticks
+### 等待记录和滴答声
 
-Phase 3 runs as ticks (`references/loop.md`). Before ending a turn with work outstanding, verify the ledger with `run_state.status: waiting` and each pending receipt's result location and on-arrival action in `run_state.pending_waits`.
+第 3 阶段按刻度 (`references/loop.md`) 运行。在结束未完成工作的轮次之前，请使用 `run_state.status: waiting` 验证分类账，并在 `run_state.pending_waits` 中验证每个待处理收据的结果位置和到达操作。
 
-Automatic resumption requires registered wakes for pending results and a timer wake at the wall deadline, even if no worker ever returns. Record the deadline timer in `pending_waits` too. The deadline is `phase3_started_at` plus `stopping.max_wall_hours`; a resume never resets it. If either result delivery or the deadline wake cannot be secured, continue an attached wait only while this session can enforce that deadline. Otherwise hand back the verified checkpoint, tell the user monitoring is paused, and print the resume invocation. Record unavailable wakes as such; do not claim automatic monitoring. Never fake a wait with a foreground sleep or an unmanaged detached process.
+自动恢复需要注册唤醒待处理的结果，并在墙上截止日期时定时器唤醒，即使没有工作人员返回。也将截止时间计时器记录在`pending_waits`中。截止日期为`phase3_started_at`加`stopping.max_wall_hours`；简历永远不会重置它。如果无法确保结果交付或截止时间唤醒，则仅当此会话可以强制执行该截止时间时才继续附加等待。否则交回已验证的检查点，告诉用户监控已暂停，并打印恢复调用。记录不可用的唤醒；不主张自动监控。切勿通过前台睡眠或非托管分离进程来假装等待。
 
-Write and verify `run_state` whenever a wait is registered or cleared and at CP-4. It also carries `active_seconds` (time spent inside ticks), `phase3_started_at` (the calendar anchor), the completed `tick` count, and `status` (`running`, `waiting`, `blocked`, `final`). Use `blocked` when progress needs an external change other than an outstanding result or a manual resume; report the blocker instead of spinning.
+每当注册或清除等待以及在 CP-4 时写入并验证 `run_state`。它还携带`active_seconds`（在刻度内花费的时间）、`phase3_started_at`（日历锚）、已完成的`tick`计数和`status`（`running`、`waiting`、`blocked`、`final`）。当进度需要外部更改而不是出色的结果或手动恢复时，请使用`blocked`；报告阻止者而不是旋转。
 
-**User-runnable resume syntax.** When this reference tells you to print or copy a resume invocation, default to `/ce-optimize <state-root>/spec.yaml`. Use `$ce-optimize <state-root>/spec.yaml` only when the active harness is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
+**用户可运行的简历语法。** 当此引用告诉您打印或复制简历调用时，默认为 `/ce-optimize <state-root>/spec.yaml`。仅当活动工具为 Codex 或明确记录以美元为前缀的技能调用时，才使用 `$ce-optimize <state-root>/spec.yaml`。仅将调用呈现为内联代码并仅输出一种形式。
 
-### On Resume
+### 简历上
 
-A wake, a scheduler fire, or a manual re-run re-enters here. When Phase 0.4 detects an existing run:
-1. Read the experiment log from `<state-root>`. It is the ground truth. Check the wall deadline before resuming work or re-registering a wait. If it has passed, persist any already-arrived results and go to Phase 4 without waiting for missing results or integrating candidates
-2. Scan worktree directories for `result.yaml` markers not yet in the log
-3. Recover any measured-but-unlogged experiments. The recovered first CP-3 entry copies `opportunity` from the hypothesis backlog as of dispatch; `result.yaml` holds metrics only, so a missing forecast stays unrecorded rather than being reconstructed from the result
-4. Collect every `run_state.pending_waits` item whose result has arrived, by the shape recorded for it, and persist each at CP-3. An item whose result has not arrived stays pending; an item whose wake is gone follows The Wait Record and Ticks above, including its manual-resume fallback
-5. Continue as the SKILL.md body's resume rule directs. Skip the work the log proves finished, and re-enter any gate whose record is absent or no longer matches
+唤醒、调度程序触发或手动重新运行都会在此处重新输入。当阶段 0.4 检测到现有运行时：
+1. 从`<state-root>`读取实验日志。这是基本事实。在恢复工作或重新登记等待之前，请检查墙的截止日期。如果已通过，则保留任何已到达的结果并进入第 4 阶段，而无需等待丢失的结果或整合候选人
+2. 扫描工作树目录中尚未在日志中的 `result.yaml` 标记
+3. 恢复任何已测量但未记录的实验。恢复的第一个 CP-3 条目从发送时的假设积压中复制了`opportunity`； `result.yaml` 仅保存指标，因此缺失的预测不会被记录，而不是根据结果重建
+4. 根据为其记录的形状收集结果已到达的每个 `run_state.pending_waits` 项，并将每个项保留在 CP-3 中。结果尚未到达的项目保持待处理状态；唤醒消失的项目遵循上面的等待记录和刻度，包括其手动恢复回退
+5. 按照 SKILL.md 主体的恢复规则指示继续。跳过日志证明已完成的工作，并重新进入任何记录缺失或不再匹配的门
 
 ---

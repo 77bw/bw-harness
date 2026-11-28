@@ -1,41 +1,41 @@
-# Product Contract write-back
+# 产品合同回写
 
-Load this only when the user applies decisions and this run has a directly related brainstorm or plan — the path passed on invoke, passed by the calling skill, or named in this session as the file this prototype is for. If this run's scratch `decisions.md` exists, use it as the continuity capsule: decisions, adjustments, rejections, and the prototype path. Do not copy the file into the repo. Do not paste the prototype into the plan.
+仅当用户应用决策并且此运行具有直接相关的头脑风暴或计划时才加载此路径 - 在调用时传递的路径、由调用技能传递的路径或在此会话中命名为该原型所在的文件的路径。如果此运行的暂存`decisions.md`存在，则将其用作连续性胶囊：决策、调整、拒绝和原型路径。不要将文件复制到存储库中。不要将原型粘贴到计划中。
 
-Markdown and HTML artifacts both get written back. `ce-plan` already rewrites an `.html` plan in place on resume, and the HTML artifact carries a visible Product Contract, visible metadata, and stable section anchors, so the edits below have somewhere to land in either format.
+Markdown 和 HTML 产物都会被写回。 `ce-plan` 已经重写了简历上的 `.html` 计划，并且 HTML 产物带有可见的产品合同、可见的元数据和稳定的部分锚点，因此下面的编辑可以以任何一种格式进行。
 
-## Fail closed
+## 失败关闭
 
-Where a branch below sends the run to a recap, that recap — the decisions, plus the prototype path when the run left one behind — is the run's complete result, not a degraded write-back. What fails closed is the write, not the run.
+当下面的分支将运行发送到回顾时，该回顾（决策，加上运行落后时的原型路径）是运行的完整结果，而不是降级的回写。关闭失败的是写入，而不是运行。
 
-- If there is no related path, or more than one file could be the target: do not write. Recap in chat. Recommend `ce-brainstorm` or `ce-plan`. Do not mint a plan or a third note. Do not search the repo for a matching plan. Do not write under `<root>/plans/` or any other artifact root.
-- If the file has no Product Contract section: do not invent a file or a section. Recap in chat. Recommend `ce-brainstorm` or `ce-plan`.
-- If a supersession notice identifies another canonical file, do not write to the superseded copy. Name the canonical file and let the user confirm the target. If same-basename format siblings exist without a clear canonical path, ask which to use before writing.
+- 如果没有相关路径，或者目标可能有多个文件：请勿写入。在聊天中回顾一下。推荐`ce-brainstorm`或`ce-plan`。不要铸造计划或第三张纸条。不要在存储库中搜索匹配的计划。不要在 `<root>/plans/` 或任何其他产物根下写入。
+- 如果文件没有产品合同部分：请勿发明文件或部分。在聊天中回顾一下。推荐`ce-brainstorm`或`ce-plan`。
+- 如果取代通知标识了另一个规范文件，则不要写入被取代的副本。命名规范文件并让用户确认目标。如果存在相同基名格式的同级，但没有明确的规范路径，请在写入之前询问使用哪个。
 
-## What to edit
+## 要编辑什么
 
-Preserve the artifact's identity and execution kind while removing obsolete readiness metadata. Confine product edits to the Product Contract — the `## Product Contract` heading in markdown; in HTML it spans the `product-contract` and `product-requirements` sections.
+保留产物的身份和执行类型，同时删除过时的就绪元数据。将产品编辑限制在产品合同中 - markdown 中的 `## Product Contract` 标题；在 HTML 中，它跨越 `product-contract` 和 `product-requirements` 部分。
 
-**HTML invariants.** Skill isolation means `ce-plan`'s rendering reference cannot be loaded here, so the rules these edits depend on are restated. Every ID-bearing item you add or change carries both the anchor and the ID as visible text — `id="r7"` on the element and `R7.` readable inside it — because downstream agents grep the HTML the way they grep markdown. A `session-settled:` annotation is visible text in the Key Decision card with its stem verbatim, never an attribute or hidden markup. Use the document's own HTML structure; never insert markdown heading syntax into it.
+**HTML 不变量。** 技能隔离意味着无法在此处加载 `ce-plan` 的渲染引用，因此需要重申这些编辑所依赖的规则。您添加或更改的每个包含 ID 的项目都将锚点和 ID 作为可见文本 — 元素上的 `id="r7"` 和元素内部的 `R7.` 可读 — 因为下游代理 grep HTML 的方式与 grep markdown 的方式相同。 `session-settled:` 注释是关键决策卡中的可见文本及其逐字词干，而不是属性或隐藏标记。使用文档自己的HTML结构；切勿在其中插入 Markdown 标题语法。
 
-Do not edit Planning Contract, Implementation Units, Verification Contract, Definition of Done, Key Technical Decisions, or any other HOW section as content. After a Product Contract change, those sections are removed wholesale (below), not rewritten.
+请勿编辑规划合同、实施单位、验证合同、完成定义、关键技术决策或任何其他“如何”部分作为内容。产品合同变更后，这些部分将被批量删除（如下），而不是重写。
 
-## Prototype sources
+## 原型来源
 
-When a kept prototype informed this artifact, record its absolute run-directory path in Sources and identify `decisions.md` and the selected screens or states relevant to the requirements. Label the citation machine-local and best effort while the original checkout or temporary directory exists. State in the citation that a missing prototype is not a blocker and the artifact's requirements govern any disagreement. Do not copy the prototype or capsule into the repository. An undone overlay has no surviving prototype to cite.
+当保存的原型通知此产物时，在源中记录其绝对运行目录路径并识别`decisions.md`以及与需求相关的所选屏幕或状态。当原始签出目录或临时目录存在时，将引文机标记为本地和尽力而为。在引文中指出，丢失的原型并不构成阻碍，任何分歧均由产物的要求决定。不要将原型或胶囊复制到存储库中。未完成的覆盖层没有幸存的原型可供引用。
 
-## How to edit the Product Contract
+## 如何编辑产品合同
 
-1. Allocate the next unused R-ID and, when the decision has a state-dependent shape, the next unused AE-ID.
-2. Add or update a Key Decision with `session-settled:` (`user-directed` or `user-approved`) and exact `Governs R…` links. The full normative rule lives on the governed R; the Key Decision does not restate it.
-3. Resolve superseded Product Contract text in place. Do not append a resolutions layer.
+1. 分配下一个未使用的 R-ID，并且当决策具有依赖于状态的形状时，分配下一个未使用的 AE-ID。
+2. 使用 `session-settled:`（`user-directed` 或 `user-approved`）和精确的 `Governs R…` 链接添加或更新关键决策。完整的规范性规则取决于受治理的 R；关键决定没有重述。
+3. 解决被取代的产品合同文本。不要附加分辨率层。
 
-## After write-back on a plan with implementation planning
+## 回写计划和实施计划后
 
-When the Product Contract changes, remove any existing HOW sections, including incomplete planning. Record in the document that implementation planning must be regenerated to reflect the changed requirements.
+当产品合同发生变化时，删除任何现有的“HOW”部分，包括不完整的计划。在文档中记录必须重新生成实施计划以反映更改的要求。
 
-Delete these HOW sections entirely: Planning Contract, Implementation Units, Verification Contract, and Definition of Done. Do not leave empty headings. In HTML they carry the stable anchors `planning-contract`, `implementation-units`, `verification-contract`, and `definition-of-done`; drop their links from the navigation region too, so it stops pointing at sections that no longer exist.
+完全删除这些“如何”部分：规划合同、实施单位、验证合同和完成定义。不要留下空标题。在 HTML 中，它们带有稳定的锚点 `planning-contract`、`implementation-units`、`verification-contract` 和 `definition-of-done`；也从导航区域中删除它们的链接，因此它不再指向不再存在的部分。
 
-Edit only the file you were given. Canonicality across same-basename format siblings is `ce-plan`'s, not this skill's.
+仅编辑为您提供的文件。相同基本名称格式同级之间的规范性是 `ce-plan` 的，而不是该技能的。
 
-`ce-plan` re-adds HOW on re-enrichment. `ce-work` requires sufficient implementation direction before executing.
+`ce-plan` 重新添加了重新浓缩的方法。 `ce-work` 在执行之前需要充分的实施指导。

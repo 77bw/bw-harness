@@ -1,244 +1,151 @@
-# Markdown Rendering
+# Markdown 渲染
 
-This is a format-rendering reference — it describes how to render any
-artifact in markdown, independent of which skill is producing it.
+这是一个格式渲染参考——它描述了如何在 Markdown 中渲染任何产物，与生成它的技能无关。
 
-It is paired with a section contract (`plan-sections.md`,
-`brainstorm-sections.md`, etc.) that describes *what* the artifact contains.
-This reference describes *how* markdown specifically presents it. The same
-content rendered by different skills shares the same markdown principles.
+它与分段合约配对（`plan-sections.md`，
+`brainstorm-sections.md`等）描述了产物包含的“内容”。该引用文档描述了 Markdown *如何*具体呈现它。不同技能渲染的相同内容具有相同的 Markdown 原理。
 
-## Hard invariants
+## 硬不变量
 
-These hold regardless of which skill produced the artifact.
+无论哪种技能产生了文档产物，这些都有效。
 
-- **YAML frontmatter at the top of the file.** Standard `---` delimited block
-  containing the artifact's stable metadata (title, date, type, etc.
-  — exact fields are per-skill, defined in the section contract).
-- **ASCII identifiers in anchors.** Markdown headings auto-generate anchors
-  from the heading text. Keep headings ASCII so anchors are predictable
-  (`#implementation-units`, not `#implementación-units`).
-- **File references are repo-relative** unless the producing skill's section contract explicitly defines a qualified local artifact citation.
-- **No HTML mixed in.** Keep the markdown pure. No `<div>`, no `<details>`,
-  no inline `<style>`. The only exception is a contract-defined invisible
-  semantic marker such as `<!-- ce-section: work-relationships -->`; it carries
-  section meaning for downstream agents and does not create layout. If a layout
-  idea only works as HTML, defer it to the HTML rendering. Markdown stays
-  markdown.
-- **No fixed-width line wrapping.** Do not hard-wrap prose to a column (e.g.
-  80 chars). Write one sentence per line, or let each paragraph flow as a
-  single line. The artifact is read rendered and shared, where fixed wraps add
-  nothing and only produce noisy mid-sentence diffs; markdown joins soft line
-  breaks within a paragraph, so wrapping never changes the rendered output.
-- **Unified plan sections use stable headings.** For unified plan artifacts,
-  render the required sections with exact ASCII headings so agents can find
-  them by heading scan: `## Goal Capsule`, `## Product Contract`,
-  `## Planning Contract`, `## Implementation Units`, `## Verification Contract`,
-  `## Definition of Done`, and optional `## Appendix`. Requirements-only
-  artifacts omit the plan-only sections rather than emitting empty placeholders.
-  These stable headings are the wayfinding contract: consumers scan them
-  (markdown headings, or `<h1>`–`<h3>` / anchor ids in HTML) instead of reading
-  the whole document.
-- **Goal Capsule is top-loaded.** It appears before Product Contract and long
-  appendices for fast orientation — not a hidden machine copy.
+- **YAML frontmatter 位于文件顶部。** 标准 `---` 分隔块，包含产物的稳定元数据（标题、日期、类型等）。
+  — 确切的字段是按技能计算的，在合同部分中定义）。
+- **锚点中的 ASCII 标识符。** Markdown 标题会根据标题文本自动生成锚点。保持标题为 ASCII，以便锚点是可预测的（`#implementation-units`，而不是 `#implementación-units`）。
+- **文件引用是相对于存储库的**，除非制作技能的部分合同明确定义了合格的本地产物引用。
+- **没有混入 HTML。** 保持 Markdown 纯粹。没有`<div>`，没有`<details>`，没有内联`<style>`。唯一的例外是合约定义的不可见语义标记，例如 `<!-- ce-section: work-relationships -->`；它为下游代理带来了部分含义，并且不创建布局。如果布局想法仅适用于 HTML，请将其推迟到 HTML 渲染。 Markdown 仍然是 Markdown。
+- **没有固定宽度的换行。** 不要将散文硬换行到列中（例如
+  80 个字符）。每行写一个句子，或者让每个段落作为一行。产物被读取、渲染和共享，其中固定换行不添加任何内容，只会产生嘈杂的中间句子差异； markdown 在段落中加入软换行符，因此换行永远不会改变渲染的输出。
+- **统一的计划部分使用稳定的标题。** 对于统一的计划产物，使用精确的 ASCII 标题呈现所需的部分，以便代理可以通过标题扫描找到它们：`## Goal Capsule`、`## Product Contract`、`## Planning Contract`、`## Implementation Units`、`## Verification Contract`、`## Definition of Done` 和可选的 `## Appendix`。仅需求产物省略仅计划部分，而不是发出空占位符。这些稳定的标题是寻路契约：消费者扫描它们（Markdown 标题，或 HTML 中的 `<h1>`–`<h3>` / 锚 id），而不是阅读整个文档。
+- **目标胶囊是顶部加载的。**它出现在产品合同和长附录之前，以便快速定位 - 而不是隐藏的机器副本。
 
-## Format principles
+## 格式原则
 
-These shape what "good" markdown looks like; the agent applies them per
-artifact based on content shape.
+这些塑造了“好的” Markdown是什么样子的；代理根据内容形状将它们应用于每个产物。
 
-### ID prefix format
+### ID前缀格式
 
-Stable IDs (R, U, A, F, AE, KTD) appear as plain prefixes at the start of
-the bullet or heading — do NOT bold the prefix. The prefix is visually
-distinctive on its own; bolding it inflates visual noise.
+稳定 ID（R、U、A、F、AE、KTD）在项目符号或标题的开头显示为普通前缀 - 不要将前缀加粗。前缀本身在视觉上就很独特；加粗会增加视觉噪音。
 
 ```markdown
-- R1. The plan returns paginated sessions.   ← right
-- **R1.** The plan returns paginated sessions.   ← wrong (bolded prefix)
+- R1。该计划返回分页会话。 ← 右
+- **R1.** 该计划返回分页会话。 ← 错误（粗体前缀）
 ```
 
-Same applies to unit headings: `### U1. Cloak detection in preflight contract`.
+这同样适用于单元标题：`### U1. Cloak detection in preflight contract`。
 
-### Content shape: prose vs bullets vs tables
+### 内容形式：散文 vs 项目符号 vs 表格
 
-The same content can be rendered three ways; the agent picks per content
-shape, not by template default.
+相同的内容可以通过三种方式呈现；代理会根据内容形状进行选择，而不是默认模板。
 
-- **Prose** when the content has narrative flow (motivation, decision
-  rationale, problem framing). Bullets fragment narrative into
-  disconnected pieces.
-- **Bullets** when items share a parallel shape but each carries enough
-  prose to not fit a table cell.
-- **Tables** when 5+ items share uniform structure (`ID + body`,
-  `name + value`, `decision + rationale`, `risk + mitigation`). Tables
-  scan faster at that scale and unlock additional columns (status,
-  traceability, severity) that bullets can't accommodate cleanly.
+- **散文** 当内容具有叙事流程（动机、决策理由、问题框架）时。项目符号将叙事分割成互不相关的片段。
+- **项目符号** 当项目共享平行形状但每个项目都包含足够的散文而不适合表格单元格时。
+- **表格** 当 5 个以上项目共享统一结构时（`ID + body`、`name + value`、`decision + rationale`、`risk + mitigation`）。在这种规模下，表扫描速度更快，并解锁项目符号无法完全容纳的附加列（状态、可追溯性、严重性）。
 
-The test: which shape would a reader scan fastest for this content? If
-items have parallel structure and 5+ instances, table. If items are 3-5
-and each has a few lines of prose, bullets. If the content is a single
-narrative thought, prose.
+测试：读者会以最快的速度浏览哪种形状的内容？如果项目具有并行结构和 5 个以上实例，则表。如果项目有 3-5 个，每个项目有几行散文、项目符号。如果内容是单一的叙事思想、散文。
 
-### Bold leader labels within bullets
+### 项目符号内的粗体领导者标签
 
-When a bullet has substructure that benefits from named fields (Key Flows
-with Trigger / Actors / Steps / Outcome, Acceptance Examples with Covers
-/ Given / When / Then), use bold leader labels at the start of nested
-bullets — not deeper heading levels.
+当项目符号具有受益于命名字段的子结构时（带有触发器/参与者/步骤/结果的关键流程，带有封面的验收示例）
+/ 鉴于 / 当 / 然后），在嵌套项目符号的开头使用粗体领导标签 - 而不是更深的标题级别。
 
 ```markdown
-- F1. Anonymous capture
-  - **Trigger:** Agent enters Step 2a with no session.
-  - **Actors:** A1, A2
-  - **Steps:** Preflight detects cloak; agent launches; capture proceeds.
-  - **Covered by:** R1, R2, R5
+- F1。匿名捕获
+  - **触发器：** 代理在没有会话的情况下进入步骤 2a。
+  - **演员：** A1、A2
+  - **步骤：** 飞行前检测斗篷；代理推出；捕获收益。
+  - **涵盖：** R1、R2、R5
 ```
 
-This gives the bullet structure without needing H4/H5 headings that would
-clutter the doc and break TOC generation.
+这给出了项目符号结构，而不需要 H4/H5 标题，否则会使文档混乱并破坏目录生成。
 
-### Section separators
+### 节分隔符
 
-For substantial artifacts, use horizontal rules (`---`) between top-level
-H2 sections. Omit for short docs where separators would dominate.
+对于大量产物，请在顶级 H2 部分之间使用水平规则 (`---`)。省略分隔符占主导地位的简短文档。
 
-### Tables for genuinely comparative info only
+### 表格仅提供真正的比较信息
 
-Use tables for the uniform-shape case in "Content shape" above. Don't use
-tables to render content lists that are really bullets — markdown tables
-are noisier in raw form and worse for diffs.
+使用上面“内容形状”中的统一形状情况的表格。不要使用表格来呈现真正的项目符号内容列表 - 原始形式的 Markdown 表格噪音更大，而且差异更差。
 
-## Section anatomy
+## 剖面解剖
 
-How section types commonly render in markdown. These are patterns, not
-contracts — the agent picks the shape that fits the content.
+节类型通常如何在 Markdown 中呈现。这些是模式，而不是合同——代理选择适合内容的形状。
 
-- **Goal Capsule** — bullets or a small table for objective, means (only
-  when an approach is fixed), authority, execution profile, stop conditions, and who finishes the remaining work.
-- **Product Contract** — H2 section containing Summary, Problem Frame,
-  Requirements, and product-scope subsections. Put Requirements under
-  `### Requirements` so review tools can distinguish Product Requirements
-  from implementation detail.
-- **Planning Contract** — H2 section for KTDs, high-level technical design,
-  assumptions, and sequencing.
-- **Summary / Problem Frame** — prose paragraphs.
-- **Requirements** — bullets with `R<N>.` prefix. When requirements span
-  more than one concern, grouping under bold inline headers is the default
-  shape, not optional polish (group by capability, not by discussion order);
-  render a flat list only when every requirement is about the same thing.
-  When requirements have status, traceability, or severity that warrant
-  additional columns, escalate to a table.
-- **Implementation Units** — H3 heading per unit with `U<N>.` prefix.
-  Fields (Goal, Files, Patterns, Test Scenarios, Verification) render as
-  bullets with bold leader labels, or as sub-headings if the field has
-  multi-paragraph content. When the work ships as several PRs, each PR group
-  is an H3 heading (`### PR<N>: <title>`; executors name the group by its
-  `PR<N>` label) followed by its `Waits on:` line,
-  and the group's units follow as their own H3 `U<N>.` headings.
-- **Verification Contract / Definition of Done** — use tables when commands,
-  applicability, unit IDs, and done signals share a uniform shape. Name
-  concrete repo commands such as `bun test` rather than generic "run tests"
-  when the repo has known commands.
-- **Key Technical Decisions** — bullets with `KTD<N>.` plain prefix (same
-  format as `R1.`/`U1.`) + bold decision name + prose rationale. Legacy
-  plans with unnumbered KTDs stay readable by label; do not renumber
-  existing numbered ones. A `session-settled:` annotation renders as part
-  of the KTD bullet's visible text, stem preserved verbatim.
-- **Key Flows / Acceptance Examples** — bullets with bold leader labels
-  (Trigger / Actors / Steps / Outcome / Covers / Given-When-Then).
-- **Scope Boundaries** — bullets, optionally split into "Deferred for
-  later" / "Outside this product's identity" sub-headings when the
-  positioning distinction matters.
+- **目标胶囊** — 目标、手段（仅当方法固定时）、权限、执行概况、停止条件以及谁完成剩余工作的项目符号或小表格。
+- **产品合同** — H2 部分包含摘要、问题框架、要求和产品范围小节。将需求放在`### Requirements`下，以便审核工具可以区分产品需求和实现细节。
+- **规划合同** — H2 部分，用于 KTD、高级技术设计、假设和排序。
+- **摘要/问题框架** — 散文段落。
+- **要求** — 带有 `R<N>.` 前缀的项目符号。当需求跨越多个关注点时，在粗体内联标题下分组是默认形状，而不是可选的修饰（按功能分组，而不是按讨论顺序分组）；仅当每个需求都相同时才渲染平面列表。当需求的状态、可追溯性或严重性需要额外的列时，请升级到表格。
+- **实施单位** — 每个单位的 H3 标题带有 `U<N>.` 前缀。字段（目标、文件、模式、测试场景、验证）呈现为带有粗体前导标签的项目符号，或者如果字段具有多段落内容，则呈现为副标题。当作品以多个 PRs 形式发布时，每个 PR 组都是一个 H3 标题（`### PR<N>: <title>`；执行者通过其 `PR<N>` 标签命名该组），后跟其 `Waits on:` 行，并且该组的单元遵循其自己的 H3 `U<N>.` 标题。
+- **验证合同/完成的定义** — 当命令、适用性、单元 ID 和完成信号共享统一形状时使用表格。当存储库具有已知命令时，命名具体的存储库命令，例如 `bun test`，而不是通用的“运行测试”。
+- **关键技术决策** — 带有 `KTD<N>.` 普通前缀的项目符号（与 `R1.`/`U1.` 格式相同）+ 粗体决策名称 + 散文理由。具有未编号 KTD 的旧计划可通过标签保持可读性；不要对现有的编号进行重新编号。 `session-settled:` 注释呈现为 KTD 项目符号可见文本的一部分，逐字保留词干。
+- **关键流程/验收示例** — 带有粗体领导者标签的项目符号（触发器/参与者/步骤/结果/覆盖/给出-何时-然后）。
+- **范围边界** — 当定位区别很重要时，项目符号可以选择分为“推迟到以后”/“超出此产品的身份”子标题。
 
-The agent picks more elaborate or simpler shapes based on what each
-specific artifact's content needs.
+代理根据每个特定产物的内容需求选择更复杂或更简单的形状。
 
-## Diagrams
+## 图表
 
-When the section contract calls for a diagram (architecture, sequence,
-flowchart, state machine, swim lane, data-flow), markdown renders it as
-a fenced mermaid block:
+当部分合约需要图表（架构、序列、流程图、状态机、泳道、数据流）时，Markdown 将其呈现为围栏美人鱼块：
 
 ```markdown
-` ``mermaid
-flowchart TB
-  A[Start] --> B{Decision}
-  B -->|yes| C[Action]
-  B -->|no| D[Other action]
+` ``美人鱼
+流程图TB
+  A[开始] --> B{Decision}
+  B -->|是| C[行动]
+  B -->|否| D[其他行动]
 ` ``
 ```
 
-(`TB` direction default — keeps diagrams narrow in source view and in
-narrow rendered viewports.)
+（`TB` 方向默认值 - 使图表在源视图和狭窄的渲染视口中保持狭窄。）
 
-Markdown's diagram affordances are limited compared to HTML. For
-quantitative comparisons (bar charts, scatter plots) markdown has no
-native equivalent — use a table with the data and let prose or caption
-carry the interpretation. The richer visualization happens in the HTML
-rendering.
+与 HTML 相比，Markdown 的图表可供性有限。对于定量比较（条形图、散点图），Markdown 没有原生的等效项 - 使用包含数据的表格，并让散文或标题进行解释。更丰富的可视化发生在 HTML 渲染中。
 
-For a **UI/layout shape** that would be a wireframe in HTML, markdown has
-no inline-SVG wireframe affordance. Render the region composition as a
-mermaid layout `flowchart` (or describe it in prose) — never hand-draw a
-box-drawing/ASCII wireframe; it violates the no-box-drawing-characters rule
-and reads poorly. The wireframe proper is an HTML-only affordance.
+对于 HTML 中的线框的 **UI/layout 形状**，Markdown 没有内联 SVG 线框可供性。将区域构成渲染为美人鱼布局`flowchart`（或用散文描述）——切勿手绘box-drawing/ASCII线框；它违反了禁止绘制字符的规则并且读起来很差。线框本身只是 HTML 的可供性。
 
-## Inline code and code blocks
+## 内联代码和代码块
 
-- **Inline code** for identifiers (variable names, function names,
-  flag names, file paths, IDs that aren't section anchors).
-- **Fenced code blocks** with language tag for code, shell commands,
-  API request/response samples. Always specify the language for syntax
-  highlighting and accessibility.
+- **内联代码** 用于标识符（变量名称、函数名称、标志名称、文件路径、不是节锚点的 ID）。
+- **受保护的代码块**，带有代码语言标签、shell 命令、API request/response 示例。始终指定语法突出显示和可访问性的语言。
 
 ```markdown
-The flag `--cdp-url` accepts a URL.
+标志 `--cdp-url` 接受 URL。
 
-` ``bash
-browser-use --cdp-url http://localhost:9222
+` ``重击
+浏览器使用 --cdp-url http://localhost:9222
 ` ``
 ```
 
-## No process exhaust
+## 无工艺废气
 
-Engineering process metadata stays out of the artifact:
+工程流程元数据不包含在产物中：
 
-- No "captured at Phase X" notes
-- No `## Next Steps` pointing to the next skill
-- No italic provenance lines ("*Brainstorm completed 2026-05-13*")
-- No engineering-flow shepherding ("Now read this file:", "Next, run that
-  command:")
+- 没有“在 X 阶段捕获”的注释
+- 没有`## Next Steps`指向下一个技能
+- 无斜体出处（“*头脑风暴于 2026 年 5 月 13 日完成*”）
+- 没有工程流程引导（“现在读取此文件：”，“下一步，运行该文件
+  命令：”）
 
-This information belongs in commit messages, tool output, and agent
-transcripts — not in the artifact a reader returns to weeks later.
+这些信息属于提交消息、工具输出和代理记录，而不是读者几周后返回的产物。
 
-## Frontmatter shape
+## 前题形状
 
-Per-skill frontmatter fields are defined in each skill's section contract
-(`plan-sections.md` lists plan frontmatter; `brainstorm-sections.md` lists
-brainstorm frontmatter). Common rules:
+每个技能的 frontmatter 字段在每个技能的部分合同中定义（`plan-sections.md` 列出计划 frontmatter；`brainstorm-sections.md` 列出头脑风暴 frontmatter）。通用规则：
 
-- YAML at the top of the file, delimited by `---` on its own line above
-  and below.
-- Field names in lowercase snake_case (`created_at`, `topic`, not
-  `CreatedAt`, `Topic`).
-- **No status / lifecycle field.** Artifacts are point-in-time records
-  (decision or discovery), not tracked work items. Do not introduce a
-  mutable `status` field or an `active → completed` lifecycle — whether
-  the work shipped is derived from git, not stored in the doc.
-- Stable across artifact revisions — never rename or repurpose a field.
+- YAML 位于文件顶部，上下由 `---` 分隔。
+- 字段名称采用小写 snake_case（`created_at`、`topic`，而不是 `CreatedAt`、`Topic`）。
+- **没有状态/生命周期字段。** 产物是时间点记录（决策或发现），而不是跟踪的工作项。不要引入可变的 `status` 字段或 `active → completed` 生命周期 - 无论交付的工作是从 git 派生的，还是存储在文档中。
+- 跨产物修订保持稳定 - 永远不会重命名或重新调整字段的用途。
 
-## Post-write audit
+## 写后审核
 
-Before declaring the markdown file written, scan it for these common
-slips:
+在声明已写入的 Markdown 文件之前，先扫描一下这些常见的
+纸条：
 
-- All stable IDs are plain-prefix format, not bolded.
-- No HTML elements mixed in.
-- File paths are repo-relative except for qualified local artifact citations defined by the producing skill's section contract.
-- Horizontal rule separators between H2s (for Standard / Deep artifacts).
-- No process exhaust (Phase X notes, Next Steps pointers, provenance
-  lines).
-- Tables only where 5+ uniform-shape items justify them.
-- Frontmatter has all the per-skill required fields with reasonable values.
+- 所有稳定的 ID 都是纯前缀格式，而不是粗体。
+- 没有混入 HTML 元素。
+- 除了由生产技能部分合同定义的合格本地产物引用外，文件路径是相对于存储库的。
+- H2 之间的水平规则分隔符（对于标准/深度产物）。
+- 无流程耗尽（X 阶段注释、后续步骤指针、出处线）。
+- 仅当 5 个以上形状统一的项目证明其合理性时才使用表格。
+- Frontmatter 具有所有每项技能所需的字段以及合理的值。

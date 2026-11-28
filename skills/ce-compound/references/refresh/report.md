@@ -1,6 +1,8 @@
-# The refresh report
+# 刷新报告
 
-**Print the full report as markdown — it is the deliverable, not an internal summary.** After processing the scope:
+对于下面的每个词汇表结果，使用具体解析的词汇表路径，并命名未解析的范围或冲突的定义，而不是报告干净的扫描。
+
+**以Markdown形式打印完整报告 - 这是可交付成果，而不是内部摘要。** 处理范围后：
 
 ```text
 Compound Refresh Summary
@@ -14,15 +16,15 @@ Replaced: Z
 Deleted: W
 Skipped: V
 Marked stale: S
-Worth: <N shortened, N deleted; standards: N removed, N narrowed, N added | off (drift fixes only)>
+值得：<N缩短，N删除；标准：N 删除、N 缩小、N 添加 |关闭（仅限漂移修复）>
 
-CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded) | updated — N added, N refined, N reconciled, N folded, N retired, N deleted, N scrubbed | repo-wide map created with N entries>
+GLOSSARY.md：<已扫描，无限定条件 |创建了 N 个条目（M 个种子）|更新 — N 添加、N 精炼、N 协调、N 折叠、N 淘汰、N 删除、N 擦除 |使用 N 个条目创建的存储库范围的映射>
 ```
 
-When `Marked stale` is above zero, add a line under the summary saying the learnings researchers that other skills dispatch keep surfacing those docs, labeled stale with their reason, until a refresh or a person settles them.
+当 `Marked stale` 大于零时，在摘要下添加一行，说明其他技能调度的学习研究人员会不断显示这些文档，并用其原因标记为陈旧，直到刷新或有人解决它们。
 
-Then, for EVERY file processed: path, classification, evidence found (tag memory-sourced findings "(auto memory [claude])"), and the action taken or recommended; for Consolidate, which doc was canonical, what was merged, what was deleted. Group Keeps under a reviewed-without-edits section, naming any Keep whose earlier stale mark this run cleared.
+然后，对于处理的每个文件：路径、分类、找到的证据（标记源自内存的发现“（自动记忆[克劳德]）”）以及采取或建议的操作；对于 Consolidate，哪个文档是规范的、合并了哪些文档、删除了哪些文档。将 Keep 分组在未编辑的审核部分下，命名本次运行清除了早期过时标记的任何 Keep。
 
-In non-interactive mode the report is the sole deliverable — self-contained, never abbreviated — and actions split into two sections. **Applied:** writes that succeeded, with the same per-file detail. **Recommended:** writes that failed (with enough context for a human to apply them), plus everything that never runs unattended — relocations that failed the four-condition gate (doc, target, failing condition), splits (doc, proposed fragment boundaries), category-shape observations, potential product regressions where code violates independently supported guidance, guidance files a learning names that contradict it, checks a doc's rule could become, and the discoverability recommendation if any. If no writes succeed, the report is a maintenance plan. If `_archived/` exists, list its files and recommend disposition (restore, delete, or consolidate).
+在非交互模式下，报告是唯一的可交付成果——独立、从不缩写——并且操作分为两个部分。 **已应用：** 写入成功，每个文件的详细信息相同。 **推荐：**写入失败的内容（有足够的上下文供人们应用它们），加上永远不会在无人值守的情况下运行的所有内容 - 未能通过四条件门（文档，目标，失败条件）的重定位，分割（文档，建议的片段边界），类别形状观察，代码违反独立支持的指导的潜在产品回归，指导文件与与之相矛盾的学习名称，检查文档的规则可能成为，以及可发现性建议（如果有）。如果没有写入成功，则该报告是维护计划。如果 `_archived/` 存在，列出其文件并建议处置（恢复、删除或合并）。
 
-When docs in scope are really rules and the repo has no `CODING_STANDARDS.md`, an attended report adds one summary line with the count and asks nothing: `N docs could be coding standards if you adopt them.` A non-interactive report, a commit message, and a pull request body leave it out.
+当范围内的文档确实是规则并且存储库没有 `CODING_STANDARDS.md` 时，有人参与的报告会添加一个带有计数的摘要行并且不询问任何内容： `有 N 篇文档可考虑纳入编码标准。` 非交互式报告、提交消息和拉取请求正文将其省略。

@@ -1,0 +1,93 @@
+diff --git a/skills/ce-commit/SKILL.md b/skills/ce-commit/SKILL.md
+index e5b4ed1b8952e921e29c0875524953f80329b8ff..0118c0c5d6a09205f03616eaff7036385275e370 100644
+--- a/skills/ce-commit/SKILL.md
++++ b/skills/ce-commit/SKILL.md
+@@ -1,49 +1,51 @@
+ ---
+ name: ce-commit
+-description: Create a git commit with a clear, value-communicating message. Use when the user asks to commit/save staged or unstaged changes with a repo-appropriate message.
++description: "创建一个包含清晰的、具有价值传达信息的 git 提交。当用户要求使用适合存储库的消息进行 commit/save 暂存或取消暂存更改时使用。"
+ ---
+ 
+-# Git Commit
++> 本包以简体中文撰写说明、选项及面向用户的输出。Skill 名称、命令、路径、字段、枚举、原文引述及要求精确匹配的契约标记保持原样。
+ 
+-Create well-crafted local commit(s) from the current working tree. No push, no PR — use `ce-commit-push-pr` for the full ship flow.
++# Git 承诺
+ 
+-**Done when:** each logical change is committed with an explicit file list and a message that states the outcome, and `git status` is clean of those changes. **Stop when:** the tree is clean (nothing to commit).
++从当前工作树创建精心设计的本地提交。没有推动，没有 PR — 使用 `ce-commit-push-pr` 来实现完整的交付流程。
+ 
+-## Context
++**完成时间：** 每个逻辑更改都使用显式文件列表和说明结果的消息提交，并且 `git status` 清除了这些更改。 **停止时：**树是干净的（没有什么可提交的）。
+ 
+-Gather context with each command as its **own** shell tool call (program + args only). Do **not** join with `;`, `&&`, `||`, pipes, `$(...)`, or redirects — that syntax fails under Windows PowerShell. A non-zero exit is a normal state to interpret, not a failure to suppress.
++## 语境
+ 
+-| Command | Purpose | Non-zero / empty means |
++收集每个命令的上下文作为其**自己的** shell 工具调用（仅限程序 + 参数）。 **不要**与 `;`、`&&`、`||`、管道、`$(...)` 或重定向连接 — 该语法在 Windows PowerShell 下失败。非零退出是解释的正常状态，而不是抑制失败。
++
++| 命令 | 目的 | 非零/空的意思 |
+ | --- | --- | --- |
+-| `git status` | Working-tree state | Not a git repo — stop |
+-| `git diff HEAD` | Uncommitted changes | Unborn repo / no commits yet |
+-| `git branch --show-current` | Current branch | Empty = detached HEAD |
+-| `git log --oneline -10` | Recent message style | Unborn repo — no history |
+-| `git rev-parse --abbrev-ref origin/HEAD` | Remote default branch | No `origin/HEAD` / bare `HEAD` — try `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`, else `main` |
++| `git status` | 工作树状态 | 不是 git repo — 停止 |
++| `git diff HEAD` | 未提交的更改 | 未出生的存储库/尚未提交 |
++| `git branch --show-current` | 当前分行 | 空=分离HEAD |
++| `git log --oneline -10` | 最近的消息样式 | Unborn repo——没有历史 |
++| `git rev-parse --abbrev-ref origin/HEAD` | 远程默认分支 | 没有 `origin/HEAD` / 裸 `HEAD` — 尝试 `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`，否则 `main` |
+ 
+-Treat this as a snapshot. Re-read branch and staged set immediately before committing if anything may have changed.
++将其视为快照。如果有任何更改，请在提交之前立即重新读取分支和暂存集。
+ 
+-**Default branch name:** strip a leading `origin/` from `origin/HEAD` (so `origin/trunk` → `trunk`). Use that bare name for all “on the default branch?” checks — never compare against `origin/<name>`.
++**默认分支名称：** 从 `origin/HEAD` 中删除前导 `origin/`（因此 `origin/trunk` → `trunk`）。对所有“默认分支上”都使用这个裸名称吗？检查——永远不要与 `origin/<name>` 进行比较。
+ 
+-## Workflow
++## 工作流程
+ 
+-0. **Gather** — run every Context command above (own shell call each), then continue.
++0. **收集** — 运行上面的每个 Context 命令（每个命令都有自己的 shell 调用），然后继续。
+ 
+-1. **Nothing to commit** — if `git status` shows no staged, modified, or untracked files, report that and stop. Do not use `git diff HEAD` alone as cleanliness (it misses untracked files).
++1. **无需提交** — 如果 `git status` 显示没有暂存、修改或未跟踪的文件，请报告并停止。不要单独使用`git diff HEAD`作为清洁度（它会丢失未跟踪的文件）。
+ 
+-2. **Branch first** — if detached HEAD, or on the default branch (`main` / `master` / the bare default name above), create a feature branch from the change content (`git checkout -b <name>`), then re-read `git branch --show-current`. Do not ask — commit-only still must not leave work only on a detached HEAD or the default branch. If the derived name exists, pick a non-conflicting suffix.
++2. **首先分支** — 如果分离 HEAD，或在默认分支（`main` / `master` / 上面的默认名称）上，从更改内容 (`git checkout -b <name>`) 创建一个功能分支，然后重新读取 `git branch --show-current`。不要询问 - 仅提交仍然不能仅将工作留在分离的 HEAD 或默认分支上。如果派生名称存在，请选择一个不冲突的后缀。
+ 
+-3. **Convention** — match project commit conventions already in context; else match the recent log pattern; else conventional commits (`type(scope): description`). When using conventional commits and `fix`/`feat` both fit, default to `fix:` (remedying broken or missing behavior); reserve `feat:` for new capabilities. User override wins.
++3. **约定** — 匹配上下文中已有的项目提交约定；否则匹配最近的日志模式；否则常规提交 (`type(scope): description`)。当使用常规提交且`fix`/`feat`都适合时，默认为`fix:`（修复损坏或缺失的行为）；为新功能保留`feat:`。用户覆盖获胜。
+ 
+-4. **Logical commits** — if changed files clearly split into distinct concerns, make separate commits (file level only, 2–3 max, no `git add -p`). If ambiguous, one commit.
++4. **逻辑提交** — 如果更改的文件明显分为不同的关注点，请进行单独的提交（仅限文件级别，最多 2-3 个，无`git add -p`）。如果有歧义，则提交一次。
+ 
+-5. **Message** — subject is imperative and names the outcome (what is now possible or fixed), not the file list. Body only when motivation or trade-offs are not obvious from the subject. When a plan Implementation Unit ID is already in hand for this commit (conversation, caller, or the files belong to one unit), append that unit's U-ID in parentheses — `(U3)` means unit 3. Do not hunt for a plan. Omit when the commit spans units, the unit is unclear, or no plan is in hand. When the commit carries someone else's work that will not otherwise land under their name (ported from their branch or PR, or applied from their patch), end the message with a `Co-authored-by: Name <email>` trailer for each person that work credits: its commit authors and anyone their `Co-authored-by` trailers name. Copy each identity exactly from those commits or the patch. Never guess an email: when none is recorded, name them in the message body instead.
++5. **消息** - 主题是命令式的，并命名结果（现在可能或已修复的结果），而不是文件列表。仅当主题的动机或权衡不明显时才使用主体。当此提交的计划实施单元 ID 已在手（对话、调用者或属于一个单元的文件）时，请在括号中附加该单元的 U-ID — `(U3)` 表示单元 3。不要寻找计划。当提交跨越多个单元、单元不清楚或手中没有计划时，请省略。当提交包含其他人的工作而不会以其他方式登陆到他们的名字下时（从他们的分支或 PR 移植，或从他们的补丁应用），请在消息结尾处为每个工作人员添加 `Co-authored-by: Name <email>` 预告片：其提交作者和他们的 `Co-authored-by` 预告片名称。从这些提交或补丁中准确复制每个身份。切勿猜测电子邮件：如果没有记录任何电子邮件，请在邮件正文中命名它们。
+ 
+-   - Bad: `Update checkout.rb` / `Add tests and fix stuff`
+-   - Good: `Fix double-submit on checkout`
+-   - Good: `Add per-subscription mute (U3)`
++   - 不好：`Update checkout.rb` / `Add tests and fix stuff`
++   - 好：`Fix double-submit on checkout`
++   - 好：`Add per-subscription mute (U3)`
+ 
+-6. **Stage and commit** — stage **named files only** (never `git add -A` or `git add .`). Honor `exclude:<paths>` when the invocation carries it: those files stay uncommitted no matter what else changed; say in the report that they were left out. Write the full message — subject line, blank line, optional body — to a file outside the repo with your file-write tool, then stage and commit as two calls per commit group:
++6. **阶段和提交** — 阶段**仅命名文件**（从不`git add -A`或`git add .`）。当调用携带它时，尊重`exclude:<paths>`：无论发生什么变化，这些文件都保持未提交状态；在报告中说他们被排除在外。使用文件写入工具将完整消息（主题行、空行、可选正文）写入存储库外部的文件，然后按每个提交组的两次调用进行暂存和提交：
+ 
+ ```bash
+ git add file1 file2 file3
+@@ -53,8 +55,8 @@ git add file1 file2 file3
+ git commit -F <message-file> -- file1 file2 file3
+ ```
+ 
+-No shell parses the message with `-F`: a `$`, quotes, backticks, or a multi-line body pass through literally under any shell, with no quoting rules to satisfy. Git's normal whitespace cleanup still applies (trailing spaces trimmed, blank-line runs collapsed), which is fine for a commit message.
++没有 shell 会使用 `-F` 解析消息：`$`、引号、反引号或多行正文在任何 shell 下都按字面意思传递，无需满足引用规则。 Git 的正常空白清理仍然适用（尾随空格被修剪，空行运行被折叠），这对于提交消息来说很好。
+ 
+-The trailing path list on `git commit` is required: a bare `git commit` takes the whole index, so anything already staged before this run (a caller's `exclude:` paths, or work the user staged and did not name) would ride into the commit. Naming the paths commits exactly the group and leaves other index entries alone.
++`git commit` 上的尾随路径列表是必需的：裸露的 `git commit` 占用整个索引，因此在此运行之前已经暂存的任何内容（调用者的 `exclude:` 路径，或用户暂存但未命名的工作）都将进入提交。命名路径会准确提交组，而不会影响其他索引条目。
+ 
+-7. **Confirm** — `git status`; report hash(es) and subject(s).
++7. **确认** — `git status`；报告哈希值和主题。

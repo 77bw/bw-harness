@@ -1,8 +1,8 @@
-# Minimal first-run template for objective metrics.
-# Start here when "better" is a scalar value from the measurement harness.
+# 用于客观指标的最小首次运行模板。
+# 当“更好”是来自测量工具的标量值时，从这里开始。
 
 name: improve-build-latency
-description: Reduce build latency without regressing correctness
+description: "减少构建延迟而不降低正确性"
 
 metric:
   primary:
@@ -12,10 +12,10 @@ metric:
   degenerate_gates:
     - name: build_passed
       check: "== 1"
-      description: The build must stay green
+      description: "构建必须保持绿色"
     - name: test_pass_rate
       check: ">= 1.0"
-      description: Required tests must keep passing
+      description: "必需的测试必须持续通过"
   diagnostics:
     - name: artifact_size_mb
     - name: peak_memory_mb

@@ -1,26 +1,26 @@
-# Verdict Routing — offer the ce-pov handoff
+# 判决路由 — 提供 ce-pov 切换
 
-Read this when the opening request (or a request the dialogue clarifies) matches the verdict shape described at Phase 0.1c. A brainstorm scopes **what to build** once a direction is chosen. Deciding **whether to adopt, switch to, or replace** a *specific external candidate* — a named technology, library, pattern, platform, or architecture — judged against this project is a different job: a decisive, project-grounded verdict, which is `ce-pov`'s purpose.
+当开场请求（或对话澄清的请求）与阶段 0.1c 中描述的判决形状匹配时，请阅读此内容。一旦选择了方向，就可以通过头脑风暴来确定**要构建什么**。决定**是否采用、切换到或替换**一个*特定的外部候选者*——指定的技术、库、模式、平台或架构——根据这个项目进行判断是另一项工作：一个决定性的、基于项目的裁决，这就是`ce-pov`的目的。
 
-## Confirm the shape — all three hold
+## 确认形状——三个都成立
 
-- a **named external candidate** — one specific outside thing, *or a bounded set the user has already named* (a 2–3-way bake-off like "X vs Y vs Z"), but not an open field for *you* to enumerate;
-- a **whether-to-commit intent** — adopt / switch to / migrate to / replace with / is-it-time-for / revisit X — not "how should we design or scope Y";
-- judged **against this project** (does it fit, what's the migration cost, is it worth it here), not a neutral explainer.
+- **命名的外部候选** - 一个特定的外部事物，*或用户已经命名的有界集合*（像“X vs Y vs Z”这样的 2-3 路烘焙），但不是一个供*您*枚举的开放字段；
+- **是否提交意图** - 采用/切换到/迁移到/替换为/是时候/重新访问X - 而不是“我们应该如何设计或范围Y”；
+- **针对这个项目**进行判断（它是否合适，迁移成本是多少，在这里值得吗），而不是中立的解释者。
 
-Open-ended design or scoping where *you'd* have to invent the options ("how should we do multi-tenant isolation?", "what should we build next?") stays in the brainstorm — do not route it. The **whether-to-commit trigger** is what separates a bounded selection from open exploration: "help me **pick** between X, Y, and Z" is a verdict (route it); "I'm **mulling** X, Y, Z — help me think it through," or any candidate framed to *explore* rather than *decide*, stays here.
+开放式设计或范围界定，*你*必须发明选项（“我们应该如何进行多租户隔离？”，“我们下一步应该构建什么？”）留在头脑风暴中 - 不要路由它。 **是否提交触发器**是将有界选择与开放探索区分开来的：“帮助我在 X、Y 和 Z 之间**选择**”是一个判决（路由它）； “我正在**考虑** X、Y、Z——帮我想清楚”，或者任何旨在“探索”而不是“做出决定”的候选人，都会留在这里。
 
-## Offer — do not silently switch
+## 提供——不要默默切换
 
-It is one simple choice: do they want a `ce-pov` verdict, or not? Make it an *interactive* offer via the platform's blocking question tool, and map the content onto its fields:
+这是一个简单的选择：他们是否想要 `ce-pov` 的判决？通过平台的阻止问题工具使其成为“交互式”报价，并将内容映射到其字段：
 
-- The **question prompt** carries the justification, so the user chooses on the merits, not on trust: name the candidate(s); say in one line *why* this is a decision rather than a scoping exercise (you'd be committing to a specific outside thing, not shaping something you've already chosen to build); and state what `ce-pov` gives them — a decisive, project-grounded verdict on the candidate, weighing fit, migration cost, and whether it's worth it here.
-- The **options are asymmetric, not two co-equal pitches**: **yes** → hand off to `ce-pov` for that verdict; **no** → stay here and the normal brainstorm simply continues. The decline needs no selling of its own — it is the default path resuming, so keep it a plain "no, keep brainstorming."
+- **问题提示**带有理由，因此用户根据优点而不是信任进行选择：说出候选人的名字；用一句话说“为什么”这是一个决定而不是范围界定练习（您将致力于特定的外部事物，而不是塑造您已经选择构建的事物）；并说明 `ce-pov` 给了他们什么——对候选人做出决定性的、基于项目的判断，权衡适合性、迁移成本以及在这里是否值得。
+- **选项是不对称的，不是两个相同的音高**：**是**→将判决移交给`ce-pov`； **不** → 留在这里，正常的头脑风暴就会继续。下跌本身不需要抛售——这是恢复的默认路径，所以保持简单的“不，继续集思广益”。
 
-Name `ce-pov` by what it does for the user (it gives you a project-grounded verdict on the candidate), never as internal machinery — not "a sibling workflow," not "another skill I have." Where the harness has no blocking tool, fall back to the same content as numbered options in chat (per the Interaction Rules), never a bare prose paragraph.
+根据它为用户所做的事情来命名 `ce-pov`（它为你提供基于项目的对候选人的判断），而不是作为内部机制 - 不是“同级工作流程”，不是“我拥有的另一项技能”。如果宿主没有阻止工具，请回退到与聊天中编号选项相同的内容（根据交互规则），而不是纯粹的散文段落。
 
-On accept, **invoke the `ce-pov` skill** — the same way the Phase 4 handoff invokes `ce-plan` — passing the candidate(s), the framed question, and any links the user supplied as its input. `ce-pov` inherits this live session (it runs warm), so pass the crisp **frame** — candidate, intent, links — rather than re-summarizing the discussion. It reads the prior dialogue as *hypotheses to verify*, never as grounding, and re-grounds independently; so the session seeds the *question*, not the *verdict*. Do **not** merely print an invocation for the user; an accepted offer is an actual handoff, not a textual suggestion. **On decline, drop the offer and continue the normal workflow (Phase 0.2 onward) unchanged** — do not re-offer on the same framing. One offer at a time, and the justification lives in the prompt — not a bare "route to `ce-pov`, yes/no?"
+接受时，**调用 `ce-pov` 技能** - 与第 4 阶段切换调用 `ce-plan` 的方式相同 - 传递候选者、框架问题以及用户作为输入提供的任何链接。 `ce-pov`继承了这个实时会话（它运行得很热），所以传递清晰的**框架**——候选者、意图、链接——而不是重新总结讨论。它将之前的对话解读为“需要验证的假设”，而不是作为基础，并独立地重新基础；因此，会议提出的是*问题*，而不是*结论*。 **不要**仅仅为用户打印一个调用；接受的报价是实际的移交，而不是文字建议。 **拒绝时，放弃报价并继续正常工作流程（阶段 0.2 以后）不变** - 不要在同一框架上重新报价。一次提供一个报价，并且合理性存在于提示中——而不是一个简单的“通往 `ce-pov`、yes/no 的路线？”
 
-## Not only at intake — throughout
+## 不仅在摄入时——在整个过程中
 
-The opening request is often too vague to tell. The same offer applies whenever the dialogue *clarifies* a request into the verdict shape: a brainstorm that narrows to a single "should we adopt X?" decision (Phases 1.3–2), or an opener whose intent only sharpens mid-conversation. As the user's intent comes into focus, `ce-pov`'s fit may only then become clear — offer the handoff at that point rather than grading the candidate inside the brainstorm. It is the same simple choice, and declining just continues the dialogue. If `ce-pov` finds the field unbounded, it routes back here, so the loop is closed.
+开场请求往往过于模糊，难以分辨。每当对话“澄清”裁决形式的请求时，同样的提议适用：一场头脑风暴，缩小到一个“我们应该采用 X 吗？”决定（阶段 1.3-2），或意图仅使对话更加尖锐的开场白。当用户的意图变得清晰时，`ce-pov`的契合度可能才会变得清晰——在此时提供交接，而不是在头脑风暴中对候选人进行评分。同样是简单的选择，拒绝只是继续对话。如果`ce-pov`发现该字段无界，它就会路由回此处，因此循环闭合。

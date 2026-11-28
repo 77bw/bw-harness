@@ -1,19 +1,19 @@
-# Independent assessment
+# 独立评估
 
-A completed Bake-off includes a fresh subagent running `ce-pov` in warm/guest mode that authored no candidate, alongside the coordinator's own comparison. The judge follows POV's grounding and verdict contract; Bake-off owns its independent context and the comparison inputs. Prefer a different model family from the coordinator when available within the authorized access and budget. Independent context is required; model diversity is preferred. A fresh same-family judge is a disclosed fallback, not cross-model evidence.
+完成的烘焙包括一个在 warm/guest 模式下运行 `ce-pov` 的新子代理，该子代理没有编写任何候选者，以及协调员自己的比较。法官遵循 POV 的搁置和判决合同； Bake-off 拥有其独立的上下文和比较输入。如果在授权访问和预算范围内可用，则更喜欢与协调员不同的型号系列。需要独立的上下文；模型多样性是首选。新的同家庭法官是公开的后备，而不是跨模型证据。
 
-## Choose available model access
+## 选择可用的模型访问
 
-Use the active host's actual delegation and model-selection capabilities. Prefer native fresh-context dispatch when it can serve the desired judge; a host with multiple model families needs no external process. Otherwise use an available authenticated model CLI or established model-access adapter within the existing authority. Discover supported invocation, model selection, read scope, result collection, and cancellation from the available capability or its current help. Do not guess model IDs or flags, install tools, change credentials, or create a new dispatch framework for one assessment. An existing caller adapter owns its mechanics when used. Before external judge dispatch, the dispatch owner briefly names the recipient and the material it will inspect, unless that recipient and scope are already disclosed. Keep this to who reviews what; omit operational detail.
+使用活动主机的实际委派和模型选择功能。当本地新鲜上下文调度可以服务于所需的判断时，更喜欢它；具有多个模型系列的主机不需要外部进程。否则，请使用可用的经过身份验证的模型CLI或在现有权限内建立的模型访问适配器。从可用功能或其当前帮助中发现支持的调用、模型选择、读取范围、结果收集和取消。不要猜测模型 ID 或标志、安装工具、更改凭据或为一项评估创建新的调度框架。现有的调用者适配器在使用时拥有其机制。在外部法官派遣之前，派遣所有者简要指定收件人及其将检查的材料，除非收件人和范围已经披露。将此保留给谁评论什么；省略操作细节。
 
-Use the best authorized route that fits the remaining budget; a missing preferred interface does not establish that independent judgment is unavailable. If no route can supply a fresh judge and return or cancel within budget, report incomplete. Do not silently replace it with same-context self-review or expand the budget. Track actual dispatch and completion, and distinguish observed model identity from requested identity.
+使用适合剩余预算的最佳授权路线；缺少首选界面并不意味着无法进行独立判断。如果没有航线可以提供新的裁判并在预算内返回或取消，则报告不完整。不要默默地用相同背景的自我审查代替它或扩大预算。跟踪实际调度和完成情况，并将观察到的模型身份与请求的身份区分开来。
 
-## Assessment and reconciliation
+## 评估与调节
 
-Dispatch after candidate artifacts are complete. Supply the common brief, criteria, complete candidates under neutral artifact labels, and source pointers within the permitted read scope. Withhold the coordinator's ranking and other judges' conclusions. The judge is read-only and returns its POV without a follow-up menu or downstream action. Supply access to the actual `ce-pov` skill and its references through the host's skill mechanism or current files; a role label alone does not invoke it. POV owns any grounding delegation it requires. Request a single POV, without a peer consultation summons, for the default assessment.
+候选产物完成后调度。在中性产物标签下提供通用摘要、标准、完整候选者以及允许阅读范围内的源指针。保留协调员的排名和其他评委的结论。法官是只读的，返回其 POV，没有后续菜单或下游操作。通过宿主的技能机制或当前文件提供对实际`ce-pov`技能及其参考的访问；单独的角色标签不会调用它。 POV 拥有其所需的任何基础授权。请求单一 POV 进行默认评估，无需同行协商传票。
 
-Give POV the developed approach set and the decision criteria. Its evidence floors apply to shared premises as well as candidate claims. Ask it to identify dependencies whose failure would change feasibility, a required guarantee, or the ranking, and distinguish source-backed conclusions from assumptions. Candidate agreement cannot corroborate an inherited premise. Consume a blocked verdict as an unresolved evidence need, not a completed endorsement.
+为 POV 提供制定的方法集和决策标准。其证据层适用于共享场所以及候选人的主张。要求它识别其失败会改变可行性、所需保证或排名的依赖关系，并将源支持的结论与假设区分开来。候选人协议不能证实继承的前提。将被阻止的判决视为未解决的证据需求，而不是完整的认可。
 
-Compare the returned assessment with your own reading, including the evidence supporting its decisive claims. Resolve consequential disagreement through source evidence and record the reason for your decision. An affirmative judge verdict does not waive the coordinator's evidence gate in `references/verification.md`. The coordinator retains selection and synthesis; a judge's recommendation is not permission to act.
+将返回的评估与您自己的阅读进行比较，包括支持其决定性主张的证据。通过原始证据解决由此产生的分歧，并记录您做出决定的原因。法官的肯定判决并不放弃`references/verification.md`协调员的证据门。协调者保留选择和合成；法官的建议并不构成采取行动的许可。
 
-Use POV's oracle panel when explicitly requested, or when a consequential disagreement survives source checking and additional perspectives could resolve it within existing authority and budget. Missing evidence needs source checking, not more votes. POV owns the panel's grounding, participation, authority, and lifecycle contracts. Pass developed candidates and require a return without a follow-up menu or downstream action. Its independent assessment can satisfy this requirement; do not launch a duplicate judge merely to fill a role. Do not silently downgrade a requested oracle to a single judge. No panel machinery belongs here.
+当明确要求时，或者当来源检查后存在相应的分歧并且其他观点可以在现有权限和预算内解决它时，请使用 POV 的判定依据机面板。缺失的证据需要来源检查，而不是更多的投票。 POV 拥有该小组的基础、参与、权力和生命周期合同。通过开发的候选者并要求返回，而无需后续菜单或下游操作。其独立评估可以满足这一要求；不要仅仅为了填补一个角色而设立重复的法官。不要默默地将所请求的判定依据机降级为单个法官。板材机械不属于这里。

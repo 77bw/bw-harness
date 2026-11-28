@@ -1,36 +1,36 @@
-# Boundaries and Routing
+# 边界和路线
 
-Read this when it is unclear whether the input fits `ce-pov`, or to route a Hold to the right skill (SKILL.md Phase 0, Frame and Classify).
+当不清楚输入是否适合 `ce-pov` 或将保持路由到正确的技能（SKILL.md 阶段 0、框架和分类）时，请阅读此内容。
 
-## The discriminator
+## 鉴别器
 
-`ce-pov` takes a **supplied subject** and judges it **against this project**, producing a **decisive position** — not options, not requirements, not implementation, not a diagnosis. If the answer should be a *verdict about your project*, it is `ce-pov`. If the answer is options, requirements, implementation, a diagnosis, or a neutral explainer, send the request to the skill that produces that.
+`ce-pov`采用**提供的主题**并根据该项目**对其进行判断，产生**决定性的立场** - 不是选项，不是要求，不是实施，不是诊断。如果答案应该是*关于您的项目的判断*，那么它就是`ce-pov`。如果答案是选项、要求、实施、诊断或中立的解释器，请将请求发送给生成该答案的技能。
 
-## Where the lines fall
+## 线条落在哪里
 
-| If the user wants... | Route to | The line |
+| 如果用户想要... | 路线至 | 线路 |
 |---|---|---|
-| A neutral explainer ("tell me about X") | `ce-explain` | `ce-pov` only returns a project-grounded verdict; with no project angle, invoke `ce-explain` with the question and intended use rather than forcing a verdict |
-| A holistic take on a supplied document ("what do you think of this doc?") | `ce-pov` | A take judges the document's direction, strengths, risks, and bottom line; "review this doc" or "find the issues" asks for findings and routes to `ce-doc-review`. When the wording is ambiguous, resolve it under the skill body's interaction rule |
-| A judgment among approaches the user already supplied | `ce-pov` | Options developed → judge against the project; rough options needing development for a defined brief → `ce-bakeoff` |
-| Options invented from an open field | `ce-ideate` | Invented vs. discovered: ideate invents; `ce-pov` judges/selects from a discoverable field |
-| To scope an idea already chosen | `ce-brainstorm` | `ce-pov` decides *whether*; brainstorm scopes *what* once it's a yes |
-| To know how to build something decided | `ce-plan` | Perform a requested handoff only when the Phase 4 (Deliver and return) authority check passes; `ce-pov` does no task breakdown |
-| To fix observed broken behavior | `ce-debug` | `ce-pov` assesses *exposure and priority* of a CVE; debug investigates an *actual failure* |
-| Product thesis / company direction | `ce-strategy` | `ce-pov` is bounded to a specific external input |
+| 中立的解释者（“告诉我有关 X 的事情”） | `ce-explain` | `ce-pov` 仅返回基于项目的判决；在没有项目角度的情况下，用问题和预期用途调用`ce-explain`，而不是强制做出结论 |
+| 对所提供文档的整体看法（“您认为这份文档怎么样？”） | `ce-pov` | Take 判断文档的方向、优势、风险和底线； “查看此文档”或“查找问题”要求提供发现结果以及通往 `ce-doc-review` 的路线。当措辞有歧义时，根据技能体交互规则解决 |
+| 对用户已提供的方法进行判断 | `ce-pov` | 制定选项 → 对项目进行判断；需要为明确的概要制定粗略的选项 → `ce-bakeoff` |
+| 从开放领域发明的期权 | `ce-ideate` | 发明与发现：构思发明； `ce-pov` judges/selects 来自可发现的领域 |
+| 确定已选择的想法的范围 | `ce-brainstorm` | `ce-pov`决定*是否*；一旦答案是肯定的，集思广益范围*什么* |
+| 知道如何构建决定的东西 | `ce-plan` | 仅当第 4 阶段（交付和归还）权限检查通过时才执行请求的移交； `ce-pov` 没有任务分解 |
+| 修复观察到的损坏行为 | `ce-debug` | `ce-pov` 评估 CVE 的*暴露程度和优先级*；调试调查*实际故障* |
+| 产品论文/公司方向 | 超出范围；将请求返回给调用者 | `ce-pov` 绑定到特定的外部输入 |
 
-## The selection escape hatch
+## 选择逃生舱口
 
-The selection escape hatch is the rule that stops `ce-pov` from judging a field it would have to invent. A *selection* question ("what should we use for auth?") is a `ce-pov` verdict only when the realistic candidate field is **bounded** (roughly five or fewer real options) and the **criteria are knowable** enough to judge — the candidates are *discovered* from a real market, not *invented*.
+选择逃生舱口是阻止`ce-pov`判断它必须发明的领域的规则。 *选择*问题（“我们应该使用什么来进行身份验证？”）只有当现实的候选领域是**有界**（大约五个或更少的实际选项）并且**标准是可知的**足以进行判断时，才是一个`ce-pov`判决——候选者是从真实市场中“发现”的，而不是“发明的”。
 
-When the field cannot be bounded without inventing options, or the criteria are unclear, **return a Hold and name the skill that can resolve it**:
+当领域无法在不发明选项的情况下被界定时，或者标准不明确时，**返回保持并命名可以解决它的技能**：
 
-- Defined solution brief, but candidates need concrete development → `ce-bakeoff`.
-- Field too open to enumerate → Hold → `ce-ideate` to enumerate the candidates → return the shortlist requirement to the caller.
-- Criteria unclear / unstated requirements → Hold → `ce-brainstorm` to bring them out → return the missing criteria to the caller.
+- 明确的解决方案简介，但候选人需要具体的发展 → `ce-bakeoff`。
+- 字段太开放，无法枚举 → 保持 → `ce-ideate` 枚举候选人 → 将入围名单要求返回给调用者。
+- 标准不明确/未说明的要求 → 按住 → `ce-brainstorm` 将其显示出来 → 将缺失的标准返回给调用者。
 
-Running a verdict on an unbounded field turns `ce-pov` into disguised requirements discovery — the escape hatch is what keeps it a judgment skill.
+在无界域上进行判断会将`ce-pov`变成变相的需求发现——逃生舱口使其成为一种判断技能。
 
-## Universal grounding (designed-in, deferred)
+## 通用接地（设计内置、延迟）
 
-`ce-pov` grounds against the project's available context, and "project" includes a non-code folder (docs, decks, markdown, data), not only a git repo. The only case out of scope is *no local material at all* — a pure user-described situation with nothing to ground against. Treat that as out of scope: return the missing project context under the skill body's interaction rule, rather than dispensing generic advice dressed as a POV.
+`ce-pov` 基于项目的可用上下文，“项目”包括非代码文件夹（文档、甲板、markdown、数据），而不仅仅是 git 存储库。唯一超出范围的情况是“根本没有本地材料”——纯粹是用户描述的情况，没有任何依据。将其视为超出范围：根据技能主体的交互规则返回缺失的项目上下文，而不是以 POV 的形式分发通用建议。

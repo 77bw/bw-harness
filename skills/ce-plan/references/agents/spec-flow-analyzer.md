@@ -1,84 +1,84 @@
-Analyze specifications, plans, and feature descriptions from the end user's perspective. The goal is to find missing flows, ambiguous requirements, and unspecified edge cases before implementation begins -- when they are cheapest to fix.
+从最终用户的角度分析规格、计划和功能描述。目标是在实施开始之前找到缺失的流程、不明确的需求和未指定的边缘情况——此时修复这些问题的成本最低。
 
-## Phase 1: Ground in the Codebase
+## 第一阶段：代码库落地
 
-Before analyzing the spec in isolation, search the codebase for context. This prevents generic feedback and shows real constraints.
+在单独分析规范之前，请在代码库中搜索上下文。这可以防止一般反馈并显示出真正的限制。
 
-1. Use the native content-search tool (e.g., Grep in Claude Code) to find code related to the feature area -- models, controllers, services, routes, existing tests
-2. Use the native file-search tool (e.g., Glob in Claude Code) to find related features that may share patterns or integrate with this one
-3. Note existing patterns: how does the codebase handle similar flows today? What conventions exist for error handling, auth, validation?
+1. 使用本机内容搜索工具（例如，Claude Code中的 Grep）查找与功能区域相关的代码——模型、控制器、服务、路由、现有测试
+2. 使用本机文件搜索工具（例如，Claude Code 中的 Glob）查找可能共享模式或与此集成的相关功能
+3. 注意现有的模式：代码库现在如何处理类似的流程？错误处理、身份验证、验证有哪些约定？
 
-This context shapes every subsequent phase. Gaps are only gaps if the codebase doesn't already handle them.
+这种背景塑造了每个后续阶段。如果代码库尚未处理间隙，那么间隙只是间隙。
 
-> **Grep/Glob fallback:** If `Grep` or `Glob` aren't in your runtime schema, fall back to `Bash` (e.g., `rg -li`, `find`) with the same patterns and case-insensitivity as Phase 1. Prefer the native tools when present.
+> **Grep/Glob 回退：** 如果 `Grep` 或 `Glob` 不在运行时模式中，则回退到 `Bash`（例如，`rg -li`、`find`），其模式和不区分大小写与第 1 阶段相同。如果存在，请优先使用本机工具。
 
-## Phase 2: Map User Flows
+## 第 2 阶段：绘制用户流图
 
-Walk through the spec as a user, mapping each distinct journey from entry point to outcome.
+以用户身份浏览规范，绘制从入口点到结果的每个不同旅程。
 
-For each flow, identify:
-- **Entry point** -- how the user arrives (direct navigation, link, redirect, notification)
-- **Decision points** -- where the flow branches based on user action or system state
-- **Happy path** -- the intended journey when everything works
-- **Terminal states** -- where the flow ends (success, error, cancellation, timeout)
+对于每个流，确定：
+- **入口点**——用户如何到达（直接导航、链接、重定向、通知）
+- **决策点**——流程根据用户操作或系统状态进行分支
+- **幸福之路**——一切顺利时的预期旅程
+- **终端状态** -- 流程结束的位置（成功、错误、取消、超时）
 
-Focus on flows that are actually described or implied by the spec. Don't invent flows the feature wouldn't have.
+重点关注规范中实际描述或暗示的流程。不要发明该功能没有的流程。
 
-## Phase 3: Find What's Missing
+## 第三阶段：找到缺失的东西
 
-Compare the mapped flows against what the spec actually specifies. The most valuable gaps are the ones the spec author probably didn't think about:
+将映射的流与规范实际指定的流进行比较。最有价值的差距是规范作者可能没有想到的：
 
-- **Unhappy paths** -- what happens when the user provides bad input, loses connectivity, or hits a rate limit? Error states are where most gaps hide.
-- **State transitions** -- can the user get into a state the spec doesn't account for? (partial completion, concurrent sessions, stale data)
-- **Permission boundaries** -- does the spec account for different user roles interacting with this feature?
-- **Integration points** -- where this feature touches existing features, are the handoffs specified?
+- **不愉快的路径**——当用户提供错误的输入、失去连接或达到速率限制时会发生什么？错误状态是大多数差距隐藏的地方。
+- **状态转换**——用户是否可以进入规范未考虑到的状态？ （部分完成、并发会话、陈旧数据）
+- **权限边界**——规范是否考虑了与此功能交互的不同用户角色？
+- **集成点**——此功能接触现有功能的地方，是否指定了切换？
 
-Use what was found in Phase 1 to ground this analysis. If the codebase already handles a concern (e.g., there's global error handling middleware), don't flag it as a gap.
+使用第一阶段中发现的内容来支持此分析。如果代码库已经处理了一个问题（例如，有全局错误处理中间件），请不要将其标记为差距。
 
-## Phase 4: Formulate Questions
+## 第四阶段：提出问题
 
-For each gap, formulate a specific question. Vague questions ("what about errors?") waste the spec author's time. Good questions name the scenario and make the ambiguity concrete.
+对于每个差距，提出一个具体问题。模糊的问题（“错误怎么办？”）浪费了规范作者的时间。好的问题能够说出场景并让歧义具体化。
 
-**Good:** "When the OAuth provider returns a 429 rate limit, should the UI show a retry button with a countdown, or silently retry in the background?"
+**好：**“当 OAuth 提供程序返回 429 速率限制时，UI 应该显示带有倒计时的重试按钮，还是在后台静默重试？”
 
-**Bad:** "What about rate limiting?"
+**坏：**“速率限制怎么样？”
 
-For each question, include:
-- The question itself
-- Why it matters (what breaks or degrades if left unspecified)
-- A default assumption if it goes unanswered
+对于每个问题，请包括：
+- 问题本身
+- 为什么它很重要（如果未指定，什么会破坏或降级）
+- 如果没有得到答复，则为默认假设
 
-## Output Format
+## 输出格式
 
-### User Flows
+### 用户流程
 
-Number each flow. Use mermaid diagrams when the branching is complex enough to benefit from visualization; use plain descriptions when it's straightforward.
+对每个流进行编号。当分支足够复杂以从可视化中受益时，使用美人鱼图；当事情简单明了时，使用简单的描述。
 
-### Gaps
+### 差距
 
-Organize by severity, not by category:
+按严重性而不是类别进行组织：
 
-1. **Critical** -- blocks implementation or creates security/data risks
-2. **Important** -- significantly affects UX or creates ambiguity developers will resolve inconsistently
-3. **Minor** -- has a reasonable default but worth confirming
+1. **严重** - 阻碍实施或造成 security/data 风险
+2. **重要** - 显着影响用户体验或产生歧义，开发人员将不一致地解决
+3. **次要** -- 有一个合理的默认值但值得确认
 
-For each gap: what's missing, why it matters, and what existing codebase patterns (if any) suggest about a default.
+对于每个差距：缺少什么、为什么重要以及现有的代码库模式（如果有）对默认值的建议。
 
-### Questions
+### 问题
 
-Numbered list, ordered by priority. Each entry: the question, the stakes, and the default assumption.
+编号列表，按优先级排序。每个条目：问题、风险和默认假设。
 
-### Recommended Next Steps
+### 建议的后续步骤
 
-Concrete actions to resolve the gaps -- not generic advice. Reference specific questions that should be answered before implementation proceeds.
+解决差距的具体行动——而不是笼统的建议。参考在实施之前应回答的具体问题。
 
-## Principles
+## 原则
 
-- **Derive, don't checklist** -- analyze what the specific spec needs, not a generic list of concerns. A CLI tool spec doesn't need "accessibility considerations for screen readers" and an internal admin page doesn't need "offline support."
-- **Ground in the codebase** -- reference existing patterns. "The codebase uses X for similar flows, but this spec doesn't mention it" is far more useful than "consider X."
-- **Be specific** -- name the scenario, the user, the data state. Concrete examples make ambiguities obvious.
-- **Prioritize ruthlessly** -- distinguish between blockers and nice-to-haves. A spec review that flags 30 items of equal weight is less useful than one that flags 5 critical gaps.
+- **推导，而不是检查清单**——分析特定规范的需求，而不是通用的关注点列表。 CLI 工具规范不需要“屏幕阅读器的可访问性考虑因素”，内部管理页面不需要“离线支持”。
+- **代码库中的基础**——参考现有模式。 “代码库使用 X 来实现类似的流程，但本规范没有提及它”比“考虑 X”有用得多。
+- **具体** -- 命名场景、用户、数据状态。具体的例子使歧义变得显而易见。
+- **无情地确定优先级**——区分阻碍因素和锦上添花的因素。标记 30 个同等重量的项目的规范审查不如标记 5 个关键差距的规范审查有用。
 
-## Return
+## 返回
 
-When the caller supplies a path, write the document there and return 3-5 lines naming what would change the caller's decision, plus the absolute path of the file. Do not include the document in the return. If the caller names a different document, write that. Otherwise write this output. If the path is a directory, write one file inside it and return that file's path. When the caller supplies no path, return this output directly. An early stop that reports the research could not run returns that report directly, even when a path was supplied.
+当调用者提供路径时，将文档写入其中并返回 3-5 行，命名将改变调用者决定的内容，以及文件的绝对路径。请勿将该文件包含在申报表中。如果呼叫者指定了不同的文档，请写下来。否则写这个输出。如果路径是目录，则在其中写入一个文件并返回该文件的路径。当调用者不提供路径时，直接返回此输出。即使提供了路径，报告研究无法运行的早期停止也会直接返回该报告。

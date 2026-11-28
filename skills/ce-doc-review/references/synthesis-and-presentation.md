@@ -1,264 +1,241 @@
-# Phases 3-5: Synthesis, Presentation, and Next Action
+# 第 3-5 阶段：综合、演示和下一步行动
 
-## Phase 3: Synthesize Findings
+## 第三阶段：综合研究结果
 
-Process findings from all agents through these steps in order. Each step depends on the previous one. Together they move every finding through the same lifecycle: **Raised → (Confidence Gate | FYI-eligible | Dropped) → Deduplicated → Classified → SafeAuto | GatedAuto | Manual | FYI**. Re-evaluate each finding's state at every step; do not carry an assumption from an earlier step forward as a shortcut.
+按顺序通过这些步骤处理所有代理的结果。每一步都取决于前一步。他们一起在相同的生命周期中移动每一个发现：**提出→（置信门|符合仅供参考|放弃）→重复数据删除→分类→SafeAuto|门禁汽车 |手册|供参考**。每一步重新评估每个发现的状态；不要将先前步骤的假设作为捷径。
 
-**Later rounds.** When the current session carries decisions from an earlier review round of this document (a decision primer rendered from `references/decision-primer.md`, or decision state retained by a resume), also read `references/later-round-synthesis.md` before 3.1. It holds R29 (rejected-finding suppression) and R30 (fix-landed verification). A first review round skips it.
+**后续轮次。** 当当前会话包含本文档前一轮审核的决定时（从`references/decision-primer.md`呈现的决策底漆，或简历保留的决策状态），还请阅读 3.1 之前的`references/later-round-synthesis.md`。它包含R29（拒绝发现抑制）和R30（固定着陆验证）。第一轮审查会跳过它。
 
-### 3.1 Validate
+### 3.1 验证
 
-Check each agent's returned JSON against the findings schema:
+根据结果架构检查每个代理返回的 JSON：
 
-- Drop findings missing any required field defined in the schema
-- Drop findings with invalid enum values (including the pre-rename `auto` / `present` values from older personas — treat those as malformed until all persona output has been regenerated)
-- Note the agent name for any malformed output in the Coverage line
+- 删除缺少架构中定义的任何必填字段的结果
+- 删除具有无效枚举值的结果（包括旧角色中的预重命名 `auto` / `present` 值 - 将这些值视为格式错误，直到重新生成所有角色输出）
+- 记下 Coverage 行中任何格式错误的输出的代理名称
 
-**Do not narrate remap / validation diagnostics to the user.** Schema-drift notes ("persona X returned unknown enum Y, remapped to Z"), persona-prompt-drift commentary, and other validator-internal diagnostics are maintainer-facing information. They do not belong in the Phase 4 output the user reads. If a persona's output is malformed, the only user-visible consequence is a mention in the Coverage line. Everything else stays internal.
+**不要向用户讲述重新映射/验证诊断。** 模式漂移注释（“角色 X 返回未知的枚举 Y，重新映射到 Z”）、角色提示漂移注释和其他验证器内部诊断是面向维护者的信息。它们不属于用户读取的第 4 阶段输出。如果角色的输出格式错误，则唯一用户可见的结果是在“覆盖范围”行中提及。其他一切都保留在内部。
 
-### 3.1b Admit Findings by Consequence
+### 3.1b 按后果承认调查结果
 
-Establish what, if anything, prevents the document from guiding the agreed work. Retain a concern when its instructions cannot jointly satisfy the agreed contract, or when following the document, its references, and active project conventions would cause a demonstrated wrong outcome or worthwhile avoidable work. Judge an omission against what a competent implementer can already derive. A missing restatement, finer threshold, or additional procedure is not a defect when the existing instructions suffice. An implementer's likely care is not a derivation: when a reviewer traces a path from an input the shipped work accepts to lost or wrongly moved money, a security breach, or corrupted stored data, retain it unless the document, its references, or the code already prevents that harm. Existing code the work newly runs or exposes, and a stub dependency on the path, do not void the trace.
+确定阻碍该文件指导商定工作的因素（如果有）。当其指示无法共同满足商定的合同时，或者当遵循文档、其引用文档和有效的项目约定会导致明显的错误结果或值得避免的工作时，请保留关注。根据有能力的实施者已经得出的结论来判断遗漏。当现有说明足够时，缺少重述、更精细的阈值或附加程序并不是缺陷。实施者可能关心的不是派生：当审查者跟踪从已交付工作接受的输入到丢失或错误转移资金、安全漏洞或损坏的存储数据的路径时，请保留它，除非文档、其引用或代码已经防止了这种损害。新运行或公开的工作的现有代码以及路径上的存根依赖项不会使跟踪无效。
 
-Investigate available facts before accepting a reviewer's claim. Establish the problem independently of its suggested fix: a useful-looking addition does not prove anything is missing. Keep the smallest supported correction that addresses the actual consequence. Verification changes must test the required outcome, not merely produce a passing check.
+在接受审稿人的主张之前调查现有事实。独立于建议的修复来确定问题：看起来有用的添加并不能证明缺少任何内容。保留可解决实际后果的最小支持修正。验证更改必须测试所需的结果，而不仅仅是产生通过检查。
 
-**Additions and removals meet the same bar.** A concern whose remedy adds something the document does not already commit to — a requirement, guard, retry, step, mode, option, or test — is retained only when the agreed work goes wrong without it in a way nobody would catch in time, or when adding it later would be expensive because it concerns stored data, a shared interface, money, or security. Making the work more thorough, robust, or explicit is not a consequence. A concern that the document commits to something failing that same test is retained on equal terms and routed like any other correction; it does not drop to FYI because its remedy removes work.
+**添加和删除满足相同的标准。** 如果问题的补救措施添加了文档尚未承诺的内容（需求、防护、重试、步骤、模式、选项或测试），则仅当商定的工作出现问题而没有它时，没有人能及时发现，或者稍后添加它会很昂贵，因为它涉及存储的数据、共享接口、金钱或安全性，才会保留。使工作更加彻底、稳健或明确并不是结果。如果担心文档承诺某些内容未通过相同测试，则会以同等条件保留并像任何其他更正一样进行路由；它不会下降仅供参考，因为它的补救措施消除了工作。
 
-Only concerns that meet this condition enter confidence scoring, recommendations, or output. This includes FYIs and deferred questions. Drop rejected claims from the working set; they require neither a user decision nor an automatic edit. Zero findings is valid.
+只有满足此条件的问题才会输入置信度评分、建议或输出。这包括仅供参考和推迟的问题。从工作集中删除被拒绝的声明；它们既不需要用户决定，也不需要自动编辑。零发现是有效的。
 
-### 3.2 Confidence Gate (Anchor-Based)
+### 3.2 置信门（基于锚）
 
-Route each finding by its `confidence` anchor value. Anchors are discrete integers (`0`, `25`, `50`, `75`, `100`). Their behavioral definitions are documented in `references/findings-schema.json` and embedded in the persona rubric (`references/subagent-template.md`). Anchors replaced the earlier continuous 0.0-1.0 scale with per-severity thresholds: document review does not warrant a different threshold per severity, and coarse anchors stop reviewers from gaming the score with false precision.
+通过其 `confidence` 锚值路由每个发现。锚点是离散整数（`0`、`25`、`50`、`75`、`100`）。他们的行为定义记录在 `references/findings-schema.json` 中，并嵌入到人物角色 (`references/subagent-template.md`) 中。锚点用每个严重性阈值取代了早期的连续 0.0-1.0 等级：文档审查不保证每个严重性有不同的阈值，并且粗锚点阻止审查者以错误的精度玩弄分数。
 
-| Anchor | Meaning | Route |
+| 锚 | 意义 | 路线 |
 |--------|---------|-------|
-| `0`    | False positive, or pre-existing issue the work does not reach | Drop silently |
-| `25`   | Might be real but could not verify | Drop silently |
-| `50`   | Verified, useful advisory concern below the actionable bar | Show in FYI subsection |
-| `75`   | Double-checked, will hit in practice, directly impacts correctness | Enter actionable tier (classify by `autofix_class`) |
-| `100`  | Evidence directly confirms; will happen frequently | Enter actionable tier (classify by `autofix_class`) |
+| `0`    | 误报或工作未达到的预先存在的问题 | 默默地掉落 |
+| `25`   | 可能是真的但无法验证 | 默默地掉落 |
+| `50`   | 已验证、有用的咨询问题位于可操作栏下方 | 显示在仅供参考的小节中 |
+| `75`   | 双重检查，实践中会命中，直接影响正确性 | 输入可操作层（按`autofix_class`分类） |
+| `100`  | 证据直接证实；会经常发生 | 输入可操作层（按`autofix_class`分类） |
 
-- **Dropped silently** (anchors `0` and `25`): these do not appear in any output bucket — not as findings, not as FYI observations, not as residual concerns. The drop is not reported to the user.
-- **FYI-subsection** (anchor `50`): show in the FYI subsection of the presentation regardless of `autofix_class`, but only when the observation names a concrete cost the reader would otherwise pay, such as time, rework, or a likely mistake. An observation that something could read better, or could be misread by no one who would act on it, names no cost and is dropped. A concern whose remedy cuts something the document commits to is never FYI: when the document confirms the committed item fails the sizing test in 3.1b, it is a `manual` decision whatever its anchor, because whether to cut is the user's call. These do not enter the walk-through or any bulk action; they are observations and force no decision. Only useful advisory observations that passed 3.1b (admission by consequence) land here; FYI is not a destination for rejected nits.
-- **Actionable** (anchors `75` and `100`): enter classification. Route by `autofix_class` (see 3.7, Route by Autofix Class).
+- **默默地丢弃**（锚点`0`和`25`）：这些不会出现在任何输出桶中——不是作为发现，不是作为仅供参考的观察，不是作为剩余的关注点。掉落不会报告给用户。
+- **FYI-subsection**（锚`50`）：无论`autofix_class`如何，都显示在演示文稿的FYI小节中，但仅当观察指出读者否则会支付的具体成本时，例如时间、返工或可能的错误。观察到某件事可以读得更好，或者可能被没有人采取行动的人误读，这种观察没有任何成本，因此被丢弃。一个关注点是，其补救措施会削减文档提交的某些内容，这绝不是仅供参考：当文档确认提交的项目未通过 3.1b 中的大小测试时，无论其锚点如何，这都是一个 `manual` 决定，因为是否削减是用户的决定。这些不会进入演练或任何批量操作；它们只是观察结果，不强制做出决定。只有通过 3.1b（通过结果接纳）的有用建议性意见才会落到这里；仅供参考，这不是被拒绝的尼特的目的地。
+- **可操作**（锚点`75`和`100`）：输入分类。按 `autofix_class` 进行路由（请参阅 3.7，按 Autofix 类进行路由）。
 
 
-### 3.3 Merge Duplicate Findings
+### 3.3 合并重复的结果
 
-Two findings are duplicates when **one fix would resolve both**. Decide that by reading them — `title`, `section`, `why_it_matters`, `evidence`, and `suggested_fix` — not by comparing strings. Reviewers describe the same problem in different words as a matter of course, so wording similarity is not the test and matching titles are not required.
+当**一个修复即可解决这两个问题**时，两个结果是重复的。通过读取它们（`title`、`section`、`why_it_matters`、`evidence` 和 `suggested_fix`）来决定，而不是通过比较字符串。审稿人用不同的词语描述同一问题是理所当然的，所以措辞相似性不是测试，也不需要匹配标题。
 
-Apply the test across personas and across sections:
+跨角色和跨部分应用测试：
 
-- **A shared section is evidence, never a requirement.** Two reviewers commonly attach the same problem to different sections, and just as commonly attach different problems to the same one. Neither settles it — the fix does.
-- **When unsure, do not merge.** When you cannot tell whether one fix resolves both, keep them separate. A surviving duplicate costs the user one extra line. A wrong merge buries a real concern inside an unrelated finding, where nothing signals that it went missing.
-- **Opposing recommendations never merge.** If one finding says cut and the other says keep, preserve both for contradiction resolution in 3.5 (Resolve Contradictions). That is a disagreement, not a duplicate.
+- **共享的部分是证据，而不是要求。** 两个审稿人通常将同一问题附加到不同的部分，并且通常将不同的问题附加到同一部分。两者都不能解决问题——解决办法就能解决问题。
+- **当不确定时，不要合并。**当您无法判断一项修复是否可以同时解决这两个问题时，请将它们分开。幸存的重复项会导致用户额外花费一行的时间。错误的合并将真正的担忧埋藏在不相关的发现中，没有任何迹象表明它丢失了。
+- **反对的建议永远不会合并。** 如果一个结果说削减，另一个结果说保留，则保留两者，以便在 3.5（解决矛盾）中解决矛盾。这是一个分歧，而不是重复。
 
-When findings merge:
+当发现合并时：
 
-- Keep the highest severity and the highest confidence anchor. If anchors tie, keep the finding appearing first in document order — deterministic, not probabilistic.
-- Union the evidence arrays and note every contributing reviewer (e.g., "coherence, feasibility").
-- **Retain each constituent finding as a record**, with its own `section`, `title`, and `evidence` intact. Round-to-round memory (R29 and R30 in `references/later-round-synthesis.md`, the decision primer, and the open-questions dedup key) matches on a single finding's section, title, and evidence overlap. A merged group has none of those, so collapsing the constituents away would make every finding the user already settled come back on the next round.
+- 保持最高严重性和最高置信度档位。如果锚点绑定，则保持结果按文档顺序首先出现 - 确定性的，而不是概率性的。
+- 合并证据数组并记下每个贡献的审稿人（例如，“连贯性、可行性”）。
+- **将每个成分发现保留为记录**，并完整保留其自己的 `section`、`title` 和 `evidence`。逐轮记忆（`references/later-round-synthesis.md`中的R29和R30、决策引物和开放问题重复数据删除密钥）匹配单个发现的部分、标题和证据重叠。合并后的小组没有这些，因此将成分折叠起来将使用户已经解决的每个发现在下一轮中重新出现。
 
-**Merging never drops.** A merge regroups findings; it never removes one from the review. Every finding that survives the lead agent's review reaches the user, either as its own entry or inside the merged finding that carries its concern. Rejected claims are recorded internally, not lost through merging.
+**合并永远不会下降。**合并重新组合发现；它永远不会从评论中删除一个。经过首席代理审查后幸存下来的每个发现都会到达用户，无论是作为其自己的条目还是在包含其关注点的合并发现中。被拒绝的索赔会在内部记录，不会因合并而丢失。
 
-**Cross-model returns.** A `<reviewer-name>-<provider>` return merges with its in-process twin under the same one-fix test. Whether that merge counts as *independent corroboration* is decided in 3.4 (Cross-Persona Agreement Promotion) by the return's `independence_verified` flag, not here.
+**跨模型返回。** `<reviewer-name>-<provider>` 返回在同一一次性修复测试下与其进程内孪生合并。该合并是否算作*独立佐证*由返回的 `independence_verified` 标志在 3.4（跨角色协议推广）中决定，而不是在这里。
 
-**The merged set is the record.** The merged finding set produced by this step is the single source of truth for rendered output. Each finding appears in exactly one place in the output — counted once in its route bucket, rendered once at its own position.
+**合并后的集合是记录。** 此步骤生成的合并结果集是渲染输出的单一事实来源。每个发现都恰好出现在输出中的一个位置 - 在其路径存储桶中计数一次，在其自己的位置渲染一次。
 
-### 3.4 Cross-Persona Agreement Promotion
+### 3.4 跨角色协议推广
 
-Agreement can strengthen the evidence but does not make an issue important. Raise confidence by at most **one anchor step** only when the combined evidence meets the next level's definition. Several reviewers noticing a nit does not make it worth fixing. A significant defect needs no second vote to be retained.
+一致意见可以加强证据，但并不会使问题变得重要。仅当组合证据满足下一级别的定义时，最多可将置信度提高**一个锚定步骤**。一些评论家注意到一个问题并不意味着它值得修复。重大缺陷无需进行第二次投票即可保留。
 
-For local personas, independence requires separate dispatched contexts; an inline fallback cannot trigger anchor promotion. Cross-model corroboration requires `independence_verified: true`, at least one in-process contributor, and an independence-verified peer. A missing or false flag cannot trigger anchor promotion. Cursor default/Auto is not verified independence unless the run recorded which model actually answered. Peer-only agreement never promotes, and additional peers never stack the promotion.
+对于本地角色，独立性需要单独的调度上下文；内联后备无法触发锚定提升。跨模型验证需要`independence_verified: true`、至少一个进程内贡献者和一个经过独立验证的同行。缺失或错误的标记无法触发主播升级。除非运行记录了实际回答的模型，否则光标 default/Auto 未被验证独立性。仅对等协议永远不会晋升，其他同行也不会叠加晋升。
 
-Record any justified promotion with the finding, naming the cross-model reviewer and its verified model or route. It is internal evidence and is not rendered. Keep the stored reviewer identities. Findings dropped at anchors 0/25 do not return through agreement. Corroboration never grants permission to apply fixes: the limits on peer-only findings in 3.6 (Resolve Who Can Choose the Fix) and 3.7 (Route by Autofix Class) still apply.
+记录任何合理的促销发现，命名跨模型审核者及其经过验证的模型或路线。它是内部证据，不被渲染。保留存储的审查者身份。抛锚0/25的调查结果不会通过协议返回。 Corroboration 永远不会授予应用修复程序的权限：3.6（解决谁可以选择修复程序）和 3.7（按自动修复类路由）中对仅限对等结果的限制仍然适用。
 
-### 3.5 Resolve Contradictions
+### 3.5 解决矛盾
 
-Check conflicting claims against the document, project evidence, and requested outcome before asking the user to decide. Drop a disproven claim or a preference with no significant benefit. Disagreement alone does not prove a defect. Record the reason internally so the rejected claim does not return when findings are combined or actions are chosen.
+在要求用户做出决定之前，检查与文档、项目证据和请求的结果相矛盾的主张。放弃未经证实的主张或没有重大好处的偏好。仅存在分歧并不能证明存在缺陷。在内部记录原因，以便在合并调查结果或选择操作时不会返回被拒绝的索赔。
 
-If several fixes remain possible and choosing one needs an unresolved user preference or scope decision, keep one combined `manual` finding. Include both views and the decision needed. Set `finding_type` from the document's actual defect, not the disagreement. Keep opposing fixes together even when they affect different sections; never schedule both as separate edits.
+如果仍有可能存在多个修复方案，并且选择一个修复方案需要未解决的用户偏好或范围决策，请保留一项组合的 `manual` 发现。包括观点和所需的决定。根据文档的实际缺陷而不是分歧来设置`finding_type`。将相反的修复放在一起，即使它们影响不同的部分；切勿将两者安排为单独的编辑。
 
-### 3.5b Lead Recommended Action
+### 3.5b 领导建议行动
 
-Remove rejected claims from the retained review set and record why internally. A rejection is a completed judgment, not a recommendation for the user to confirm. Only surviving problems receive a `recommended_action` for presentation.
+从保留的审核集中删除被拒绝的索赔并在内部记录原因。拒绝是一个完整的判断，而不是供用户确认的建议。只有幸存的问题才会获得 `recommended_action` 的展示。
 
-Choose that action from the verified problem, benefit of the correction, agreed scope, and existing decisions. Recommend Apply when the correction is justified and concrete. Recommend Defer when a worthwhile problem cannot yet be resolved. A recommendation to Skip a proposed remedy belongs in the user-facing review only when a consequential unresolved choice still requires the user; explain that choice rather than asking them to ratify your rejection.
+从已验证的问题、纠正的好处、商定的范围和现有决策中选择该操作。建议在修正合理且具体时应用。当有价值的问题尚未解决时建议推迟。仅当后续未解决的选择仍然需要用户时，才应在面向用户的审查中提出跳过所提议的补救措施的建议；解释你的选择，而不是要求他们批准你的拒绝。
 
-When reviewers recommended different actions, keep one line explaining the lead agent's choice and its evidence. The walk-through and bulk preview use that `recommended_action` without recalculating it. Recommendations do not grant edit permission. After 3.6 and 3.7, check that each Apply still has a specific edit in `suggested_fix`; otherwise recommend Defer.
+当审查者建议采取不同的行动时，请保留一行解释首席代理人的选择及其证据。演练和批量预览使用 `recommended_action` 而不重新计算它。推荐不授予编辑权限。 3.6和3.7之后，检查每个Apply在`suggested_fix`中仍然有特定的编辑；否则建议推迟。
 
-### 3.6 Resolve Who Can Choose the Fix
+### 3.6 解决谁可以选择修复
 
-Each retained problem leaves this step with a correction the agent can choose or a specific unanswered question only the user can settle. Determine that from the current document, evidence, and user decisions. A reviewer's classification or a previous review's section heading is not a user decision and does not carry forward as the answer.
+每个保留的问题都会在该步骤中留下代理可以选择的更正或只有用户可以解决的特定未解答问题。从当前文档、证据和用户决策中确定这一点。审查者的分类或先前审阅的章节标题不是用户决定，并且不会作为答案保留。
 
-Use `manual` only when you can state the missing input or consequential choice, why the agreed outcome and constraints leave it unresolved, and how the user's answer changes the work. A description of a technical fix does not establish such a question. When the document already determines the outcome, choose the smallest supported correction within its constraints; the existence of other workable methods does not transfer that choice to the user.
+仅当您可以说明缺少的输入或相应的选择、为什么商定的结果和约束使其未得到解决以及用户的答案如何改变工作时，才使用`manual`。技术修复的描述并不能提出这样的问题。当文档已经确定结果时，选择其约束范围内支持的最小修正；其他可行方法的存在不会将该选择转移给用户。
 
-Use `safe_auto` for a mechanical correction with one right answer and `gated_auto` for a chosen correction that changes meaning. Step 3.7 (Route by Autofix Class) determines whether the correction may be applied. Keep prior user decisions and actual applied changes; reclassify the remaining reviewer proposals from their evidence.
+使用 `safe_auto` 进行有一个正确答案的机械修正，使用 `gated_auto` 进行选择的改变含义的修正。步骤3.7（按自动修复类别路由）确定是否可以应用修正。保留之前的用户决定和实际应用的更改；根据证据重新分类剩余的审稿人提案。
 
-**Fixes found only by another model.** These never qualify for `safe_auto`. The lead may choose a supported `gated_auto` correction within the agreed outcome and constraints, but its own investigation is not independent review. When missing local corroboration is the only obstacle to an otherwise authorized, worthwhile correction, obtain the limited independent check described in `references/document-intake.md` before returning it for approval. Keep the original attribution and record any new review separately. Silent application requires that local reviewer to independently identify the same issue, plus the confidence and edit-authority requirements in 3.7. Missing, failed, or disagreeing local evidence leaves the peer-only restriction in place.
+**仅由另一个模型发现的修复。**这些永远不符合 `safe_auto` 的条件。领导者可以在商定的结果和限制范围内选择受支持的`gated_auto`更正，但其自己的调查不是独立审查。当缺少当地证实是进行其他授权的、值得纠正的唯一障碍时，请在返回批准之前进行`references/document-intake.md`中描述的有限独立检查。保留原始归属并单独记录任何新评论。无提示申请要求本地审查者独立识别同一问题，以及 3.7 中的置信度和编辑权限要求。本地证据的缺失、失败或不一致都会导致仅限同行的限制。
 
-### 3.7 Route by Autofix Class
+### 3.7 按 Autofix 类进行路由
 
-**Severity and autofix_class are independent.** A P1 finding can be `safe_auto` if the correct fix is obvious. Importance does not establish who can choose the fix or permission to edit.
+**严重性和 autofix_class 是独立的。** 如果正确的修复显而易见，则 P1 结果可能是 `safe_auto`。重要性并不决定谁可以选择修复或编辑权限。
 
-**Anchor and autofix_class are also independent.** The anchor decides where the finding goes (FYI or actionable); `autofix_class` decides what happens to an actionable finding. Both are consulted in this step.
+**锚点和autofix_class也是独立的。**锚点决定发现的去向（仅供参考或可操作）； `autofix_class` 决定如何处理可操作的发现。在此步骤中会咨询两者。
 
-Findings reaching 3.7 already have anchor `50`, `75`, or `100`; 3.2 (Confidence Gate) dropped anchors `0` and `25`.
+达到 3.7 的结果已经有锚点 `50`、`75` 或 `100`； 3.2（置信门）抛锚`0`和`25`。
 
-**Check obligations before autofix routing.** An **obligation** is a retained defect whose remedy follows from a decision the document already made. This classifies findings that passed 3.1b (admission by consequence); it does not create findings because a unit is less detailed than the contract it follows.
+**在自动修复路由之前检查义务。** **义务**是保留的缺陷，其补救措施取决于文档已做出的决定。这对通过 3.1b 的结果进行分类（按结果录取）；它不会产生结果，因为一个单元不如它所遵循的合同详细。
 
-A finding is **not** an obligation merely because its fix would improve the document. Project evidence may justify a technical correction without making it an existing requirement. Step 3.6 decides who can choose the correction; grouping it here does not reopen that judgment.
+发现**不是**一项义务，仅仅因为它的修复会改进文档。项目证据可以证明技术修正的合理性，但不使其成为现有要求。步骤3.6决定谁可以选择修正；将其分组在这里并不会重新进行该判断。
 
-An obligation that changes meaning uses `gated_auto` and must include a specific `suggested_fix`. A mechanical `safe_auto` correction keeps its class, subject to the restriction on findings raised only by another model. If investigation still leaves no specific edit to apply, exclude it from the group and return the missing information to the calling agent.
+改变含义的义务使用`gated_auto`，并且必须包含特定的`suggested_fix`。机械 `safe_auto` 校正保持其类别，但受到仅由另一个模型提出的结果的限制。如果调查仍然没有留下要应用的特定编辑，请将其从组中排除并将丢失的信息返回给呼叫代理。
 
-This is a per-finding test against one document. It needs no comparison to other findings and is independent of the merging in 3.3 (Merge Duplicate Findings).
+这是针对一份文档的每次发现测试。它不需要与其他发现进行比较，并且独立于 3.3 中的合并（合并重复发现）。
 
-Group obligations still needing approval under the implementation unit or the section they affect. They belong in one approval batch, not the per-finding decision walk-through. **Render the group in full before asking the confirmation question.**
+集团义务仍需要实施单位或其影响的部门的批准。它们属于一批审批，而不是每个发现的决策演练。 **在提出确认问题之前完整呈现该组。**
 
-Obligation grouping governs presentation, not edit authority. Route authorized corrections to Apply before constructing the approval batch.
+义务分组控制表示，而不是编辑权限。在构建批准批次之前将授权的更正发送至“应用”。
 
-**Evidence, choosing a fix, and permission to edit are separate checks.** Confidence describes support for the finding. Step 3.6 decides whether the agent can choose the fix. This step decides whether and how the reader must approve the edit.
+**证据、选择修复和编辑权限是单独的检查。** 置信度描述了对发现结果的支持。步骤3.6决定代理是否可以选择修复。此步骤决定读者是否以及如何批准编辑。
 
-**Establish edit authority from the request and the document's settled decisions.** Explicit read-only, report-only, or narrower edit restrictions take precedence. By default, this review may correct a proven defect in the reviewed document when the correction is necessary to implement a concrete decision already made there. Name that decision and how the defect prevents it from being carried out. Broad goals such as quality, safety, or clarity do not establish a particular correction. The correction must preserve user commitments and require no unresolved user input; choosing among equivalent technical methods does not itself create a user decision.
+**根据请求和文档的既定决定建立编辑权限。** 显式只读、仅报告或更窄的编辑限制优先。默认情况下，当需要进行更正以实施已在其中做出的具体决策时，此审核可能会纠正已审核文档中已证明的缺陷。说出该决定以及缺陷如何阻止该决定的执行。质量、安全性或清晰度等宽泛的目标并没有建立特定的纠正措施。更正必须保留用户承诺并且不需要未解决的用户输入；在等效技术方法中进行选择本身并不构成用户决定。
 
-Apply such a correction at anchor `100` when a local reviewer supports the finding and a specific `suggested_fix` is ready. This may be `safe_auto` or `gated_auto`: changing wording or meaning to fulfill an existing decision is different from making a new decision. Findings raised only by another model retain the no-silent-fixes restriction, and session-settled annotations remain protected.
+当本地审查者支持该发现并且特定的`suggested_fix`准备就绪时，在锚点`100`应用此类更正。这可能是`safe_auto`或`gated_auto`：改变措辞或含义来实现现有决策与做出新决策不同。仅由另一个模型提出的调查结果保留了无静默修复限制，并且会话解决的注释仍然受到保护。
 
-An explicit user or caller grant may cover additional technical corrections at anchor `75` or `100` within its named scope and established contract. It does not authorize changing product outcomes, constraints, or user-reserved choices unless the grant expressly includes them. Confidence, reviewer agreement, and non-interactive mode never supply edit authority.
+明确的用户或调用者授权可以涵盖其指定范围和既定合同内锚点`75`或`100`的额外技术更正。它不授权更改产品结果、约束或用户保留的选择，除非拨款明确包含这些内容。置信度、审稿人同意和非交互模式永远不会提供编辑权限。
 
-For findings not covered by the authority above, use the routes below. Show the chosen fixes together for one approval. Ask separate questions only for essential information or choices the user still needs to supply. Another reasonable implementation does not, by itself, create a user decision.
+对于上述权威机构未涵盖的调查结果，请使用以下途径。将所选修复程序一起显示以获得一次批准。仅针对用户仍需要提供的基本信息或选择提出单独的问题。另一种合理的实现本身并不产生用户决定。
 
-| Anchor | Autofix Class | Route |
+| 锚 | 自动修复类 | 路线 |
 |--------|---------------|-------|
-| `100`  | `safe_auto`   | Apply when the request permits default editing. Report in the change list. Mechanical corrections only — evidence directly confirms and there is one right answer. Requires `suggested_fix`; demote to `gated_auto` if missing. |
-| `100`  | `gated_auto`  | Grouped confirmation. A concrete fix that touches meaning, so the reader sees it before it lands — but batched, not asked one at a time. Requires `suggested_fix`; demote to `manual` if missing. |
-| `100`  | `manual`      | A decision: the reader chooses. Never a question about whether to proceed with something already settled. Ask **which remedy** only when the finding carries competing ones; see below. |
-| `75`   | `safe_auto`   | Grouped confirmation. Unattended apply stays reserved for anchor `100`, where the evidence directly confirms the fix. Requires `suggested_fix`; demote to `manual` if missing. |
-| `75`   | `gated_auto`  | Grouped confirmation. Requires `suggested_fix`; demote to `manual` if missing. |
-| `75`   | `manual`      | A decision. Same treatment. |
-| `50`   | any           | Show in the FYI subsection regardless of `autofix_class`. Do not enter the Decisions list or any batch action. These are observations. |
+| `100`  | `safe_auto`   | 当请求允许默认编辑时应用。在变更列表中报告。仅机械修正——证据直接证实，并且有一个正确答案。需要`suggested_fix`；如果缺失则降级至`gated_auto`。 |
+| `100`  | `gated_auto`  | 分组确认。这是一个触及意义的具体修复，因此读者可以在它落地之前看到它——但是是批量的，而不是一次询问一个。需要`suggested_fix`；如果缺失则降级至`manual`。 |
+| `100`  | `manual`      | 决定：读者选择。从来没有想过是否要继续处理已经解决的事情。仅当研究结果存在竞争性时才询问**哪种补救措施**；见下文。 |
+| `75`   | `safe_auto`   | 分组确认。无人值守的应用保留为锚点`100`保留，证据直接证实了修复。需要`suggested_fix`；如果缺失则降级至`manual`。 |
+| `75`   | `gated_auto`  | 分组确认。需要`suggested_fix`；如果缺失则降级至`manual`。 |
+| `75`   | `manual`      | 一个决定。同样的待遇。 |
+| `50`   | 任何           | 无论`autofix_class`如何，都显示在仅供参考的小节中。不要输入决策列表或任何批处理操作。这些是观察结果。 |
 
-**A useful improvement is not automatically an entailed correction.** When no concrete settled decision requires the change and no edit grant covers it, retain a worthwhile, chosen remedy in the grouped confirmation. Keep choices the user must still make in Decisions.
+**有用的改进不会自动进行必要的纠正。**当没有具体的既定决定需要更改并且没有编辑授权涵盖它时，请在分组确认中保留有价值的、选定的补救措施。保留用户在决策中仍必须做出的选择。
 
-Earlier blanket application of `gated_auto` corrections selected genuine product forks (#1373). The boundary above therefore requires a concrete prior decision or an explicit edit grant; classifying a fix as technical or inevitable cannot establish either.
+早期全面应用 `gated_auto` 修正选择了正品叉子 (#1373)。因此，上述边界需要具体的事先决定或明确的编辑授权；将修复归类为技术性修复或不可避免性修复都无法成立。
 
-Present three groups: **applied** corrections, **proposed fixes** still needing approval, and **decisions** that the user must still make. Proposed fixes include entailed corrections that still lack sufficient confidence or independent reviewer support, and worthwhile improvements outside current edit authority. Follow the shared rendering rules so the reader can distinguish these groups.
+呈现三组：**已应用**更正、**仍需批准的建议修复**以及用户仍必须做出的**决定**。提议的修复包括仍然缺乏足够信心或独立审查者支持的必要修正，以及当前编辑权限之外的有价值的改进。遵循共享的渲染规则，以便读者可以区分这些组。
 
-**Present the unresolved choice, when one remains.** Step 3.6 decides whether the user must choose; the number of proposed remedies does not. The reviewer contract supplies one recommendation, so use the regular walk-through question for a genuine decision with one remedy. When contradiction resolution in 3.5 (Resolve Contradictions) preserves competing remedies, present both views and ask which remedy. Do not invent alternatives to create a choice.
+**当还有一个未解决的选择时，呈现未解决的选择。** 步骤3.6决定用户是否必须选择；提议的补救措施的数量却没有。审查者合同提供了一项建议，因此请使用常规的演练问题通过一种补救措施做出真正的决定。当 3.5（解决矛盾）中的矛盾解决保留相互竞争的补救措施时，提出两种观点并询问哪种补救措施。不要发明替代方案来创造选择。
 
-**No silent fixes from another model alone.** Findings raised only by another model never go directly to Apply, regardless of confidence or class. Show a verified, chosen fix for approval with the others. Keep `manual` when a user decision or essential information is still missing. The source of a finding limits silent application, not the lead agent's ability to investigate and recommend.
+**仅由另一个模型提出的静默修复。**仅由另一个模型提出的发现永远不会直接进入“应用”，无论信心或等级如何。显示经过验证的、选定的修复程序以供其他人批准。当用户决定或基本信息仍然缺失时，保留`manual`。调查结果的来源限制了静默申请，而不是首席代理人的调查和建议能力。
 
-**Check the correction against the problem.** Before applying or recommending an edit, establish that it resolves the retained problem and preserves the agreed outcome with no unnecessary new requirements. Verify prescribed mechanisms against the actual project interfaces and behavior; where implementation can choose the mechanism, state the result it must achieve. A fix that merely looks more explicit is not ready to apply.
+**检查针对问题的更正。** 在应用或建议编辑之前，确定它解决了保留的问题并保留了商定的结果，没有不必要的新要求。根据实际项目接口和行为验证规定的机制；如果实施可以选择机制，请说明其必须达到的结果。只是看起来更明确的修复尚未准备好应用。
 
-Check edit authority separately. A concrete `suggested_fix` does not grant permission, and a choice reserved for the user remains `manual`. A `safe_auto` fix that changes meaning or has more than one correct answer can become `gated_auto` only after the agent has resolved the choice. Mechanical corrections must follow directly from the document's authoritative content. A visual aid may be updated to fix an inconsistency, but not deleted merely because it repeats prose.
+单独检查编辑权限。具体的`suggested_fix`不授予权限，为用户保留的选择仍然是`manual`。只有在代理解决了选择之后，改变含义或具有多个正确答案的`safe_auto`修复才能变为`gated_auto`。机械更正必须直接遵循文档的权威内容。视觉辅助工具可能会被更新以修复不一致之处，但不会仅仅因为它重复散文而被删除。
 
-### 3.8 Sort
+### 3.8 排序
 
-Sort findings for presentation: P0 → P1 → P2 → P3, then by finding type (errors before omissions), then by confidence anchor (descending: `100` first, then `75`, then `50`), then by document order (section position) as the deterministic final tiebreak.
+对演示结果进行排序：P0→P1→P2→P3，然后按查找类型（遗漏之前的错误），然后按置信锚点（降序：首先是`100`，然后`75`，然后`50`），然后按文档顺序（部分位置）作为确定性的最终决胜局。
 
-### 3.9 Suppress Restatements in Residual Concerns and Deferred Questions
+### 3.9 禁止对剩余问题和延期问题的重述
 
-Apply 3.1b to each reviewer's `residual_risks` and `deferred_questions`, not just its findings. Keep an uncertain concern only when project evidence shows why it matters to the requested outcome. Rejected preferences and unsupported possibilities do not return through another output field.
+将 3.1b 应用于每个评审者的 `residual_risks` 和 `deferred_questions`，而不仅仅是其发现。仅当项目证据表明为什么它对所要求的结果很重要时，才保留不确定的担忧。被拒绝的首选项和不支持的可能性不会通过另一个输出字段返回。
 
-Compare the remaining risks and questions with the final findings, including FYI items. Omit any that repeat a concern already covered by a finding or its recommended fix. Keep distinct, relevant uncertainty; similar wording alone does not prove duplication.
+将剩余的风险和问题与最终结果（包括仅供参考的项目）进行比较。忽略任何重复发现结果或其建议修复方案已涵盖的问题。保持独特、相关的不确定性；仅类似的措辞并不能证明重复。
 
-Run this pass on the merged set across all personas. The suppression is not reported to the user.
+在所有角色的合并集上运行此传递。抑制不会报告给用户。
 
-## Phase 4: Apply and Present
+## 第四阶段：申请并展示
 
-**Rendering floor (applies to every finding, every mode — read before rendering anything).** Read
-`references/rendering-floor.md` now. It is the single source of truth for the decision-first field
-order (Recommendation → Consequence-if-unchanged → Change → Basis → Trace-on-request), the rule for
-identifiers the reader cannot understand without opening the document, the tracker, or the code
-(document IDs, ticket and PR references, code symbols; at most two per block), and the code-span
-budget. Every place findings are shown below — the structured non-interactive result, the interactive
-template, and the bulk preview — maps its own layout onto that floor. Do not restate a weaker rule for
-one of them; the floor is authoritative.
+**渲染地板（适用于每个发现、每个模式 - 在渲染任何内容之前阅读）。** 现在阅读 `references/rendering-floor.md`。它是决策优先字段顺序（建议→未更改时的后果→更改→基础→根据请求进行跟踪）、读者在不打开文档、跟踪器或代码（文档 ID、票证和 PR 引用、代码符号；每个块最多两个）的情况下无法理解的标识符规则以及代码跨度预算的唯一事实来源。每个地方的发现如下所示——结构化的非交互式结果、交互式模板和批量预览——将其自己的布局映射到该楼层。不要对其中一项重申较弱的规则；楼上的很权威。
 
-**User-facing vocabulary rule (applies to ALL user-visible output in Phase 4, not just the rendered template).** Internal enum values — `safe_auto`, `gated_auto`, `manual`, `FYI` — stay inside the schema and synthesis prose. Every word the user sees in Phase 4 output, including free-text narration between sections, transition preambles, status lines, and confirmation messages, MUST use user-facing vocabulary, named by where 3.7 routed the finding: "applied changes" or "fixes" (what 3.7 routed to Apply), "proposed fixes" (the grouped confirmation), "decisions" (the Decisions list), "FYI observations" (anchor `50`). Do NOT emit narration like "safe_auto fixes applied" or "N gated_auto findings" — write "fixes applied" or "N proposed fixes" instead.
+**面向用户的词汇规则（适用于第 4 阶段中的所有用户可见输出，而不仅仅是渲染的模板）。** 内部枚举值 — `safe_auto`、`gated_auto`、`manual`、`FYI` — 保留在模式和综合散文中。用户在第 4 阶段输出中看到的每个单词，包括各部分之间的自由文本旁白、转换序言、状态行和确认消息，必须使用面向用户的词汇，以 3.7 路由发现的位置命名：“应用的更改”或“修复”（3.7 路由到应用的内容）、“建议的修复”（分组确认）、“决策”（决策列表）、“FYI 观察结果”（锚点） `50`）。不要发出类似“safe_auto已应用的修复”或“Ngated_auto发现”之类的旁白——而是写“已应用的修复”或“N个建议的修复”。
 
-### Apply the findings 3.7 routed to Apply
+### 应用结果 3.7 路由至 Apply
 
-Apply, in a single pass, every finding 3.7 routed to Apply. Verify that each edit resolves its finding and preserves the governing contract. Report what changed and which settled decision or supplied edit scope authorized it. Findings outside Apply remain unapplied.
+应用一次，将每个结果 3.7 路由至“应用”。验证每次编辑是否解决了其发现并保留了管理合同。报告发生了什么变化以及哪个决定或提供的编辑范围授权了它。 Apply 之外的结果仍未应用。
 
-Apply each edit in the document's native format and preserve its existing structure. Never insert markdown syntax into HTML, and for an ID-bearing HTML item mirror the nearest sibling's structure, preserving both its anchor convention and its visible ID text.
+以文档的本机格式应用每次编辑并保留其现有结构。切勿将 Markdown 语法插入 HTML，并且对于带有 ID 的 HTML 项目，镜像最近的同级结构，保留其锚约定和可见 ID 文本。
 
-- Edit the document inline using the platform's edit tool
-- Track what was changed for the "Applied changes" section in the rendered output
-- Do not ask for approval; 3.7 already established there is no choice to offer
-- Do **not** apply anything 3.7 routed elsewhere. Obligations and peer-only findings diverted out of Apply join the grouped confirmation; anchor `50` goes to FYI; `manual` at any anchor is a decision. If a finding reaches this step from any of those routes, 3.7 was not applied correctly. Re-run it for that finding before continuing.
-- Do **not** apply a finding whose only reviewers are cross-model peers, at any anchor or class. 3.7 diverts those to the grouped confirmation when the table would have applied them, and keeps choices that only the user can make in the separate Decisions section after the check in 3.6 of who can choose the fix.
-- An applied fix must never remove or reword a `session-settled:` annotation. If a `suggested_fix`'s text would touch one, do not apply it. Send the finding to the grouped confirmation so the user answers before the annotation changes.
+- 使用平台的编辑工具内联编辑文档
+- 跟踪渲染输出中“应用的更改”部分的更改内容
+- 不寻求批准； 3.7 已经建立没有选择提供
+- **不要**应用任何在其他地方路由的 3.7 内容。从Apply中转出的义务和仅限同行的调查结果加入分组确认；锚`50`仅供参考； `manual` 在任何锚点都是一个决定。如果发现结果从任何这些途径到达此步骤，则 3.7 未正确应用。在继续之前重新运行该发现。
+- **不要**应用任何锚点或类别的唯一审查者是跨模型同行的发现。 3.7 当表应用它们时将它们转移到分组确认，并在检查 3.6 中谁可以选择修复后保留只有用户可以在单独的决策部分中做出的选择。
+- 应用的修复绝不能删除或改写 `session-settled:` 注释。如果 `suggested_fix` 的文本会触及其中一个，则不要应用它。将结果发送到分组确认，以便用户在注释更改之前回答。
 
-List every applied fix in the output summary so the user can see what changed. Use enough detail to convey the substance of each fix (section, what was changed, reviewer attribution). This is especially important for fixes that add content — the user should not have to diff the document to understand what the review did.
+在输出摘要中列出每个已应用的修复，以便用户可以看到更改的内容。使用足够的细节来传达每个修复的实质内容（部分、更改内容、审查者归属）。这对于添加内容的修复尤其重要——用户不必通过比较文档来了解评论的内容。
 
-### Route Remaining Findings
+### 路线剩余调查结果
 
-After the applied changes land, the rest split by the route 3.7 assigned, not by `autofix_class`:
+申请的变更土地后，其余部分按分配的路线 3.7 划分，而不是按 `autofix_class` 划分：
 
-- **Grouped confirmation** — every finding 3.7 sent there, obligations and Apply-diverted peer-only findings among them. Rendered in full before anything asks about it. In interactive mode the routing question covers this batch and the decisions together (see `references/walkthrough.md`); a run that ends without that question leaves the batch unapplied. In non-interactive mode the batch is returned unapplied for the caller to handle.
-- **Decisions** — `manual` findings at anchor `75` or `100`. These enter the routing question and the walk-through (see `references/walkthrough.md`). They carry a which-remedy sub-question only when the finding holds competing remedies, which in practice means a contradiction preserved in 3.5, per the note under the routing table.
-- **FYI** — anchor `50`, presentation only, no routing.
-- **Nothing pending** (no proposed fixes and no decisions) → skip the routing question. In Interactive mode, emit the completion report and return through Phase 5 (Return to the Caller). In Non-interactive mode, return only the structured result described below; an extra interactive report would break the caller's expected format.
+- **分组确认** — 发送到那里的每项调查结果 3.7、其中的义务和仅申请转移的同行调查结果。在任何询问之前就已完整渲染。在交互模式下，路由问题涵盖了该批次和决策（参见`references/walkthrough.md`）；如果运行结束时没有出现该问题，则该批次不会被应用。在非交互模式下，批量返回未应用的状态以供调用者处理。
+- **决定** — `manual`锚点发现`75`或`100`。这些进入路由问题和演练（参见`references/walkthrough.md`）。仅当发现存在竞争补救措施时，它们才带有哪个补救措施子问题，这实际上意味着根据路由表下的注释，3.5 中保留了矛盾。
+- **仅供参考** — 锚点 `50`，仅演示，无路由。
+- **没有任何悬而未决的**（没有建议的修复方案，也没有决定）→ 跳过路由问题。在交互模式下，发出完成报告并通过阶段 5 返回（返回调用者）。非交互模式下，仅返回如下所示的结构化结果；额外的交互式报告会破坏调用者的预期格式。
 
-**Self-contained rendered lines (both modes, including the Applied-fixes list).** Every rendered line —
-an applied fix, proposed fix, decision, FYI observation, residual concern, or deferred question —
-follows the shared rendering floor (`references/rendering-floor.md`) for every identifier the reader
-cannot understand without opening the document, the tracker, or the code, not document IDs alone. A
-requirement or unit ID (`R6`, `U3`) keeps its ID and gets a short handle at first mention. A ticket or
-PR number (`ESP-3373`, `PR #1776`) is named only when that event changes the decision; otherwise it
-moves to the detail offered on request. A function, file, variable, or line reference the document
-names (`clearMuxStatus`, `codebookTranscriptMode.ts:46`) is described by the role it plays in the
-decision; keep the exact symbol only when precise scope drives the decision. At most two such
-identifiers per finding — counted across all its rendered lines, matching the floor's per-block limit —
-each resolved at render time against the document in context so it stays accurate after an Apply
-renumbers the item. The floor's full decision-first field order
-(Recommendation → Consequence → Change → Basis) applies to **actionable findings** — proposed fixes and
-decisions. FYI observations, residual concerns, deferred questions, and obligations carry no
-recommendation, so each renders as a single line under the identifier rule, not the full field order: a
-consequence, concern, or question, and for an obligation the consequence plus its change as intent. A
-line whose only description of a referenced item is a bare identifier — of any kind — is not acceptable
-rendered output.
+**自包含的渲染行（两种模式，包括应用修复列表）。** 每条渲染行（应用的修复、建议的修复、决策、仅供参考的观察、剩余问题或延迟的问题）都遵循共享渲染层 (`references/rendering-floor.md`)，适用于读者在不打开文档、跟踪器或代码（而不是单独的文档 ID）的情况下无法理解的每个标识符。需求或单元 ID（`R6`、`U3`）保留其 ID 并在首次提及时获得简短句柄。仅当该事件改变决定时，票证或PR号码（`ESP-3373`、`PR #1776`）才会被命名；否则，它将转向根据要求提供的详细信息。函数、文件、变量或行引用文档名称（`clearMuxStatus`、`codebookTranscriptMode.ts:46`）通过其在决策中扮演的角色来描述；仅当精确范围驱动决策时才保留精确符号。每个发现最多有两个这样的标识符（在所有渲染的行中计数，与楼层的每块限制相匹配），每个标识符在渲染时根据上下文中的文档进行解析，以便在“应用”对项目重新编号后保持准确。会场的完整决策优先现场顺序（建议→结果→更改→基础）适用于**可操作的发现** - 提议的修复和决策。仅供参考的观察结果、剩余问题、延迟问题和义务不包含任何内容
+建议，因此每个在标识符规则下呈现为单行，而不是完整的字段顺序：结果、关注点或问题，对于义务，结果加上其作为意图的更改。所引用项目的唯一描述是任何类型的裸标识符的行是不可接受的渲染输出。
 
-**Non-interactive mode:** Do not use interactive question tools. The structured text block below is the non-interactive result, which the caller parses. Write it to a file rather than into the chat, as described after the template, so a nested run does not fill the user's conversation with a report addressed to another skill. Internal enum values (`safe_auto`, `gated_auto`, `manual`, `FYI`) stay in the schema and synthesis prose; the non-interactive result uses user-facing vocabulary ("fixes", "Proposed fixes", "Decisions", "FYI observations") so non-interactive output reads the same way interactive output does. `peer.outcome` is a machine field in that block, not narration: callers read it to tell a review whose different-provider peer folded an artifact from one whose peer did not.
+**非交互模式：**不使用交互提问工具。下面的结构化文本块是调用者解析的非交互式结果。将其写入文件而不是写入聊天中，如模板后面所述，因此嵌套运行不会使用针对其他技能的报告填充用户的对话。内部枚举值（`safe_auto`、`gated_auto`、`manual`、`FYI`）保留在模式和综合散文中；非交互式结果使用面向用户的词汇（“修复”、“建议修复”、“决策”、“仅供参考”），因此非交互式输出的读取方式与交互式输出相同。 `peer.outcome` 是该块中的一个机器字段，而不是旁白：调用者阅读它是为了告诉评论，其不同提供商的同行折叠了一件产物，而其同行则没有折叠。
 
-Two things about the template that follows. First, **nothing left in the batch has been confirmed here.** These edits were not covered by existing authority and this mode asks no questions, so they are returned unapplied for the caller to handle. Already-authorized corrections that landed belong only in Applied. Wording that reports them as already confirmed invites a caller, or a user reading over its shoulder, to treat unapplied and unapproved changes as accepted. Second, **the text inside the code fence is the whole result.** Do not restate it in prose; the caller summarizes it for the user. Leave reviewer names and confidence values out of it; the caller does not use them. On a document with no implementation units, title the obligations section "Entailed corrections" and use the section name as each group heading. Do not emit that instruction, or any other bracketed note, into the result the caller parses.
+关于下面的模板有两件事。首先，**这里没有确认批次中剩下的任何内容。**这些编辑不属于现有权限的范围，并且此模式不会提出任何问题，因此它们会不经应用地返回给调用者处理。已授权的更正仅属于应用材料。将这些更改报告为已确认的措辞会邀请呼叫者或背后阅读的用户将未应用和未经批准的更改视为已接受。其次，**代码围栏内的文本是整个结果。**不要用散文重述它；调用者为用户总结它。将审查者姓名和置信度值排除在外；调用者不使用它们。在没有实施单位的文件中，将义务部分标题为“需要的更正”，并使用该部分名称作为每个组标题。不要将该指令或任何其他括号内的注释发送到调用者解析的结果中。
 
 ```
-Document review complete (non-interactive mode).
+文档审核完成（非交互模式）。
 
-Applied N fixes:
-- <section>: <what was changed>
-- <section>: <what was changed>
+已应用 N 项修复：
+- <section>：<改变了什么>
+- <section>：<改变了什么>
 
-Implementation obligations (already entailed by the document; not applied):
+实施义务（文件已规定；未适用）：
 
-<unit or section name>
-  - <consequence, no opaque identifier> — <change as intent language>
-  - <consequence, no opaque identifier> — <change as intent language>
+<单位或部门名称>
+  - <后果，无不透明标识符> — <更改为意图语言>
+  - <后果，无不透明标识符> — <更改为意图语言>
 
-<unit or section name>
-  - <consequence, no opaque identifier> — <change as intent language>
+<单位或部门名称>
+  - <后果，无不透明标识符> — <更改为意图语言>
 
-Proposed fixes (not applied; need approval before they land):
+提议的修复（未应用；需要在落地前获得批准）：
 
-[P0] Section: <section> — <consequence-first title>
-  Recommendation: <Apply | Defer | Skip>
-  Consequence if unchanged: <one sentence, no opaque identifier>
-  Change: <suggested_fix as intent language>
-  Basis: <at most two sentences of mechanism, opaque tokens glossed, at most two anchors>
+[P0] 部分：<section> — <结果第一标题>
+  建议：<申请|推迟 |跳过>
+  如果不变的话后果：<一句话，没有不透明的标识符>
+  更改：<suggested_fix 作为意图语言>
+  依据：<最多两句机制，不透明标记被注释，最多两个锚点>
 
-Decisions (requires user judgment):
+决策（需要用户判断）：
 
-[P1] Section: <section> — <consequence-first title>
-  Recommendation: <Apply | Defer | Skip>
-  Consequence if unchanged: <one sentence, no opaque identifier>
-  Change: <suggested_fix as intent language, or "none">
-  Basis: <at most two sentences of mechanism, opaque tokens glossed, at most two anchors>
+[P1] 部分：<section> — <结果第一标题>
+  建议：<申请|推迟 |跳过>
+  如果不变的话后果：<一句话，没有不透明的标识符>
+  更改：<suggested_fix 作为意图语言，或“无”>
+  依据：<最多两句机制，不透明标记被注释，最多两个锚点>
 
-FYI observations (anchor 50, no decision required):
+仅供参考的观察结果（锚点 50，无需做出决定）：
 
-[P3] Section: <section> — <consequence-first title>
-  Consequence if unchanged: <one sentence, no opaque identifier>
+[P3] 部分：<section> — <结果第一标题>
+  如果不变的话后果：<一句话，没有不透明的标识符>
 
 Residual concerns:
 - <concern>
@@ -266,22 +243,22 @@ Residual concerns:
 Deferred questions:
 - <question>
 
-Recorded in the document: N items under Deferred / Open Questions
-Not recorded in the document: N items (<reason>)
+文档中记录：Deferred / Open Questions 下的 N 项
+文档中未记录：N 项 (<reason>)
 
-Coverage: <what limited this review, including a lite review as references/depth.md words it>
+覆盖范围：<本次评论的限制，包括 references/depth.md 字样的精简评论>
 
-peer.outcome: <folded | in-process-fallback>
-cross-model <lens> peer: <what happened to the peer's result>
-<lens>: in-process fallback (cross-model peer not run: <reason>)
-whole-doc: not run (cross-model peer not run: <reason>)
+peer.outcome: <折叠|进程内回退>
+跨模型<lens>对等点：<对等点的结果发生了什么>
+<lens>：进程内回退（跨模型对等点未运行：<reason>）
+整个文档：未运行（跨模型对等未运行：<reason>）
 
 Review complete
 ```
 
-Omit any section with zero items; Coverage follows the same condition as the interactive Coverage line in `references/review-output-template.md`. The bucket names are the user-facing vocabulary for the routes 3.7 assigned. "Applied N fixes" reports what already changed. The obligations block and "Proposed fixes" together render the grouped confirmation: obligations first, then the rest of the batch, each shaped by the floor's "Presenting a batch" rule. The caller re-narrates this result to a reader who has seen none of it, so a flat list here becomes a flat list there. "Decisions" carries the decisions the user must still make, and "FYI observations" carries anchor `50`. End with "Review complete" as the final line so callers can detect completion.
+省略任何包含零项的部分； Coverage 遵循与 `references/review-output-template.md` 中的交互式 Coverage 线相同的条件。存储桶名称是分配的路由的面向用户的词汇表 3.7。 “应用的 N 个修复”报告已更改的内容。义务块和“提议的修复”一起呈现分组确认：首先是义务，然后是批次的其余部分，每个批次均由会场的“呈现批次”规则形成。调用者向没有见过任何结果的读者重新叙述这个结果，因此这里的平面列表变成了那里的平面列表。 “Decisions”携带用户仍必须做出的决定，“FYI comments”携带锚`50`。以“审核完成”作为最后一行，以便调用者可以检测完成情况。
 
-**Deliver the result through a file.** Write the block, exactly as specified, to `result.md` in a private run directory, then print only the three lines below as your final output. Create the directory with this block (`<run-id>` is the current date and time plus a short random suffix, e.g. `20261030-0114-a3f9c1`):
+**通过文件传递结果。** 完全按照指定的方式将块写入私有运行目录中的 `result.md`，然后仅打印下面三行作为最终输出。使用此块创建目录（`<run-id>`是当前日期和时间加上一个简短的随机后缀，例如`20261030-0114-a3f9c1`）：
 
 ```bash
 SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
@@ -294,45 +271,45 @@ RUN_DIR="$SCRATCH_ROOT/ce-doc-review/<run-id>"; (umask 077; mkdir -p "$RUN_DIR")
 ```
 
 ```
-Doc review: applied N fixes; P proposed fixes and D decisions remain.
-Full result: <absolute path to result.md>
+文档审查：应用了 N 个修复； P 提议的修复和 D 决定仍然存在。
+完整结果：<到result.md的绝对路径>
 Review complete
 ```
 
-Name only the counts that are non-zero, and say "no open items" when nothing remains. If the file cannot be written, print the whole block in the chat instead; a caller must always receive the result one way or the other.
+仅列出非零计数，并在没有剩余时说“没有未清项目”。如果文件无法写入，则在聊天中打印整个块；调用者必须始终以一种方式接收结果。
 
-When a trio lens was activated, keep `peer.outcome` even though empty sections are omitted; omit it and its lens lines when none was. The owed lenses are each activated trio lens plus the whole-doc sweep. Write `peer.outcome: folded` only when every owed lens folded a different-provider peer artifact. Any other result, including a peer that started and then failed or timed out, is `peer.outcome: in-process-fallback`. Under it, give each owed lens that did not fold exactly one line, chosen by whether there is positive evidence that its peer did not run: it never started, the script skipped it, or the worker reported the transport unavailable before egress. With that evidence, use the not-run line with the observed reason: `<lens>: in-process fallback (cross-model peer not run: <reason>)` for a trio lens, and `whole-doc: not run (cross-model peer not run: <reason>)` for the whole-doc sweep, which has no in-process reviewer. Without it, the peer ran or may have run, so use `cross-model <lens> peer: <what happened to the peer's result>`: the job's terminal state (`failed`, `timeout`, `died-without-result`), or what kept a finished result from folding, such as no usable output or a read the runner could not verify.
+当激活三重镜头时，即使省略了空白部分，仍保持`peer.outcome`；如果没有的话，请忽略它及其镜头线。所欠的镜头是每个激活的三重镜头加上全文档扫描。仅当每个欠镜头都折叠了不同提供商的同行产物时才写`peer.outcome: folded`。任何其他结果，包括启动然后失败或超时的对等点，都是 `peer.outcome: in-process-fallback`。在它下面，给出每个未折叠一行的欠镜头，根据是否有明确证据表明其对等点没有运行来选择：它从未启动，脚本跳过它，或者工作人员在出口之前报告传输不可用。有了这些证据，使用未运行的行和观察到的原因：`<lens>: in-process fallback (cross-model peer not run: <reason>)`对于三重镜头，`whole-doc: not run (cross-model peer not run: <reason>)`对于整个文档扫描，没有过程中的审查者。如果没有它，对等方将运行或可能已经运行，因此请使用 `cross-model <lens> peer: <同行的结果发生了什么>`：作业的最终状态（`failed`、`timeout`、`died-without-result`），或者阻止最终结果折叠的原因，例如没有可用的输出或运行程序无法验证的读取。
 
-**Count findings by their final route.** Obligations still awaiting grouped confirmation count as proposed fixes; grouping changes presentation, not the count. Obligations already applied count only as applied fixes. Do not export a separate obligation count: the caller uses the proposed-fixes count to detect pending approval, so it must include every pending edit and exclude edits that already landed.
+**按最终路线计算发现结果。** 仍在等待分组确认的义务作为建议的修复计数；分组改变表示方式，而不是计数。已应用的义务仅算作已应用的修复。不要导出单独的义务计数：调用者使用建议的修复计数来检测待批准的内容，因此它必须包括每个待处理的编辑并排除已落地的编辑。
 
-**FYI observations, residual concerns, and deferred questions** render one line each with no per-item elaboration: the consequence line for an FYI, the concern or question text for the others. Proposed fixes and Decisions stay fully rendered.
+**仅供参考的观察结果、剩余关注点和推迟的问题** 各自呈现一行，没有对每个项目进行详细说明：仅供参考的结果行，其他的关注点或问题文本。提议的修复和决策保持完全呈现。
 
-**Interactive mode:**
+**交互模式：**
 
-Present findings using the review output template (read `references/review-output-template.md`). This presentation must appear as user-visible assistant text in the same turn immediately before the routing question in `references/walkthrough.md` is asked. A non-interactive result printed in an earlier turn, or a one-line count, does not satisfy that requirement.
+使用评审输出模板呈现调查结果（阅读`references/review-output-template.md`）。在询问 `references/walkthrough.md` 中的路由问题之前，该演示文稿必须立即以用户可见的辅助文本形式出现。前一轮打印的非交互式结果或单行计数不满足该要求。
 
-### Protected Artifacts
+### 受保护的文物
 
-During synthesis, discard any finding that recommends deleting or removing a CE pipeline artifact: any file **under** a `plans/`, `solutions/`, `ideation/`, `explainers/`, `pulse-reports/`, `dogfood-reports/`, `feedback-sweep/`, or `personas/` directory (or the legacy `brainstorms/` one) **whose immediate parent is the artifact root**. The artifact root is a directory named `docs` — the default, and where unmigrated legacy artifacts stay even after a project sets `docs_root` — or the configured `docs_root` when this run resolved it. Matching by that parent covers nested category files (`solutions/<category>/foo.md`) while leaving a same-named directory elsewhere — a skill's own `references/personas/` prompt assets, whose parent is `references` — as ordinary code whose deletion finding stands. A review that never resolved a configured root still protects the `docs`-parented tree (default and legacy). An artifact under a configured root seen by such a run is the one case this rule does not cover.
+在综合过程中，丢弃任何建议删除或删除 CE 管道产物的结果：`plans/`、`solutions/`、`ideation/`、`explainers/`、`pulse-reports/`、`dogfood-reports/`、`feedback-sweep/` 或 `personas/` 目录（或旧版 `brainstorms/` 目录）**下的任何文件 **其直接父级是产物根**。产物根是一个名为 `docs` 的目录（默认情况下），即使在项目设置 `docs_root` 后，未迁移的旧产物仍保留在其中，或者在运行解决该问题时配置的 `docs_root`。该父级的匹配涵盖嵌套类别文件 (`solutions/<category>/foo.md`)，同时在其他地方留下同名目录 - 技能自己的 `references/personas/` 提示资源，其父级为 `references` - 作为删除结果成立的普通代码。从未解决已配置根的审核仍会保护 `docs` 父树（默认和旧版）。此类运行所看到的已配置根下的产物是此规则不涵盖的一种情况。
 
-## Phase 5: Return to the Caller
+## 阶段 5：返回调用者
 
-Return "Review complete" with the completion report or the non-interactive result. A finished review does not need a terminal question. When nested, "Review complete" ends this skill, not the turn: the caller runs in this same session, and its next step follows the report. Do not start a nested planning or execution workflow merely because the review is complete.
+返回“审核完成”以及完成报告或非交互式结果。完成的评论不需要最终问题。嵌套时，“审阅完成”结束此技能，而不是回合：调用者在同一会话中运行，其下一步遵循报告。不要仅仅因为审核已完成就开始嵌套的计划或执行工作流程。
 
-For standalone use, a useful next step may be named without a blocking menu. A requirements-only unified plan or legacy standalone requirements doc routes to `ce-plan`; an implementation-ready unified plan or legacy implementation plan routes to `ce-work`. Invoke that next skill only when the user's existing request authorizes it. Review completion alone does not authorize new work.
+对于独立使用，可以在没有阻止菜单的情况下命名有用的下一步。仅需求统一计划或遗留独立需求文档路由至`ce-plan`；准备好实施的统一计划或遗留实施计划路由至`ce-work`。仅当用户的现有请求授权时才调用下一项技能。仅审核完成并不授权新的工作。
 
-### Iteration limit
+### 迭代限制
 
-After 2 refinement passes, recommend completion. An explicit request for another pass is honored with prior decisions preserved. Handling unchanged findings uses the intake reuse condition rather than starting a new pass.
+经过 2 次细化后，建议完成。再次通过的明确请求将得到尊重，并保留先前的决定。处理未更改的结果使用摄入重用条件而不是开始新的传递。
 
-## What NOT to Do
+## 不该做什么
 
-- Do not rewrite the entire document
-- Do not add new sections or requirements the user didn't discuss
-- Do not over-engineer or add complexity
-- Do not create separate review files or add metadata sections
-- Do not modify caller skills (ce-brainstorm, ce-plan, or external plugin skills that invoke ce-doc-review)
+- 不要重写整个文档
+- 不要添加用户未讨论的新部分或要求
+- 不要过度设计或增加复杂性
+- 不要创建单独的审阅文件或添加元数据部分
+- 请勿修改调用者技能（ce-brainstorm、ce-plan或调用ce-doc-review的外部插件技能）
 
-## Iteration Guidance
+## 迭代指导
 
-On genuinely new review passes, re-dispatch the reviewers `references/persona-selection.md` selects for a later round, with the multi-round decision primer (`references/decision-primer.md`) and re-synthesize. Fixed findings drop out on their own because their evidence is gone from the current doc; rejected findings are handled by the R29 suppression rule and applied-fix verification uses the R30 matching test, both in `references/later-round-synthesis.md`. If findings repeat across passes after these rules run, recommend completion.
+在真正新的评审通过时，重新派遣`references/persona-selection.md`为下一轮选择的评审员，使用多轮决策引物（`references/decision-primer.md`）并重新综合。固定的发现会自行消失，因为它们的证据已从当前文档中消失；被拒绝的结果由R29抑制规则处理，应用修复验证使用R30匹配测试，两者都在`references/later-round-synthesis.md`中。如果这些规则运行后发现在各遍中重复出现，建议完成。
