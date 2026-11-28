@@ -37,8 +37,6 @@ If a `GLOSSARY-MAP.md` exists at the root, the repo has multiple contexts. The m
 │       └── docs/adr/
 ```
 
-These trees are examples, not required source layouts. Resolve the approved domain and ADR locations from the project's domain instructions and the root map; paths can differ from the CE document root. If a code observation and a settled definition disagree, distinguish a bug from a change to the model before editing.
-
 Create files lazily: only when you have something to write. If no `GLOSSARY.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
 
 ## During the session

@@ -1,8 +1,6 @@
-# GLOSSARY.md vocabulary rules
+# CONCEPTS.md vocabulary rules
 
-Resolve the target before reading or writing: if the repository has `GLOSSARY-MAP.md`, follow its links to the context this work concerns (or the separately scoped contexts a repo-wide refresh actually investigated). Do not create a combined root glossary. Without a map use the root `GLOSSARY.md`; create a missing glossary only when this mode allows seeding and there is a qualifying term. A broken map or ambiguous owner is a routing problem, not license to guess a new path. Report the unresolved context and leave the vocabulary unchanged there. In this skill, “GLOSSARY.md” means the resolved file; use its concrete path in reports and discoverability links (the map is the durable entry point for multiple contexts). Legacy CONTEXT/CONCEPTS files are migration inputs, not a second target; surface unmerged terms for project-governance migrate, not automatic rename.
-
-For every write, read the installed `domain-modeling` skill’s [GLOSSARY-FORMAT.md](../../domain-modeling/GLOSSARY-FORMAT.md). Its context heading, Language entries and aliases are the shared representation. The evidence and retention rules below select which entries to write, not a second format. Never silently replace a settled meaning: distinguish a compatible refinement from a contradiction. Leave the disputed entry intact and return the term, actual definitions and evidence for domain-modeling; in unattended mode report the unresolved item for status/research and continue independent work.
+`CONCEPTS.md` defines the words that mean something specific in this codebase. It is the shared base that `<root>/solutions/` and AGENTS.md can cite without redefining terms. It lives at the repo root. Terms enter in two ways, accretion and seeding (below), and the file is created the first time either path produces a qualifying entry.
 
 ## The supported mutations
 
@@ -24,7 +22,7 @@ Define the core domain nouns the area's **declared domain model** exposes that m
 ### Scope of a seed
 
 - A **scoped run** (a learning capture, or a refresh narrowed to an area) seeds only that area's core nouns, and defines only terms it actually investigated against code. It does not reach for repo-wide nouns it never touched.
-- A **repo-wide bootstrap** (an explicit "create GLOSSARY.md" request) seeds the whole project's declared domain model. This is the only path that produces a coherent "what is this project" glossary; a scoped run cannot, and should not pretend to.
+- A **repo-wide bootstrap** (an explicit "create CONCEPTS.md" request) seeds the whole project's declared domain model. This is the only path that produces a coherent "what is this project" glossary; a scoped run cannot, and should not pretend to.
 
 ## Be opinionated
 
@@ -40,7 +38,7 @@ Each entry teaches its concept to a reader with no access to anything else: no c
 - Links to PRs, issues, channels, or roadmap milestones
 - Version-specific claims ("currently uses X; migrating to Y")
 
-Cross-references between entries within `GLOSSARY.md` are fine — they resolve internally. General programming vocabulary (caches, queues, jobs, sessions) and everyday domain English need no redefinition either. But if an entry leans on another *project-specific* term to make sense, that term must be defined here too — an undefined project-specific sibling is itself a candidate to add.
+Cross-references between entries within `CONCEPTS.md` are fine — they resolve internally. General programming vocabulary (caches, queues, jobs, sessions) and everyday domain English need no redefinition either. But if an entry leans on another *project-specific* term to make sense, that term must be defined here too — an undefined project-specific sibling is itself a candidate to add.
 
 ## What earns a slot — and what keeps one
 
@@ -58,9 +56,9 @@ The neighborhood of an entry is its cluster siblings plus the terms it cross-ref
 
 ## Per entry
 
-The definition is one sentence: what the term means in this domain, and what makes it distinct from neighbors. Add an evidenced domain invariant only when needed to distinguish the meaning; keep implementation and research evidence outside the glossary.
+The definition is one sentence: what the term means in this domain, and what makes it distinct from neighbors. A term with non-obvious behavioral rules (lifecycle, cancellation semantics, ownership invariants) earns a second paragraph for those rules, never for elaborating the definition itself.
 
-When dropped synonyms exist, list them as an aliases line directly under the definition: `_Avoid_: Booking, appointment`. Entities typically need more depth than value types; status concepts may need transition notes.
+When dropped synonyms exist, list them as an aliases line directly under the definition: *Avoid: Booking, appointment*. Entities typically need more depth than value types; status concepts may need transition notes.
 
 ## Relationships (optional)
 
@@ -78,14 +76,39 @@ When two terms were used interchangeably and the team settled on a distinction, 
 
 One line per concept the project no longer has and nothing replaced: what the term meant, and what removed it. Write enough that someone meeting it in an old ticket understands what they were reading and why it is not current. Do not carry the original entry over.
 
+## One illustrative entry — the shape, not a template
+
+```
+## Booking
+
+### Reservation
+A future commitment to seat a Party at a specified date and time.
+*Avoid:* Booking, appointment
+
+A Reservation owns its Party but does not own a Table — Tables are acquired only when the Party arrives, through a Seating. Lifecycle: Booked, Seated, Completed, No-Show. Cancellation before a Seating is non-destructive; cancellation after a Seating is recorded as a No-Show.
+
+### Party
+The guests committed to a Reservation. Each Reservation has exactly one Party. Party size is the count promised at booking, not the count who arrive.
+
+### Table
+A physical seating unit with fixed capacity. Tables are shared resources — they do not belong to Reservations and are allocated only on the day-of through Seatings.
+
+### Seating
+The act of placing a Party at a Table once the Party arrives. A Reservation has at most one Seating; a Table accumulates many Seatings across its lifetime.
+```
+
 ## Vocabulary capture during a refresh
 
-After the per-doc actions execute, reconcile the domain terms flagged during investigation with `GLOSSARY.md`.
+After the per-doc actions execute, reconcile the domain terms flagged during investigation with `CONCEPTS.md`.
 
-1. **Aggregate** qualifying terms across the learnings in scope; when one term surfaced with different shades of precision, combine compatible shades into one entry; report a conflict rather than choosing one meaning.
-2. **If `GLOSSARY.md` exists:** add missing terms, refine entries where the corpus surfaced new precision, then reconcile every entry this run's scope reaches against **What earns a slot — and what keeps one** above: backfill central-but-missing core nouns, then route each entry that fails the bar to the outcome that condition names — fold into the surviving entry that can carry it, retire to `## Retired` when readers will still meet the term, delete when they will not. An unscoped refresh reads the whole store; reconcile each evidenced context against its own glossary — that is the pass an accreted glossary needs; a scoped one stays in its area and leaves the rest untouched. Retention reads the same **declared domain model** the Seed goal seeds from, so presence and absence are judged against one source.
-3. **If it doesn't exist** and at least one term qualified: bootstrap it — seed the in-scope area's core domain nouns per the Seed goal alongside the surfaced terms, holding the bar conservatively for borderline terms at creation. Use the shared format: name the context and describe it briefly, then put canonical entries under `## Language`; group under subheadings only when useful.
+1. **Aggregate** qualifying terms across the learnings in scope; when one term surfaced with different shades of precision, union the shades into one entry.
+2. **If `CONCEPTS.md` exists:** add missing terms, refine entries where the corpus surfaced new precision, then reconcile every entry this run's scope reaches against **What earns a slot — and what keeps one** above: backfill central-but-missing core nouns, then route each entry that fails the bar to the outcome that condition names — fold into the surviving entry that can carry it, retire to `## Retired` when readers will still meet the term, delete when they will not. An unscoped refresh reads the whole store, so its reconcile covers the whole file — that is the pass an accreted glossary needs; a scoped one stays in its area and leaves the rest untouched. Retention reads the same **declared domain model** the Seed goal seeds from, so presence and absence are judged against one source.
+3. **If it doesn't exist** and at least one term qualified: bootstrap it — seed the in-scope area's core domain nouns per the Seed goal alongside the surfaced terms, holding the bar conservatively for borderline terms at creation. Start the file with this preamble under a `# Concepts` heading:
+
+   > Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound captures and refreshes learnings; direct edits are fine. Glossary only, not a spec or catch-all.
+
+   1-4 terms → flat headings; more → cluster by domain relationship per the reference.
 4. **Scrub violations** per the reference's criteria (implementation specifics, config values that drift, status/owner/date metadata, duplicates, undefined project-specific siblings) in the same entries step 2 reconciled — the whole file on an unscoped run, because refresh is an audit; the area's entries on a scoped one.
-5. Do not expand beyond what this run's scope reaches, and do not retroactively inject `(see GLOSSARY.md)` pointers into learnings.
+5. Do not expand beyond what this run's scope reaches, and do not retroactively inject `(see CONCEPTS.md)` pointers into learnings.
 
-Report what this run did to `GLOSSARY.md`. "scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. The visible record is the audit signal that the reference was consulted, and it is what keeps a silent glossary mutation from going unreported. Apply vocabulary edits silently in every mode — no user prompt.
+Report what this run did to `CONCEPTS.md`. "scanned, no qualifying terms" is correct only when the file is byte-for-byte as the run found it; any change at all reports its counts, whichever step made it. The visible record is the audit signal that the reference was consulted, and it is what keeps a silent glossary mutation from going unreported. Apply vocabulary edits silently in every mode — no user prompt.

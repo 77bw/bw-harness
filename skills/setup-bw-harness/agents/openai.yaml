@@ -1,5 +1,0 @@
-interface:
-  display_name: "Setup BW Harness"
-  short_description: "Merge BW workflow rules into an existing or new project"
-policy:
-  allow_implicit_invocation: false

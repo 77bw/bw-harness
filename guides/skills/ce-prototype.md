@@ -7,5 +7,3 @@
 需要有人实际操作；无人值守时上游要求停止，不会替用户判断手感。原型可能写入被忽略的 `.context/compound-engineering/ce-prototype/`，或使用临时目录；修改忽略规则、启动服务前先核对范围。
 
 试用后，把**你做的决定**交回现有计划，不把试验代码直接发布。若问题只是“哪一种编码更快”，用固定输入跑测量即可，不需要交互原型。
-
-执行依据：[ce-prototype 正文](../../skills/ce-prototype/SKILL.md) · CE `fcb5e3a`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。

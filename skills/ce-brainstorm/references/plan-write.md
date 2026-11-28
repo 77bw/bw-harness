@@ -19,14 +19,14 @@ If the grounding scout's gist listed any `pack:<id>` matches, read those entries
 
 **Ready for Planning Check.** After writing the actual file, run the four checks in `references/brainstorm-sections.md`: Complete, Consistent, Focused, and Usable by planning. Fix failures in place when the correction preserves settled intent, then rerun the failed checks. If a correction would choose or change product behavior or scope, ask one targeted question, update the artifact after the answer, and rerun the checks. When confirming in chat after the pass, report the artifact with its absolute path so the reference is clickable.
 
-#### Vocabulary Capture — after the requirements-only unified plan (only if GLOSSARY.md already exists)
+#### Vocabulary Capture — after the requirements-only unified plan (only if CONCEPTS.md already exists)
 
-If the repository has a `GLOSSARY-MAP.md`, resolve its in-scope context first; otherwise use root `GLOSSARY.md`. **Skip this step if the resolved glossary is absent or its scope is unclear.** This branch is update-only.
+**Skip this step entirely if `CONCEPTS.md` does not exist at repo root** — only ce-compound creates it.
 
 Run this **after** the approaches, the scope synthesis, and the requirements-only unified plan — that is where the canonical term often gets chosen or corrected, so capturing during early dialogue (before this point) would miss the final resolved name. If it exists, scan the full dialogue and the Product Contract for **resolved** domain terms — terms where the conversation actively pinned down a precise local meaning, not terms merely mentioned in passing. **Resolved means the definition is settled, not still under discussion.** Provisional terms that may still revise stay in the conversation only.
 
 For each resolved term: if missing, add it; if present but new precision surfaced, refine it; if already consistent, no action. A term whose whole meaning an existing entry already carries is a refinement of that entry, not a new heading. Only ce-compound folds an existing entry, and only its refresh job retires or deletes one.
 
-**Domain entities, named processes, and status concepts with project-specific meaning only.** Not file paths, class names, function signatures, or implementation decisions — `GLOSSARY.md` is a glossary, not a spec or catch-all.
+**Domain entities, named processes, and status concepts with project-specific meaning only.** Not file paths, class names, function signatures, or implementation decisions — `CONCEPTS.md` is a glossary, not a spec or catch-all.
 
-Use [the shared glossary format](../../domain-modeling/GLOSSARY-FORMAT.md). If a new definition contradicts an existing one, leave it intact and return the conflict and evidence for `domain-modeling`. Apply only compatible resolved edits. (If Phase 3 skipped the doc, still run this against the resolved dialogue.)
+Follow the format set by existing entries. Apply edits silently. (If Phase 3 skipped the doc, still run this against the resolved dialogue.)

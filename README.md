@@ -1,21 +1,45 @@
 # BW Harness
 
-BW Harness 帮助开发者在多个 AI 会话之间继续同一项工作：用 Matt 的访谈厘清领域语言，用 Compound Engineering（CE）规划、实施、验证、审查和交付，用项目自己的文档保存决定、证据与下一步。**接入改变工作约定，不替你选语言、创建代码目录或安装项目技术栈。**
+BW Harness 是给 **用 AI 开发 Python 项目的人**准备的工具包。它不是另一个 Agent：你继续在 Pi 里工作，Harness 提供项目模板和一组可点名调用的工作方法（Skill）。
 
-## 从已有项目开始
+比如你要写一个消息编码器：先生成能导入、能跑测试的 Python 包，再和 Agent 定下“长度按字节还是字符算”，把决定交给实施计划。做到一半换会话，新会话可以从项目里的术语表、计划和状态文件继续，不用从聊天记录重新猜。小修复不用走整套流程。
 
-在已配置模型的 Pi 安装本包（[安装方式与版本说明](guides/installation.md)），进入业务项目目录，在 Pi 对话中输入：
+## 快速开始：生成你的第一个项目
 
-```text
-/skill:setup-bw-harness check 请先检查现有指令、文档根、Git 和实际验证入口，不写文件。
-/skill:setup-bw-harness 接入当前项目，保留现有规则和代码。只对实际冲突向我确认。
-/skill:bw-help 我已有一个实施计划，接下来从哪继续？
+需要已能调用模型的 Pi、Git、Node.js ≥22.19、npm、Python 和 uv。无需单独安装 Matt Pocock 或 Compound Engineering。以下示例使用 macOS 终端。
+
+**1. 在终端安装一次**，然后从你平时放项目的目录创建一个新目录。不要在本仓库里初始化业务代码。
+
+```bash
+pi install git:github.com/77bw/bw-harness@v1.0.0
+mkdir frame-demo
+cd frame-demo
+pi
 ```
 
-第一次接入空目录也用同一个 setup。它读随 Skill 分发的模板，合并项目指令、工作流和真实状态；没有术语、重大决策或经验时不创建空文档。`check` 不写文件，升级工作约定用 `update`。普通开发无需反复初始化。
+**2. 在 Pi 对话里输入**（不是终端命令）：
 
-- [快速上手](guides/quick-start.md) · [现有项目与旧知识迁移](guides/workflows/existing-project.md)
-- [文档分别负责什么](guides/document-structure.md) · [暂停与跨会话继续](guides/workflows/session-recovery.md)
-- [从计划到原生 Git 交付](guides/workflows/git-delivery.md) · [全部 Skill 指南](guides/README.md)
+```text
+/skill:setup-bw-harness new 在当前空目录创建 Python 包 frame_demo，不启用 API。安装依赖并运行检查，不提交 Git。
+```
 
-一个包内置所需 Matt、CE 资源与 Pi 扩展，无需另装两套同名 Skill。软件以 Git 标签分发，不是官方 Matt/Every 插件。来源、修订和适配见[上游锁](upstream.lock.yml)、[版权声明](licenses/)和[变更记录](CHANGELOG.md)。
+**3. 在 `frame-demo` 目录的终端验证：**
+
+```bash
+uv run python -c "import frame_demo; print(frame_demo.__name__)"
+uv run pytest -q
+```
+
+第一条应打印 `frame_demo`，第二条应有测试通过。此时 `src/frame_demo/` 是你要开发的包，`tests/` 是它的测试；`.copier-answers.yml` 记录模板来源。接下来可以在 Pi 里问 `/skill:bw-help 我想为这个包增加一个编码函数，从哪里开始？`
+
+## 已经有项目？不要用 `new`
+
+在**已有项目的根目录**启动 Pi，输入 `/skill:setup-bw-harness check 只读检查，不移动文件、不安装依赖`。先看它指出哪些文件缺失、哪些目录需要解释，再决定要不要改。[已有项目迁移示例](guides/workflows/existing-project.md)
+
+## 接下来读什么
+
+- [快速上手](guides/quick-start.md)：从空目录到第一次测试，再把一个具体任务交给 Agent。
+- [使用手册](guides/README.md)：按“修 Bug、迭代算法、换会话”等场景找路线，或查全部 28 个 Skill。
+- [安装与兼容性](guides/installation.md)：Pi 是首选；Codex 实测过导航调用，Claude Code 的模型调用未验收，Windows 未实测。
+
+自研内容采用 [MIT](LICENSE)。本包是独立发行，不是 Matt Pocock 或 Every 官方插件；内置版本与资源见[上游锁](upstream.lock.yml)，原版权声明见[许可证目录](licenses/)。

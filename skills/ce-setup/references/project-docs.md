@@ -30,7 +30,7 @@ The user should be able to judge, from the offer alone, what they would get and 
 
 Skip the offer, and say why in the summary, when the repository has nothing to draft from: no reachable pull request history, fix commits, solution records, or rules already written in its instructions or an AI reviewer's file. Never offer a template in place of evidence.
 
-A missing `STRATEGY.md` is not a review-doc defect. Drafting product strategy takes a separate interview; do not offer to create it here or direct users to an unbundled command.
+`STRATEGY.md` is owned by `ce-strategy`, and drafting it takes an interview, not history. When the repository has none, add one line to the summary suggesting it. When this host is Codex, or documents dollar-prefixed skill invocation, render the invocation as `$ce-strategy`; on oh-my-pi (`omp`), render it as `/skill:ce-strategy`; otherwise render it as `/ce-strategy`. Render only the invocation as inline code, in one form.
 
 ## Drafting
 

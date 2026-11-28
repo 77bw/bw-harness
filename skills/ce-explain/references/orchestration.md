@@ -37,7 +37,7 @@ echo "$RUN_DIR";
 
 ## Grounding by input shape
 
-**Repo-touching inputs** (a concept with footprint in this repo, a diff, a recap): use the project's active instructions already in context and go directly to the diff, call-sites, current source, or commits. When canonical vocabulary matters, read the applicable glossary. If the repository has a `GLOSSARY-MAP.md`, resolve its in-scope context first; otherwise use root `GLOSSARY.md`. If the topic cannot be scoped from the input and existing context, allow one targeted root or workspace probe.
+**Repo-touching inputs** (a concept with footprint in this repo, a diff, a recap): use the project's active instructions already in context and go directly to the diff, call-sites, current source, or commits. Read `CONCEPTS.md` when canonical vocabulary matters. If the topic cannot be scoped from the input and existing context, allow one targeted root or workspace probe.
 
 **Diff mode:** resolve the change (the `diff:` ref, or the most recent substantial change when the request points at one implicitly) and gather its evidence — the diff itself, the files it touches, any plan or solution doc that motivated it. **Empty range** or missing subject: do not silently explain something else. Report that before explaining an adjacent thing. Use a substitute only when the request permits it or the user agrees; name the substitution in the result and artifact `Subject` when present. Otherwise return the unresolved scope to the caller.
 

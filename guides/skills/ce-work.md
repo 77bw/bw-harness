@@ -1,7 +1,13 @@
-# ce-work：实施已有计划并交付
+# ce-work：拿着一个确定的计划实施
 
-目标和验收已经确定时，输入 `/skill:ce-work docs/plans/frame-codec.md`，把示例换成真实计划路径。原因未明的故障先用 [ce-debug](ce-debug.md)，只有目标没有可实施范围时先用 [ce-plan](ce-plan.md)。
+适用于“做什么、怎样验收”已经清楚的工作。若只有一个报错而不知道原因，先用 [ce-debug](ce-debug.md)，不要让实施流程猜根因。
 
-在有历史的可写 checkout 上核对分支与原有工作中修改。按单元实施和提交，用真实验证与审查收据进入原生交付。检查报告中的变更、测试、审查、Git 修订及实际 PR。没有可用远端就区分本地完成和远程未交付。原生 `mode:return-to-caller` 用于已有调用方接管后续，不是禁用提交。参见[从计划到交付](../workflows/git-delivery.md)。
+以下假设计划位于 `docs/plans/frame-codec.md`，使用时换成项目里真实存在的路径：
 
-执行依据：[ce-work 正文](../../skills/ce-work/SKILL.md) · CE `fcb5e3a`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。
+```text
+/skill:ce-work mode:return-to-caller docs/plans/frame-codec.md 仅本地实施与验证，不暂存、不提交、不推送。若所选执行路径需要 Git 写入，停止该路径并告诉我。
+```
+
+它可以改 `src/` 和 `tests/`，也可以返回阻塞。`return-to-caller` 的含义是**由调用方接手收尾**，不是对所有内部 Git 行为的技术封锁。原生方式不适合当前权限时，明确授权受控本地实施，不悄悄放宽约束。
+
+拿到结果后分别看变更文件、实际运行的测试、未验证项。跳过交付尾部也意味着不能假设最终审查已经发生；按需要请 [ce-code-review](ce-code-review.md) 独立检查，再做治理。

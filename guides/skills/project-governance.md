@@ -1,9 +1,9 @@
-# project-governance：检查、迁移、收尾
+# project-governance：检查改动能否安全留下
 
-- **检查。** `/skill:project-governance check 核对当前计划链接和该主题的研究依据`。仅诊断，返回优先级、位置、证据、影响和建议，不写报告或状态。不把平铺项目或缺少可选文档误报为错。
-- **迁移。** `/skill:project-governance migrate 请按段检查旧研究笔记，先列建议`。逐批确认源、目标、重复和冲突、受影响引用、证据与回退办法。只执行已经批准的批次；未知判断、唯一原样本和业务文件保留。
-- **收尾。** `/skill:project-governance close 这项任务暂停。请核对当前计划、Git 和上次测试依据，记录失败处与下一步`。原位更新 status，按证据更新研究，不重复仍有效的原生审查或已完成的经验捕获。没有足够证据就返回部分完成或阻塞。
+代码已经能跑，但根目录多了临时脚本，测试结果只在聊天里。现在需要的是核对现状，不是再规划一次。
 
-结果应清楚区分实际与建议、先前与本次验证。治理不是第二套代码审查或 Git 提交流程；新增测试或规则交还原生最终校验。[迁移示例](../workflows/existing-project.md)
+- **`check`**：只读报告。比如 `/skill:project-governance check 查 src 是否引用 experiments、.local 是否被跟踪；列出违规路径，不修复。` 路径告警不能证明脚本已经无用。
+- **`close`**：阶段收尾。给它本次变更与验证范围，让它跑相关回归、Ruff 和结构检查，核对临时证据，再原地更新 `docs/status.md`。没通过就写明失败，不标完成。
+- **`migrate`**：整理旧工程。先给逐文件清单、基线和回退方法；批准某一批不等于批准改业务逻辑或删旧资料。
 
-执行依据：[project-governance 正文](../../skills/project-governance/SKILL.md) · BW v1.1.0 自研（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。
+如果它建议删除唯一的原始样本，先停下来核对备份和授权。好的收尾报告能回答：跑了哪条命令、还有哪个失败、下一会话从哪里继续。[旧工程实例](../workflows/existing-project.md)

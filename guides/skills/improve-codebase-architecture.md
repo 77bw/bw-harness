@@ -5,5 +5,3 @@
 `/skill:improve-codebase-architecture 检查 CLI 和 API 是否各自实现了长度规则。给我候选改进和相应源码位置，先不要重构业务代码。`
 
 给它可读取的工程与术语表。上游会把候选整理成可视化 HTML 报告；这是**报告文件**，不是代码变更，先确认允许的落点。你选中一个候选后再讨论接口和取舍，必要时记录决策。若只是某个函数里有重复分支，不必做全项目扫描，用 [ce-simplify-code](ce-simplify-code.md) 更直接。
-
-执行依据：[improve-codebase-architecture 正文](../../skills/improve-codebase-architecture/SKILL.md) · Matt `6f7f783`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。

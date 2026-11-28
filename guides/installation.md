@@ -1,36 +1,44 @@
 # 安装、升级与卸载
 
-安装给宿主注册 Skill；接入才会按项目实际情况合并文档。两步分别验证。业务项目不需要安装 Copier、uv 或一套固定测试工具。Pi 路线需要可用的模型、Git、npm 及兼容的 Node（本包依赖要求至少 22.19）。
+**安装**把 Skill 注册给 Agent，可以供多个项目使用。**初始化**则在某一个项目写 Python 包、测试和规则文件。安装成功后还没有业务项目；反过来，克隆了仓库也不代表 Pi 已经加载它。
 
-## Pi：注册一种来源
+## Pi：选一种安装方式
 
-已发布版本按 Git 标签安装。在安装前先运行 `git ls-remote --tags https://github.com/77bw/bw-harness.git refs/tags/v1.1.0`；只有返回该标签才使用以下命令：
+先在终端确认 `pi --version`、`node --version`、`npm --version`、`git --version` 和 `uv --version` 可运行。Node 需要 ≥22.19，模板项目使用 Python ≥3.11。Pi 还需要一个可用的模型；列出 Skill 不代表模型可以回答。
 
-```sh
-pi install git:github.com/77bw/bw-harness@v1.1.0
+**只想使用：** 在任意目录执行以下命令。Pi 从固定 Git 标签安装包及声明的运行依赖。
+
+```bash
+pi install git:github.com/77bw/bw-harness@v1.0.0
 pi list
 ```
 
-测试未发布候选版时，检出要测的修订，在**包目录**执行：
+**想阅读源码或测试本地改动：** 在放工具的目录执行以下命令（macOS shell）。本地注册不会替你安装 Node 依赖，不能略过 `npm ci`。
 
-```sh
+```bash
+git clone -b v1.0.0 https://github.com/77bw/bw-harness.git
+cd bw-harness
 npm ci --ignore-scripts --legacy-peer-deps
 pi install "$PWD"
 pi list
 ```
 
-进入**另一个业务目录**新开 Pi，以 `/skill:bw-help 仅说明接入前先检查什么` 验证调用；核对加载位置与安装源一致。有注册记录不等于模型、工具或子 Agent 能工作。Git 安装与本地注册择一；重名时识别来源，不删除个人全局 Skill。
+两种方式择一。核对 `pi list` 的源是你选择的标签或目录，然后**到业务目录新开 Pi**，输入 `/skill:bw-help 我准备接手旧项目，先做什么？`。看到只读检查的建议，才验证了发现和调用两件事。不要再分别安装 Matt/CE；老环境若出现重名，先[核对来源](troubleshooting.md)。
 
-## 其他宿主
+## Claude Code 和 Codex
 
-- Claude Code：`claude --plugin-dir /path/to/bw-harness`；在该会话使用 `/bw-harness:bw-help`。包路径换成当前检出的绝对路径。
-- Codex：从包目录运行 `codex plugin marketplace add "$PWD"`、`codex plugin add bw-harness@bw-harness` 后，新会话使用 `$bw-help`。用 `codex plugin list` 核对来源及启用状态。
-- 本手册中的 `/skill:…` 是 **Pi 对话输入**，不是 shell 命令或通用宿主语法。发现、模型实际调用、子任务派发、跨会话恢复是不同能力；兼容性以对应修订的实际验收为准。操作系统上的包检查不证明该系统已跑模型。
+先把同一标签的仓库克隆到本地。以下命令在**克隆的包目录**运行，`$PWD` 表示它的绝对路径。若要在另一个项目启动 Claude，把参数换成这个包的实际绝对路径。
 
-### v1.1 工作流的实测边界
+| 宿主 | 如何加载 | v1.0.0 验证边界 |
+|---|---|---|
+| Pi 1.1.0 | 上述 Git 或本地注册 | macOS 上从公共标签发现 28 个 Skill；初始化、测试与会话接续有真实试点。 |
+| Claude Code 2.1.322 | `claude --plugin-dir "$PWD"`，单次启动加载 | 清单校验通过；试调用 `/bw-harness:bw-help` 时模型网关返回 `ECONNRESET`，未确认端到端调用。 |
+| Codex 0.153.4 | `codex plugin marketplace add "$PWD"`，然后 `codex plugin add bw-harness@bw-harness` | `codex plugin list` 显示 `installed, enabled`；在业务目录用 `$bw-help` 已读到项目术语和状态，不能据此外推所有 Skill。 |
 
-macOS 上 Pi 1.1.0 已从公开仓的候选修订隔离安装，并能调用 BW；Codex 0.153.4 已从单独插件缓存加载 BW，在两个独立会话中续接同一个计划。Claude Code 2.1.322 的插件校验通过（有警告），启动目录中能看到 BW 命令，但配置的模型网关重试后仍返回 `ECONNRESET`，因此不宣称 Claude 模型调用或会话接续通过。Linux、Windows 的包测试与宿主实测分别报告；不从 CI 推断桌面宿主支持。
+本手册的 `/skill:…` 示例均为 **Pi 对话输入**，不是通用终端命令。Windows 未做端到端验收。
 
-## 升级
+## 升级或移除
 
-先升级注册源，再到业务项目运行 `/skill:setup-bw-harness update`。新版不生成 Python 工程；只更新可识别的 BW 规则，保留项目原有约定，实质冲突先核对。旧资料归位用治理的 migrate，不对业务代码做模板升级。Pi 解除注册使用 `pi remove` 加上 `pi list` 中的实际源，不删除业务仓文件。
+更换包版本前先记下 `pi list` 的源。卸载公共标签用 `pi remove git:github.com/77bw/bw-harness@v1.0.0`；本地源则在克隆目录用 `pi remove "$PWD"`。这只解除注册，不会移除你项目里的代码或文档。Claude 单次加载可直接退出；Codex 用 `codex plugin remove --help` 核对已安装的名称再操作。
+
+升级包**不等于**升级已生成的业务项目。后者先看项目的 `.copier-answers.yml`：本地路径要能访问、原修订要能找到。先在可回退的 Git 副本验证 Copier 更新，检查用户修改、ADR 和冲突，再决定是否在原项目应用。不要在非空项目用 `new` 来“升级”。

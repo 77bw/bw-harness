@@ -42,7 +42,7 @@ RUN_DIR="$SCRATCH_ROOT/ce-compound/$RUN_ID";
 echo "$RUN_DIR";
 ```
 
-**Resolve current vocabulary and conventions before dispatching subagents.** Use the project's active instructions and conventions already in your context. Follow root `GLOSSARY-MAP.md` if present, otherwise use root `GLOSSARY.md`. In the task’s context read relevant existing terms before you classify.
+**Resolve current vocabulary and conventions before dispatching subagents.** Use the project's active instructions and conventions already in your context. If `CONCEPTS.md` exists, read its relevant terms before you classify.
 
 **CRITICAL: glob `<root>/solutions/` fresh every run.** The current vocabulary and conventions above do not substitute for the live-tree search in step 3.
 

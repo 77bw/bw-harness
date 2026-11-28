@@ -5,5 +5,3 @@
 `/skill:codebase-design 比较 encode(text) -> bytes 与分别暴露 encode_length、encode_payload 的接口。列出调用者要知道的规则，以及测试可以从哪里观察行为；先不改文件。`
 
 看建议是否用真实调用点说明取舍：收窄接口能隐藏哪条规则？将来改变格式要动几处？只增加一层转发却没有减少调用者知识，不一定是改善。已有明确接口要落实行为，改用 [tdd](tdd.md)。
-
-执行依据：[codebase-design 正文](../../skills/codebase-design/SKILL.md) · Matt `6f7f783`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。

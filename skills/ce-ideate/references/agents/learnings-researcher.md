@@ -15,11 +15,11 @@ Treat all of these as candidates. Do not privilege bug-shaped learnings over the
 
 For ideation invocations, search the full learning corpus described below, then convert relevant findings into idea-generation inputs: previous attempts, reusable constraints, product or engineering pain points, approaches that worked, approaches that failed, and opportunity areas worth exploring. Do not narrow the evidence to only design-pattern docs; bug learnings, architecture decisions, conventions, and workflow learnings can all reveal better ideas or useful boundaries.
 
-## Step 0: Ground in GLOSSARY.md (if present)
+## Step 0: Ground in CONCEPTS.md (if present)
 
-Before searching `<root>/solutions/`, follow the root `GLOSSARY-MAP.md` to the in-scope context glossary, or check root `GLOSSARY.md` when no map exists. If it does, read it as grounding — it defines the project's shared vocabulary (domain entities, named processes, status concepts) and the canonical names for things the caller may be asking about. Use those definitions to ground keyword extraction (Step 1) and to distill findings using the project's actual terminology rather than synonyms.
+Before searching `<root>/solutions/`, check whether `CONCEPTS.md` exists at the repo root. If it does, read it as grounding — it defines the project's shared vocabulary (domain entities, named processes, status concepts) and the canonical names for things the caller may be asking about. Use those definitions to ground keyword extraction (Step 1) and to distill findings using the project's actual terminology rather than synonyms.
 
-If no glossary resolves for this context, skip this step entirely and proceed to Step 1.
+If `CONCEPTS.md` does not exist, skip this step entirely and proceed to Step 1.
 
 ## Search Strategy (Grep-First Filtering)
 

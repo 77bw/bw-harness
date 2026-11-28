@@ -18,7 +18,7 @@ The orchestrator (main conversation) performs ALL of the following in one sequen
    - YAML frontmatter with track-appropriate fields, applying the YAML-safety quoting rule for array items (see `references/yaml-schema.md` > YAML Safety Rules)
    - Bug track: Problem, root cause, solution with key code snippets, one prevention tip
    - Knowledge track: Context, guidance with key examples, one applicability note
-4. **Vocabulary capture (update-only)**: read `references/concepts-vocabulary.md` to resolve the context; if its glossary exists, scan any new doc and the conversation for qualifying terms and add, refine, fold, or scrub entries silently, within the criteria and coherence-neighborhood bounds that reference states. If `GLOSSARY.md` does not exist, defer creation to a Full run, which is the run that seeds the file. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined, 1 folded" or "scanned, no qualifying terms"). If this run changed `GLOSSARY.md` at all (added, refined, folded, or scrubbed) and the project's active instructions and conventions already in your context do not mention it, add the discoverability tip to the output below. Lightweight only **tips**; it does not edit instruction files. An interactive Full run makes that edit after consent; non-interactive Full also only tips and reports.
+4. **Vocabulary capture (update-only)**: if `CONCEPTS.md` exists at repo root, read `references/concepts-vocabulary.md`, then scan any new doc and the conversation for qualifying terms and add, refine, fold, or scrub entries silently, within the criteria and coherence-neighborhood bounds that reference states. If `CONCEPTS.md` does not exist, defer creation to a Full run, which is the run that seeds the file. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined, 1 folded" or "scanned, no qualifying terms"). If this run changed `CONCEPTS.md` at all (added, refined, folded, or scrubbed) and the project's active instructions and conventions already in your context do not mention it, add the discoverability tip to the output below. Lightweight only **tips**; it does not edit instruction files. An interactive Full run makes that edit after consent; non-interactive Full also only tips and reports.
 5. **Read-only discoverability check**: Using the project's active instructions and conventions already in your context, assess whether they point agents to `<root>/solutions/` against the three criteria under **Discoverability Check** in `references/refresh-and-discoverability.md`. Do not open, offer to edit, or edit instruction files; Lightweight only reports the result. Record one of:
    - `no gap` when active project instructions point agents to the knowledge store
    - `gap noted — instruction-file tip emitted` when active project instructions exist but do not mention it
@@ -46,8 +46,8 @@ This could be a coding standard if you adopt them.
 Tip: Your AGENTS.md/CLAUDE.md doesn't surface <root>/solutions/ to agents —
 a brief mention helps all agents discover these learnings.
 
-[If GLOSSARY.md changed at all this run and isn't surfaced in the instruction files:]
-Tip: Your AGENTS.md/CLAUDE.md doesn't surface <actual glossary/map path> —
+[If CONCEPTS.md changed at all this run and isn't surfaced in the instruction files:]
+Tip: Your AGENTS.md/CLAUDE.md doesn't surface CONCEPTS.md —
 a one-line mention helps agents find the shared vocabulary.
 
 Note: This was created in lightweight mode. For richer documentation
@@ -55,7 +55,7 @@ Note: This was created in lightweight mode. For richer documentation
 semantic grounding validation), re-run <rendered invocation> in a fresh session.
 ```
 
-**No subagents are launched. No parallel tasks. The chosen form, plus at most one learning, is the deliverable** (Phase 2.4's update-only vocabulary capture may also change an existing `GLOSSARY.md`).
+**No subagents are launched. No parallel tasks. The chosen form, plus at most one learning, is the deliverable** (Phase 2.4's update-only vocabulary capture may also change an existing `CONCEPTS.md`).
 
 In lightweight mode, the overlap check is skipped (no Related Docs Finder subagent). This means lightweight mode may create a doc that overlaps with an existing one. That is acceptable; a refresh will catch it later. Only suggest a refresh if there is an obvious narrow refresh target. Do not broaden into a large refresh sweep from a lightweight session.
 

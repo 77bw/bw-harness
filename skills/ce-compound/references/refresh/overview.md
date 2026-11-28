@@ -5,7 +5,7 @@ Audit the learnings under `<root>/solutions/` against the current codebase, appl
 
 ## Mode
 
-**Read `references/refresh/modes.md` now.** It reads the mode off the arguments and defines what each mode may apply unattended, the stale-marking fallback, the question tools, and the `GLOSSARY.md` bootstrap.
+**Read `references/refresh/modes.md` now.** It reads the mode off the arguments and defines what each mode may apply unattended, the stale-marking fallback, the question tools, and the `CONCEPTS.md` bootstrap.
 
 Two rules hold in both modes. A failed write is recorded as **recommended**, and the run continues. And a question is asked through the host's blocking tool, or through the numbered-options fallback that reference defines. It is never silently skipped.
 
@@ -49,9 +49,9 @@ Read `references/refresh/per-action-flows.md` and follow the section matching ea
 
 ## Vocabulary Capture
 
-After the per-doc actions, reconcile the domain terms flagged during investigation with `GLOSSARY.md`. **Read `references/concepts-vocabulary.md` unconditionally.** Its qualifying criteria are non-obvious, so a "nothing qualifies" judgment reached without reading it is a shortcut, not a result.
+After the per-doc actions, reconcile the domain terms flagged during investigation with `CONCEPTS.md`. **Read `references/concepts-vocabulary.md` unconditionally.** Its qualifying criteria are non-obvious, so a "nothing qualifies" judgment reached without reading it is a shortcut, not a result.
 
-Edits apply silently in every mode. The report's `GLOSSARY.md` line records what the scan found, including "scanned, no qualifying terms".
+Edits apply silently in every mode. The report's `CONCEPTS.md` line records what the scan found, including "scanned, no qualifying terms".
 
 ## Report
 
@@ -63,4 +63,4 @@ Skip if nothing changed. Otherwise stage **only** the files this refresh modifie
 
 ## Discoverability Check
 
-After the report, check that the project's instructions would lead an agent to `<root>/solutions/` before working in a documented area. Do this every time: the store only compounds value when agents can find it. **Read `references/refresh/discoverability.md`** for what the reader must learn, the smallest-addition rule and its tone, the `GLOSSARY.md` variant, consent versus a report line per mode, and folding a late edit into the commit.
+After the report, check that the project's instructions would lead an agent to `<root>/solutions/` before working in a documented area. Do this every time: the store only compounds value when agents can find it. **Read `references/refresh/discoverability.md`** for what the reader must learn, the smallest-addition rule and its tone, the `CONCEPTS.md` variant, consent versus a report line per mode, and folding a late edit into the commit.

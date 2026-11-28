@@ -35,7 +35,7 @@ After any body edit from this step or Step 2, re-run the script until it reports
 
 ## Step 2: Semantic validator subagent (Full and non-interactive; skipped in lightweight)
 
-Dispatch **one generic read-only subagent** covering the written solution doc plus any `GLOSSARY.md` entries added or edited this run. Phase 2.4's entries are claims too; a glossary entry written from a session-level summary is exactly how wrong semantics enter the vocabulary. Use the same mid-tier model class as other reviewer subagents when the platform exposes one.
+Dispatch **one generic read-only subagent** covering the written solution doc plus any `CONCEPTS.md` entries added or edited this run. Phase 2.4's entries are claims too; a glossary entry written from a session-level summary is exactly how wrong semantics enter the vocabulary. Use the same mid-tier model class as other reviewer subagents when the platform exposes one.
 
 If the user's or project's active instructions or the live prompt name a model for this subagent, use that model instead of the default tier above. They can name it by the subagent's tier, by its prompt-asset name, or for the subagents being dispatched. Without such an instruction, a model configured for this subagent's role takes precedence over the default tier.
 
@@ -46,7 +46,7 @@ You are a grounding validator for documentation about to enter a permanent
 knowledge store. You are read-only: never edit files. Inspect with Read,
 Grep, Glob, git (non-mutating), and gh when available.
 
-Inputs: the doc content below, the GLOSSARY.md entries below (if any), and
+Inputs: the doc content below, the CONCEPTS.md entries below (if any), and
 this staleness context: <INFO line from the mechanical script, or "none">,
 and the tree to verify code against: <"working tree", or a git ref to
 read with git show <ref>:<path>>.

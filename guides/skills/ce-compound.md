@@ -7,5 +7,3 @@
 提供失败证据、修复后结果和已有相关条目。输出可能是测试、规则建议、经验文档的更新或合理跳过，不必每次都写 Markdown。规则变更另审；项目词汇只归 `GLOSSARY.md`，不要让原生词汇步骤静默创建第二权威。
 
 已有经验需要复核时，用 `/skill:ce-compound mode:refresh 只检查编码相关条目`，要求按当前代码逐项确认，再改文档。
-
-执行依据：[ce-compound 正文](../../skills/ce-compound/SKILL.md) · CE `fcb5e3a`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。

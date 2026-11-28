@@ -1,6 +1,6 @@
 # BW Harness 使用手册
 
-第一次使用？从[快速上手](quick-start.md)在自己的目录接入工作约定。已经有源码？见[接手已有项目](workflows/existing-project.md)，业务结构保持不动。
+第一次使用？从[快速上手](quick-start.md)在自己的目录生成一个可导入的 Python 包。已经有源码？直接看[接手已有项目](workflows/existing-project.md)，不要在原目录执行 `new`。
 
 ```text
 装一次包 → 每个新项目初始化一次
@@ -23,7 +23,7 @@
 | 刚解决了一个容易再踩的坑 | [知识沉淀](workflows/knowledge-compounding.md) | 测试、标准或已有经验的更新 |
 | 新会话不想从头探索 | [接续](workflows/session-recovery.md) | 可核对的状态和一个下一步 |
 
-包没加载看[安装](installation.md)和[排错](troubleshooting.md)。不知道某个文件该放哪里，分别查[可选 Python 架构参考](references/python-project-architecture-reference.md)和[文档职责](document-structure.md)。
+包没加载看[安装](installation.md)和[排错](troubleshooting.md)。不知道某个文件该放哪里，分别查[项目结构](project-structure.md)和[文档职责](document-structure.md)。
 
 ## Skill 速查
 
@@ -31,7 +31,7 @@
 
 | 主入口和常用流程 | 什么时候选 |
 |---|---|
-| [setup-bw-harness](skills/setup-bw-harness.md) / [bw-help](skills/bw-help.md) | 接入或检查项目 / 推荐下一步，明确要求时移交执行 |
+| [setup-bw-harness](skills/setup-bw-harness.md) / [bw-help](skills/bw-help.md) | 初始化或检查项目 / 只问下一步怎么走 |
 | [grill-with-docs](skills/grill-with-docs.md) / [ce-brainstorm](skills/ce-brainstorm.md) | 术语、业务边界不清 / 产品需求和范围未定 |
 | [ce-plan](skills/ce-plan.md) / [ce-work](skills/ce-work.md) | 已定目标要变成计划 / 已有计划要实施 |
 | [project-governance](skills/project-governance.md) / [ce-compound](skills/ce-compound.md) | 检查、迁移、收尾 / 留下已证实的经验 |
@@ -46,5 +46,3 @@
 | [ce-handoff](skills/ce-handoff.md)、[ce-worktree](skills/ce-worktree.md) | 显式交接 / 经授权隔离 Git 工作区 |
 
 **通常由其他 Skill 带入：** [grilling](skills/grilling.md) 逐问决策，[domain-modeling](skills/domain-modeling.md) 维护领域语言，[codebase-design](skills/codebase-design.md) 对齐模块设计，[ce-noslop](skills/ce-noslop.md) 清理文案，[ce-setup](skills/ce-setup.md) 检查 CE 自身配置。旧流程中的 [ce-compound-refresh](skills/ce-compound-refresh.md) 是兼容入口，不是第二套知识系统。
-
-**原生交付：**[流程实例](workflows/git-delivery.md)。只提交用 [ce-commit](skills/ce-commit.md)，推送和建 PR 用 [ce-commit-push-pr](skills/ce-commit-push-pr.md)；评审反馈交给 [ce-resolve-pr-feedback](skills/ce-resolve-pr-feedback.md)，看护已有 PR 用 [ce-babysit-pr](skills/ce-babysit-pr.md)。明确要求端到端自治时才用 [lfg](skills/lfg.md)，其中界面测试由 [ce-test-browser](skills/ce-test-browser.md)按适用条件承担。

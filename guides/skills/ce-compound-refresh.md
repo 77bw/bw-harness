@@ -5,5 +5,3 @@
 `/skill:ce-compound-refresh 仅复核 docs/solutions 里与 UTF-8 长度有关的条目，指出当前哪些测试仍能支持它们。`
 
 输入是已有条目和变更后的实现。刷新可能更新过期说明；想先审查时应明确要求只列差异。新版工作流直接写 `/skill:ce-compound mode:refresh`，不要两个入口各跑一次。只有“文件久没改”而没有相反证据，不足以删除经验。
-
-执行依据：[ce-compound-refresh 正文](../../skills/ce-compound-refresh/SKILL.md) · CE `fcb5e3a`（[修订与适配](../../upstream.lock.yml)）；其他宿主的调用方式见[安装指南](../installation.md)。
